@@ -1,11 +1,11 @@
-import { Button } from "./components/ui/button"
-import { Card } from "./components/ui/card"
+import React from 'react'
+import { RouterProvider } from 'react-router-dom'
+import { router } from './routes/Router'
 
 const App = () => {
   return (
-    <div className="p-2 font-bold text-2xl">
-      <Button variant="outline" className="bg-yellow-500">Hello React</Button>
-      <Card className="bg-indigo-200">login</Card>
+    <div>
+      <RouterProvider router={router} />
     </div>
   )
 }
