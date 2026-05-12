@@ -1,9 +1,11 @@
-import React from 'react'
+import React from "react"
 
 const Dashboard = () => {
   return (
     <div>
-      Dashboard
+      <h1 className="text-2xl font-bold">
+        Dashboard Page
+      </h1>
     </div>
   )
 }
