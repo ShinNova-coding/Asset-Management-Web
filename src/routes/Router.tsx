@@ -1,25 +1,52 @@
 // src/routes/Router.tsx
+
 import { createBrowserRouter } from "react-router-dom"
-import Login from "../pages/Auth/Login"
-import Dashboard from "@/pages/Dashboard/Dashboard"
-import Layout from "../layouts/Layout"
+
+import Login from "@/pages/Auth/Login"
+
+import Layout from "@/layouts/Layout"
+
+import DashboardPage from "@/pages/Dashboard/DashboardPage"
+import InventoryPage from "@/pages/Inventory/InventoryPage"
+import UserManagementPage from "@/pages/UserManagement/UserManagementPage"
+import ActivityPage from "@/pages/Activity/ActivityPage"
+import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
 
 export const router = createBrowserRouter([
- 
   {
     path: "/",
     element: <Login />,
   },
- 
+
   {
-    path: "/dashboard",
-    element: <Layout />, children: [
+    path: "/",
+    element: <Layout />,
+
+    children: [
       {
-        index: true,
-        element: <Dashboard />,
+        path: "dashboard",
+        element: <DashboardPage />,
+      },
+
+      {
+        path: "inventory",
+        element: <InventoryPage />,
+      },
+
+      {
+        path: "usermanagement",
+        element: <UserManagementPage />,
+      },
+
+      {
+        path: "activity",
+        element: <ActivityPage />,
+      },
+
+      {
+        path: "maintenance",
+        element: <MaintenancePage />,
       },
     ],
-    
   },
-
 ])

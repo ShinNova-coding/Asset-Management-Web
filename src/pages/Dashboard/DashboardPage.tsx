@@ -1,6 +1,4 @@
-import React from "react"
-
-const Dashboard = () => {
+const DashboardPage = () => {
   return (
     <div>
       <h1 className="text-2xl font-bold">
@@ -10,4 +8,4 @@ const Dashboard = () => {
   )
 }
 
-export default Dashboard
+export default DashboardPage
