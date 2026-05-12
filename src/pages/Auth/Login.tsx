@@ -56,9 +56,7 @@ const login = () => {
         <Button type="submit" className="w-full" onClick={()=> navigate("/Dashboard")}>
           Login
         </Button>
-        <Button variant="outline" className="w-full">
-          Login with Google
-        </Button>
+       
       </CardFooter>
     </Card>
   )
