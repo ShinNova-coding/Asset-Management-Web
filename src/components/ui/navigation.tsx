@@ -9,11 +9,11 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="flex items-center justify-between border-b bg-white px-2 py-1">
+    <nav className="flex items-center justify-between border-b bg-white px-4 py-3">
 
       {/* LEFT */}
       <h1 className="text-xl font-bold text-slate-700">
-        {/* Dashboard */}
+        Dashboard
       </h1>
 
       {/* RIGHT */}
@@ -24,10 +24,7 @@ export default function Navigation() {
 
           <Bell className="h-6 w-6 text-slate-600" />
 
-          <span className="absolute -right-1 -top-1 flex h-2 w-2 items-center justify-center rounded-full">
-        
-          </span>
-
+          
         </button>
 
         {/* PROFILE DROPDOWN */}
@@ -39,20 +36,18 @@ export default function Navigation() {
           >
 
             {/* Avatar */}
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 font-semibold">
-              <img 
-                src="https://img.magnific.com/free-psd/contact-icon-illustration-isolated_23-2151903337.jpg?semt=ais_hybrid&w=740&q=80" 
-                alt="Admin Profile" 
-                className="h-5 w-5 rounded-full object-cover"
-                    />
-            </div>
+            <img
+              src="https://img.magnific.com/free-psd/contact-icon-illustration-isolated_23-2151903337.jpg?semt=ais_hybrid&w=740&q=80"
+              alt="Admin Profile"
+              className="h-8 w-8 rounded-full object-cover"
+            />
 
             <span className="text-sm font-semibold">
               Admin User
             </span>
 
             <ChevronDown
-              className={`h-3 w-3 transition-transform duration-200 ${
+              className={`h-4 w-4 transition-transform duration-200 ${
                 open ? "rotate-180" : ""
               }`}
             />
