@@ -15,15 +15,17 @@ import {
   Users,
   ClipboardList,
   Wrench,
-  Monitor,
+
 } from "lucide-react"
 import { BsFillBoxFill } from "react-icons/bs"
 
 import {
-  Link,
+  useNavigate,
   Outlet,
   useLocation,
 } from "react-router-dom"
+
+import Navigation from "@/components/ui/navigation"
 
 const menuItems = [
   {
@@ -55,23 +57,26 @@ const menuItems = [
 
 export default function Layout() {
   const location = useLocation()
-
+  const navigate = useNavigate()
   return (
+  <>
+    <Navigation/>
+
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-slate-50">
 
         {/* Sidebar */}
-        <Sidebar className="w-[260px] border-r bg-[#F8FAFC]">
+        <Sidebar className="w-[250px] border-r bg-[#F8FAFC]">
 
           {/* Logo */}
-          <SidebarHeader className="px-6 py-8">
+          <SidebarHeader className="px-4 py-4">
             <div className="flex items-center gap-3">
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0070EB] shadow-md">
-                <BsFillBoxFill className="text-white h-5 w-5"/>
+              <div className="flex h-10 w-10 ml-4 items-center justify-center rounded-xl bg-[#0070EB] shadow-md">
+                <BsFillBoxFill className="text-white  h-5 w-5"/>
               </div>
 
-              <h1 className="text-xl font-bold text-slate-700">
+              <h1 className="text-xl font-bold tracking-wide  text-[#0070EB]">
                 ITAMS
               </h1>
 
@@ -88,28 +93,21 @@ export default function Layout() {
 
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton >
+                    <SidebarMenuButton
+                onClick={() => navigate(item.path)}
+                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors
 
-                      <Link
-                        to={item.path}
-                        className={`flex w-full items-center gap-4 rounded-xl px-4 py-3 transition-all
+                ${
+                  isActive
+                    ? "bg-blue-500 text-white shadow-sm hover:bg-blue-500"
+                    : "text-slate-600 hover:bg-blue-100 hover:text-blue-600"
+                }
+                `}
+              >
+                <item.icon className="h-5 w-5" />
 
-                        ${
-                          isActive
-                            ? "bg-blue-500 text-white shadow-md"
-                            : "text-gray-600 hover:bg-gray-100"
-                        }
-                        `}
-                      >
-                        <item.icon className="h-5 w-5" />
-
-                        <span className="text-[15px] font-medium">
-                          {item.title}
-                        </span>
-
-                      </Link>
-
-                    </SidebarMenuButton>
+                {item.title}
+              </SidebarMenuButton>
                   </SidebarMenuItem>
                 )
               })}
@@ -129,6 +127,6 @@ export default function Layout() {
 
         </main>
       </div>
-    </SidebarProvider>
+    </SidebarProvider> </>
   )
 }
