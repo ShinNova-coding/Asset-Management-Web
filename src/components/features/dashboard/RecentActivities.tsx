@@ -16,7 +16,7 @@ const activities: ActivityItem[] = [
     id: "1",
     username: "Chaw Su Su Win",
     category: "Laptop",
-    inventory: "HP-123",
+    inventory: "HP",
     activity: "Request",
     date: "10.5.2026",
   },
@@ -24,34 +24,34 @@ const activities: ActivityItem[] = [
     id: "2",
     username: "Khin Sandi Win",
     category: "Monitor",
-    inventory: "MNTR-456",
+    inventory: "Dell",
     activity: "Maintenance",
-    date: "23.9.2025",
+    date: "25.1.2026",
   },
   {
     id: "3",
     username: "Team Leader",
-    category: "Desktop",  
-    inventory: "DT-789",
+    category: "Desktop",
+    inventory: "Lenovo",
     activity: "Return",
-    date: "19.7.2025",
+    date: "19.8.2025",
   },
   {
     id: "4",
     username: "Network Admin",
-    category: "Phone",
-    inventory: "PH-321",
-    activity: "Request",
-    date: "28.1.2025",
-  },
-  {
-    id: "5",
-    username: "Project Manager",
     category: "Chair",
-    inventory: "CHR-654",
-    activity: "Maintenance",
-    date: "7.11.2024",
+    inventory: "Ergonomic",
+    activity: "Request",
+    date: "15.3.2025",
   },
+ {
+    id: "5",
+    username: "Software Engineer",
+    category: "Software",
+    inventory: "Adobe",
+    activity: "Maintenance",
+    date: "18.11.2024",
+  }, 
 ];
 
 const getActivityStyle = (activity: ActivityType) => {
@@ -69,7 +69,7 @@ const getActivityStyle = (activity: ActivityType) => {
 
 const RecentActivities: React.FC = () => {
   return (
-    <div className="p-2">
+    <div className="p-6">
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
 
         {/* Header */}
@@ -85,7 +85,7 @@ const RecentActivities: React.FC = () => {
           <thead className="bg-blue-300 text-white text-left">
             <tr>
               <th className="px-4 py-2 font-medium">Username</th>
-              <th className="px-4 py-2 font-medium">Category</th>
+              <th className="px-4 py-2 font-medium">Category</th> 
               <th className="px-4 py-2 font-medium">Inventory</th>
               <th className="px-4 py-2 font-medium">Activity</th>
               <th className="px-4 py-2 font-medium">Date</th>
@@ -99,7 +99,7 @@ const RecentActivities: React.FC = () => {
                 className="border-b last:border-none hover:bg-gray-50"
               >
                 <td className="px-4 py-3 flex items-center gap-2">
-                  
+                  {/* <span className="w-2 h-2 bg-gray-800 rounded-full"></span> */}
 
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium ${getActivityStyle(
@@ -109,11 +109,12 @@ const RecentActivities: React.FC = () => {
                     {item.username}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-gray-600">
+
+                <td className="px-4 py-3 text-gray-700">
                   {item.category}
                 </td>
 
-                <td className="px-4 py-3 text-gray-600">
+                <td className="px-4 py-3 text-gray-700">
                   {item.inventory}
                 </td>
 
@@ -121,7 +122,7 @@ const RecentActivities: React.FC = () => {
                   {item.activity}
                 </td>
 
-                <td className="px-4 py-3 text-gray-400">
+                <td className="px-4 py-3 text-gray-700">
                   {item.date}
                 </td>
               </tr>
