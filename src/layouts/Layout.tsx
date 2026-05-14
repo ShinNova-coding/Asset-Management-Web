@@ -59,74 +59,45 @@ export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   return (
-  <>
-    <Navigation/>
+<SidebarProvider> 
+  <div className="flex flex-col min-h-screen w-full bg-slate-50">
+    <Navigation />
 
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-slate-50">
+    <div className="flex flex-1">
+      {/* Updated Sidebar: bg-white and border-none */}
+      <Sidebar className="w-[250px] border-none "> 
+        
+        <SidebarContent className="px-4 py-20 border-r border-slate-400 bg-slate-50"> 
+          <SidebarMenu className="space-y-3">
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    onClick={() => navigate(item.path)}
+                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors
+                    ${isActive 
+                      ? "bg-blue-500 text-white shadow-sm hover:bg-blue-500" 
+                      : "text-slate-600 hover:bg-blue-100 hover:text-blue-600"}
+                    `}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.title}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            })}
+          </SidebarMenu>
+        </SidebarContent>
+      </Sidebar>
 
-        {/* Sidebar */}
-        <Sidebar className="w-[250px] border-r bg-[#F8FAFC]">
-
-          {/* Logo */}
-          <SidebarHeader className="px-4 py-4">
-            <div className="flex items-center gap-3">
-
-              <div className="flex h-10 w-10 ml-4 items-center justify-center rounded-xl bg-[#0070EB] shadow-md">
-                <BsFillBoxFill className="text-white  h-5 w-5"/>
-              </div>
-
-              <h1 className="text-xl font-bold tracking-wide  text-[#0070EB]">
-                ITAMS
-              </h1>
-
-            </div>
-          </SidebarHeader>
-
-          {/* Menu */}
-          <SidebarContent className="px-4">
-            <SidebarMenu className="space-y-3">
-
-              {menuItems.map((item) => {
-                const isActive =
-                  location.pathname === item.path
-
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                onClick={() => navigate(item.path)}
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors
-
-                ${
-                  isActive
-                    ? "bg-blue-500 text-white shadow-sm hover:bg-blue-500"
-                    : "text-slate-600 hover:bg-blue-100 hover:text-blue-600"
-                }
-                `}
-              >
-                <item.icon className="h-5 w-5" />
-
-                {item.title}
-              </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-
-            </SidebarMenu>
-          </SidebarContent>
-        </Sidebar>
-
-        {/* Main Content */}
-        <main className="flex-1 p-6">
-
-          <SidebarTrigger />
-
-          <div className="mt-4">
-            <Outlet />
-          </div>
-
-        </main>
-      </div>
-    </SidebarProvider> </>
+      <main className="flex-1 p-6">
+        <div className="mt-4">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  </div>
+</SidebarProvider>
   )
 }
