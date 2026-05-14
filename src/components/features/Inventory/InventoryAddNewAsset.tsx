@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button"
+import { FaCirclePlus } from "react-icons/fa6";
 export function InventoryAddNewAsset(){
   return(
     <div>
-      <Button>Add New Asset</Button>
+      <Button>
+        <FaCirclePlus />Add New Asset
+      </Button>
     </div>
   )
 }

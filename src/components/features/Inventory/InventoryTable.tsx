@@ -1,5 +1,6 @@
 "use client"
-
+import { FaSearch } from "react-icons/fa";
+import { IoFilterSharp } from "react-icons/io5";
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import {
@@ -68,14 +69,21 @@ export function InventoryTable<TData, TValue>({
       {/* 🔍 SEARCH + COLUMN TOGGLE */}
       <div className="flex items-center gap-80">
     <h2>Inventory List</h2>
-    <div className="flex items-center">
+    <div className="relative max-w-sm">
+      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+    <FaSearch className="h-4 w-90 text-black" />
+  </div>
         <Input
           placeholder="Search product..."
           value={globalFilter ?? ""}
           onChange={(e) => setGlobalFilter(e.target.value)}
           className="max-w-sm"
+          
         /></div>
-<div className="flex items-center">
+<div className="">
+  <div>
+    <IoFilterSharp />
+  </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             
