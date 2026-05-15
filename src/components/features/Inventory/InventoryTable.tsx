@@ -1,20 +1,14 @@
 "use client"
-import { FaSearch } from "react-icons/fa";
-import { IoFilterSharp } from "react-icons/io5";
+
 import * as React from "react"
-import type { ColumnDef } from "@tanstack/react-table"
 import {
-  
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
 
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -23,138 +17,185 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
 
-interface InventoryTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+import { columns } from "./InventoryColumns"
+import { InventorySearch } from "./InventorySearchBox"
+import { InventoryFilter } from "./InventoryFilter"
+
+interface InventoryTableProps {
+  data: any[]
 }
 
-export function InventoryTable<TData, TValue>({
-  columns,
-  data,
-}: InventoryTableProps<TData, TValue>) {
+export function InventoryTable({ data: initialData }: InventoryTableProps) {
+  const [data, setData] = React.useState(initialData)
   const [globalFilter, setGlobalFilter] = React.useState("")
-  const [rowSelection, setRowSelection] = React.useState({})
-  const [columnVisibility, setColumnVisibility] = React.useState({})
+  
+  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
+  const [selectedItem, setSelectedItem] = React.useState<any>(null)
+
+  const handleDelete = (id: string) => {
+    if (confirm("Are you sure you want to delete this item?")) {
+      setData((prev) => prev.filter((item) => item.id !== id))
+    }
+  }
+
+  const handleEdit = (id: string) => {
+    const item = data.find((i) => i.id === id)
+    setSelectedItem({ ...item }) 
+    setIsEditDialogOpen(true) 
+  }
+
+  const handleSave = () => {
+    setData((prev) =>
+      prev.map((item) => (item.id === selectedItem.id ? selectedItem : item))
+    )
+    setIsEditDialogOpen(false)
+  }
 
   const table = useReactTable({
     data,
     columns,
-    getPaginationRowModel:getPaginationRowModel(),
-    getCoreRowModel:getCoreRowModel(),
-    state: {
-      globalFilter,
-      rowSelection,
-      columnVisibility,
+    state: { globalFilter },
+    meta: {
+      deleteRow: handleDelete,
+      editRow: handleEdit,
     },
     onGlobalFilterChange: setGlobalFilter,
-    onRowSelectionChange: setRowSelection,
-    onColumnVisibilityChange: setColumnVisibility,
-
+    getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    
-    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize: 6 } },
   })
 
+  // Pagination Helpers
+  const pageCount = table.getPageCount()
+  const currentPage = table.getState().pagination.pageIndex
+
   return (
-    <div className="space-y-4">
-
-      {/* 🔍 SEARCH + COLUMN TOGGLE */}
-      <div className="flex items-center gap-80">
-    <h2>Inventory List</h2>
-    <div className="relative max-w-sm">
-      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-    <FaSearch className="h-4 w-90 text-black" />
-  </div>
-        <Input
-          placeholder="Search product..."
-          value={globalFilter ?? ""}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          className="max-w-sm"
-          
-        /></div>
-<div className="">
-  <div>
-    <IoFilterSharp />
-  </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            
-            <Button variant="outline">
-              Filters
-            </Button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="end">
-            {table.getAllColumns()
-              .filter((col) => col.getCanHide())
-              .map((col) => (
-                <DropdownMenuCheckboxItem
-                  key={col.id}
-                  checked={col.getIsVisible()}
-                  onCheckedChange={(value) =>
-                    col.toggleVisibility(!!value)
-                  }
-                >
-                  {col.id}
-                </DropdownMenuCheckboxItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+    <div className="w-full space-y-4 p-4">
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-xl font-bold text-gray-800">Inventory List</h2>
+        <div className="flex items-center gap-2">
+          <InventorySearch value={globalFilter} onChange={setGlobalFilter} />
+          <InventoryFilter table={table} />
         </div>
       </div>
 
-      {/* TABLE */}
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-hidden">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-blue-300">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                  <TableHead key={header.id} className="text-white font-semibold py-3">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
             ))}
           </TableHeader>
-
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                    <TableCell key={cell.id} className="py-3">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length}>
-                  No results.
-                </TableCell>
+                <TableCell colSpan={columns.length} className="h-24 text-center">No results.</TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
+
+      {/* --- PAGINATION BUTTONS --- */}
+      <div className="flex items-center justify-center space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+
+        {/* Numbered Page Buttons [1] [2] [3] */}
+        <div className="flex items-center gap-1">
+          {Array.from({ length: pageCount }).map((_, index) => (
+            <Button
+              key={index}
+              variant={currentPage === index ? "default" : "outline"}
+              size="sm"
+              className={currentPage === index ? "bg-blue-300 hover:bg-blue-400 text-white border-none" : ""}
+              onClick={() => table.setPageIndex(index)}
+            >
+              {index + 1}
+            </Button>
+          ))}
+        </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
+      </div>
+
+      {/* --- EDIT MODAL --- */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Update Asset Information</DialogTitle>
+          </DialogHeader>
+          
+          {selectedItem && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">Name</Label>
+                <Input 
+                  id="name" 
+                  value={selectedItem.name} 
+                  className="col-span-3" 
+                  onChange={(e) => setSelectedItem({ ...selectedItem, name: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="asset" className="text-right">Asset ID</Label>
+                <Input 
+                  id="asset" 
+                  value={selectedItem.asset} 
+                  className="col-span-3" 
+                  onChange={(e) => setSelectedItem({ ...selectedItem, asset: e.target.value })}
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+                <Button className="bg-blue-300 hover:bg-blue-400" onClick={handleSave}>Confirm Edit</Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

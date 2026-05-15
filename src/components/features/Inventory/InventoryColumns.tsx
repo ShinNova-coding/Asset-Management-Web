@@ -1,67 +1,76 @@
 "use client"
-
 import type { ColumnDef } from "@tanstack/react-table"
 import Delete from "./InventoryDelete"
 import Edit from "./InventoryEdit"
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
+
 export type Inventory = {
   id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
+  asset: string
+  name: string
+  no: string
+  purchase: string
+  warranty: string
+  status: string
 }
 
 export const columns: ColumnDef<Inventory>[] = [
-  {
-    accessorKey: "asset",
-    header: "Asset ID",
-  },
-  {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "no",
-    header: "Serial No",
-  },
-  {
-    accessorKey: "purchase",
-    header: "Purchase Date",
-  },
-  {
-    accessorKey: "warranty",
+  { accessorKey: "asset", header: "Asset ID" },
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "no", header: "Serial No" },
+  { accessorKey: "purchase", header: "Purchase Date" },
+  { 
+    accessorKey: "warranty", 
     header: "Warranty",
+    cell: ({ row }) => {
+      const warranty = row.getValue("warranty") as string;
+      const isExpired = warranty.toLowerCase().includes("expired");
+      return (
+        <span className={isExpired ? "text-red-600 font-medium" : ""}>
+          {warranty}
+        </span>
+      );
+    },
   },
-  {
-    accessorKey: "status",
+  { 
+    accessorKey: "status", 
     header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      const statusStyles: Record<string, string> = {
+        "Deployed": "bg-blue-100 text-blue-700 border-blue-200",
+        "In Repair": "bg-yellow-100 text-yellow-700 border-yellow-200",
+        "Available": "bg-green-100 text-green-700 border-green-200",
+      };
+      const style = statusStyles[status] || "bg-gray-100 text-gray-200";
+      return (
+        <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${style}`}>
+          {status}
+        </span>
+      );
+    },
   },
   {
-    accessorKey: "action",
-    header: "Action",
-    
-  },
-  {
-  id: "actions",
-  cell: ({ row }) => {
-    const item = row.original
+    id: "actions",
+    header: "Actions",
+    cell: ({ row, table }) => {
+      const item = row.original
+      
+      /** 
+       * အသစ်ထည့်လိုက်သောအပိုင်း: 
+       * table options ထဲက meta ကို လှမ်းယူပြီး Table component ထဲမှာရှိတဲ့ 
+       * handleEdit နဲ့ handleDelete function တွေကို ချိတ်ဆက်ပေးလိုက်တာဖြစ်ပါတယ်။
+       */
+      const meta = table.options.meta as any;
 
-    return (
-        <div className="items-center">
-             <Delete
-        onDelete={() => {
-          console.log("Delete item:", item.id)
+      return (
+        <div className="flex items-center gap-2">
+          {/* Edit icon ကိုနှိပ်လျှင် Modal ပွင့်လာအောင် meta.editRow ကို လှမ်းခေါ်ပါတယ် */}
+          <Edit onEdit={() => meta?.editRow(item.id)} />
           
-        }}
-      />
-            <Edit onEdit={()=>{
-                console.log("Edit item:",item.id)
-            }}/>
-     
-      </div>
-    )
+          {/* Delete icon ကိုနှိပ်လျှင် row ပျက်သွားအောင် meta.deleteRow ကို လှမ်းခေါ်ပါတယ် */}
+          <Delete onDelete={() => meta?.deleteRow(item.id)} />
+        </div>
+      )
+    },
   },
-  
-}
 ]
