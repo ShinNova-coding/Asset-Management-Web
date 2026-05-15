@@ -131,7 +131,7 @@ const AddEmployeeForm: React.FC = () => {
                 type="submit" 
                 className="px-8 py-2.5 rounded bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors shadow-sm"
               >
-                Save Employee
+                Save 
               </button>
             </div>
 
