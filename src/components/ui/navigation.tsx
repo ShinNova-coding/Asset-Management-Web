@@ -12,20 +12,20 @@ export default function Navigation() {
 
   return (
     
-    <nav className="flex items-center justify-between  bg-slate-50 px-6 py-3 sticky top-0 z-30 border-b border-slate-400">
+    <nav className="flex items-left justify-between  bg- px-2 py-5 sticky top-0 z-30 ">
       
       {/* LEFT SECTION: Sidebar Toggle & Context */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         
         {/* Optional: Add a Breadcrumb or Page Title next to the trigger */}
         <div className="hidden h-6 w-[1px] bg-slate-200 md:block" />
-         <div className="flex items-center gap-7">
+         <div className="flex items-center gap-5">
 
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0070EB] shadow-md">
                 <BsFillBoxFill className="text-white  h-5 w-5"/>
               </div>
 
-              <h1 className="text-xl font-bold tracking-wide mr-8 ml-0 text-[#0070EB]">
+              <h1 className="text-xl font-bold tracking-wide  mr-8 ml-0 text-[#0070EB]">
                 ITAMS
               </h1>
 
