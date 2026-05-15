@@ -1,6 +1,7 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
+import { BiSolidSkipPreviousCircle } from "react-icons/bi";
 import {
   flexRender,
   getCoreRowModel,
@@ -38,7 +39,7 @@ console.log(table.getPageCount())
   return (
     <div className="rounded-md border">
 
-      {/* TABLE */}
+      
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -84,7 +85,7 @@ console.log(table.getPageCount())
         </TableBody>
       </Table>
 
-      {/* PAGINATION (FIXED SECTION) */}
+      
       <div className="flex items-center justify-end gap-2 py-4 px-2 border-t bg-white">
         <Button
           variant="outline"
@@ -92,7 +93,7 @@ console.log(table.getPageCount())
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          Previous
+        Previous
         </Button>
 
         <Button

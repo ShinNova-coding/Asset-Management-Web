@@ -1,13 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Search,
   UserPlus,
   MoreVertical,
-  ChevronLeft,
-  ChevronRight,
   ChevronDown,
 } from 'lucide-react';
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 interface Employee {
   id: string;
@@ -17,50 +16,37 @@ interface Employee {
   status: 'Active' | 'Onboarding' | 'Offboarding';
 }
 
-const employees: Employee[] = [
-  {
-    id: 'AF-1024',
-    name: 'Wang',
-    email: 'wang@agga.io',
-    position: 'System Admin',
-    status: 'Active',
-    
-  },
-  {
-    id: 'AF-2051',
-    name: 'Xing',
-    email: 'xing@agga.io',
-    position: 'Security Analyst',
-    status: 'Onboarding',
-  
-  },
-  {
-    id: 'AF-0982',
-    name: 'Alex',
-    email: 'alex@agga.io',
-    position: 'Project Manager',
-    status: 'Offboarding',
-    
-  },
-  {
-    id: 'AF-1140',
-    name: 'Marry',
-    email: 'marry@agga.io',
-    position: 'Software Engineer',
-    status: 'Active',
-    
-  },
-  {
-    id: 'AF-1101',
-    name: 'Cherry',
-    email: 'cherry@agga.io',
-    position: 'System Operator',
-    status: 'Onboarding',
-    
-  },
+const employeesData: Employee[] = [
+  { id: 'AF-1024', name: 'Wang', email: 'wang@agga.io', position: 'System Admin', status: 'Active' },
+  { id: 'AF-2051', name: 'Xing', email: 'xing@agga.io', position: 'Security Analyst', status: 'Onboarding' },
+  { id: 'AF-0982', name: 'Alex', email: 'alex@agga.io', position: 'Project Manager', status: 'Offboarding' },
+  { id: 'AF-1140', name: 'Marry', email: 'marry@agga.io', position: 'Software Engineer', status: 'Active' },
+  { id: 'AF-1101', name: 'Cherry', email: 'cherry@agga.io', position: 'System Operator', status: 'Onboarding' },
+  { id: 'AF-1223', name: 'Minn', email: 'minn@agga.io', position: 'Product Owner', status: 'Active' },
+  { id: 'AF-1876', name: 'Annn', email: 'annn@agga.io', position: 'Java Developer', status: 'Offboarding' },
+  { id: 'AF-0845', name: 'Berry', email: 'berry@agga.io', position: 'Product Manager', status: 'Active' },
+  { id: 'AF-1138', name: 'Jimin', email: 'jimin@agga.io', position: 'Tester', status: 'Onboarding' },
+  { id: 'AF-1209', name: 'Luna', email: 'luna@agga.io', position: 'Data Analyst', status: 'Offboarding' },
+  { id: 'AF-1109', name: 'Jungkook', email: 'jungkook@agga.io', position: 'System Admin', status: 'Active' },
+  { id: 'AF-1078', name: 'Jhope', email: 'jhope@agga.io', position: 'Security Analyst', status: 'Onboarding' },
+  { id: 'AF-1276', name: 'TaeTae', email: 'taetae@agga.io', position: 'Project Manager', status: 'Offboarding' },
+  { id: 'AF-1034', name: 'Rapmon', email: 'rapmon@agga.io', position: 'Software Engineer', status: 'Active' },
+  { id: 'AF-0056', name: 'Jinnnie', email: 'jinnnie@agga.io', position: 'Product Manager', status: 'Onboarding' },
 ];
 
+const pageSize = 5;
+
 const UserManagement: React.FC = () => {
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // 1. Dynamically calculate total pages based on the data length
+  const totalPages = Math.ceil(employeesData.length / pageSize); 
+
+  // 2. Slice the dataset down to exactly 5 items per current page window index
+  const startIndex = currentPage * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentPaginatedData = employeesData.slice(startIndex, endIndex);
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-8 font-sans text-slate-600">
       {/* Header Section */}
@@ -70,7 +56,7 @@ const UserManagement: React.FC = () => {
         </h1>
 
         <Link to="/add-employee">
-          <button className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600">
+          <button className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700">
             <UserPlus size={18} />
             Add Employee
           </button>
@@ -84,7 +70,6 @@ const UserManagement: React.FC = () => {
             className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
             size={18}
           />
-
           <input
             type="text"
             placeholder="Search by name, email, or employee ID..."
@@ -99,7 +84,6 @@ const UserManagement: React.FC = () => {
             <option>Onboarding</option>
             <option>Offboarding</option>
           </select>
-
           <ChevronDown
             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
             size={16}
@@ -122,42 +106,21 @@ const UserManagement: React.FC = () => {
           </thead>
 
           <tbody className="divide-y divide-slate-100">
-            {employees.map((emp) => (
+            {/* 3. Render currentPaginatedData instead of all employeesData directly */}
+            {currentPaginatedData.map((emp) => (
               <tr
                 key={emp.id}
                 className="transition-colors hover:bg-slate-50"
               >
-                {/* Employee ID */}
-                <td className="px-6 py-5 text-sm text-slate-700">
-                  {emp.id}
-                </td>
-
-                {/* Name */}
-                  <td className="px-6 py-5">
-                    <div>
-                      <div className="text-sm text-slate-700">
-                          {emp.name}
-                      </div>
-                    </div>
-                    </td>
-        
-
-                
-
-                {/* Email */}
-                <td className="px-6 py-5 text-sm  text-slate-700">
-                  {emp.email}
-                </td>
-
-                {/* Position */}
+                <td className="px-6 py-5 text-sm text-slate-700">{emp.id}</td>
+                <td className="px-6 py-5 text-sm text-slate-700">{emp.name}</td>
+                <td className="px-6 py-5 text-sm text-slate-700">{emp.email}</td>
                 <td className="px-6 py-5">
-                  <span className="rounded-md bg-blue-50 text-xs font-medium text-[#4F75FF]">
+                  <span className="rounded bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600">
                     {emp.position}
                   </span>
                 </td>
-
-                {/* Status */}
-                <td className="px-6 py-5">
+                <td className="px-8 py-5">
                   <span
                     className={`flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium
                       ${
@@ -178,14 +141,9 @@ const UserManagement: React.FC = () => {
                             : 'bg-orange-500'
                         }`}
                     />
-
                     {emp.status}
                   </span>
                 </td>
-
-                
-
-                {/* Action */}
                 <td className="px-6 py-5 text-right">
                   <button className="text-slate-400 hover:text-slate-600">
                     <MoreVertical size={18} />
@@ -197,29 +155,47 @@ const UserManagement: React.FC = () => {
         </table>
       </div>
 
-      {/* Footer / Pagination */}
+      {/* Footer / Pagination Section */}
       <div className="flex items-center justify-between rounded-b-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
-        <div>Showing 4 of 128 employees</div>
+        {/* Left Aligned Description matching exact slice count status */}
+        <div>
+          Showing {startIndex + 1} to {Math.min(endIndex, employeesData.length)} of {employeesData.length} employees
+        </div>
 
-        <div className="flex items-center gap-1">
-          <button className="rounded p-1 text-slate-400 hover:bg-slate-100">
-            <ChevronLeft size={18} />
+        {/* Right Aligned Control Panel Set matching Black Outlined Border Variant */}
+        <div className="flex justify-end space-x-2 py-4">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+            disabled={currentPage === 0}
+            className="flex items-center gap-1 rounded-md border border-black bg-white px-3 h-9 text-xs font-medium text-black shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:border-slate-200 disabled:text-slate-400"
+          >
+            <FiChevronLeft size={16} />
+            
           </button>
 
-          <button className="flex h-8 w-8 items-center justify-center rounded bg-[#4F75FF] text-white">
-            1
-          </button>
+          <div className="flex gap-1 justify-end">
+            {Array.from({ length: totalPages }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPage(index)}
+                className={`rounded-md px-3 h-9 text-xs font-medium transition-colors ${
+                  currentPage === index
+                    ? "bg-blue-300 hover:bg-blue-400 text-white border-none font-semibold"
+                    : "border border-black bg-white text-black hover:bg-slate-50"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
 
-          <button className="flex h-8 w-8 items-center justify-center rounded transition-colors hover:bg-slate-100">
-            2
-          </button>
-
-          <button className="flex h-8 w-8 items-center justify-center rounded transition-colors hover:bg-slate-100">
-            3
-          </button>
-
-          <button className="rounded p-1 text-slate-400 hover:bg-slate-100">
-            <ChevronRight size={18} />
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))}
+            disabled={currentPage === totalPages - 1}
+            className="flex items-center gap-1 rounded-md border border-black bg-white px-3 h-9 text-xs font-medium text-black shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:border-slate-200 disabled:text-slate-400"
+          >
+            
+            <FiChevronRight size={16} />
           </button>
         </div>
       </div>

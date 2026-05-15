@@ -1,105 +1,48 @@
 import { InventoryAddNewAsset } from "@/components/features/Inventory/InventoryAddNewAsset"
-
-import {
-  columns
-} from "@/components/features/Inventory/InventoryColumns"
+import { columns } from "@/components/features/Inventory/InventoryColumns"
 import type { Inventory } from "@/components/features/Inventory/InventoryColumns"
 import { InventoryTable } from "@/components/features/Inventory/InventoryTable"
 
 const data: Inventory[] = [
+  // Laptops & Main Hardware
+  { id: "1", asset: "AF-LP-1011", name: "MacBook Pro M2", no: "SN-99210", purchase: "Oct 12 2023", warranty: "Exp. Oct 2026", status: "Deployed" },
+  { id: "2", asset: "AF-LP-1012", name: "RedmiBook", no: "SN-88211", purchase: "Oct 12 2022", warranty: "Expired", status: "In Repair" },
+  { id: "3", asset: "AF-LP-1013", name: "Msi Stealth", no: "SN-77322", purchase: "Oct 12 2023", warranty: "Exp. Dec 2026", status: "Deployed" },
+  { id: "4", asset: "AF-LP-1014", name: "HP Pavilion", no: "SN-66433", purchase: "Oct 12 2023", warranty: "Exp. Jan 2027", status: "In Repair" },
+  { id: "5", asset: "AF-LP-1015", name: "MacBook Air 13", no: "SN-55444", purchase: "Oct 12 2023", warranty: "Exp. Feb 2027", status: "Available" },
+  { id: "6", asset: "AF-LP-1016", name: "Msi Gaming", no: "SN-44555", purchase: "Oct 12 2023", warranty: "Exp. Oct 2027", status: "Available" },
   
-  
-  { id: "1", asset: "LAP-001", name: "MacBook Pro M2", no: "SN12345", purchase: "2023-01-10", warranty: "Active", status: "Available" },
-  { id: "2", asset: "LAP-002", name: "Dell XPS 15", no: "SN67890", purchase: "2022-05-20", warranty: "Expired", status: "Deployed" },
-  { id: "3", asset: "MON-001", name: "LG UltraWide 34\"", no: "SN11223", purchase: "2023-03-15", warranty: "Active", status: "Available" },
-  { id: "4", asset: "MOU-001", name: "Logitech MX Master 3", no: "SN44556", purchase: "2023-06-01", warranty: "Active", status: "In Repair" },
-  { id: "5", asset: "KEY-001", name: "Keychron K2 V2", no: "SN77889", purchase: "2021-12-10", warranty: "Expired", status: "Available" },
-
-  // Page 2 Items
-  { id: "6", asset: "LAP-003", name: "Lenovo ThinkPad X1", no: "SN99001", purchase: "2023-08-12", warranty: "Active", status: "Deployed" },
-  { id: "7", asset: "TAB-001", name: "iPad Pro 11\"", no: "SN22334", purchase: "2022-11-05", warranty: "Active", status: "Available" },
-  { id: "8", asset: "MON-002", name: "Samsung Odyssey G7", no: "SN55667", purchase: "2021-01-20", warranty: "Expired", status: "In Repair" },
-  { id: "9", asset: "HEA-001", name: "Sony WH-1000XM5", no: "SN88990", purchase: "2023-09-30", warranty: "Active", status: "Available" },
-  { id: "10", asset: "LAP-004", name: "HP Spectre x360", no: "SN11122", purchase: "2022-07-15", warranty: "Expired", status: "Deployed" },
-
-  {
-    id: "1",
-    
-    asset: "AF-LP-1011",
-    warranty:"Exp.Oct 2026",
-    purchase:"Oct 12 2023",
-    no:"1",
-    name:"MacBook Pro",
-    status:"Deployed",
-  },
-   {
-    id: "6",
-    
-    asset: "AF-LP-1014",
-    warranty:"Exp.Oct 2027",
-    purchase:"Oct 12 2023",
-    no:"2",
-    name:"Msi",
-    status:"Available",
-  },
-  
-  {
-    id: "2",
-    asset: "AF-LP-1012",
-    warranty:"Expired",
-    purchase:"Oct 12 2022",
-    no:"2",
-    name:"RedmiBook",
-    status:"In Repair",
-  },
-  {
-    id: "3",
-    asset: "AF-LP-1013",
-    warranty:"Exp.Dec 2026",
-    purchase:"Oct 12 2023",
-    no:"3",
-    name:"Msi",
-    status:"Deployed",
-  },
-  {
-    id: "4",
-    asset: "AF-LP-1014",
-    warranty:"Exp.Jan 2027",
-    purchase:"Oct 12 2023",
-    no:"4",
-    name:"HP",
-    status:"In Repair",
-  },
-  {
-    id: "5",
-    asset: "AF-LP-1015",
-    warranty:"Exp.Feb 2027",
-    purchase:"Oct 12 2023",
-    no:"5",
-    name:"MacBook Air 13",
-    status:"Available",
-  },
-  
-]
+  // Peripherals & Accessories
+  { id: "7", asset: "TAB-001", name: "iPad Pro 11\"", no: "SN-22334", purchase: "Nov 05 2022", warranty: "Active", status: "Available" },
+  { id: "8", asset: "MON-002", name: "Samsung Odyssey G7", no: "SN-55667", purchase: "Jan 20 2021", warranty: "Expired", status: "In Repair" },
+  { id: "9", asset: "HEA-001", name: "Sony WH-1000XM5", no: "SN-88990", purchase: "Sep 30 2023", warranty: "Active", status: "Available" },
+  { id: "10", asset: "MOU-001", name: "Logitech MX Master 3", no: "SN-44556", purchase: "Jun 01 2023", warranty: "Active", status: "In Repair" },
+];
 
 const InventoryPage = () => {
   return (
-    <div className="p-10 space-y-6">
-
-      {/* HEADER */}
+    <div className="p-10 space-y-6 min-h-screen bg-slate-50/30">
+      
+      {/* HEADER SECTION */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">
-          Inventory
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Inventory
+          </h1>
+          
+        </div>
 
+        {/* The button component from features/Inventory/InventoryAddNewAsset */}
         <InventoryAddNewAsset />
       </div>
 
-      {/* TABLE */}
-      <InventoryTable columns={columns} data={data} />
+      {/* TABLE SECTION */}
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <InventoryTable columns={columns} data={data} />
+      </div>
       
     </div>
   )
 }
 
-export default InventoryPage
+export default InventoryPage;

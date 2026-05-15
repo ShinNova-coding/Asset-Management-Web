@@ -13,7 +13,7 @@ import ActivityPage from "@/pages/Activity/ActivityPage"
 import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
 import UserManagement from "@/pages/UserManagement/UserManagementPage";
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee";
-
+import AddNewAsset from "@/pages/Inventory/AddNewAsset"
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +34,10 @@ export const router = createBrowserRouter([
       {
         path: "inventory",
         element: <InventoryPage />,
+      },
+      {
+        path:"inventory/add",
+        element:<AddNewAsset />,
       },
 
       {
