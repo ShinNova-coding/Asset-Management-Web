@@ -21,20 +21,20 @@ export default function Navigation() {
         <div className="hidden h-6 w-[1px] bg-slate-200 md:block" />
          <div className="flex items-center gap-7">
 
-              <div className="flex h-10 w-10 ml-4 items-center justify-center rounded-xl bg-[#0070EB] shadow-md">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0070EB] shadow-md">
                 <BsFillBoxFill className="text-white  h-5 w-5"/>
               </div>
 
-              <h1 className="text-xl font-bold tracking-wide  text-[#0070EB]">
+              <h1 className="text-xl font-bold tracking-wide mr-8 ml-0 text-[#0070EB]">
                 ITAMS
               </h1>
 
             </div>
-        <SidebarTrigger className="text-slate-600 ml-6 hover:bg-slate-100" />
+        <SidebarTrigger className="text-slate-600 ml-8 hover:bg-slate-100" />
       </div>
-
+      <div className="hidden h-6 w-[1px] bg-slate-200 md:block" />
       {/* RIGHT SECTION: Notifications & Profile */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 ml-2">
 
         {/* Notifications */}
         <button className="relative rounded-full p-2 transition ">

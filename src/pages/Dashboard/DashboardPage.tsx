@@ -14,8 +14,8 @@ const DashboardPage: React.FC = () => {
 
       {/* Combined Section */}
         <div className=" space-y-6">
-<AssetCategoriesCards />
-<RecentActivities />
+    <AssetCategoriesCards />
+    <RecentActivities />
         </div>
         </div>
 
