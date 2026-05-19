@@ -32,35 +32,49 @@ interface InventoryTableProps {
 
 export function InventoryTable({ data: initialData }: InventoryTableProps) {
   const navigate = useNavigate() 
-  const [data, setData] = React.useState(initialData)
+  const [data, setData] = React.useState<any[]>([]) 
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
 
-  
   const [deleteModal, setDeleteModal] = React.useState<{ isOpen: boolean; targetId: string | null }>({
     isOpen: false,
     targetId: null,
   })
   const [showToast, setShowToast] = React.useState(false)
 
- 
+  
+  React.useEffect(() => {
+    const cachedData = localStorage.getItem("inventory_data");
+    if (cachedData) {
+      setData(JSON.parse(cachedData));
+    } else {
+      // Fallback fallback: If local cache storage is fresh, seed it with the hardcoded layout entries
+      localStorage.setItem("inventory_data", JSON.stringify(initialData));
+      setData(initialData);
+    }
+  }, [initialData]);
+
   const handleDeleteTrigger = (id: string) => {
     setDeleteModal({ isOpen: true, targetId: id })
   }
 
-  
+  // Updated to persistently remove the element from state AND browser storage cache
   const handleConfirmDelete = () => {
     if (deleteModal.targetId) {
+      const updatedList = data.filter(
+        (item) => item.asset !== deleteModal.targetId && item.id !== deleteModal.targetId
+      );
       
-      setData((prev) => prev.filter((item) => item.asset !== deleteModal.targetId && item.id !== deleteModal.targetId))
+      // Update running memory state 
+      setData(updatedList);
+      // Write mirror down to storage layer
+      localStorage.setItem("inventory_data", JSON.stringify(updatedList));
+      
       setDeleteModal({ isOpen: false, targetId: null })
-      
-      
       setShowToast(true)
     }
   }
 
-  
   React.useEffect(() => {
     if (showToast) {
       const timer = setTimeout(() => setShowToast(false), 3000)
@@ -102,7 +116,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         <InventoryFilter table={table} />
       </div>
 
-     
       <div className="rounded-md border-slate-400 overflow-hidden">
         <Table>
           <TableHeader className="bg-blue-300">
@@ -151,7 +164,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </Table>
       </div>
 
-     
       <div className="flex justify-end items-center space-x-2 py-4">
         <Button
           variant="outline"
@@ -222,7 +234,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-slate-900">Are you absolutely sure?</h3>
               <p className="text-sm text-slate-500">
-                This action cannot be undone. This item will be permanently removed from your inventory dataset records.
+                This action cannot be undone. This item will be permanently removed.
               </p>
             </div>
             <div className="flex gap-3 pt-2">

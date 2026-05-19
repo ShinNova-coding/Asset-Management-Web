@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from "react-router-dom"; 
 import { ArrowLeft, Package, Settings, ImageIcon, Upload, X } from 'lucide-react';
 
-const AddNewAsset = () => {
+const ActivityUpdate = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -12,11 +12,16 @@ const AddNewAsset = () => {
   const editItem = location.state?.editItem;
   const isEditMode = !!editItem;
 
+  // Track state keys aligned perfectly with the input HTML fields below
   const [formData, setFormData] = useState({
-    name: '',
+    id: '',
+    name:'',
+    status: '',
+    assigndate: '',
+    returndate: '',
+    actions: '',
     category: '',
-    purchaseDate: '',
-    warranty: '',
+   
     shopName: '',
     phone: '',
     address: ''
@@ -25,7 +30,7 @@ const AddNewAsset = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const formatToInputDate = (dateString: string) => {
+  const formatToInputDate = (dateString: string | Date) => {
     if (!dateString) return "";
     const date = new Date(dateString);
     if (!isNaN(date.getTime())) {
@@ -34,13 +39,18 @@ const AddNewAsset = () => {
     return ""; 
   };
 
+ 
   useEffect(() => {
     if (editItem) {
       setFormData({
-        name: editItem.name || '',
-        purchaseDate: formatToInputDate(editItem.purchase || editItem.purchaseDate),
-        warranty: editItem.warranty || '',
+        id: editItem.id || '',
+        name:editItem.name || '',
+        status: editItem.action || '',
+        assigndate: formatToInputDate(editItem.assigndate),
+        returndate: formatToInputDate(editItem.returndate),
+        actions: editItem.actions || '',
         category: editItem.category || '',
+       
         shopName: editItem.shopName || '',
         phone: editItem.phone || '',
         address: editItem.address || ''
@@ -58,7 +68,7 @@ const AddNewAsset = () => {
   };
 
   const goBack = () => {
-    navigate("/inventory"); 
+    navigate("/activity"); 
   };
 
   const handleDropzoneClick = () => {
@@ -102,85 +112,16 @@ const AddNewAsset = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Helper method converting local image memory files to raw base64 data URIs for global localStorage persistence
-  const convertImageToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
-  // Unified submission interceptor handling storage mutation engines
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const payload = {
+      assetId: editItem?.id || undefined, 
+      ...formData,
+      image: selectedImage || imagePreview
+    };
 
-    if (!formData.name.trim()) {
-      alert("Please provide at least an Asset Name before saving.");
-      return;
-    }
-
-    try {
-      // 1. Process image file data if changed, otherwise fallback to existing snapshot string
-      let finalizedImageString = imagePreview;
-      if (selectedImage) {
-        finalizedImageString = await convertImageToBase64(selectedImage);
-      }
-
-      // 2. Fetch global mock DB records from storage state or default to fallback list array
-      const localRawData = localStorage.getItem("inventory_data");
-      let currentInventory = localRawData ? JSON.parse(localRawData) : [];
-
-      if (isEditMode) {
-        // --- UPDATE CORNER ---
-        currentInventory = currentInventory.map((item: any) => {
-          if (item.asset === editItem.asset) {
-            return {
-              ...item,
-              name: formData.name,
-              category: formData.category,
-              purchase: formData.purchaseDate, // Map to your shared table list key names
-              purchaseDate: formData.purchaseDate,
-              warranty: formData.warranty,
-              shopName: formData.shopName,
-              phone: formData.phone,
-              address: formData.address,
-              image: finalizedImageString,
-              status: item.status || "Available" // Preserve status flags
-            };
-          }
-          return item;
-        });
-      } else {
-        // --- CREATE CORNER ---
-        const generatedAssetId = `AST-${Math.floor(1000 + Math.random() * 9000)}`;
-        
-        const newAssetPayload = {
-          asset: generatedAssetId,
-          name: formData.name,
-          category: formData.category || "General IT",
-          purchase: formData.purchaseDate || new Date().toISOString().split('T')[0],
-          purchaseDate: formData.purchaseDate || new Date().toISOString().split('T')[0],
-          warranty: formData.warranty || "N/A",
-          shopName: formData.shopName,
-          phone: formData.phone,
-          address: formData.address,
-          status: "Available",
-          image: finalizedImageString
-        };
-
-        currentInventory.unshift(newAssetPayload); // Place at top of dashboard arrays
-      }
-
-      // 3. Force-write back to state stack and bounce back to list view
-      localStorage.setItem("inventory_data", JSON.stringify(currentInventory));
-      navigate("/inventory");
-
-    } catch (err) {
-      console.error("Failed to compile item bundle payload:", err);
-      alert("An error occurred while rendering your asset entry.");
-    }
+    console.log("Submitting asset dataset payload:", payload);
   };
 
   return (
@@ -194,10 +135,10 @@ const AddNewAsset = () => {
             className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
           >
             <ArrowLeft size={16} className="mr-2" />
-            Back to Inventory
+            Back to Activity
           </button>
           <h1 className="text-2xl font-bold text-slate-900">
-            {isEditMode ? `Modify Asset: ${editItem.asset}` : "Register New IT Asset"}
+            {isEditMode ? `Modify Asset ID: ${editItem.id}` : "Register IT New Asset"}
           </h1>
         </div>
 
@@ -209,20 +150,20 @@ const AddNewAsset = () => {
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Package size={18} className="text-blue-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Asset Information</h2>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Employee & Asset Info</h2>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Asset Name</label>
+                    <label className="text-xs font-semibold text-slate-600">Status</label>
                     <input 
                       type="text" 
-                      name="name"
-                      value={formData.name}
+                      name="status"
+                      value={formData.status}
                       onChange={handleInputChange}
-                      placeholder="e.g. MacBook Pro M2" 
+                      placeholder="e.g. Active, Pending, Returned" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                      required
                     />
                   </div>
                   
@@ -243,21 +184,32 @@ const AddNewAsset = () => {
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Settings size={18} className="text-blue-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Warranty & Procurement</h2>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Assignment Timeline</h2>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
+                  {/* FIXED: Renamed keys to match target data model metrics (assigndate / returndate) */}
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Purchase Date</label>
+                    <label className="text-xs font-semibold text-slate-600">Assign Date</label>
                     <input 
                       type="date" 
-                      name="purchaseDate"
-                      value={formData.purchaseDate}
+                      name="assigndate"
+                      value={formData.assigndate}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
                   <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-600">Return Date</label>
+                    <input 
+                      type="date" 
+                      name="returndate"
+                      value={formData.returndate}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    />
+                  </div>
+                  <div className="space-y-1 col-span-2">
                     <label className="text-xs font-semibold text-slate-600">Warranty Expiration</label>
                     <input 
                       type="text" 
@@ -274,12 +226,12 @@ const AddNewAsset = () => {
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Settings size={18} className="text-blue-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Software House Details</h2>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Shop House Details</h2>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1 col-span-2">
-                    <label className="text-xs font-semibold text-slate-600">Software House Name</label>
+                    <label className="text-xs font-semibold text-slate-600">Shop House Name</label>
                     <input 
                       type="text" 
                       name="shopName"
@@ -301,7 +253,7 @@ const AddNewAsset = () => {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Software House Address</label>
+                    <label className="text-xs font-semibold text-slate-600">Shop House Address</label>
                     <input 
                       type="text" 
                       name="address"
@@ -317,7 +269,7 @@ const AddNewAsset = () => {
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                 <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
                 <button type="submit" className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
-                  {isEditMode ? "Update" : "Save"}
+                  {isEditMode ? "Update Asset" : "Save Asset"}
                 </button>
               </div>
             </form>
@@ -383,4 +335,4 @@ const AddNewAsset = () => {
   );
 };
 
-export default AddNewAsset;
+export default ActivityUpdate;

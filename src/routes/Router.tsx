@@ -11,6 +11,7 @@ import InventoryPage from "@/pages/Inventory/InventoryPage"
 
 import UserManagementPage from "@/pages/UserManagement/UserManagementPage"
 import ActivityPage from "@/pages/Activity/ActivityPage"
+import ActivityUpdate from "@/components/features/Activity/ActivityUpdate"
 import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
 import UserManagement from "@/pages/UserManagement/UserManagementPage";
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee";
@@ -54,7 +55,11 @@ export const router = createBrowserRouter([
         path: "activity",
         element: <ActivityPage />,
       },
-
+      {
+        path:"activity/add",
+        element:<ActivityUpdate/>,
+      },
+      
       {
         path: "maintenance",
         element: <MaintenancePage />,

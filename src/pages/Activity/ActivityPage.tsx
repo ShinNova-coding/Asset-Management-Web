@@ -6,61 +6,98 @@ import { FiClock } from 'react-icons/fi'
 const mockActivities = [
   {
     id: "ACT-001",
-    user: "Aung Aung",
-    action: "Created" as const,
-    targetAsset: "MacBook Pro M2 (INV-9821)",
-    details: "Registered new asset with 2-year warranty baseline profile",
-    timestamp: "2026-05-18 09:14 AM"
+    
+    action: "Active",
+    assigndate:"2024-05-13",
+    returndate:"2025--2-22",
+    actions:"View Details"
   },
-  {
+   {
     id: "ACT-002",
-    user: "Su Su",
-    action: "Updated" as const,
-    targetAsset: "Dell UltraSharp 27 (INV-3412)",
-    details: "Changed current assignment state location to Main Office Floor Room 4",
-    timestamp: "2026-05-18 11:30 AM"
+    
+    action: "Pending",
+    assigndate:"2023-12-01",
+    returndate:"2025-01-12",
+    actions:"View Details"
   },
   {
     id: "ACT-003",
-    user: "Admin Team",
-    action: "Deleted" as const,
-    targetAsset: "iPhone 11 Pro Max (INV-0041)",
-    details: "Permanently purged hardware node records from operational inventory context",
-    timestamp: "2026-05-17 04:45 PM"
+    action: "Active",
+    assigndate: "2023-10-02", 
+    returndate: "2024-03-12",
+    actions: "View Details"   
   },
   {
     id: "ACT-004",
-    user: "Mg Mg",
-    action: "Maintenance Check" as const,
-    targetAsset: "HP LaserJet Enterprise (INV-8755)",
-    details: "Replaced toner cartridges and updated firmware to version 4.1.2",
-    timestamp: "2026-05-16 02:20 PM"
-  }
+    action: "Returned",
+    assigndate: "2024-01-15",
+    returndate: "2024-02-20",
+    actions: "Manage"
+  },
+   {
+    id: "ACT-005",
+    action: "Returned",
+    assigndate: "2024-01-15",
+    returndate: "2024-02-20",
+    actions: "Manage"
+  },
+   {
+    id: "ACT-006",
+    action: "Returned",
+    assigndate: "2024-01-15",
+    returndate: "2024-02-20",
+    actions: "Manage"
+  },
+   {
+    id: "ACT-007",
+    action: "Returned",
+    assigndate: "2024-01-15",
+    returndate: "2024-02-20",
+    actions: "Manage"
+  },
+   {
+    id: "ACT-008",
+    action: "Returned",
+    assigndate: "2024-01-15",
+    returndate: "2024-02-20",
+    actions: "Manage"
+  },
+   {
+    id: "ACT-009",
+    action: "Returned",
+    assigndate: "2024-01-15",
+    returndate: "2024-02-20",
+    actions: "Manage"
+  },
+   {
+    id: "ACT-010",
+    action: "Returned",
+    assigndate: "2024-01-15",
+    returndate: "2024-02-20",
+    actions: "Manage"
+  },
+  
 ]
 
 const ActivityPage = () => {
   return (
-    // FIXED: Wrapped everything inside one single parent div container
+    
     <div className="min-h-screen bg-slate-50/50 p-8 space-y-6">
       
-      {/* Header Layout */}
+      
       <div className="flex items-center gap-3 pb-2">
-        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg shadow-xs">
-          <FiClock size={22} />
-        </div>
+       
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
             Activity Management
           </h1>
-          <p className="text-xs font-medium text-slate-400">
-            Track structural changes, data mutations, and infrastructure audits over time
-          </p>
+          
         </div>
       </div>
 
-      {/* Table Container Wrapper */}
+     
       <div className="rounded-xl border border-slate-200 bg-white shadow-xs p-6">
-        {/* FIXED: Passing the mockActivities directly into the data prop as expected by your ActivityTable */}
+        
         <ActivityTable data={mockActivities} />
       </div>
       

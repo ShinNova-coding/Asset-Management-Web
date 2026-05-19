@@ -54,7 +54,7 @@ export const columns: ColumnDef<Inventory>[] = [
 
       return (
         <div className="flex items-center gap-2">
-          {/* UPDATED: Passing the entire item object into your editRow metadata function */}
+         
           <Edit onEdit={() => meta?.editRow(item)} />
           
           <Delete onDelete={() => meta?.deleteRow(item.asset)} />
