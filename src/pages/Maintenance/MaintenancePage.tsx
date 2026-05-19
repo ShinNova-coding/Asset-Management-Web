@@ -1,8 +1,9 @@
+
 const MaintenancePage = () => {
   return (
     <div>
       <h1 className="text-2xl font-bold">
-        Maintenance Page
+        Asset Maintenance
       </h1>
     </div>
   )

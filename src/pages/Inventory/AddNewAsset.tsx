@@ -1,35 +1,147 @@
-import React from 'react';
-import { ArrowLeft, Package, Settings, Calendar, Hash, Image as ImageIcon, Upload } from 'lucide-react';
+"use client"
+
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from "react-router-dom"; 
+import { ArrowLeft, Package, Settings, ImageIcon, Upload, X } from 'lucide-react';
 
 const AddNewAsset = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const editItem = location.state?.editItem;
+  const isEditMode = !!editItem;
+
+  const [formData, setFormData] = useState({
+    name: '',
+    category: '',
+    purchaseDate: '',
+    warranty: '',
+    shopName: '',
+    phone: '',
+    address: ''
+  });
+
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Helper function to convert any date string format into HTML input compatible YYYY-MM-DD
+  const formatToInputDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    // If it's a valid date object, format it to YYYY-MM-DD
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0];
+    }
+    return ""; 
+  };
+
+  useEffect(() => {
+    if (editItem) {
+      setFormData({
+        // Matching your exact table column keys:
+        name: editItem.name || '',
+        purchaseDate: formatToInputDate(editItem.purchase), // Converts your date text so HTML input can render it
+        warranty: editItem.warranty || '',
+        
+        // These keys aren't in your table data yet, so we ensure they fallback to safe string defaults
+        category: editItem.category || '',
+        shopName: editItem.shopName || '',
+        phone: editItem.phone || '',
+        address: editItem.address || ''
+      });
+
+      if (editItem.image) {
+        setImagePreview(editItem.image);
+      }
+    }
+  }, [editItem]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const goBack = () => {
-    window.location.href = "/inventory"; 
+    navigate("/inventory"); 
+  };
+
+  const handleDropzoneClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      processImage(e.target.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processImage(e.dataTransfer.files[0]);
+    }
+  };
+
+  const processImage = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file (PNG, JPG).");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size exceeds 5MB limit.");
+      return;
+    }
+    setSelectedImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const payload = {
+      assetId: editItem?.asset || undefined, // Uses your exact table key 'asset' for the primary unique identifier
+      ...formData,
+      image: selectedImage || imagePreview
+    };
+
+    console.log("Submitting asset dataset payload:", payload);
   };
 
   return (
     <div className="min-h-screen bg-slate-50 p-10 font-sans text-slate-900">
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* Header */}
         <div className="space-y-2">
           <button 
+            type="button"
             onClick={goBack}
             className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
           >
             <ArrowLeft size={16} className="mr-2" />
             Back to Inventory
           </button>
-          <h1 className="text-2xl font-bold text-slate-900">Register IT New Asset</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {isEditMode ? `Modify Asset: ${editItem.asset}` : "Register IT New Asset"}
+          </h1>
         </div>
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           
-          {/* LEFT COLUMN: Form Card (Shrunk to span 2/3) */}
           <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <form className="p-8 space-y-8">
+            <form onSubmit={handleSubmit} className="p-8 space-y-8">
               
-              {/* Section 1: Asset Details */}
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Package size={18} className="text-blue-600" />
@@ -39,24 +151,30 @@ const AddNewAsset = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset Name</label>
-                    <input type="text" placeholder="e.g. MacBook Pro M2" className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                    <input 
+                      type="text" 
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="e.g. MacBook Pro M2" 
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Asset ID / Tag</label>
-                    <input type="text" placeholder="AF-LP-1011" className="w-full px-3 py-2 rounded-md border border-slate-300 bg-slate-50 text-sm" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Serial Number</label>
-                    <input type="text" placeholder="SN-99210" className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
-                  </div>
+                  
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset Category</label>
-                    <input type="text" placeholder="e.g. Laptops" className="w-full px-3 py-2 rounded-md border border-slate-300 text-sm" />
+                    <input 
+                      type="text" 
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Laptops" 
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    />
                   </div>
                 </div>
               </section>
 
-              {/* Section 2: Warranty & Procurement (TWO BOXES ON SAME LINE) */}
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Settings size={18} className="text-blue-600" />
@@ -66,62 +184,132 @@ const AddNewAsset = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Purchase Date</label>
-                    <input type="date" className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                    <input 
+                      type="date" 
+                      name="purchaseDate"
+                      value={formData.purchaseDate}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Warranty Expiration</label>
-                    <input type="text" placeholder="Exp. Oct 2026" className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                    <input 
+                      type="text" 
+                      name="warranty"
+                      value={formData.warranty}
+                      onChange={handleInputChange}
+                      placeholder="2 years" 
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    />
                   </div>
                 </div>
               </section>
 
-              {/* Section 3: Vendor Details */}
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Settings size={18} className="text-blue-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Vendor Details</h2>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Shop House Details</h2>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1 col-span-2">
-                    <label className="text-xs font-semibold text-slate-600">Vendor Name</label>
-                    <input type="text" placeholder="e.g. Insight Enterprise INC" className="w-full px-3 py-2 rounded-md border border-slate-300 text-sm" />
+                    <label className="text-xs font-semibold text-slate-600">Shop House Name</label>
+                    <input 
+                      type="text" 
+                      name="shopName"
+                      value={formData.shopName}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Insight Enterprise INC" 
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Phone No</label>
-                    <input type="text" className="w-full px-3 py-2 rounded-md border border-slate-300 text-sm" />
+                    <input 
+                      type="text" 
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      placeholder="09*********" 
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Vendor Address</label>
-                    <input type="text" placeholder="City" className="w-full px-3 py-2 rounded-md border border-slate-300 text-sm" />
+                    <label className="text-xs font-semibold text-slate-600">Shop House Address</label>
+                    <input 
+                      type="text" 
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      placeholder="City" 
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    />
                   </div>
                 </div>
               </section>
 
-              {/* Actions */}
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                 <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
-                <button type="submit" className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">Save Asset</button>
+                <button type="submit" className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
+                  {isEditMode ? "Update Asset" : "Save Asset"}
+                </button>
               </div>
             </form>
           </div>
 
-          {/* RIGHT COLUMN: Asset Photo Card */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <ImageIcon size={18} className="text-blue-600" />
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Asset Photo</h2>
             </div>
             
-            <div className="aspect-square w-full bg-slate-50 rounded-lg border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 space-y-2 hover:bg-slate-100 transition-colors cursor-pointer group">
-              <div className="p-3 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
-                <Upload size={24} className="text-blue-500" />
-              </div>
-              <p className="text-[11px] font-medium px-4 text-center">Click to upload or drag and drop asset image</p>
-              <p className="text-[10px]">PNG, JPG up to 5MB</p>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileChange} 
+              accept="image/*" 
+              className="hidden" 
+            />
+
+            <div 
+              onClick={handleDropzoneClick}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              className={`aspect-square w-full bg-slate-50 rounded-lg border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 space-y-2 hover:bg-slate-100 transition-colors cursor-pointer group relative overflow-hidden ${
+                imagePreview ? 'border-solid border-slate-300 bg-white p-2' : ''
+              }`}
+            >
+              {imagePreview ? (
+                <div className="w-full h-full relative group/preview">
+                  <img 
+                    src={imagePreview} 
+                    alt="Asset preview" 
+                    className="w-full h-full object-cover rounded-md"
+                  />
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity rounded-md">
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="p-3 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-lg transform transition-transform duration-200 hover:scale-110 flex items-center gap-1.5 text-xs font-medium"
+                    >
+                      <X size={16} />
+                      Remove Photo
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="p-3 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
+                    <Upload size={24} className="text-blue-500" />
+                  </div>
+                  <p className="text-[11px] font-medium px-4 text-center text-slate-600">
+                    Click to upload or drag and drop asset image
+                  </p>
+                  <p className="text-[10px] text-slate-400">PNG, JPG up to 5MB</p>
+                </>
+              )}
             </div>
-            
-           
           </div>
 
         </div>

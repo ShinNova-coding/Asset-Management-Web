@@ -4,15 +4,19 @@ import Delete from "./InventoryDelete"
 import Edit from "./InventoryEdit"
 
 export type Inventory = {
+  
   asset: string
   name: string
+  
   purchase: string
   warranty: string
-  status: "Assigned" | "Available" | "Maintenance" | "Expired";
+  status: "Returned" | "Available" | "Maintenance" | "Expired";
 }
 
 export const columns: ColumnDef<Inventory>[] = [
+
   { accessorKey: "name", header: "Name" },
+  
   { accessorKey: "purchase", header: "Purchase Date" },
   { 
     accessorKey: "warranty", 
@@ -33,7 +37,7 @@ export const columns: ColumnDef<Inventory>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       const statusStyles: Record<string, string> = {
-        "Assigned": "bg-blue-100 text-blue-700 border-blue-200",
+        "Returned": "bg-blue-100 text-blue-700 border-blue-200",
         "Maintenance": "bg-yellow-100 text-yellow-700 border-yellow-200",
         "Available": "bg-green-100 text-green-700 border-green-200",
       };
@@ -50,14 +54,17 @@ export const columns: ColumnDef<Inventory>[] = [
     header: "Actions",
     cell: ({ row, table }) => {
       const item = row.original
+      
+      
       const meta = table.options.meta as any;
 
       return (
         <div className="flex items-center gap-2">
-          {/* UPDATED: Passing the entire item object into your editRow metadata function */}
-          <Edit onEdit={() => meta?.editRow(item)} />
           
-          <Delete onDelete={() => meta?.deleteRow(item.asset)} />
+          <Edit onEdit={() => meta?.editRow(item.id)} />
+          
+          
+          <Delete onDelete={() => meta?.deleteRow(item.id)} />
         </div>
       )
     },
