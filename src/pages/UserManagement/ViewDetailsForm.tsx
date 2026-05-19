@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, FC } from 'react';
 import {
   ArrowLeft,
   User,
@@ -10,8 +10,113 @@ import {
 
 import { Link } from 'react-router-dom';
 
+/* =========================
+   View Details Modal
+========================= */
+
+type Props = {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: { startDate: string; endDate: string }) => void;
+};
+
+const ViewDetailsForm: FC<Props> = ({
+  isOpen,
+  onClose,
+  onSave,
+}) => {
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    onSave({
+      startDate,
+      endDate,
+    });
+
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6">
+        <h2 className="text-xl font-semibold mb-6 text-slate-800">
+          Employee Date Details
+        </h2>
+
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-2 gap-4">
+
+            {/* Start Date */}
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-600">
+                Start Date
+              </label>
+
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) =>
+                  setStartDate(e.target.value)
+                }
+                className="w-full px-4 py-3 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* End Date */}
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-600">
+                End Date
+              </label>
+
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) =>
+                  setEndDate(e.target.value)
+                }
+                className="w-full px-4 py-3 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end gap-4 pt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2.5 rounded border border-slate-300 text-slate-600 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="px-6 py-2.5 rounded bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Save Dates
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+/* =========================
+   Main Add Employee Form
+========================= */
+
 const AddEmployeeForm: React.FC = () => {
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] =
+    useState<string | null>(null);
+
+  const [isModalOpen, setIsModalOpen] =
+    useState<boolean>(false);
 
   const handleImageChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -24,13 +129,20 @@ const AddEmployeeForm: React.FC = () => {
     }
   };
 
+  const handleSaveDates = (data: {
+    startDate: string;
+    endDate: string;
+  }) => {
+    console.log('Saved Dates:', data);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 p-8 font-sans text-slate-900">
       <div className="max-w-4xl mx-auto">
-        
+
         {/* Back Button */}
         <Link
-          to="/employees"
+          to="/employee-dates"
           className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline"
         >
           <ArrowLeft size={16} className="mr-2" />
@@ -56,7 +168,10 @@ const AddEmployeeForm: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <User size={40} className="text-slate-500" />
+                    <User
+                      size={40}
+                      className="text-slate-500"
+                    />
                   )}
                 </div>
 
@@ -84,18 +199,23 @@ const AddEmployeeForm: React.FC = () => {
             {/* General Information */}
             <section>
               <div className="flex items-center gap-3 mb-4 pb-2 border-b border-slate-200">
-                <User size={20} className="text-slate-400" />
+                <User
+                  size={20}
+                  className="text-slate-400"
+                />
+
                 <h2 className="text-lg font-semibold text-blue-600">
                   General Information
                 </h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
+
                 <div className="space-y-2">
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
                     Full Name
                   </label>
+
                   <input
                     type="text"
                     placeholder="Enter full name"
@@ -107,6 +227,7 @@ const AddEmployeeForm: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
                     Employee ID
                   </label>
+
                   <input
                     type="text"
                     placeholder="EMP-001"
@@ -118,6 +239,7 @@ const AddEmployeeForm: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
                     Email Address
                   </label>
+
                   <input
                     type="email"
                     placeholder="employee@gmail.com"
@@ -148,7 +270,10 @@ const AddEmployeeForm: React.FC = () => {
             {/* Organizational Placement */}
             <section>
               <div className="flex items-center gap-3 mb-4 pb-2 border-b border-slate-200">
-                <Briefcase size={20} className="text-slate-400" />
+                <Briefcase
+                  size={20}
+                  className="text-slate-400"
+                />
 
                 <h2 className="text-lg font-semibold text-blue-600">
                   Organizational Placement
@@ -156,7 +281,7 @@ const AddEmployeeForm: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
+
                 <div className="space-y-2">
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
                     Position
@@ -226,6 +351,17 @@ const AddEmployeeForm: React.FC = () => {
               </div>
             </section>
 
+            {/* View Details Button */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="px-6 py-2.5 rounded bg-slate-800 text-white hover:bg-slate-900"
+              >
+                View Employee Dates
+              </button>
+            </div>
+
             {/* Buttons */}
             <div className="flex justify-end gap-4 pt-6">
               <button
@@ -242,10 +378,16 @@ const AddEmployeeForm: React.FC = () => {
                 Save Employee
               </button>
             </div>
-
           </form>
         </div>
       </div>
+
+      {/* Modal */}
+      <ViewDetailsForm
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveDates}
+      />
     </div>
   );
 };
