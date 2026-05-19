@@ -8,13 +8,14 @@ import Layout from "@/layouts/Layout"
 
 import DashboardPage from "@/pages/Dashboard/DashboardPage"
 import InventoryPage from "@/pages/Inventory/InventoryPage"
+
 import UserManagementPage from "@/pages/UserManagement/UserManagementPage"
 import ActivityPage from "@/pages/Activity/ActivityPage"
 import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
 import UserManagement from "@/pages/UserManagement/UserManagementPage";
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee";
 import AddNewAsset from "@/pages/Inventory/AddNewAsset"
-
+import { InventoryDetail } from "@/components/features/Inventory/InventoryDetail"
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
       {
         path:"inventory/add",
         element:<AddNewAsset />,
+      },
+      {
+        path:"inventory/:id",
+        element:<InventoryDetail/>
       },
 
       {

@@ -1,42 +1,42 @@
 "use client"
-import { IoFilterSharp } from "react-icons/io5"
-import type{ Table } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
+
+import type { Table } from "@tanstack/react-table"
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface InventoryFilterProps<TData> {
   table: Table<TData>
 }
 
 export function InventoryFilter<TData>({ table }: InventoryFilterProps<TData>) {
+  const statusColumn = table.getColumn("status")
+
+  if (!statusColumn) return null
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger  asChild>
-        <Button variant="outline" className="flex gap-2">
-          <IoFilterSharp className="h-4 w-4" />
-          Filters
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {table
-          .getAllColumns()
-          .filter((col) => col.getCanHide())
-          .map((col) => (
-            <DropdownMenuCheckboxItem
-              key={col.id}
-              className="capitalize"
-              checked={col.getIsVisible()}
-              onCheckedChange={(value) => col.toggleVisibility(!!value)}
-            >
-              {col.id}
-            </DropdownMenuCheckboxItem>
-          ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className=" bg-gray-50">
+      <Select
+        value={(statusColumn.getFilterValue() as string) ?? "Status"}
+        onValueChange={(value) => {
+         
+          statusColumn.setFilterValue(value === "all" ? undefined : value)
+        }}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select Status" />
+        </SelectTrigger>
+        <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-md z-5">
+          <SelectItem value="all">All Status</SelectItem>
+          <SelectItem value="available">Available</SelectItem>
+          <SelectItem value="Returned">Returned</SelectItem>
+          <SelectItem value="Maintenance">Maintenance</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
   )
 }
