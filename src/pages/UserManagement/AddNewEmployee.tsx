@@ -18,7 +18,7 @@ const AddEmployeeForm: React.FC = () => {
             to="/employees"
             className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline">
             <ArrowLeft size={16} className="mr-2" />
-            Back to Employee List
+            Back to Employee 
         </Link>
         
         
@@ -26,7 +26,7 @@ const AddEmployeeForm: React.FC = () => {
         
 
         {/* Form Card */}
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-10">
+        <div className="bg-gray-100 rounded-lg border border-slate-200 shadow-sm p-10">
           <form className="space-y-10">
             
             {/* General Information Section */}
@@ -50,7 +50,7 @@ const AddEmployeeForm: React.FC = () => {
                   <input 
                     type="text" 
                   
-                    className="w-full px-4 py-3 rounded-md border border-slate-500 bg-blue-50/30 text-slate-700"
+                    className="w-full px-4 py-3 rounded-md border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -58,7 +58,7 @@ const AddEmployeeForm: React.FC = () => {
                   <input 
                     type="email" 
                    
-                    className="w-full px-4 py-3 rounded-md border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 rounded-md border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -67,8 +67,8 @@ const AddEmployeeForm: React.FC = () => {
                     <input 
                       type="text" 
                       placeholder="mm/dd/yyyy" 
-                      className="w-full px-4 py-3 rounded-md border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                      className="w-full px-4 py-3 rounded-md border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  />
                     <Calendar size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   </div>
                 </div>
@@ -88,7 +88,7 @@ const AddEmployeeForm: React.FC = () => {
                   <input 
                     type="text" 
                     
-                    className="w-full px-4 py-3 rounded-md border border-slate- focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 rounded-md border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -110,11 +110,11 @@ const AddEmployeeForm: React.FC = () => {
            
  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
  <div className="space-y-2"> <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">Phone Number</label>
- <input type="text" className="w-full px-4 py-3 rounded-md border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+ <input type="text" className="w-full px-4 py-3 rounded-md border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
  </div> 
 <div className="space-y-2"> <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">Status</label> 
 
- <input type="text" className="w-full px-4 py-3 rounded-md border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+ <input type="text" className="w-full px-4 py-3 rounded-md border border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
  </div> 
 </div> 
 

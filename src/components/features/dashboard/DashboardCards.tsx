@@ -23,7 +23,7 @@ const StatCard: React.FC<StatCardProps> = ({
   color,
 }) => {
   return (
-    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between min-h-[110px] w-full">
+    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-400 flex flex-col justify-between min-h-[110px] w-full">
       <div>
         <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-1">
           {label}

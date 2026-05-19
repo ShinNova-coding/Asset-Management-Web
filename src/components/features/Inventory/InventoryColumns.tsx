@@ -10,7 +10,7 @@ export type Inventory = {
   no: string
   purchase: string
   warranty: string
-  status: string
+  status: "Deployed" | "Available" | "In Repair" | "Expired";
 }
 
 export const columns: ColumnDef<Inventory>[] = [
@@ -55,19 +55,15 @@ export const columns: ColumnDef<Inventory>[] = [
     cell: ({ row, table }) => {
       const item = row.original
       
-      /** 
-       * အသစ်ထည့်လိုက်သောအပိုင်း: 
-       * table options ထဲက meta ကို လှမ်းယူပြီး Table component ထဲမှာရှိတဲ့ 
-       * handleEdit နဲ့ handleDelete function တွေကို ချိတ်ဆက်ပေးလိုက်တာဖြစ်ပါတယ်။
-       */
+      
       const meta = table.options.meta as any;
 
       return (
         <div className="flex items-center gap-2">
-          {/* Edit icon ကိုနှိပ်လျှင် Modal ပွင့်လာအောင် meta.editRow ကို လှမ်းခေါ်ပါတယ် */}
+          
           <Edit onEdit={() => meta?.editRow(item.id)} />
           
-          {/* Delete icon ကိုနှိပ်လျှင် row ပျက်သွားအောင် meta.deleteRow ကို လှမ်းခေါ်ပါတယ် */}
+          
           <Delete onDelete={() => meta?.deleteRow(item.id)} />
         </div>
       )

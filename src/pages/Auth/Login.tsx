@@ -87,12 +87,12 @@ const Login = () => {
 
         <CardFooter className="flex-col gap-4">
           <Button 
-            type="submit" 
-            className="w-full h-12 font-bold rounded-lg" 
-            onClick={() => navigate("/Dashboard")}
-          >
-            Login
-          </Button>
+              type="submit" 
+                className="w-full h-12 font-bold rounded-lg" 
+                onClick={() => navigate("/dashboard")}
+>
+                Login
+            </Button>
           <a
             href="#"
             className="mx-auto inline-block text-sm underline-offset-4 text-center hover:underline text-blue-500 font-medium"

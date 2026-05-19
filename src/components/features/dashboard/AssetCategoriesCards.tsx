@@ -26,7 +26,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 }) => {
   return (
     <div
-      className={`bg-white p-6 rounded-xl border-t-2 ${borderColor} shadow-sm flex flex-col items-start w-full`}
+      className={`bg-white p-6 rounded-xl border-t-3 ${borderColor} shadow-sm flex flex-col items-start w-full`}
     >
       <div className="bg-slate-50 p-2 rounded-lg mb-4">
         <Icon className="w-6 h-6 text-slate-400" />
@@ -94,8 +94,8 @@ const AssetCategories: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 bg-slate-50 w-full">
-      <h2 className="text-xl font-bold text-slate-800 mb-6">
+    <div className="p-3 bg-slate-50 w-full">
+      <h2 className="text-xl font-bold text-black mb-8">
         Asset Categories
       </h2>
 

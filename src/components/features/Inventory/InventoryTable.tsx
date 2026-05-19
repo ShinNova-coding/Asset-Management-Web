@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi" 
 import {
   flexRender,
   getCoreRowModel,
@@ -78,14 +80,12 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     initialState: { pagination: { pageSize: 6 } },
   })
 
-  // Pagination Helpers
   const pageCount = table.getPageCount()
   const currentPage = table.getState().pagination.pageIndex
 
   return (
     <div className="w-full space-y-4 p-4">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-xl font-bold text-gray-800">Inventory List</h2>
         <div className="flex items-center gap-2">
           <InventorySearch value={globalFilter} onChange={setGlobalFilter} />
           <InventoryFilter table={table} />
@@ -125,19 +125,21 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </Table>
       </div>
 
-      {/* --- PAGINATION BUTTONS --- */}
-      <div className="flex items-center justify-center space-x-2 py-4">
+      
+      <div className="flex justify-end space-x-2 py-4">
         <Button
           variant="outline"
           size="sm"
+          className="flex items-center gap-1"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          Previous
+          
+          <FiChevronLeft size={16} />
+          
         </Button>
 
-        {/* Numbered Page Buttons [1] [2] [3] */}
-        <div className="flex items-center gap-1">
+        <div className="flex gap-1 justify-end">
           {Array.from({ length: pageCount }).map((_, index) => (
             <Button
               key={index}
@@ -154,14 +156,16 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         <Button
           variant="outline"
           size="sm"
+          className="flex items-center gap-1"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          Next
+          
+          
+          <FiChevronRight size={16} />
         </Button>
       </div>
 
-      {/* --- EDIT MODAL --- */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

@@ -1,3 +1,5 @@
+// Layout.tsx
+
 import {
   Sidebar,
   SidebarContent,
@@ -22,7 +24,7 @@ import {
 } from "react-router-dom"
 
 import Navigation from "@/components/ui/navigation"
-
+import { BsFillBoxFill } from "react-icons/bs"
 const menuItems = [
   {
     title: "Dashboard",
@@ -57,21 +59,40 @@ export default function Layout() {
 
   return (
     <SidebarProvider>
-      <div className="flex flex-col min-h-screen w-full bg-blue-50">
-        <Navigation />
+      <div className="flex min-h-screen w-full bg-[#F8FAFC]">
 
-        <div className="flex flex-1">
-          <Sidebar className="w-[250px] border-none">
-            <SidebarContent className="px-4 py-20 border-r border-slate-400 bg-[#F8FAFC]">
-              <SidebarMenu className="space-y-3">
-                {menuItems.map((item) => {
-                  const isActive = location.pathname.startsWith(item.path)
+        {/* SIDEBAR */}
+        <Sidebar className="w-[255px] border-r border-slate-400 bg-white-100">
 
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
+          <SidebarContent className="bg-blue-50 px-4 py-6">
+
+            {/* LOGO */}
+               <div className="hidden h-7 w-[1px] -mt-10 bg-slate-200 md:block" />
+         <div className="flex items-center gap-2">
+
+              <div className="flex h-10 w-10 items-center ml-8 justify-center rounded-xl bg-[#0070EB] shadow-md">
+                <BsFillBoxFill className="text-white  h-6 w-6"/>
+              </div>
+
+              <h1 className="text-2xl font-bold tracking-wide  mr-8 ml-0 text-[#0070EB]">
+                ITAMS
+              </h1>
+               </div>
+
+            {/* MENU */}
+            <SidebarMenu className="space-y-3 mt-6">
+
+              {menuItems.map((item) => {
+                const isActive =
+                  location.pathname.startsWith(item.path) ||
+                  (item.path === "/dashboard" &&
+                    location.pathname === "/")
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
                         onClick={() => navigate(item.path)}
-                        className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                        className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-md font-medium transition-colors ${
                           isActive
                            ? "bg-blue-500 text-white shadow-sm hover:bg-blue-500" 
                             : "text-slate-600 hover:bg-blue-100 hover:text-blue-600"}
@@ -80,17 +101,22 @@ export default function Layout() {
                         <item.icon className="h-5 w-5" />
                         {item.title}
                       </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )
-                })}
-              </SidebarMenu>
-            </SidebarContent>
-          </Sidebar>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarContent>
+        </Sidebar>
 
-          <main className="flex-1 p-6">
-            <div className="mt-4">
-              <Outlet />
-            </div>
+        {/* RIGHT CONTENT */}
+        <div className="flex flex-1 flex-col">
+
+          {/* NAVIGATION */}
+          <Navigation />
+
+          {/* PAGE CONTENT */}
+          <main className="flex-1 p-8">
+            <Outlet />
           </main>
         </div>
       </div>
