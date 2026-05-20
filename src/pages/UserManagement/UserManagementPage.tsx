@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { employees as employeesData } from '../../data/employees';
+import type { Employee } from '../../types/employee';
+import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
 
 import {
   Search,
@@ -16,52 +19,6 @@ import {
 
 import { FaEdit } from "react-icons/fa";
 import { RiDeleteBin4Fill } from "react-icons/ri";
-
-interface Employee {
-  id: string;
-  name: string;
-  email: string;
-  position: string;
-  status: 'Active' | 'Suspend';
-}
-
-const employeesData: Employee[] = [
-  { id: 'AF-1024', name: 'Wang', email: 'wang@agga.io', position: 'System Admin', status: 'Active' },
-  { id: 'AF-2051', name: 'Xing', email: 'xing@agga.io', position: 'Security Analyst', status: 'Active' },
-  { id: 'AF-0982', name: 'Alex', email: 'alex@agga.io', position: 'Project Manager', status: 'Suspend' },
-  { id: 'AF-1140', name: 'Marry', email: 'marry@agga.io', position: 'Software Engineer', status: 'Active' },
-  { id: 'AF-1101', name: 'Cherry', email: 'cherry@agga.io', position: 'System Operator', status: 'Active' },
-  
-  { id: 'AF-1223', name: 'Minn', email: 'minn@agga.io', position: 'Product Owner', status: 'Active' },
-  { id: 'AF-1876', name: 'Annn', email: 'annn@agga.io', position: 'Java Developer', status: 'Suspend' },
-  { id: 'AF-0845', name: 'Berry', email: 'berry@agga.io', position: 'Product Manager', status: 'Active' },
-  { id: 'AF-1138', name: 'Jimin', email: 'jimin@agga.io', position: 'Tester', status: 'Suspend' },
-  { id: 'AF-1209', name: 'Luna', email: 'luna@agga.io', position: 'Data Analyst', status: 'Suspend' },
-  
-  { id: 'AF-1109', name: 'Jungkook', email: 'jungkook@agga.io', position: 'System Admin', status: 'Active' },
-  { id: 'AF-1078', name: 'Jhope', email: 'jhope@agga.io', position: 'Security Analyst', status: 'Suspend' },
-  { id: 'AF-1276', name: 'TaeTae', email: 'taetae@agga.io', position: 'Project Manager', status: 'Suspend' },
-  { id: 'AF-1034', name: 'Rapmon', email: 'rapmon@agga.io', position: 'Software Engineer', status: 'Active' },
-  { id: 'AF-0056', name: 'Jinnnie', email: 'jinnnie@agga.io', position: 'Product Manager', status: 'Suspend' },
-  
-  { id: 'AF-1167', name: 'VeVe', email: 'veve@agga.io', position: 'System Admin', status: 'Active' },
-  { id: 'AF-2026', name: 'Asia', email: 'asia@agga.io', position: 'Security Analyst', status: 'Active' },
-  { id: 'AF-0980', name: 'Mainn', email: 'mainn@agga.io', position: 'Project Manager', status: 'Suspend' },
-  { id: 'AF-5813', name: 'Babe', email: 'babe@agga.io', position: 'Software Engineer', status: 'Active' },
-  { id: 'AF-1265', name: 'Wendy', email: 'wendy@agga.io', position: 'System Operator', status: 'Active' },
-  
-  { id: 'AF-0078', name: 'Bada', email: 'bada@agga.io', position: 'Product Owner', status: 'Active' },
-  { id: 'AF-1098', name: 'Reyhi', email: 'reyhi@agga.io', position: 'Java Developer', status: 'Suspend' },
-  { id: 'AF-2678', name: 'Honeyj', email: 'honeyj@agga.io', position: 'Product Manager', status: 'Active' },
-  { id: 'AF-0386', name: 'Kyoka', email: 'kyoka@agga.io', position: 'Tester', status: 'Suspend' },
-  { id: 'AF-0021', name: 'Uwa', email: 'uwa@agga.io', position: 'Data Analyst', status: 'Suspend' },
-
-  { id: 'AF-3487', name: 'Aung', email: 'aung@agga.io', position: 'System Admin', status: 'Active' },
-  { id: 'AF-2310', name: 'Kaung', email: 'kaung@agga.io', position: 'Security Analyst', status: 'Suspend' },
-  { id: 'AF-7654', name: 'Sett', email: 'sett@agga.io', position: 'Project Manager', status: 'Suspend' },
-  { id: 'AF-2015', name: 'Khaing', email: 'khaing@agga.io', position: 'Software Engineer', status: 'Active' },
-  { id: 'AF-7235', name: 'Myat', email: 'myat@agga.io', position: 'Product Manager', status: 'Suspend' },
-];
 
 const pageSize = 5;
 
@@ -84,14 +41,14 @@ const UserManagement: React.FC = () => {
   const handleDeleteTrigger = (id: string) => {
     setDeleteModal({
       isOpen: true,
-      targetId: id,
+      targetId: id
     });
   };
 
   const handleConfirmDelete = () => {
     if (deleteModal.targetId) {
       setData((prev) =>
-        prev.filter((item) => item.id !== deleteModal.targetId)
+        prev.filter((item) => item.employeeId !== deleteModal.targetId)
       );
 
       setDeleteModal({
@@ -123,7 +80,7 @@ const UserManagement: React.FC = () => {
   return (
     emp.name.toLowerCase().includes(search.toLowerCase()) ||
     emp.email.toLowerCase().includes(search.toLowerCase()) ||
-    emp.id.toLowerCase().includes(search.toLowerCase()) ||
+    emp.employeeId.toLowerCase().includes(search.toLowerCase()) ||
     emp.status.toLowerCase().includes(search.toLowerCase())
   );
 });
@@ -183,12 +140,13 @@ const UserManagement: React.FC = () => {
     <option value="">All Status</option>
     <option value="Active">Active</option>
     <option value="Suspend">Suspend</option>
+    <option value="Resign">Resign</option>
   </select>
 </div>
       </div>
 
       {/* TABLE */}
-      <div className="overflow-hidden border border-slate-100 bg-white">
+      <div className="overflow-hidden rounded-xl border-slate-100 bg-white">
         <table className="w-full text-left">
 
           <thead>
@@ -204,9 +162,13 @@ const UserManagement: React.FC = () => {
 
           <tbody className="divide-y divide-slate-300">
             {currentPaginatedData.map((emp) => (
-              <tr key={emp.id} className="hover:bg-gray-100">
+              <tr
+                key={emp.employeeId}
+                className="hover:bg-gray-100 cursor-pointer"
+                onClick={() => navigate(`/employee/${emp.employeeId}`)}
+              >
 
-                <td className="px-6 py-5 text-sm">{emp.id}</td>
+                <td className="px-6 py-5 text-sm">{emp.employeeId}</td>
                 <td className="px-6 py-5 text-sm font-medium">{emp.name}</td>
                 <td className="px-6 py-5 text-sm">{emp.email}</td>
 
@@ -220,8 +182,11 @@ const UserManagement: React.FC = () => {
                   <span className={`text-xs px-3 py-1 rounded-full ${
                     emp.status === 'Active'
                       ? 'bg-green-100 text-green-700'
-                      : 'bg-orange-100 text-orange-700'
-                  }`}>
+                      : emp.status === 'Suspend'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-yellow-100 text-yellow-700'   
+                      
+                      }`}>
                     {emp.status}
                   </span>
                 </td>
@@ -230,15 +195,13 @@ const UserManagement: React.FC = () => {
                 <td className="px-6 py-5 text-right">
                   <div className="flex justify-end gap-2">
 
-                    <button
-                      onClick={() => handleEdit(emp)}
-                      className="text-blue-500 hover:text-blue-700"
-                    >
-                      <FaEdit size={18} />
-                    </button>
+                    <UserManagementEdit onEdit={() => handleEdit(emp)} />
 
                     <button
-                      onClick={() => handleDeleteTrigger(emp.id)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDeleteTrigger(emp.employeeId);
+                      }}
                       className="text-red-500 hover:text-red-700"
                     >
                       <RiDeleteBin4Fill size={18} />
