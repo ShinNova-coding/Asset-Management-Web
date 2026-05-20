@@ -17,6 +17,10 @@ import UserManagement from "@/pages/UserManagement/UserManagementPage";
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee";
 import AddNewAsset from "@/pages/Inventory/AddNewAsset"
 import { InventoryDetail } from "@/components/features/Inventory/InventoryDetail"
+import ViewDetailsForm from "@/pages/UserManagement/ViewDetailsForm";
+
+
+  
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -72,6 +76,11 @@ export const router = createBrowserRouter([
     path: "/add-employee",
     element: <AddEmployeeForm />,
   },
+  {
+    path:"/employee-dates",
+     element: <ViewDetailsForm />,
+  }
+
     ],
   },
 ])
