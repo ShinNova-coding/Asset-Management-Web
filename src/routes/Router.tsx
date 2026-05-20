@@ -16,8 +16,8 @@ import UserManagement from "@/pages/UserManagement/UserManagementPage";
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee";
 import AddNewAsset from "@/pages/Inventory/AddNewAsset"
 import { InventoryDetail } from "@/components/features/Inventory/InventoryDetail"
-import ViewDetailsForm from "@/pages/UserManagement/ViewDetailsForm";
-
+import EmployeeListPage from "@/pages/UserManagement/EmployeeListPage";
+import EmployeeDetailsPage from "@/pages/UserManagement/EmployeeDetailsPage";
 
   
 export const router = createBrowserRouter([
@@ -72,9 +72,14 @@ export const router = createBrowserRouter([
     element: <AddEmployeeForm />,
   },
   {
-    path:"/employee-dates",
-     element: <ViewDetailsForm />,
-  }
+    path: "/",
+    element: <EmployeeListPage />,
+  },
+  {
+    path: "/employee/:employeeId",
+    element: <EmployeeDetailsPage />,
+  },
+  
 
     ],
   },

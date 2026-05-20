@@ -34,7 +34,7 @@ const AddEmployeeForm: React.FC = () => {
           className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline"
         >
           <ArrowLeft size={16} className="mr-2" />
-          Back to Employee
+          Back
         </Link>
 
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
