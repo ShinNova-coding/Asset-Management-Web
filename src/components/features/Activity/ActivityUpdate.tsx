@@ -12,16 +12,14 @@ const ActivityUpdate = () => {
   const editItem = location.state?.editItem;
   const isEditMode = !!editItem;
 
-  // Track state keys aligned perfectly with the input HTML fields below
   const [formData, setFormData] = useState({
     id: '',
-    name:'',
-    status: '',
+    name: '',
+    action: '', // Aligns with TanStack columns key
     assigndate: '',
     returndate: '',
     actions: '',
     category: '',
-   
     shopName: '',
     phone: '',
     address: ''
@@ -39,18 +37,16 @@ const ActivityUpdate = () => {
     return ""; 
   };
 
- 
   useEffect(() => {
     if (editItem) {
       setFormData({
         id: editItem.id || '',
-        name:editItem.name || '',
-        status: editItem.action || '',
+        name: editItem.name || '',
+        action: editItem.action || '',
         assigndate: formatToInputDate(editItem.assigndate),
         returndate: formatToInputDate(editItem.returndate),
         actions: editItem.actions || '',
         category: editItem.category || '',
-       
         shopName: editItem.shopName || '',
         phone: editItem.phone || '',
         address: editItem.address || ''
@@ -116,12 +112,17 @@ const ActivityUpdate = () => {
     e.preventDefault();
     
     const payload = {
-      assetId: editItem?.id || undefined, 
+      ...editItem, 
       ...formData,
-      image: selectedImage || imagePreview
+      // Fallback fallback sets random id tags for brand new registrations to prevent broken table loops
+      id: editItem?.id || formData.id || `AST-${Math.floor(1000 + Math.random() * 9000)}`,
+      image: imagePreview
     };
 
     console.log("Submitting asset dataset payload:", payload);
+    
+    // Absolute route back with updatedItem target signature
+    navigate("/activity", { state: { updatedItem: payload } });
   };
 
   return (
@@ -154,13 +155,12 @@ const ActivityUpdate = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Status</label>
+                    <label className="text-xs font-semibold text-slate-600">Action/Status</label>
                     <input 
                       type="text" 
-                      name="status"
-                      value={formData.status}
+                      name="action"
+                      value={formData.action}
                       onChange={handleInputChange}
                       placeholder="e.g. Active, Pending, Returned" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
@@ -188,7 +188,6 @@ const ActivityUpdate = () => {
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  {/* FIXED: Renamed keys to match target data model metrics (assigndate / returndate) */}
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Assign Date</label>
                     <input 
@@ -206,17 +205,6 @@ const ActivityUpdate = () => {
                       name="returndate"
                       value={formData.returndate}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                    />
-                  </div>
-                  <div className="space-y-1 col-span-2">
-                    <label className="text-xs font-semibold text-slate-600">Warranty Expiration</label>
-                    <input 
-                      type="text" 
-                      name="warranty"
-                      value={formData.warranty}
-                      onChange={handleInputChange}
-                      placeholder="2 years" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
@@ -269,7 +257,7 @@ const ActivityUpdate = () => {
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                 <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
                 <button type="submit" className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
-                  {isEditMode ? "Update Asset" : "Save Asset"}
+                  {isEditMode ? "Update" : "Save"}
                 </button>
               </div>
             </form>

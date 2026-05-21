@@ -12,6 +12,7 @@ import InventoryPage from "@/pages/Inventory/InventoryPage"
 import UserManagementPage from "@/pages/UserManagement/UserManagementPage"
 import ActivityPage from "@/pages/Activity/ActivityPage"
 import ActivityUpdate from "@/components/features/Activity/ActivityUpdate"
+import ActivityDetail from "@/components/features/Activity/ActivityDetail"
 import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
 import UserManagement from "@/pages/UserManagement/UserManagementPage";
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee";
@@ -19,6 +20,9 @@ import AddNewAsset from "@/pages/Inventory/AddNewAsset"
 import { InventoryDetail } from "@/components/features/Inventory/InventoryDetail"
 import EmployeeListPage from "@/pages/UserManagement/EmployeeListPage";
 import EmployeeDetailsPage from "@/pages/UserManagement/EmployeeDetailsPage";
+
+import ViewDetailsForm from "@/pages/UserManagement/ViewDetailsForm";
+
 
   
 export const router = createBrowserRouter([
@@ -62,6 +66,10 @@ export const router = createBrowserRouter([
       {
         path:"activity/add",
         element:<ActivityUpdate/>,
+      },
+      {
+        path:"activity/:id",
+        element:<ActivityDetail/>,
       },
       
       {

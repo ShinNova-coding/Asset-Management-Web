@@ -48,7 +48,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     if (cachedData) {
       setData(JSON.parse(cachedData));
     } else {
-      // Fallback fallback: If local cache storage is fresh, seed it with the hardcoded layout entries
+      
       localStorage.setItem("inventory_data", JSON.stringify(initialData));
       setData(initialData);
     }
@@ -58,16 +58,16 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     setDeleteModal({ isOpen: true, targetId: id })
   }
 
-  // Updated to persistently remove the element from state AND browser storage cache
+  
   const handleConfirmDelete = () => {
     if (deleteModal.targetId) {
       const updatedList = data.filter(
         (item) => item.asset !== deleteModal.targetId && item.id !== deleteModal.targetId
       );
       
-      // Update running memory state 
+      
       setData(updatedList);
-      // Write mirror down to storage layer
+      
       localStorage.setItem("inventory_data", JSON.stringify(updatedList));
       
       setDeleteModal({ isOpen: false, targetId: null })
@@ -109,16 +109,32 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   const currentPage = table.getState().pagination.pageIndex
 
   return (
-    <div className="w-full space-y-4 p-4 relative">
+    <div className="w-full space-y-4 p-3 relative">
       
-      <div className="flex w-full items-center justify-between gap-4">
-        <InventorySearch value={globalFilter} onChange={setGlobalFilter} />
-        <InventoryFilter table={table} />
-      </div>
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full">
+
+  
+  <div className="flex-1">
+    <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 overflow-hidden">
+      <InventorySearch
+        value={globalFilter}
+        onChange={setGlobalFilter}
+      />
+    </div>
+  </div>
+
+  
+  <div className="w-full md:w-[160px] lg:w-[100px]">
+    <div className="rounded-xl bg-white duration-200 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 px-2 py-2">
+      <InventoryFilter table={table} />
+    </div>
+  </div>
+
+</div>
 
       <div className="rounded-md border-slate-400 overflow-hidden">
         <Table>
-          <TableHeader className="bg-blue-300">
+          <TableHeader className="bg-blue-400">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => (

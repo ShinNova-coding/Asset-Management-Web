@@ -30,7 +30,7 @@ export function InventoryFilter<TData>({ table }: InventoryFilterProps<TData>) {
         <SelectTrigger>
           <SelectValue placeholder="Select Status" />
         </SelectTrigger>
-        <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-md z-5">
+        <SelectContent className="bg-white">
           <SelectItem value="all">All Status</SelectItem>
           <SelectItem value="available">Available</SelectItem>
           <SelectItem value="Returned">Returned</SelectItem>
