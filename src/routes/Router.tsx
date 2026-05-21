@@ -21,7 +21,7 @@ import { InventoryDetail } from "@/components/features/Inventory/InventoryDetail
 import EmployeeListPage from "@/pages/UserManagement/EmployeeListPage";
 import EmployeeDetailsPage from "@/pages/UserManagement/EmployeeDetailsPage";
 
-import ViewDetailsForm from "@/pages/UserManagement/ViewDetailsForm";
+
 
 
   
