@@ -69,7 +69,7 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
   }, [showToast])
 
   const handleEdit = (item: any) => {
-    navigate("/inventory/add", { state: { editItem: item } })
+    navigate("/maintenance/add", { state: { editItem: item } })
   }
 
   const table = useReactTable({
@@ -128,7 +128,7 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
                     if (target.closest('button') || target.closest('svg') || target.closest('a')) {
                       return; 
                     }
-                    navigate(`/inventory/${row.original.id}`, { 
+                    navigate(`/maintenance/${row.original.id}`, { 
                       state: { item: row.original } 
                     })
                   }}
@@ -222,7 +222,7 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-slate-900">Are you absolutely sure?</h3>
               <p className="text-sm text-slate-500">
-                This action cannot be undone. This item will be permanently removed from your inventory dataset records.
+                {/* Are you sure you want to delete this employe */}
               </p>
             </div>
             <div className="flex gap-3 pt-2">

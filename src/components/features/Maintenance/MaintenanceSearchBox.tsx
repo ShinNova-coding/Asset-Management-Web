@@ -8,7 +8,7 @@ export function MaintenanceSearch({ value, onChange }: { value: string, onChange
       <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
       <Input 
         className="pl-10 w-full" 
-        placeholder="Search products..." 
+        placeholder="Search by name, employee ID, or category..." 
         value={value} 
         onChange={(e) => onChange(e.target.value)} 
       />

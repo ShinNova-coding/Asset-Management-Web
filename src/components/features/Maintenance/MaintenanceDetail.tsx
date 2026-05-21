@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { FiArrowLeft, FiCalendar, FiClock, FiCheckCircle, FiAlertCircle, FiRefreshCw } from "react-icons/fi"
 
-export function InventoryDetail() {
+export function MaintenanceDetail() {
   const location = useLocation()
   const navigate = useNavigate()
   
@@ -16,7 +16,7 @@ export function InventoryDetail() {
       <div className="flex h-screen flex-col items-center justify-center space-y-4">
         <p className="text-slate-500">No asset data found.</p>
        
-        <Button onClick={() => navigate("/inventory")}>Back to Inventory</Button>
+        <Button onClick={() => navigate("/Maintenance")}>Back to Maintenance</Button>
       </div>
     )
   }
@@ -24,12 +24,12 @@ export function InventoryDetail() {
   const getStatusBadge = (status: string) => {
     const base = "flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full w-fit "
     switch (status?.toLowerCase()) {
-      case "available":
-        return <span className={base + "bg-green-100 text-green-700"}><FiCheckCircle /> Available</span>
-      case "returned":
-        return <span className={base + "bg-blue-100 text-blue-700"}><FiRefreshCw /> Returned</span>
-      case "maintenance":
-        return <span className={base + "bg-amber-100 text-amber-700"}><FiAlertCircle /> Maintenance</span>
+      case "active":
+        return <span className={base + "bg-green-100 text-green-700"}><FiCheckCircle /> Active</span>
+      case "return":
+        return <span className={base + "bg-blue-100 text-blue-700"}><FiRefreshCw /> Return</span>
+      case "request":
+        return <span className={base + "bg-amber-100 text-amber-700"}><FiAlertCircle /> Request</span>
       default:
         return <span className={base + "bg-slate-100 text-slate-700"}>{status}</span>
     }
@@ -46,7 +46,7 @@ export function InventoryDetail() {
         className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
       >
         <FiArrowLeft size={16} />
-        Back to Inventory List
+        Back
       </Button>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
