@@ -131,7 +131,7 @@ export default function ActivityDetail() {
 
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
                  
-                  {activityItem.category || "N/A"}
+                  {activityItem.category || ""}
                 </span>
               </div>
                <div>

@@ -8,11 +8,10 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useNavigate } from "react-router"
+import { Link, useNavigate } from "react-router"
 import { LuEyeClosed, LuEye } from "react-icons/lu";
 import { useState } from "react"
 import { BsBoxFill } from "react-icons/bs"
-
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -93,12 +92,12 @@ const Login = () => {
 >
                 Login
             </Button>
-          <a
-            href="#"
+          <Link
+            to="/forget-password"
             className="mx-auto inline-block text-sm underline-offset-4 text-center hover:underline text-blue-500 font-medium"
           >
             Forgot your password?
-          </a>
+          </Link>
         </CardFooter>
         
       </Card>

@@ -52,11 +52,14 @@ const AddNewAsset = () => {
     }
   }, [editItem]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
+  const handleInputChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+) => {
+  setFormData({
+    ...formData,
+    [e.target.name]: e.target.value,
+  });
+};
   const goBack = () => {
     navigate("/inventory"); 
   };
@@ -170,10 +173,10 @@ const AddNewAsset = () => {
           image: finalizedImageString
         };
 
-        currentInventory.unshift(newAssetPayload); // Place at top of dashboard arrays
+        currentInventory.unshift(newAssetPayload); 
       }
 
-      // 3. Force-write back to state stack and bounce back to list view
+      
       localStorage.setItem("inventory_data", JSON.stringify(currentInventory));
       navigate("/inventory");
 
@@ -227,7 +230,28 @@ const AddNewAsset = () => {
                   </div>
                   
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Asset Category</label>
+  <label className="text-xs font-semibold text-slate-600">
+    Asset Category
+  </label>
+
+  <select
+    name="category"
+    value={formData.category}
+    onChange={handleInputChange}
+    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+  >
+    <option value="">Select Category</option>
+    <option value="Laptops">Laptops</option>
+    <option value="Desktops">Desktops</option>
+    <option value="Printers">Printers</option>
+    <option value="Monitors">Monitors</option>
+    <option value="Networking">Networking</option>
+    <option value="Accessories">Accessories</option>
+  </select>
+</div>
+</div>
+                   <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-600">Asset Type</label>
                     <input 
                       type="text" 
                       name="category"
@@ -237,7 +261,7 @@ const AddNewAsset = () => {
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
-                </div>
+                
               </section>
 
               <section className="space-y-4">

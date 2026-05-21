@@ -98,13 +98,13 @@ export function InventoryDetail() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
               <div className="space-y-1">
-                <span className="text-xs text-slate-400 block">System Category</span>
+                <span className="text-xs text-slate-400 block">Device</span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
-                  <FiTag className="text-slate-400" /> {assetItem.category || "Hardware Appliance"}
+                  <FiTag className="text-slate-400" /> {assetItem.category || "Laptops"}
                 </span>
               </div>
               <div className="space-y-1">
-                <span className="text-xs text-slate-400 block">Primary Identifier ID</span>
+                <span className="text-xs text-slate-400 block">Device ID</span>
                 <span className="text-sm font-mono font-medium text-slate-800">
                   {assetItem.asset}
                 </span>
@@ -124,7 +124,7 @@ export function InventoryDetail() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiCalendar size={18} className="text-blue-600" />
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Procurement & Lifespan</h2>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Procurement</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
@@ -135,7 +135,7 @@ export function InventoryDetail() {
                 </span>
               </div>
               <div className="space-y-1">
-                <span className="text-xs text-slate-400 block">Warranty Period Active Coverage</span>
+                <span className="text-xs text-slate-400 block">Warranty </span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
                   <FiShield className="text-slate-400" /> {assetItem.warranty || "No active arrangement logs found"}
                 </span>
@@ -147,26 +147,26 @@ export function InventoryDetail() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiBriefcase size={18} className="text-blue-600" />
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Software House Provider Accounts</h2>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Software House</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
               <div className="col-span-1 md:col-span-2 space-y-1">
-                <span className="text-xs text-slate-400 block">Vendor Organization Entity Name</span>
+                <span className="text-xs text-slate-400 block">Software House Name</span>
                 <span className="text-sm font-medium text-slate-800">
                   {assetItem.shopName || "Insight Enterprise Global Inc."}
                 </span>
               </div>
               <div className="space-y-1">
-                <span className="text-xs text-slate-400 block">Support Desk Phone Line</span>
+                <span className="text-xs text-slate-400 block">Phone Number</span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
-                  <FiPhone className="text-slate-400" /> {assetItem.phone || "+1 (800) 555-0192"}
+                  <FiPhone className="text-slate-400" /> {assetItem.phone || "+95 9*********"}
                 </span>
               </div>
               <div className="space-y-1">
-                <span className="text-xs text-slate-400 block">Corporate Headquarter Location Address</span>
+                <span className="text-xs text-slate-400 block"> Location Address</span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
-                  <FiMapPin className="text-slate-400" /> {assetItem.address || "Tempe, Arizona HQ Branch"}
+                  <FiMapPin className="text-slate-400" /> {assetItem.address || "Yangon"}
                 </span>
               </div>
             </div>

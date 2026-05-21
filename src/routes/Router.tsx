@@ -3,7 +3,8 @@
 import { createBrowserRouter } from "react-router-dom"
 
 import Login from "@/pages/Auth/Login"
-
+import ForgetPassword from "@/pages/Auth/ForgetPassword"
+import ResetPassword from "@/pages/Auth/ResetPassword"
 import Layout from "@/layouts/Layout"
 
 import DashboardPage from "@/pages/Dashboard/DashboardPage"
@@ -13,7 +14,7 @@ import UserManagementPage from "@/pages/UserManagement/UserManagementPage"
 import ActivityPage from "@/pages/Activity/ActivityPage"
 import ActivityUpdate from "@/components/features/Activity/ActivityUpdate"
 import ActivityDetail from "@/components/features/Activity/ActivityDetail"
-import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
+
 import UserManagement from "@/pages/UserManagement/UserManagementPage";
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee";
 import AddNewAsset from "@/pages/Inventory/AddNewAsset"
@@ -30,6 +31,15 @@ export const router = createBrowserRouter([
     path: "/",
     element: <Login />,
   },
+  {
+    path:"/forget-password",
+    element:<ForgetPassword/>,
+ },
+{
+    path:"/reset-password",
+    element:<ResetPassword/>,
+
+},
 
   {
     path: "/",
@@ -72,10 +82,7 @@ export const router = createBrowserRouter([
         element:<ActivityDetail/>,
       },
       
-      {
-        path: "maintenance",
-        element: <MaintenancePage />,
-      },
+      
     {
     path: "/employees",
     element: <UserManagement />,
@@ -92,8 +99,7 @@ export const router = createBrowserRouter([
     path: "/employee/:employeeId",
     element: <EmployeeDetailsPage />,
   },
-  
-
+ 
     ],
   },
 ])
