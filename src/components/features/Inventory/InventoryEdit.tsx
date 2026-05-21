@@ -10,7 +10,7 @@ export default function Edit({ onEdit }: EditProps) {
   return (
     <button 
       onClick={(e) => {
-        // Stops the click event from triggering the TableRow's onClick navigation handler
+        
         e.stopPropagation() 
         
         if (onEdit) onEdit()

@@ -1,5 +1,5 @@
-import { columns, } from "@/components/features/Inventory/InventoryColumns"
-import type { Inventory } from "../Maintenance/MaintenanceColumns"
+import { columns} from "@/components/features/Inventory/InventoryColumns"
+import type { Inventory } from "../Inventory/InventoryColumns"
 import { InventoryTable } from "./InventoryTable" 
 import { InventoryAddNewAsset } from "./InventoryAddNewAsset"
 

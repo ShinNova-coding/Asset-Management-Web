@@ -70,7 +70,7 @@ const getActivityStyle = (activity: ActivityType) => {
 const RecentActivities: React.FC = () => {
   return (
     <div className="p-6">
-      <div className="bg-white shadow-sm rounded-lg border border-slate-400">
+      <div className="bg-white shadow-sm rounded-lg border border-slate-200">
 
         {/* Header */}
         <div className="flex justify-between items-center px-4 py-3 border-b">
@@ -82,11 +82,11 @@ const RecentActivities: React.FC = () => {
 
         {/* Table */}
         <table className="w-full text-sm">
-          <thead className="bg-blue-400 text-white border-amber-100 text-left">
+          <thead className="bg-blue-400 text-white border-amber-100 text-left border-slate-50">
             <tr>
               <th className="px-4 py-2 font-medium">Username</th>
               <th className="px-4 py-2 font-medium">Category</th> 
-              <th className="px-4 py-2 font-medium">Inventory</th>
+              <th className="px-4 py-2 font-medium">Name</th>
               <th className="px-4 py-2 font-medium">Activity</th>
               <th className="px-4 py-2 font-medium">Date</th>
             </tr>
@@ -96,7 +96,7 @@ const RecentActivities: React.FC = () => {
             {activities.map((item) => (
               <tr
                 key={item.id}
-                className="border-b last:border-none hover:bg-gray-100 transition-colors"
+                className="border-b last:border-none hover:bg-gray-100 transition-colors border-slate-300"
               >
                 <td className="px-4 py-3 flex items-center gap-2">
                   {/* <span className="w-2 h-2 bg-gray-800 rounded-full"></span> */}

@@ -13,7 +13,7 @@ const defaultMockData: Inventory[] = [
   { asset: "AF-LP-1014", name: "HP Pavilion", purchase: "Oct 12 2023", warranty: "1 years", status: "Maintenance" },
   { asset: "AF-LP-1015", name: "MacBook Air 13", purchase: "Oct 12 2023", warranty: "3 years", status: "Available" },
   { asset: "AF-LP-1016", name: "Msi Gaming", purchase: "Oct 12 2023", warranty: "6 months", status: "Available" },
-  { asset: "AF-LP-1011_2", assetIdAlt: "AF-LP-1011", name: "MacBook Pro M2", purchase: "Oct 12 2023", warranty: "2 years", status: "Assigned" },
+  { asset: "AF-LP-1011_2", name: "MacBook Pro M2", purchase: "Oct 12 2023", warranty: "2 years", status: "Assigned" },
   { asset: "AF-LP-1012_2", name: "RedmiBook", purchase: "Oct 12 2022", warranty: "Expired", status: "Maintenance" },
   { asset: "AF-LP-1013_2", name: "Msi Stealth", purchase: "Oct 12 2023", warranty: "6 months", status: "Assigned" },
   { asset: "AF-LP-1014_2", name: "HP Pavilion", purchase: "Oct 12 2023", warranty: "1 years", status: "Maintenance" },
