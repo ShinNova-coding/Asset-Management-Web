@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useNavigate } from "react-router-dom" 
-import { FiChevronLeft, FiChevronRight, FiTrash2, FiAlertCircle, FiCheckCircle, FiX } from "react-icons/fi" 
+import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiX } from "react-icons/fi"
 import {
   flexRender,
   getCoreRowModel,
@@ -21,70 +20,127 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-
+import type { Maintenance } from "@/data/maintenance"
 import { columns } from "./MaintenanceColumns"
 import { MaintenanceSearch } from "./MaintenanceSearchBox"
+import { MaintenanceRemark } from "./MaintenanceRemark"
+import { MaintenanceDetailModal } from "./MaintenanceDetailModal"
 
+const durationOptions = [
+  { value: "1-hour", label: "1 hour" },
+  { value: "2-hours", label: "2 hours" },
+  { value: "half-day", label: "Half day" },
+  { value: "full-day", label: "Full day" },
+]
 
 interface MaintenanceTableProps {
-  data: any[]
+  data: Maintenance[]
 }
 
 export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
-  const navigate = useNavigate() 
-  const [data, setData] = React.useState(initialData)
+  const [data, setData] = React.useState<Maintenance[]>(initialData)
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [toastMessage, setToastMessage] = React.useState<string | null>(null)
+  const [selectedItem, setSelectedItem] = React.useState<Maintenance | null>(null)
+  const [dialogMode, setDialogMode] = React.useState<"remark" | "detail" | null>(null)
+  const [remarkText, setRemarkText] = React.useState("")
+  const [vendorName, setVendorName] = React.useState("")
+  const [estimatedCost, setEstimatedCost] = React.useState("0.00")
+  const [duration, setDuration] = React.useState("")
+  const [laptopType, setLaptopType] = React.useState("")
 
-  
-  const [deleteModal, setDeleteModal] = React.useState<{ isOpen: boolean; targetId: string | null }>({
-    isOpen: false,
-    targetId: null,
-  })
-  const [showToast, setShowToast] = React.useState(false)
+  const handleRowAction = (item: Maintenance) => {
+    setSelectedItem(item)
 
- 
-  const handleDeleteTrigger = (id: string) => {
-    setDeleteModal({ isOpen: true, targetId: id })
-  }
+    if (item.stage === "pending") {
+      setRemarkText(item.remark ?? "")
+      setDialogMode("remark")
+      return
+    }
 
-  
-  const handleConfirmDelete = () => {
-    if (deleteModal.targetId) {
-      
-      setData((prev) => prev.filter((item) => item.asset !== deleteModal.targetId && item.id !== deleteModal.targetId))
-      setDeleteModal({ isOpen: false, targetId: null })
-      
-      
-      setShowToast(true)
+    if (item.stage === "approved") {
+      setVendorName(item.vendorName ?? "")
+      setEstimatedCost(item.estimatedCost ?? "0.00")
+      setDuration(item.duration ?? "")
+      setLaptopType(item.laptopType ?? item.category ?? "")
+      setDialogMode("detail")
+      return
     }
   }
 
-  
+  const closeDialog = () => {
+    setDialogMode(null)
+    setSelectedItem(null)
+    setRemarkText("")
+    setVendorName("")
+    setEstimatedCost("0.00")
+    setDuration("")
+    setLaptopType("")
+  }
+
+  const submitRemark = () => {
+    if (!selectedItem) return
+
+    setData((prev) =>
+      prev.map((row) =>
+        row.employeeId === selectedItem.employeeId
+          ? {
+              ...row,
+              stage: "approved",
+              status: "In Progress",
+              remark: remarkText || "No remark provided",
+            }
+          : row
+      )
+    )
+
+    setToastMessage(`${selectedItem.name} approved and moved to in progress.`)
+    closeDialog()
+  }
+
+  const submitMaintenanceDetail = () => {
+    if (!selectedItem) return
+
+    setData((prev) =>
+      prev.map((row) =>
+        row.employeeId === selectedItem.employeeId
+          ? {
+              ...row,
+              stage: "completed",
+              status: "Complete",
+              vendorName: vendorName || "Unknown vendor",
+              estimatedCost,
+              duration: duration || "Not specified",
+              laptopType: laptopType || row.category,
+            }
+          : row
+      )
+    )
+
+    setToastMessage(`${selectedItem.name} maintenance completed.`)
+    closeDialog()
+  }
+
   React.useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => setShowToast(false), 3000)
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(null), 3000)
       return () => clearTimeout(timer)
     }
-  }, [showToast])
-
-  const handleEdit = (item: any) => {
-    navigate("/maintenance/add", { state: { editItem: item } })
-  }
+  }, [toastMessage])
 
   const table = useReactTable({
     data,
     columns,
-    state: { 
+    state: {
       globalFilter,
-      columnFilters, 
+      columnFilters,
     },
     meta: {
-      deleteRow: handleDeleteTrigger,
-      editRow: handleEdit, 
+      handleRowAction,
     },
     onGlobalFilterChange: setGlobalFilter,
-    onColumnFiltersChange: setColumnFilters, 
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -96,13 +152,10 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
 
   return (
     <div className="w-full space-y-4 p-4 relative">
-      
       <div className="flex w-full items-center justify-between gap-4">
         <MaintenanceSearch value={globalFilter} onChange={setGlobalFilter} />
-      
       </div>
 
-     
       <div className="rounded-md border-slate-400 overflow-hidden">
         <Table>
           <TableHeader className="bg-blue-300">
@@ -116,22 +169,13 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
               </TableRow>
             ))}
           </TableHeader>
-          
+
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow 
-                  key={row.id} 
-                  className="transition-colors hover:bg-slate-50 border-slate-300 cursor-pointer"
-                  onClick={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (target.closest('button') || target.closest('svg') || target.closest('a')) {
-                      return; 
-                    }
-                    navigate(`/maintenance/${row.original.id}`, { 
-                      state: { item: row.original } 
-                    })
-                  }}
+                <TableRow
+                  key={row.id}
+                  className="transition-colors hover:bg-slate-50 border-slate-300"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-3">
@@ -151,16 +195,12 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
         </Table>
       </div>
 
-     
       <div className="flex justify-end items-center space-x-2 py-4">
         <Button
           variant="outline"
           size="sm"
           className="flex items-center gap-1 disabled:opacity-50"
-          onClick={(e) => {
-            e.stopPropagation() 
-            table.previousPage()
-          }}
+          onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
           <FiChevronLeft size={16} />
@@ -183,10 +223,7 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
                       ? "bg-blue-300 hover:bg-blue-400 text-white border-none"
                       : "bg-slate-200"
                   }`}
-                  onClick={(e) => {
-                    e.stopPropagation() 
-                    table.setPageIndex(index)
-                  }}
+                  onClick={() => table.setPageIndex(index)}
                 >
                   {index + 1}
                 </Button>
@@ -203,58 +240,23 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
           variant="outline"
           size="sm"
           className="flex items-center gap-1 disabled:opacity-50"
-          onClick={(e) => {
-            e.stopPropagation() 
-            table.nextPage()
-          }}
+          onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
           <FiChevronRight size={16} />
         </Button>
       </div>
 
-      {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4 border border-slate-100 text-center space-y-4 animate-scale-up">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-50 text-red-600">
-              <FiAlertCircle size={24} />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-slate-900">Are you absolutely sure?</h3>
-              <p className="text-sm text-slate-500">
-                {/* Are you sure you want to delete this employe */}
-              </p>
-            </div>
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setDeleteModal({ isOpen: false, targetId: null })}
-                className="w-full px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmDelete}
-                className="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showToast && (
+      {toastMessage && (
         <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-800 transition-all duration-300 transform translate-x-0 max-w-md animate-slide-in">
           <FiCheckCircle className="text-green-400 shrink-0" size={20} />
           <div className="flex-1">
-            <p className="text-sm font-semibold">Delete Successful</p>
-            <p className="text-xs text-slate-400">The requested asset data records were updated safely.</p>
+            <p className="text-sm font-semibold">Action Updated</p>
+            <p className="text-xs text-slate-400">{toastMessage}</p>
           </div>
-          <button 
-            type="button" 
-            onClick={() => setShowToast(false)}
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
             className="text-slate-400 hover:text-white transition-colors p-1"
           >
             <FiX size={16} />
@@ -262,6 +264,30 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
         </div>
       )}
 
+      <MaintenanceRemark
+        open={dialogMode === "remark"}
+        item={selectedItem}
+        remarkText={remarkText}
+        onChange={setRemarkText}
+        onClose={closeDialog}
+        onSubmit={submitRemark}
+      />
+
+      <MaintenanceDetailModal
+        open={dialogMode === "detail"}
+        item={selectedItem}
+        vendorName={vendorName}
+        onVendorChange={setVendorName}
+        estimatedCost={estimatedCost}
+        onEstimatedChange={setEstimatedCost}
+        duration={duration}
+        onDurationChange={setDuration}
+        durationOptions={durationOptions}
+        laptopType={laptopType}
+        onLaptopChange={setLaptopType}
+        onClose={closeDialog}
+        onSubmit={submitMaintenanceDetail}
+      />
     </div>
   )
 }
