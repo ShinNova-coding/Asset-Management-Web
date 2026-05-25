@@ -1,8 +1,9 @@
+// InventoryTable.tsx
 "use client"
 
 import * as React from "react"
 import { useNavigate } from "react-router-dom" 
-import { FiChevronLeft, FiChevronRight, FiTrash2, FiAlertCircle, FiCheckCircle, FiX } from "react-icons/fi" 
+import { FiChevronLeft, FiChevronRight, FiAlertCircle, FiCheckCircle, FiX } from "react-icons/fi" 
 import {
   flexRender,
   getCoreRowModel,
@@ -32,7 +33,16 @@ interface InventoryTableProps {
 
 export function InventoryTable({ data: initialData }: InventoryTableProps) {
   const navigate = useNavigate() 
-  const [data, setData] = React.useState<any[]>([]) 
+  
+  // Instantly read data from localStorage on mount to pull latest edited statuses
+  const [data, setData] = React.useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      const cachedData = localStorage.getItem("inventory_data")
+      return cachedData ? JSON.parse(cachedData) : initialData
+    }
+    return initialData
+  }) 
+
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
 
@@ -42,34 +52,32 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   })
   const [showToast, setShowToast] = React.useState(false)
 
-  
+  // Force table internal data state to fetch updates when coming back from the form view
   React.useEffect(() => {
-    const cachedData = localStorage.getItem("inventory_data");
-    if (cachedData) {
-      setData(JSON.parse(cachedData));
-    } else {
-      
-      localStorage.setItem("inventory_data", JSON.stringify(initialData));
-      setData(initialData);
+    if (typeof window !== "undefined") {
+      const cachedData = localStorage.getItem("inventory_data")
+      if (cachedData) {
+        setData(JSON.parse(cachedData))
+      }
     }
-  }, [initialData]);
+  }, [initialData])
+
+  // Sync state data safely back to localStorage cache pipeline whenever mutated
+  React.useEffect(() => {
+    localStorage.setItem("inventory_data", JSON.stringify(data))
+  }, [data])
 
   const handleDeleteTrigger = (id: string) => {
     setDeleteModal({ isOpen: true, targetId: id })
   }
 
-  
   const handleConfirmDelete = () => {
     if (deleteModal.targetId) {
       const updatedList = data.filter(
         (item) => item.asset !== deleteModal.targetId && item.id !== deleteModal.targetId
-      );
+      )
       
-      
-      setData(updatedList);
-      
-      localStorage.setItem("inventory_data", JSON.stringify(updatedList));
-      
+      setData(updatedList)
       setDeleteModal({ isOpen: false, targetId: null })
       setShowToast(true)
     }
@@ -96,6 +104,15 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     meta: {
       deleteRow: handleDeleteTrigger,
       editRow: handleEdit, 
+      updateRowAction: (targetId: string, newAction: string) => {
+        setData((prevData) =>
+          prevData.map((item) =>
+            item.id === targetId || item.asset === targetId
+              ? { ...item, action: newAction }
+              : item
+          )
+        )
+      },
     },
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters, 
@@ -112,33 +129,33 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     <div className="w-full space-y-4 p-3 relative">
       
       <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full">
+        {/* Search Bar Block */}
+        <div className="flex-1">
+          <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 overflow-hidden">
+            <InventorySearch
+              value={globalFilter}
+              onChange={setGlobalFilter}
+            />
+          </div>
+        </div>
 
-  
-  <div className="flex-1">
-    <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 overflow-hidden">
-      <InventorySearch
-        value={globalFilter}
-        onChange={setGlobalFilter}
-      />
-    </div>
-  </div>
+        {/* Column Filters Selector Dropdown */}
+        {/* FIXED: Container ring handling removed so it doesn't fight Radix core mounting states */}
+        <div className="w-full md:w-[180px]">
+          <div className="bg-transparent p-0">
+            <InventoryFilter table={table} />
+          </div>
+        </div>
+      </div>
 
-  
-  <div className="w-full md:w-[160px] lg:w-[100px]">
-    <div className="rounded-xl bg-white duration-200 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 px-2 py-2">
-      <InventoryFilter table={table} />
-    </div>
-  </div>
-
-</div>
-
-      <div className="rounded-md border-slate-400 overflow-hidden">
+      {/* Main Table Interface Data View */}
+      <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-xs">
         <Table>
           <TableHeader className="bg-blue-400">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-white font-semibold py-3">
+                  <TableHead key={header.id} className="text-white font-semibold py-3 text-sm">
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
@@ -151,19 +168,20 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
               table.getRowModel().rows.map((row) => (
                 <TableRow 
                   key={row.id} 
-                  className="transition-colors hover:bg-slate-50 border-slate-300 cursor-pointer"
+                  className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer"
                   onClick={(e) => {
-                    const target = e.target as HTMLElement;
+                    const target = e.target as HTMLElement
+                    // Intercept action button clicks so they don't fire navigation by accident
                     if (target.closest('button') || target.closest('svg') || target.closest('a')) {
-                      return; 
+                      return 
                     }
-                    navigate(`/inventory/${row.original.id}`, { 
+                    navigate(`/inventory/${row.original.id || row.original.asset}`, { 
                       state: { item: row.original } 
                     })
                   }}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3">
+                    <TableCell key={cell.id} className="py-3 text-slate-700 text-sm">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -171,7 +189,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-slate-500">
+                <TableCell colSpan={columns.length} className="h-24 text-center text-slate-400 text-sm">
                   No results found.
                 </TableCell>
               </TableRow>
@@ -180,11 +198,12 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </Table>
       </div>
 
-      <div className="flex justify-end items-center space-x-2 py-4">
+      {/* Pagination Controls */}
+      <div className="flex justify-end items-center space-x-2 py-2">
         <Button
           variant="outline"
           size="sm"
-          className="flex items-center gap-1 disabled:opacity-50"
+          className="flex items-center gap-1 disabled:opacity-40 p-2"
           onClick={(e) => {
             e.stopPropagation() 
             table.previousPage()
@@ -206,11 +225,11 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
                   key={index}
                   variant={currentPage === index ? "default" : "outline"}
                   size="sm"
-                  className={`disabled:opacity-50 ${
+                  className={
                     currentPage === index
-                      ? "bg-blue-300 hover:bg-blue-400 text-white border-none"
-                      : "bg-slate-200"
-                  }`}
+                      ? "bg-blue-300 hover:bg-blue-400 text-slate-800 font-semibold border-none"
+                      : "bg-slate-100 text-slate-700"
+                  }
                   onClick={(e) => {
                     e.stopPropagation() 
                     table.setPageIndex(index)
@@ -221,7 +240,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
               )
             }
             if (index === currentPage - 2 || index === currentPage + 2) {
-              return <span key={index} className="px-2 flex items-center text-gray-500">...</span>
+              return <span key={index} className="px-2 flex items-center text-slate-400 select-none text-sm">...</span>
             }
             return null
           })}
@@ -230,7 +249,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         <Button
           variant="outline"
           size="sm"
-          className="flex items-center gap-1 disabled:opacity-50"
+          className="flex items-center gap-1 disabled:opacity-40 p-2"
           onClick={(e) => {
             e.stopPropagation() 
             table.nextPage()
@@ -241,9 +260,10 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </Button>
       </div>
 
+      {/* Delete Confirmation Modal */}
       {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4 border border-slate-100 text-center space-y-4 animate-scale-up">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs">
+          <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4 border border-slate-100 text-center space-y-4">
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-50 text-red-600">
               <FiAlertCircle size={24} />
             </div>
@@ -273,8 +293,9 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </div>
       )}
 
+      {/* Toast System Alert Popup */}
       {showToast && (
-        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-800 transition-all duration-300 transform translate-x-0 max-w-md animate-slide-in">
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-800 transition-all duration-300 transform translate-x-0 max-w-md">
           <FiCheckCircle className="text-green-400 shrink-0" size={20} />
           <div className="flex-1">
             <p className="text-sm font-semibold">Delete Successful</p>

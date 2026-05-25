@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from "react-router-dom"; 
-import { ArrowLeft, Package, Settings, ImageIcon, Upload, X } from 'lucide-react';
+import { ArrowLeft, Package, Settings, ImageIcon, Upload, X, Cpu } from 'lucide-react';
 
 const AddNewAsset = () => {
   const navigate = useNavigate();
@@ -15,11 +15,15 @@ const AddNewAsset = () => {
   const [formData, setFormData] = useState({
     name: '',
     category: '',
+    model: '',
+    ram: '',
+    storage: '',
     purchaseDate: '',
     warranty: '',
     shopName: '',
     phone: '',
-    address: ''
+    address: '',
+    action: '' 
   });
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -38,12 +42,17 @@ const AddNewAsset = () => {
     if (editItem) {
       setFormData({
         name: editItem.name || '',
+        category: editItem.category || '',
+        model: editItem.model || '',
+        ram: editItem.ram || '',
+        storage: editItem.storage || '',
         purchaseDate: formatToInputDate(editItem.purchase || editItem.purchaseDate),
         warranty: editItem.warranty || '',
-        category: editItem.category || '',
         shopName: editItem.shopName || '',
         phone: editItem.phone || '',
-        address: editItem.address || ''
+        address: editItem.address || '',
+        // Pull either .action or fallback to .status when loading an asset to edit
+        action: editItem.action || editItem.status || ''
       });
 
       if (editItem.image) {
@@ -53,13 +62,14 @@ const AddNewAsset = () => {
   }, [editItem]);
 
   const handleInputChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-) => {
-  setFormData({
-    ...formData,
-    [e.target.name]: e.target.value,
-  });
-};
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   const goBack = () => {
     navigate("/inventory"); 
   };
@@ -105,7 +115,6 @@ const AddNewAsset = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Helper method converting local image memory files to raw base64 data URIs for global localStorage persistence
   const convertImageToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -115,7 +124,6 @@ const AddNewAsset = () => {
     });
   };
 
-  // Unified submission interceptor handling storage mutation engines
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -125,32 +133,37 @@ const AddNewAsset = () => {
     }
 
     try {
-      // 1. Process image file data if changed, otherwise fallback to existing snapshot string
       let finalizedImageString = imagePreview;
       if (selectedImage) {
         finalizedImageString = await convertImageToBase64(selectedImage);
       }
 
-      // 2. Fetch global mock DB records from storage state or default to fallback list array
       const localRawData = localStorage.getItem("inventory_data");
       let currentInventory = localRawData ? JSON.parse(localRawData) : [];
+
+      // Determine what the user typed, or default safely if left completely empty
+      const updatedStatusText = formData.action.trim() || "Available";
 
       if (isEditMode) {
         // --- UPDATE CORNER ---
         currentInventory = currentInventory.map((item: any) => {
-          if (item.asset === editItem.asset) {
+          if (item.asset === editItem.asset || item.id === editItem.id) {
             return {
               ...item,
               name: formData.name,
-              category: formData.category,
-              purchase: formData.purchaseDate, // Map to your shared table list key names
+              category: formData.category || "Laptops",
+              model: formData.model,
+              ram: formData.ram,
+              storage: formData.storage,
+              purchase: formData.purchaseDate, 
               purchaseDate: formData.purchaseDate,
               warranty: formData.warranty,
               shopName: formData.shopName,
               phone: formData.phone,
               address: formData.address,
               image: finalizedImageString,
-              status: item.status || "Available" // Preserve status flags
+              status: updatedStatusText, // Fixed: Syncs live status updates back to table columns
+              action: updatedStatusText
             };
           }
           return item;
@@ -160,29 +173,33 @@ const AddNewAsset = () => {
         const generatedAssetId = `AST-${Math.floor(1000 + Math.random() * 9000)}`;
         
         const newAssetPayload = {
+          id: generatedAssetId, 
           asset: generatedAssetId,
           name: formData.name,
-          category: formData.category || "General IT",
+          category: formData.category || "Laptops",
+          model: formData.model || "N/A",
+          ram: formData.ram || "N/A",
+          storage: formData.storage || "N/A",
           purchase: formData.purchaseDate || new Date().toISOString().split('T')[0],
           purchaseDate: formData.purchaseDate || new Date().toISOString().split('T')[0],
-          warranty: formData.warranty || "N/A",
+          warranty: formData.warranty || "No active arrangement logs found",
           shopName: formData.shopName,
           phone: formData.phone,
           address: formData.address,
-          status: "Available",
+          status: updatedStatusText, // Fixed: Directly injects whatever you types into status schema
+          action: updatedStatusText, 
           image: finalizedImageString
         };
 
         currentInventory.unshift(newAssetPayload); 
       }
 
-      
       localStorage.setItem("inventory_data", JSON.stringify(currentInventory));
       navigate("/inventory");
 
     } catch (err) {
       console.error("Failed to compile item bundle payload:", err);
-      alert("An error occurred while rendering your asset entry.");
+      alert("An error occurred while saving your asset entry.");
     }
   };
 
@@ -209,6 +226,7 @@ const AddNewAsset = () => {
           <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
               
+              {/* Core Info */}
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Package size={18} className="text-blue-600" />
@@ -223,47 +241,91 @@ const AddNewAsset = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="e.g. MacBook Pro M2" 
+                      placeholder="e.g. MacBook Pro M3" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                       required
                     />
                   </div>
                   
                   <div className="space-y-1">
-  <label className="text-xs font-semibold text-slate-600">
-    Asset Category
-  </label>
-
-  <select
-    name="category"
-    value={formData.category}
-    onChange={handleInputChange}
-    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
-  >
-    <option value="">Select Category</option>
-    <option value="Laptops">Laptops</option>
-    <option value="Desktops">Desktops</option>
-    <option value="Printers">Printers</option>
-    <option value="Monitors">Monitors</option>
-    <option value="Networking">Networking</option>
-    <option value="Accessories">Accessories</option>
-  </select>
-</div>
-</div>
-                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Asset Type</label>
-                    <input 
-                      type="text" 
+                    <label className="text-xs font-semibold text-slate-600">Asset Category</label>
+                    <select
                       name="category"
                       value={formData.category}
                       onChange={handleInputChange}
-                      placeholder="e.g. Laptops" 
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                    >
+                      <option value="">Select Category</option>
+                      <option value="Laptops">Laptops</option>
+                      <option value="Desktops">Desktops</option>
+                      <option value="Printers">Printers</option>
+                      <option value="Monitors">Monitors</option>
+                      <option value="Networking">Networking</option>
+                      <option value="Accessories">Accessories</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5 md:col-span-2">
+                    <label className="text-xs font-bold text-slate-600">Action Status</label>
+                    <input 
+                      type="text" 
+                      name="action"
+                      value={formData.action}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Active, Returned, Pending" 
+                      className="w-full px-3.5 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-sm bg-slate-50/50 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400" 
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Hardware Specifications */}
+              <section className="space-y-4">
+                <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
+                  <Cpu size={18} className="text-blue-600" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Hardware Specifications</h2>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-600">Model</label>
+                    <input 
+                      type="text" 
+                      name="model"
+                      value={formData.model}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Apple M3 Max" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
-                
+                  
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-600">RAM</label>
+                    <input 
+                      type="text" 
+                      name="ram"
+                      value={formData.ram}
+                      onChange={handleInputChange}
+                      placeholder="e.g. 16GB" 
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-600">Storage</label>
+                    <input 
+                      type="text" 
+                      name="storage"
+                      value={formData.storage}
+                      onChange={handleInputChange}
+                      placeholder="e.g. 512GB SSD" 
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    />
+                  </div>
+                </div>
               </section>
 
+              {/* Purchase Metadata */}
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Settings size={18} className="text-blue-600" />
@@ -288,13 +350,14 @@ const AddNewAsset = () => {
                       name="warranty"
                       value={formData.warranty}
                       onChange={handleInputChange}
-                      placeholder="2 years" 
+                      placeholder="e.g. 2 years" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
                 </div>
               </section>
 
+              {/* Vendor House Details */}
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Settings size={18} className="text-blue-600" />
@@ -338,6 +401,7 @@ const AddNewAsset = () => {
                 </div>
               </section>
 
+              {/* Actions Footer */}
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                 <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
                 <button type="submit" className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
@@ -347,6 +411,7 @@ const AddNewAsset = () => {
             </form>
           </div>
 
+          {/* Photo Management Sidebar Block */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <ImageIcon size={18} className="text-blue-600" />

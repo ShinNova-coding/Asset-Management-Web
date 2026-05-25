@@ -6,7 +6,7 @@ import Login from "@/pages/Auth/Login"
 import ForgetPassword from "@/pages/Auth/ForgetPassword"
 import ResetPassword from "@/pages/Auth/ResetPassword"
 import Layout from "@/layouts/Layout"
-
+import { NotificationDropdown } from "@/layouts/NotificationDropDown"
 import DashboardPage from "@/pages/Dashboard/DashboardPage"
 import InventoryPage from "@/pages/Inventory/InventoryPage"
 
@@ -14,7 +14,7 @@ import UserManagementPage from "@/pages/UserManagement/UserManagementPage"
 import ActivityPage from "@/pages/Activity/ActivityPage"
 import ActivityUpdate from "@/components/features/Activity/ActivityUpdate"
 import ActivityDetail from "@/components/features/Activity/ActivityDetail"
-
+import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
 import UserManagement from "@/pages/UserManagement/UserManagementPage";
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee";
 import AddNewAsset from "@/pages/Inventory/AddNewAsset"
@@ -72,6 +72,10 @@ export const router = createBrowserRouter([
       {
         path: "activity",
         element: <ActivityPage />,
+      },
+      {
+        path:"maintenance",
+        element:<MaintenancePage/>
       },
       {
         path:"activity/add",

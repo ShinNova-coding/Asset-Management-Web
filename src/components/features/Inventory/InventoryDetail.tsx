@@ -12,17 +12,18 @@ import {
   FiMapPin, 
   FiBriefcase, 
   FiTag,
-  FiFileText
+  FiFileText,
+  FiCpu,
+  FiHardDrive,
+  FiLayers
 } from "react-icons/fi"
 
 export function InventoryDetail() {
   const location = useLocation()
   const navigate = useNavigate()
   
-  
   const assetItem = location.state?.item
 
-  
   if (!assetItem) {
     return (
       <div className="max-w-md mx-auto my-20 p-8 text-center bg-white border border-slate-200 rounded-xl shadow-sm space-y-4">
@@ -38,7 +39,6 @@ export function InventoryDetail() {
     )
   }
 
-  
   const getStatusStyles = (status: string) => {
     switch (status?.toLowerCase()) {
       case "assigned":
@@ -47,6 +47,8 @@ export function InventoryDetail() {
         return "bg-blue-50 text-blue-700 border-blue-200"
       case "maintenance":
         return "bg-amber-50 text-amber-700 border-amber-200"
+        case "pending":
+          return "bg-amber-50 text-amber-700 border-amber-200"
       default:
         return "bg-slate-50 text-slate-700 border-slate-200"
     }
@@ -55,7 +57,7 @@ export function InventoryDetail() {
   return (
     <div className="max-w-5xl mx-auto p-6 md:p-10 space-y-6 text-slate-950 font-sans">
       
-      
+      {/* Navigation Row */}
       <Button 
         variant="ghost" 
         size="sm" 
@@ -66,7 +68,7 @@ export function InventoryDetail() {
         Back to Inventory Dashboard
       </Button>
 
-      
+      {/* Header Info */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
@@ -83,34 +85,52 @@ export function InventoryDetail() {
         </div>
       </div>
 
-     
+      {/* Detail Split Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
-        
+        {/* Left Columns - Meta Forms */}
         <div className="lg:col-span-2 space-y-6">
           
-         
+          {/* Box Segment 1: Device Specifications */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiPackage size={18} className="text-blue-600" />
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Device Specifications</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
               <div className="space-y-1">
-                <span className="text-xs text-slate-400 block">Device</span>
+                <span className="text-xs text-slate-400 block">Category</span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
-                  <FiTag className="text-slate-400" /> {assetItem.category || "Laptops"}
+                  <FiTag className="text-slate-400" size={14} /> {assetItem.category || "Laptops"}
                 </span>
               </div>
+              
+            
+
               <div className="space-y-1">
-                <span className="text-xs text-slate-400 block">Device ID</span>
-                <span className="text-sm font-mono font-medium text-slate-800">
-                  {assetItem.asset}
+                <span className="text-xs text-slate-400 block">Model Variation</span>
+                <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
+                  <FiCpu className="text-slate-400" size={14} /> {assetItem.model || "Not Specified"}
                 </span>
               </div>
+
+              <div className="space-y-1">
+                <span className="text-xs text-slate-400 block">RAM Configuration</span>
+                <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
+                  <FiLayers className="text-slate-400" size={14} /> {assetItem.ram || "Not Specified"}
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-xs text-slate-400 block">Storage Capacity</span>
+                <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
+                  <FiHardDrive className="text-slate-400" size={14} /> {assetItem.storage || "Not Specified"}
+                </span>
+              </div>
+
               {assetItem.assetIdAlt && (
-                <div className="space-y-1">
+                <div className="col-span-1 md:col-span-2 space-y-1 pt-1">
                   <span className="text-xs text-slate-400 block">Secondary Mapping Reference Tag</span>
                   <span className="text-sm font-mono text-slate-600">
                     {assetItem.assetIdAlt}
@@ -120,7 +140,7 @@ export function InventoryDetail() {
             </div>
           </div>
 
-          
+          {/* Box Segment 2: Procurement Info */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiCalendar size={18} className="text-blue-600" />
@@ -135,7 +155,7 @@ export function InventoryDetail() {
                 </span>
               </div>
               <div className="space-y-1">
-                <span className="text-xs text-slate-400 block">Warranty </span>
+                <span className="text-xs text-slate-400 block">Warranty Setup Logs</span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
                   <FiShield className="text-slate-400" /> {assetItem.warranty || "No active arrangement logs found"}
                 </span>
@@ -143,7 +163,7 @@ export function InventoryDetail() {
             </div>
           </div>
 
-         
+          {/* Box Segment 3: Vendor Metadata */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiBriefcase size={18} className="text-blue-600" />
@@ -164,7 +184,7 @@ export function InventoryDetail() {
                 </span>
               </div>
               <div className="space-y-1">
-                <span className="text-xs text-slate-400 block"> Location Address</span>
+                <span className="text-xs text-slate-400 block">Location Address</span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
                   <FiMapPin className="text-slate-400" /> {assetItem.address || "Yangon"}
                 </span>
@@ -174,11 +194,11 @@ export function InventoryDetail() {
 
         </div>
 
-       
+        {/* Right Sidebar - Attachment Canvas */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <FiFileText size={18} className="text-blue-600" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400"> Profile Image</h2>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Profile Image</h2>
           </div>
           
           <div className="aspect-square w-full bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden p-2">

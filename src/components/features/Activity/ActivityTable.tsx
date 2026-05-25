@@ -5,8 +5,6 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { 
   FiChevronLeft, 
   FiChevronRight, 
-  FiTrash2, 
-  FiAlertCircle, 
   FiCheckCircle, 
   FiX, 
   FiSearch
@@ -39,71 +37,64 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
   const navigate = useNavigate()
   const location = useLocation()
   
-  const [tableData, setTableData] = React.useState<ActivityLog[]>(initialData)
+  // Initialize state directly from localStorage if it exists
+  const [tableData, setTableData] = React.useState<ActivityLog[]>(() => {
+    if (typeof window !== "undefined") {
+      const savedData = localStorage.getItem("asset_guard_logs")
+      return savedData ? JSON.parse(savedData) : initialData
+    }
+    return initialData
+  })
+
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   
-  const [deleteModal, setDeleteModal] = React.useState<{ isOpen: boolean; targetId: string | null }>({
-    isOpen: false,
-    targetId: null,
-  })
   const [toastConfig, setToastConfig] = React.useState<{ show: boolean; title: string; message: string }>({
     show: false,
     title: "",
     message: ""
   })
 
-  // Watch for dynamic changes pushed from parent source arrays
+  // Synchronize state if the incoming initialData prop changes
   React.useEffect(() => {
-    setTableData(initialData)
+    if (initialData && initialData.length > 0) {
+      setTableData(initialData)
+    }
   }, [initialData])
 
-  // Watch for updates returning from the ActivityUpdate sub-route
+  // Automatically sync state arrays to localStorage whenever they change
+  React.useEffect(() => {
+    if (tableData && tableData.length > 0) {
+      localStorage.setItem("asset_guard_logs", JSON.stringify(tableData))
+    }
+  }, [tableData])
+
+  // Handle incoming router layout state updates safely
   React.useEffect(() => {
     if (location.state?.updatedItem) {
-      const updated = location.state.updatedItem;
-      
+      const updated = location.state.updatedItem
+
       setTableData((prev) => {
-        // Check if item exists to distinguish an edit execution context vs a new addition setup
-        const exists = prev.some((item) => item.id === updated.id);
+        const exists = prev.some((item) => item.id === updated.id)
         if (exists) {
-          return prev.map((item) => (item.id === updated.id ? { ...item, ...updated } : item));
+          return prev.map((item) => (item.id === updated.id ? { ...item, ...updated } : item))
         } else {
-          return [updated, ...prev];
+          return [updated, ...prev]
         }
-      });
+      })
 
       setToastConfig({
         show: true,
         title: "Record Updated Successfully",
         message: "The log changes were mapped safely to the current dataset array context view."
-      });
+      })
 
       // Clear layout state route memory so it won't pop up again on component refreshes
-      navigate(location.pathname, { replace: true, state: {} });
+      navigate(location.pathname, { replace: true, state: {} })
     }
   }, [location.state, navigate, location.pathname])
 
-  const handleDeleteTrigger = (id: string) => {
-    setDeleteModal({ isOpen: true, targetId: id })
-  }
-
-  const handleEdit = (item: any) => {
-    navigate("/activity/add", { state: { editItem: item } })
-  }
-
-  const handleConfirmDelete = () => {
-    if (deleteModal.targetId) {
-      setTableData((prev) => prev.filter((item) => item.id !== deleteModal.targetId))
-      setDeleteModal({ isOpen: false, targetId: null })
-      setToastConfig({
-        show: true,
-        title: "Delete Successful",
-        message: "The requested asset logging metrics records were processed safely."
-      });
-    }
-  }
-
+  // Toast auto-dismiss timer
   React.useEffect(() => {
     if (toastConfig.show) {
       const timer = setTimeout(() => setToastConfig((prev) => ({ ...prev, show: false })), 3000)
@@ -118,10 +109,6 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
       globalFilter,
       columnFilters, 
     },
-    meta: {
-      deleteRow: handleDeleteTrigger,
-      editRow: handleEdit, 
-    },
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters, 
     getCoreRowModel: getCoreRowModel(),
@@ -133,11 +120,52 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
   const pageCount = table.getPageCount()
   const currentPage = table.getState().pagination.pageIndex
 
+  // Helper method to construct neat UI pagination ranges dynamically
+  const renderPageButtons = () => {
+    const buttons: React.ReactNode[] = []
+    
+    for (let i = 0; i < pageCount; i++) {
+      const isFirst = i === 0
+      const isLast = i === pageCount - 1
+      const isWithinRange = i >= currentPage - 1 && i <= currentPage + 1
+
+      if (isFirst || isLast || isWithinRange) {
+        buttons.push(
+          <Button
+            key={i}
+            variant={currentPage === i ? "default" : "outline"}
+            size="sm"
+            className={
+              currentPage === i 
+                ? "bg-blue-300 text-slate-800 font-semibold border-none hover:bg-blue-400" 
+                : "bg-slate-100 text-slate-700"
+            }
+            onClick={() => table.setPageIndex(i)}
+          >
+            {i + 1}
+          </Button>
+        )
+      } else if (i === 1 && currentPage > 2) {
+        buttons.push(
+          <span key="left-ellipsis" className="px-2 text-slate-400 text-sm select-none">
+            ...
+          </span>
+        )
+      } else if (i === pageCount - 2 && currentPage < pageCount - 3) {
+        buttons.push(
+          <span key="right-ellipsis" className="px-2 text-slate-400 text-sm select-none">
+            ...
+          </span>
+        )
+      }
+    }
+    return buttons
+  }
+
   return (
     <div className="w-full space-y-4">
       
       <div className="flex flex-col sm:flex-row w-full items-start sm:items-center justify-between gap-4">
-        
         <div className="relative max-w-4xl w-full flex-1">
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
@@ -155,15 +183,19 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
             value={(table.getColumn("action")?.getFilterValue() as string) ?? ""}
             onChange={(e) => table.getColumn("action")?.setFilterValue(e.target.value || undefined)}
             className="w-full sm:w-48 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-400 transition-all cursor-pointer appearance-none shadow-xs"
-            style={{ backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', backgroundSize: '16px' }}
+            style={{ 
+              backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`, 
+              backgroundRepeat: 'no-repeat', 
+              backgroundPosition: 'right 8px center', 
+              backgroundSize: '16px' 
+            }}
           >
-            <option value="">All Action Types</option>
+            <option value="">Select Status</option>
             <option value="Active">Active</option>
             <option value="Pending">Pending</option>
             <option value="Returned">Returned</option>
           </select>
         </div>
-
       </div>
 
       {/* Main Data Table View */}
@@ -188,11 +220,11 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
                   key={row.id} 
                   className="border-b border-slate-100 transition-colors hover:bg-slate-50/60 cursor-pointer"
                   onClick={(e) => {
-                    const target = e.target as HTMLElement;
+                    const target = e.target as HTMLElement
                     if (target.closest('button') || target.closest('svg') || target.closest('a')) {
-                      return; 
+                      return 
                     }
-                    navigate(`/activity/${row.original.id}`, { 
+                    navigate(`/activity/${row.original.id || row.id}`, { 
                       state: { item: row.original } 
                     })
                   }}
@@ -228,35 +260,7 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
         </Button>
 
         <div className="flex gap-1 items-center">
-          {Array.from({ length: pageCount }).map((_, index) => {
-            const isFirst = index === 0
-            const isLast = index === pageCount - 1
-            const isWithinRange = index >= currentPage - 1 && index <= currentPage + 1
-
-            if (isFirst || isLast || isWithinRange) {
-              return (
-                <Button
-                  key={index}
-                  variant={currentPage === index ? "default" : "outline"}
-                  size="sm"
-                  className={currentPage === index ? "bg-blue-300 text-slate-800 font-semibold border-none hover:bg-blue-400" : "bg-slate-100 text-slate-700"}
-                  onClick={() => table.setPageIndex(index)}
-                >
-                  {index + 1}
-                </Button>
-              )
-            }
-
-            if (index === 1 || index === pageCount - 2) {
-              return (
-                <span key={index} className="px-2 text-slate-400 text-sm select-none">
-                  ...
-                </span>
-              )
-            }
-
-            return null
-          })}
+          {renderPageButtons()}
         </div>
 
         <Button
@@ -269,39 +273,6 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
           <FiChevronRight size={16} />
         </Button>
       </div>
-
-      {/* Delete Confirmation Modal */}
-      {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs">
-          <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4 border border-slate-100 text-center space-y-4">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-50 text-red-600">
-              <FiAlertCircle size={24} />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-slate-900">Are you absolutely sure?</h3>
-              <p className="text-sm text-slate-500">
-                This action cannot be undone.
-              </p>
-            </div>
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setDeleteModal({ isOpen: false, targetId: null })}
-                className="w-full px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmDelete}
-                className="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Action Notification Toast */}
       {toastConfig.show && (

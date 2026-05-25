@@ -86,7 +86,7 @@ const RecentActivities: React.FC = () => {
             <tr>
               <th className="px-4 py-2 font-medium">Username</th>
               <th className="px-4 py-2 font-medium">Category</th> 
-              <th className="px-4 py-2 font-medium">Name</th>
+              <th className="px-4 py-2 font-medium">Asset Name</th>
               <th className="px-4 py-2 font-medium">Activity</th>
               <th className="px-4 py-2 font-medium">Date</th>
             </tr>

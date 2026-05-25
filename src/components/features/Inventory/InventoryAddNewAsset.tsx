@@ -1,13 +1,16 @@
 "use client"
 
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { FaCirclePlus } from "react-icons/fa6"
 
 export function InventoryAddNewAsset() {
+  const navigate = useNavigate()
+
   const goToNewPage = () => {
-    
-    window.location.href = "/inventory/add";
-  };
+    // Navigates internally without breaking React state or forcing a browser reload
+    navigate("/inventory/add")
+  }
 
   return (
     <Button 
