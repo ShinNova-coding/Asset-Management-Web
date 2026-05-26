@@ -28,7 +28,7 @@ const AddEmployeeForm: React.FC = () => {
     <div className="min-h-screen bg-slate-50 p-8 font-sans text-slate-900">
       <div className="max-w-4xl mx-auto">
         
-        {/* Back Button */}
+       
         <Link
           to="/employees"
           className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline"

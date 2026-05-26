@@ -272,7 +272,7 @@ const AddNewAsset = () => {
                       name="action"
                       value={formData.action}
                       onChange={handleInputChange}
-                      placeholder="e.g. Active, Returned, Pending" 
+                      placeholder="e.g. Active, Returned, Pending,Maintenance" 
                       className="w-full px-3.5 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-sm bg-slate-50/50 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400" 
                     />
                   </div>
@@ -350,7 +350,7 @@ const AddNewAsset = () => {
                       name="warranty"
                       value={formData.warranty}
                       onChange={handleInputChange}
-                      placeholder="e.g. 2 years" 
+                      placeholder="e.g. months/years" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>

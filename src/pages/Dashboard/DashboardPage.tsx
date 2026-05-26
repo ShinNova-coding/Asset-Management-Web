@@ -2,6 +2,7 @@ import React from "react";
 import DashboardCards from "../../components/features/dashboard/DashboardCards";
 import AssetCategoriesCards from "../../components/features/dashboard/AssetCategoriesCards";
 import RecentActivities from "../../components/features/dashboard/RecentActivities"
+
 const DashboardPage: React.FC = () => {
   return (
     <div className=" min-h-screen">

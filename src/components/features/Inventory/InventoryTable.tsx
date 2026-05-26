@@ -34,13 +34,25 @@ interface InventoryTableProps {
 export function InventoryTable({ data: initialData }: InventoryTableProps) {
   const navigate = useNavigate() 
   
-  // Instantly read data from localStorage on mount to pull latest edited statuses
+  // Helper utility function to parse items and auto-retire expired warranties
+  const processExpiredWarranties = (items: any[]): any[] => {
+    return items.map((item) => {
+      const warrantyText = (item.warranty || "").toLowerCase()
+      if (warrantyText.includes("expired")) {
+        return { ...item, status: "Retired" }
+      }
+      return item
+    })
+  }
+
+  // Instantly read data from localStorage on mount and apply auto-retire rules
   const [data, setData] = React.useState<any[]>(() => {
     if (typeof window !== "undefined") {
       const cachedData = localStorage.getItem("inventory_data")
-      return cachedData ? JSON.parse(cachedData) : initialData
+      const baseData = cachedData ? JSON.parse(cachedData) : initialData
+      return processExpiredWarranties(baseData)
     }
-    return initialData
+    return processExpiredWarranties(initialData)
   }) 
 
   const [globalFilter, setGlobalFilter] = React.useState("")
@@ -52,12 +64,12 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   })
   const [showToast, setShowToast] = React.useState(false)
 
-  // Force table internal data state to fetch updates when coming back from the form view
+  // Force table internal data state to fetch updates and process rules when returning from forms
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const cachedData = localStorage.getItem("inventory_data")
       if (cachedData) {
-        setData(JSON.parse(cachedData))
+        setData(processExpiredWarranties(JSON.parse(cachedData)))
       }
     }
   }, [initialData])
@@ -140,7 +152,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </div>
 
         {/* Column Filters Selector Dropdown */}
-        {/* FIXED: Container ring handling removed so it doesn't fight Radix core mounting states */}
         <div className="w-full md:w-[180px]">
           <div className="bg-transparent p-0">
             <InventoryFilter table={table} />
@@ -171,7 +182,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
                   className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer"
                   onClick={(e) => {
                     const target = e.target as HTMLElement
-                    // Intercept action button clicks so they don't fire navigation by accident
                     if (target.closest('button') || target.closest('svg') || target.closest('a')) {
                       return 
                     }

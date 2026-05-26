@@ -18,7 +18,7 @@ const defaultMockData: any[] = [
     purchase: "Oct 12 2024", 
     purchaseDate: "2024-10-12", 
     warranty: "2 years", 
-    status: "Pending" 
+    status: "Retired" 
   },
   { 
     id: "AF-LP-1012", 
@@ -31,7 +31,7 @@ const defaultMockData: any[] = [
     purchase: "Oct 12 2022", 
     purchaseDate: "2022-10-12", 
     warranty: "Expired", 
-    status: "Pending" 
+    status: "Retired" 
   },
   { 
     id: "AF-LP-1013", 

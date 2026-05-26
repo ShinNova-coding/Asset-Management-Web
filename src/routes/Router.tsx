@@ -6,7 +6,7 @@ import Login from "@/pages/Auth/Login"
 import ForgetPassword from "@/pages/Auth/ForgetPassword"
 import ResetPassword from "@/pages/Auth/ResetPassword"
 import Layout from "@/layouts/Layout"
-import { NotificationDropdown } from "@/layouts/NotificationDropDown"
+
 import DashboardPage from "@/pages/Dashboard/DashboardPage"
 import InventoryPage from "@/pages/Inventory/InventoryPage"
 
