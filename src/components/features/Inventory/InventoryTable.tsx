@@ -130,8 +130,11 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     }
   }, [showToast])
 
+  /* ========================================================
+     UPDATED EDIT FUNCTION: SENDS ONLY THE ID VALUE IN STATE
+     ======================================================== */
   const handleEdit = (item: any) => {
-    navigate("/inventory/add", { state: { editItem: item } })
+    navigate("/inventory/add", { state: { id: item.asset_id } })
   }
 
   const table = useReactTable({

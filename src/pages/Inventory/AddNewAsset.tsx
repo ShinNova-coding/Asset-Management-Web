@@ -9,17 +9,22 @@ const AddNewAsset = () => {
   const location = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const editItem = location.state?.editItem;
-  const isEditMode = !!editItem;
+  // Capture both potential variants from React Router state
+  const stateId = location.state?.id;
+  const stateEditItem = location.state?.editItem;
+
+  // Track if we are editing by checking either source
+  const isEditMode = !!stateEditItem || !!stateId;
 
   const [formData, setFormData] = useState({
+    assetId: '', 
     name: '',
     category: '',
     model: '',
     ram: '',
     storage: '',
-    serialnumber:'',
-    purchaseDate: '',
+    serial_number: '', 
+    purchased_date: '', 
     warranty: '',
     shopName: '',
     phone: '',
@@ -39,28 +44,45 @@ const AddNewAsset = () => {
     return ""; 
   };
 
+  // Resolve target asset data depending on what the table sent
   useEffect(() => {
-    if (editItem) {
-      setFormData({
-        name: editItem.name || '',
-        category: editItem.category || '',
-        model: editItem.model || '',
-        ram: editItem.ram || editItem.ram_capacity || '',
-        storage: editItem.storage || '',
-        serialnumber:editItem.serialnumber||'',
-        purchaseDate: formatToInputDate(editItem.purchase || editItem.purchaseDate || editItem.purchase_date),
-        warranty: editItem.warranty || editItem.warranty_period || '',
-        shopName: editItem.shopName || '',
-        phone: editItem.phone || '',
-        address: editItem.address || '',
-        action: editItem.action || editItem.status || ''
-      });
+    let activeItem = stateEditItem;
 
-      if (editItem.image) {
-        setImagePreview(editItem.image);
+    if (!activeItem && stateId) {
+      const localRawData = localStorage.getItem("inventory_data");
+      if (localRawData) {
+        const currentInventory = JSON.parse(localRawData);
+        activeItem = currentInventory.find((item: any) => 
+          item.asset_id === stateId || item.id === stateId
+        );
       }
     }
-  }, [editItem]);
+
+    // Populate data states if a matching asset item was discovered
+    if (activeItem) {
+      setFormData({
+        assetId: activeItem.asset_id || activeItem.id || '',
+        name: activeItem.name || '',
+        category: activeItem.category?.name || activeItem.category || '',
+        model: activeItem.model || '',
+        ram: activeItem.ram_capacity || activeItem.ram || '',
+        storage: activeItem.storage || '',
+        serial_number: activeItem.serial_number || '',
+        purchased_date: formatToInputDate(activeItem.purchased_date || activeItem.purchase_date || activeItem.purchase),
+        warranty: activeItem.warranty_period || activeItem.warranty || '',
+        shopName: activeItem.shopName || '',
+        phone: activeItem.phone || '',
+        address: activeItem.address || '',
+        action: activeItem.status || activeItem.action || ''
+      });
+
+      if (activeItem.image_url) {
+        setImagePreview(activeItem.image_url);
+      } else if (activeItem.image) {
+        setImagePreview(activeItem.image);
+      }
+    }
+  }, [stateId, stateEditItem]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -128,88 +150,90 @@ const AddNewAsset = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // 1. Basic Field Validations
     if (!formData.name.trim()) {
       alert("Please provide at least an Asset Name before saving.");
       return;
     }
 
+    if (!formData.serial_number.trim()) {
+      alert("Serial Number is required by the server!");
+      return;
+    }
+
+    // 2. Base64 Image Validation: Verify an image choice exists
+    if (!selectedImage && !imagePreview) {
+      alert("The backend requires an asset photo. Please upload an image first!");
+      return;
+    }
+
     try {
-      let finalizedImageString = imagePreview;
+      let finalizedImageString = "";
+
       if (selectedImage) {
+        // Wait for conversion completion
         finalizedImageString = await convertImageToBase64(selectedImage);
+      } else if (imagePreview) {
+        // Keep the preexisting string reference
+        finalizedImageString = imagePreview;
       }
 
-      const localRawData = localStorage.getItem("inventory_data");
-      let currentInventory = localRawData ? JSON.parse(localRawData) : [];
+      const updatedStatusText = formData.action.trim() || "available";
 
-      const updatedStatusText = formData.action.trim() || "Available";
+      // 3. Assemble complete JSON payload bundle
+      const assetPayload = {
+        asset_id: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`,
+        name: formData.name.trim(),
+        serial_number: formData.serial_number.trim(),
+        purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
+        warranty_period: parseInt(formData.warranty) || 12, 
+        model: formData.model.trim() || "N/A",
+        ram_capacity: formData.ram.trim() || "N/A",
+        storage: formData.storage.trim() || "N/A",
+        category_id: formData.category === "Laptops" ? 2 : 1, 
+        status: updatedStatusText.toLowerCase(), 
+        condition: "new",
+        shop_name: formData.shopName.trim(),
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
+        image: finalizedImageString 
+      };
 
-      if (isEditMode) {
-        // 🎯 FIXED CORNER: Explicit lookup checking 'asset_id' or 'id' strings safely
-        const targetId = editItem.asset_id || editItem.id;
+      // Debug check print string length logs directly to the terminal environment
+      console.log("🚀 Payload sending to backend:", assetPayload);
 
-        currentInventory = currentInventory.map((item: any) => {
-          const itemId = item.asset_id || item.id;
-          
-          if (itemId && itemId === targetId) {
-            return {
-              ...item,
-              name: formData.name,
-              category: formData.category || "Laptops",
-              model: formData.model,
-              ram: formData.ram,
-              ram_capacity: formData.ram, // Keep both naming conventions aligned
-              storage: formData.storage,
-              purchase: formData.purchaseDate, 
-              purchaseDate: formData.purchaseDate,
-              purchase_date: formData.purchaseDate,
-              warranty: formData.warranty,
-              warranty_period: formData.warranty,
-              shopName: formData.shopName,
-              phone: formData.phone,
-              address: formData.address,
-              image: finalizedImageString,
-              status: updatedStatusText, 
-              action: updatedStatusText
-            };
-          }
-          return item;
-        });
-      } else {
-        // --- CREATE CORNER ---
-        const generatedAssetId = `AST-${Math.floor(1000 + Math.random() * 9000)}`;
+      const API_URL = "http://192.168.100.185:1010/api/asset"; 
+      const targetId = stateEditItem?.asset_id || stateEditItem?.id || stateId;
+      const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
+      const method = isEditMode ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer 75|ecXvly4g06pAEgaOezO53PZP7XFej6OiXUEe40CZ21f2564c"
+        },
+        body: JSON.stringify(assetPayload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ Backend Validation Errors:", errorData);
         
-        const newAssetPayload = {
-          id: generatedAssetId, 
-          asset_id: generatedAssetId,
-          name: formData.name,
-          category: formData.category || "Laptops",
-          model: formData.model || "N/A",
-         
-          ram_capacity: formData.ram || "N/A",
-          storage: formData.storage || "N/A",
-         
-          purchase_date: formData.purchaseDate || new Date().toISOString().split('T')[0],
-          
-          warranty: formData.warranty || "No active logs found",
-          warranty_period: formData.warranty || "No active logs found",
-          shopName: formData.shopName,
-          phone: formData.phone,
-          address: formData.address,
-          status: updatedStatusText, 
-          action: updatedStatusText, 
-          image: finalizedImageString
-        };
-
-        currentInventory.unshift(newAssetPayload); 
+        if (errorData.errors) {
+          const validationErrors = Object.values(errorData.errors).flat().join("\n");
+          throw new Error(validationErrors);
+        }
+        throw new Error(errorData.message || `Server responded with status ${response.status}`);
       }
 
-      localStorage.setItem("inventory_data", JSON.stringify(currentInventory));
+      alert(isEditMode ? "Asset entry altered successfully!" : "New asset entry saved!");
       navigate("/inventory");
 
-    } catch (err) {
-      console.error("Failed to compile item bundle payload:", err);
-      alert("An error occurred while saving your asset entry.");
+    } catch (err: any) {
+      console.error("Transmission Error details:", err);
+      alert(`Could not save item to backend server:\n${err.message}`);
     }
   };
 
@@ -227,7 +251,7 @@ const AddNewAsset = () => {
             Back to Inventory
           </button>
           <h1 className="text-2xl font-bold text-slate-900">
-            {isEditMode ? `Modify Asset: ${editItem.asset_id || editItem.name}` : "Register New IT Asset"}
+            {isEditMode ? "Modify Asset Records" : "Register New IT Asset"}
           </h1>
         </div>
 
@@ -244,6 +268,19 @@ const AddNewAsset = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-600">Asset ID</label>
+                    <input 
+                      type="text" 
+                      name="assetId"
+                      value={formData.assetId}
+                      onChange={handleInputChange}
+                      placeholder="e.g. AST-2026-03" 
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                      required
+                    />
+                  </div>
+                  
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset Name</label>
                     <input 
@@ -332,16 +369,18 @@ const AddNewAsset = () => {
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
-                  <div className="space-y-1">
+                  
+                  <div className="space-y-1 md:col-span-3">
                     <label className="text-xs font-semibold text-slate-600">Serial Number</label>
-                    <input type="text" name="serialnumber" 
-                    value={formData.serialnumber}
-                    onChange={handleInputChange}
-                    placeholder="e.g.SN123456789j2"
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500
-                    outline-none text-sm">
-                    </input>
-                    </div>
+                    <input 
+                      type="text" 
+                      name="serial_number"
+                      value={formData.serial_number}
+                      onChange={handleInputChange}
+                      placeholder="e.g. SN123456789j2"
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                    />
+                  </div>
                 </div>
               </section>
 
@@ -357,20 +396,20 @@ const AddNewAsset = () => {
                     <label className="text-xs font-semibold text-slate-600">Purchase Date</label>
                     <input 
                       type="date" 
-                      name="purchaseDate"
-                      value={formData.purchaseDate}
+                      name="purchased_date"
+                      value={formData.purchased_date}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Warranty Expiration</label>
+                    <label className="text-xs font-semibold text-slate-600">Warranty Expiration (Months)</label>
                     <input 
                       type="text" 
                       name="warranty"
                       value={formData.warranty}
                       onChange={handleInputChange}
-                      placeholder="e.g. 12 Months" 
+                      placeholder="e.g. 12" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
@@ -402,7 +441,7 @@ const AddNewAsset = () => {
                       type="text" 
                       name="phone"
                       value={formData.phone}
-                      onChange={handleInputChange}
+                      onChange={handleInputChange} 
                       placeholder="09*********" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />

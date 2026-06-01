@@ -25,9 +25,9 @@ import MaintenanceDetailsForm from "@/components/features/Maintenance/Maintenanc
 import AssignmentDetailPage from "@/components/features/Assignment/AssignmentDetailPage";
 import AssetListPage from "@/components/features/dashboard/AssetListPage";
 import AssetCategoriesCards from "@/components/features/dashboard/AssetCategoriesCards";
-
-
-
+import AssignmentLogsPage from "@/pages/Activity/AssignmentLogsPage"
+import MaintenanceLogsPage from "@/pages/Activity/MaintenanceLogsPage"
+import ActivityLogsPage from "@/pages/Activity/ActivityLogsPage"
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -96,8 +96,18 @@ export const router = createBrowserRouter([
         path:"activity/:id",
         element:<ActivityDetail/>,
       },
-      
-      
+      {
+        path:"activity/assignment-logs",
+        element:<AssignmentLogsPage/>
+      },
+      {
+        path:"activity/maintenance-logs",
+        element:<MaintenanceLogsPage/>
+      },
+      {
+        path:"activity/activity-logs",
+        element:<ActivityLogsPage/>
+      },
     {
     path: "/employees",
     element: <UserManagement />,
