@@ -39,10 +39,10 @@ export function InventoryFilter<TData>({ table }: InventoryFilterProps<TData>) {
           {/* 3. Leave value as "all" so your onValueChange handler clears the filter */}
           <SelectItem value="all">All Status</SelectItem>
           <SelectItem value="available">Available</SelectItem>
-          <SelectItem value="Returned">Returned</SelectItem>
-          <SelectItem value="Maintenance">Maintenance</SelectItem>
-          <SelectItem value="Pending">Pending</SelectItem>
-          <SelectItem value="Retired">Retired</SelectItem>
+          <SelectItem value="returned">Returned</SelectItem>
+          <SelectItem value="maintenance">Maintenance</SelectItem>
+          <SelectItem value="pending">Pending</SelectItem>
+          <SelectItem value="retired">Retired</SelectItem>
         </SelectContent>
       </Select>
     </div>

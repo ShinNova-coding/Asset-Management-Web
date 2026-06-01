@@ -18,6 +18,7 @@ const AddNewAsset = () => {
     model: '',
     ram: '',
     storage: '',
+    serialnumber:'',
     purchaseDate: '',
     warranty: '',
     shopName: '',
@@ -44,14 +45,14 @@ const AddNewAsset = () => {
         name: editItem.name || '',
         category: editItem.category || '',
         model: editItem.model || '',
-        ram: editItem.ram || '',
+        ram: editItem.ram || editItem.ram_capacity || '',
         storage: editItem.storage || '',
-        purchaseDate: formatToInputDate(editItem.purchase || editItem.purchaseDate),
-        warranty: editItem.warranty || '',
+        serialnumber:editItem.serialnumber||'',
+        purchaseDate: formatToInputDate(editItem.purchase || editItem.purchaseDate || editItem.purchase_date),
+        warranty: editItem.warranty || editItem.warranty_period || '',
         shopName: editItem.shopName || '',
         phone: editItem.phone || '',
         address: editItem.address || '',
-        // Pull either .action or fallback to .status when loading an asset to edit
         action: editItem.action || editItem.status || ''
       });
 
@@ -141,28 +142,34 @@ const AddNewAsset = () => {
       const localRawData = localStorage.getItem("inventory_data");
       let currentInventory = localRawData ? JSON.parse(localRawData) : [];
 
-      // Determine what the user typed, or default safely if left completely empty
       const updatedStatusText = formData.action.trim() || "Available";
 
       if (isEditMode) {
-        // --- UPDATE CORNER ---
+        // 🎯 FIXED CORNER: Explicit lookup checking 'asset_id' or 'id' strings safely
+        const targetId = editItem.asset_id || editItem.id;
+
         currentInventory = currentInventory.map((item: any) => {
-          if (item.asset === editItem.asset || item.id === editItem.id) {
+          const itemId = item.asset_id || item.id;
+          
+          if (itemId && itemId === targetId) {
             return {
               ...item,
               name: formData.name,
               category: formData.category || "Laptops",
               model: formData.model,
               ram: formData.ram,
+              ram_capacity: formData.ram, // Keep both naming conventions aligned
               storage: formData.storage,
               purchase: formData.purchaseDate, 
               purchaseDate: formData.purchaseDate,
+              purchase_date: formData.purchaseDate,
               warranty: formData.warranty,
+              warranty_period: formData.warranty,
               shopName: formData.shopName,
               phone: formData.phone,
               address: formData.address,
               image: finalizedImageString,
-              status: updatedStatusText, // Fixed: Syncs live status updates back to table columns
+              status: updatedStatusText, 
               action: updatedStatusText
             };
           }
@@ -174,19 +181,22 @@ const AddNewAsset = () => {
         
         const newAssetPayload = {
           id: generatedAssetId, 
-          asset: generatedAssetId,
+          asset_id: generatedAssetId,
           name: formData.name,
           category: formData.category || "Laptops",
           model: formData.model || "N/A",
-          ram: formData.ram || "N/A",
+         
+          ram_capacity: formData.ram || "N/A",
           storage: formData.storage || "N/A",
-          purchase: formData.purchaseDate || new Date().toISOString().split('T')[0],
-          purchaseDate: formData.purchaseDate || new Date().toISOString().split('T')[0],
-          warranty: formData.warranty || "No active arrangement logs found",
+         
+          purchase_date: formData.purchaseDate || new Date().toISOString().split('T')[0],
+          
+          warranty: formData.warranty || "No active logs found",
+          warranty_period: formData.warranty || "No active logs found",
           shopName: formData.shopName,
           phone: formData.phone,
           address: formData.address,
-          status: updatedStatusText, // Fixed: Directly injects whatever you types into status schema
+          status: updatedStatusText, 
           action: updatedStatusText, 
           image: finalizedImageString
         };
@@ -217,7 +227,7 @@ const AddNewAsset = () => {
             Back to Inventory
           </button>
           <h1 className="text-2xl font-bold text-slate-900">
-            {isEditMode ? `Modify Asset: ${editItem.asset}` : "Register New IT Asset"}
+            {isEditMode ? `Modify Asset: ${editItem.asset_id || editItem.name}` : "Register New IT Asset"}
           </h1>
         </div>
 
@@ -272,7 +282,7 @@ const AddNewAsset = () => {
                       name="action"
                       value={formData.action}
                       onChange={handleInputChange}
-                      placeholder="e.g. Active, Returned, Pending,Maintenance" 
+                      placeholder="e.g. Active, Returned, Pending, Maintenance" 
                       className="w-full px-3.5 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-sm bg-slate-50/50 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400" 
                     />
                   </div>
@@ -322,6 +332,16 @@ const AddNewAsset = () => {
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-600">Serial Number</label>
+                    <input type="text" name="serialnumber" 
+                    value={formData.serialnumber}
+                    onChange={handleInputChange}
+                    placeholder="e.g.SN123456789j2"
+                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500
+                    outline-none text-sm">
+                    </input>
+                    </div>
                 </div>
               </section>
 
@@ -350,7 +370,7 @@ const AddNewAsset = () => {
                       name="warranty"
                       value={formData.warranty}
                       onChange={handleInputChange}
-                      placeholder="e.g. months/years" 
+                      placeholder="e.g. 12 Months" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
