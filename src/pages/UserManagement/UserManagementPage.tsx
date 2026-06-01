@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { employees as employeesData } from '../../data/employees';
 import type { Employee } from '../../types/employee';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
+import { apiFetch } from '../../lib/api';
 
 import {
   Search,
@@ -17,17 +17,51 @@ import {
   FiCheckCircle,
 } from "react-icons/fi";
 
-import { FaEdit } from "react-icons/fa";
 import { RiDeleteBin4Fill } from "react-icons/ri";
 
 const pageSize = 5;
+
+type ApiUser = {
+  employee_id: string;
+  name: string;
+  email: string;
+  position: string | null;
+  status: string;
+  phone_number: string | null;
+  joined_date: string | null;
+  left_date: string | null;
+  image_url: string | null;
+  roles?: Array<{
+    name: string;
+  }>;
+};
+
+const formatStatus = (status: string) =>
+  status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : "-";
+
+const mapApiUserToEmployee = (user: ApiUser): Employee => ({
+  profileImage: user.image_url || "https://via.placeholder.com/120",
+  employeeId: user.employee_id,
+  name: user.name,
+  email: user.email,
+  address: "-",
+  position: user.position || "-",
+  status: formatStatus(user.status),
+  role: user.roles?.[0]?.name || "-",
+  joiningDate: user.joined_date || "-",
+  startDate: user.joined_date || "-",
+  endDate: user.left_date || "-",
+  phone: user.phone_number || "-",
+});
 
 const UserManagement: React.FC = () => {
 
   const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState(0);
-  const [data, setData] = useState(employeesData);
+  const [data, setData] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
 
@@ -37,6 +71,26 @@ const UserManagement: React.FC = () => {
   });
 
   const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const response = await apiFetch("/user");
+        const users = response.data?.data || [];
+        setData(users.map(mapApiUserToEmployee));
+      } catch (err) {
+        console.error(err);
+        setError("Cannot load users from server.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleDeleteTrigger = (id: string) => {
     setDeleteModal({
@@ -139,8 +193,8 @@ const UserManagement: React.FC = () => {
   >
     <option value="">All Status</option>
     <option value="Active">Active</option>
-    <option value="Suspend">Suspend</option>
-    <option value="Resign">Resign</option>
+    <option value="Suspended">Suspended</option>
+    <option value="Resigned">Resigned</option>
   </select>
 </div>
       </div>
@@ -161,7 +215,31 @@ const UserManagement: React.FC = () => {
           </thead>
 
           <tbody className="divide-y divide-slate-300">
-            {currentPaginatedData.map((emp) => (
+            {loading && (
+              <tr>
+                <td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">
+                  Loading users...
+                </td>
+              </tr>
+            )}
+
+            {!loading && error && (
+              <tr>
+                <td colSpan={6} className="px-6 py-8 text-center text-sm text-red-600">
+                  {error}
+                </td>
+              </tr>
+            )}
+
+            {!loading && !error && currentPaginatedData.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">
+                  No users found.
+                </td>
+              </tr>
+            )}
+
+            {!loading && !error && currentPaginatedData.map((emp) => (
               <tr
                 key={emp.employeeId}
                 className="hover:bg-gray-100 cursor-pointer"
@@ -284,10 +362,10 @@ const UserManagement: React.FC = () => {
   <button
     onClick={() =>
       setCurrentPage((p) =>
-        Math.min(totalPages - 1, p + 1)
+        Math.min(Math.max(totalPages - 1, 0), p + 1)
       )
     }
-    disabled={currentPage === totalPages - 1}
+    disabled={totalPages === 0 || currentPage === totalPages - 1}
     className="
       flex h-10 w-10 items-center justify-center
       rounded-xl border border-gray-400

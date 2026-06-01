@@ -1,13 +1,26 @@
-const BASE_URL = "http://192.168.100.180:1010/api";
+// src/lib/api.ts
 
-export async function apiFetch(endpoint: string, options: RequestInit = {}) {
-  // Grab the secure token dynamically from the browser's storage
-  const token = localStorage.getItem("itams_auth_token") || "14|yHkaytLIBZNjU8uHLHioabMF6Fw5uXAKayR9BS16ee81d101"; // Fallback to your test token for now
+const BASE_URL = "http://192.168.100.185:1010/api";
 
-  const headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-    ...(token && { "Authorization": `Bearer ${token}` }),
+export async function apiFetch(
+  endpoint: string,
+  options: RequestInit = {}
+) {
+  const token = localStorage.getItem("token");
+
+  const isFormData = options.body instanceof FormData;
+
+  const headers: HeadersInit = {
+    Accept: "application/json",
+
+    ...(token && {
+      Authorization: `Bearer ${token}`,
+    }),
+
+    ...(!isFormData && {
+      "Content-Type": "application/json",
+    }),
+
     ...options.headers,
   };
 
@@ -17,7 +30,16 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(`API Error: ${response.status}`);
+    let message = `API Error: ${response.status}`;
+
+    try {
+      const errorData = await response.json();
+      message = errorData.message || message;
+    } catch (error) {
+      console.error(error);
+    }
+
+    throw new Error(message);
   }
 
   return response.json();

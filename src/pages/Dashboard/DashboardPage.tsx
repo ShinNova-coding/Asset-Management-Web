@@ -1,12 +1,8 @@
 import React from "react";
 import DashboardCards from "../../components/features/dashboard/DashboardCards";
 import AssetCategoriesCards from "../../components/features/dashboard/AssetCategoriesCards";
-<<<<<<< HEAD
 import RecentActivities from "../../components/features/dashboard/RecentActivities";
 ;
-=======
-import RecentActivities from "../../components/features/dashboard/RecentActivities"
->>>>>>> 3b814d81709643264c5a322c844036c3b50445fa
 
 const DashboardPage: React.FC = () => {
   return (

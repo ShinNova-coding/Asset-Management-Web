@@ -33,7 +33,8 @@ export function UserManagementFilter<TData>({ table }: UserManagementFilterProps
         <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-md z-5">
           <SelectItem value="all">All Status</SelectItem>
           <SelectItem value="active">Active</SelectItem>
-          <SelectItem value="suspend">Suspend</SelectItem>
+          <SelectItem value="suspended">Suspended</SelectItem>
+          <SelectItem value="resigned">Resigned</SelectItem>
         </SelectContent>
       </Select>
     </div>
