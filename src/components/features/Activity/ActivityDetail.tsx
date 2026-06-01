@@ -85,14 +85,15 @@ export default function ActivityDetail() {
       {/* Top Navbar Header */}
       <header className="bg-white border-b border-slate-200 h-16 px-8 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/activity")}
-            className="flex items-center gap-2 text-sm font-medium text-blue-600 border border-slate-200 bg-white rounded-lg px-4 py-2 hover:bg-slate-50 transition-colors"
-          >
-            <FiArrowLeft className="w-4 h-4" />
-            Back to Logs
-          </Button>
+          <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate(-1)} 
+                  className="flex items-center gap-2 text-slate-600 hover:text-slate-900 -ml-2 group transition-colors"
+                >
+                  <FiArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+                  Back to Activity Dashboard
+                </Button>
         </div>
       </header>
 

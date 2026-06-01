@@ -42,6 +42,7 @@ export function InventoryFilter<TData>({ table }: InventoryFilterProps<TData>) {
           <SelectItem value="Returned">Returned</SelectItem>
           <SelectItem value="Maintenance">Maintenance</SelectItem>
           <SelectItem value="Pending">Pending</SelectItem>
+          <SelectItem value="Retired">Retired</SelectItem>
         </SelectContent>
       </Select>
     </div>

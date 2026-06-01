@@ -49,6 +49,8 @@ export function InventoryDetail() {
         return "bg-amber-50 text-amber-700 border-amber-200"
         case "pending":
           return "bg-amber-50 text-amber-700 border-amber-200"
+        case "retired":
+          return "bg-red-300 text-red-800 border-red-100"
       default:
         return "bg-slate-50 text-slate-700 border-slate-200"
     }
