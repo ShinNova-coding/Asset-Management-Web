@@ -94,7 +94,7 @@ const AddEmployeeForm: React.FC = () => {
                 
                 <div className="space-y-2">
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
-                    Full Name
+                    Name
                   </label>
                   <input
                     type="text"
@@ -127,7 +127,7 @@ const AddEmployeeForm: React.FC = () => {
 
                 <div className="space-y-2">
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
-                    Joining Date
+                    Start Date
                   </label>
 
                   <div className="relative">

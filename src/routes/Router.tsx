@@ -9,7 +9,7 @@ import Layout from "@/layouts/Layout"
 import { NotificationDropdown } from "@/layouts/NotificationDropDown"
 import DashboardPage from "@/pages/Dashboard/DashboardPage"
 import InventoryPage from "@/pages/Inventory/InventoryPage"
-
+import AssignmentPage from "@/pages/Assignment/AssignmentPage";
 import UserManagementPage from "@/pages/UserManagement/UserManagementPage"
 import ActivityPage from "@/pages/Activity/ActivityPage"
 import ActivityUpdate from "@/components/features/Activity/ActivityUpdate"
@@ -21,11 +21,13 @@ import AddNewAsset from "@/pages/Inventory/AddNewAsset"
 import { InventoryDetail } from "@/components/features/Inventory/InventoryDetail"
 import EmployeeListPage from "@/pages/UserManagement/EmployeeListPage";
 import EmployeeDetailsPage from "@/pages/UserManagement/EmployeeDetailsPage";
+import MaintenanceDetailsForm from "@/components/features/Maintenance/MaintenanceDetailsForm";
+import AssignmentDetailPage from "@/components/features/Assignment/AssignmentDetailPage";
+import AssetListPage from "@/components/features/dashboard/AssetListPage";
+import AssetCategoriesCards from "@/components/features/dashboard/AssetCategoriesCards";
 
 
 
-
-  
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -50,7 +52,13 @@ export const router = createBrowserRouter([
         path: "dashboard",
         element: <DashboardPage />,
       },
-
+       {
+  path: "assets",
+  element: <AssetListPage />,
+},
+        
+          
+  
       {
         path: "inventory",
         element: <InventoryPage />,
@@ -68,7 +76,10 @@ export const router = createBrowserRouter([
         path: "usermanagement",
         element: <UserManagementPage />,
       },
-
+{
+        path: "assignment",
+        element: <AssignmentPage />,
+      },
       {
         path: "activity",
         element: <ActivityPage />,
@@ -103,7 +114,13 @@ export const router = createBrowserRouter([
     path: "/employee/:employeeId",
     element: <EmployeeDetailsPage />,
   },
- 
+       {
+        path: "maintenance/:id",
+        element: <MaintenanceDetailsForm />,
+      },
+    { path: "assignment/:id",
+        element: <AssignmentDetailPage />,
+        },
     ],
   },
 ])

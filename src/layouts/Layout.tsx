@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   Boxes,
   Users,
+  FileEdit,
   ClipboardList,
   Wrench,
 } from "lucide-react"
@@ -23,9 +24,9 @@ import {
   Outlet,
   useLocation,
 } from "react-router-dom"
-
 import Navigation from "@/components/ui/navigation"
 import { BsFillBoxFill } from "react-icons/bs"
+
 
 const menuItems = [
   {
@@ -44,14 +45,19 @@ const menuItems = [
     path: "/usermanagement",
   },
   {
-    title: "Activity",
-    icon: ClipboardList,
-    path: "/activity",
+    title: "Assignment",
+    icon: FileEdit,
+    path: "/assignment",
   },
   {
     title: "Maintenance",
     icon: Wrench,
     path: "/maintenance",
+  },
+  {
+    title: "Activity",
+    icon: ClipboardList,
+    path: "/activity",
   },
 ]
 

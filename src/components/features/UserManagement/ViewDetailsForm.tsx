@@ -34,13 +34,13 @@ export default function ViewDetailsForm({ data }: Props) {
         <div className="flex items-center gap-4">
           <img
             src={data.profileImage || "https://via.placeholder.com/120"}
-            alt="Profile"
-            className="w-24 h-24 rounded-full border object-cover"
+            alt=""
+            className="w-20 h-20 rounded-full border object-cover"
           />
 
           <div>
             <p className="text-lg font-medium">{data.name}</p>
-            <p className="text-gray-500">{data.position}</p>
+            
           </div>
         </div>
 
@@ -52,7 +52,7 @@ export default function ViewDetailsForm({ data }: Props) {
           <Field label="Position" value={data.position} />
           <Field label="Status" value={data.status} />
           <Field label="Role / Access Level" value={data.role} />
-          <Field label="Joining Date" value={data.joiningDate} />
+          <Field label="Position" value={data.position} />
           <Field label="Start Date" value={data.startDate} />
           <Field label="End Date" value={data.endDate} />
         </div>

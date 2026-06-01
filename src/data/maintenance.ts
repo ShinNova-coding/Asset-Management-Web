@@ -1,8 +1,8 @@
-export type Maintenance = {
-  employeeId: string
-  name: string
+export type Maintenance = { 
+  "employee name": string
+  "asset ID": string
   category: string
-  status: "Pending" | "In Progress" | "Complete"
+  status: "Request" | "Pending" | "In Progress" | "Complete"
   stage: "pending" | "approved" | "completed"
   remark?: string
   vendorName?: string
@@ -13,34 +13,34 @@ export type Maintenance = {
 }
 
 export const maintenanceData: Maintenance[] = [
-  { employeeId: "EMP-1", name: "Employee 1", category: "Laptop", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-2", name: "Employee 2", category: "Desktop", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-3", name: "Employee 3", category: "Monitor", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-4", name: "Employee 4", category: "Tablet", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-5", name: "Employee 5", category: "Printer", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-6", name: "Employee 6", category: "Desktop", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-7", name: "Employee 7", category: "Monitor", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-8", name: "Employee 8", category: "Computer", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-9", name: "Employee 9", category: "Laptop", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-10", name: "Employee 10", category: "Chair", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-11", name: "Employee 11", category: "Tablet", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-12", name: "Employee 12", category: "Desktop", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-13", name: "Employee 13", category: "Laptop", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-14", name: "Employee 14", category: "Chair", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-15", name: "Employee 15", category: "Printer", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-16", name: "Employee 16", category: "Laptop", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-17", name: "Employee 17", category: "Desktop", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-18", name: "Employee 18", category: "Monitor", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-19", name: "Employee 19", category: "Tablet", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-20", name: "Employee 20", category: "Printer", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-21", name: "Employee 21", category: "Monitor", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-22", name: "Employee 22", category: "Chair", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-23", name: "Employee 23", category: "Laptop", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-24", name: "Employee 24", category: "Computer", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-25", name: "Employee 25", category: "Server", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-26", name: "Employee 26", category: "Chair", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-27", name: "Employee 27", category: "Desktop", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-28", name: "Employee 28", category: "Printer", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-29", name: "Employee 29", category: "Tablet", status: "Pending", stage: "pending" },
-  { employeeId: "EMP-30", name: "Employee 30", category: "Laptop", status: "Pending", stage: "pending" },
+  { "employee name": "Employee 1",  "asset ID":"AK-100", category: "Laptop", status: "Request", stage: "pending" },
+  { "employee name": "Employee 2",  "asset ID":"AK-101",category: "Desktop", status: "Request", stage: "pending" },
+  { "employee name": "Employee 3",  "asset ID":"AK-102",category: "Monitor", status: "Request", stage: "pending" },
+  { "employee name": "Employee 4",  "asset ID":"AK-103",category: "Tablet", status: "Request", stage: "pending" },
+  { "employee name": "Employee 5",  "asset ID":"AK-104",category: "Printer", status: "Request", stage: "pending" },
+  { "employee name": "Employee 6",  "asset ID":"AK-105",category: "Desktop", status: "Request", stage: "pending" },
+  { "employee name": "Employee 7",  "asset ID":"AK-106",category: "Monitor", status: "Request", stage: "pending" },
+  { "employee name": "Employee 8",  "asset ID":"AK-107",category: "Computer", status: "Request", stage: "pending" },
+  { "employee name": "Employee 9",  "asset ID":"AK-108",category: "Laptop", status: "Request", stage: "pending" },
+  { "employee name": "Employee 10", "asset ID":"AK-109",category: "Chair", status: "Request", stage: "pending" },
+  { "employee name": "Employee 11", "asset ID":"AK-110",category: "Tablet", status: "Request", stage: "pending" },
+  { "employee name": "Employee 12", "asset ID":"AK-111",category: "Desktop", status: "Request", stage: "pending" },
+  { "employee name": "Employee 13", "asset ID":"AK-112",category: "Laptop", status: "Request", stage: "pending" },
+  { "employee name": "Employee 14", "asset ID":"AK-113",category: "Chair", status: "Request", stage: "pending" },
+  { "employee name": "Employee 15", "asset ID":"AK-114",category: "Printer", status: "Request", stage: "pending" },
+  { "employee name": "Employee 16", "asset ID":"AK-115",category: "Laptop", status: "Request", stage: "pending" },
+  { "employee name": "Employee 17", "asset ID":"AK-116",category: "Desktop", status: "Request", stage: "pending" },
+  { "employee name": "Employee 18", "asset ID":"AK-117",category: "Monitor", status: "Request", stage: "pending" },
+  { "employee name": "Employee 19", "asset ID":"AK-118",category: "Tablet", status: "Request", stage: "pending" },
+  { "employee name": "Employee 20", "asset ID":"AK-119",category: "Printer", status: "Request", stage: "pending" },
+  { "employee name": "Employee 21", "asset ID":"AK-120",category: "Monitor", status: "Request", stage: "pending" },
+  { "employee name": "Employee 22", "asset ID":"AK-121",category: "Chair", status: "Request", stage: "pending" },
+  { "employee name": "Employee 23", "asset ID":"AK-122",category: "Laptop", status: "Request", stage: "pending" },
+  { "employee name": "Employee 24", "asset ID":"AK-123",category: "Computer", status: "Request", stage: "pending" },
+  { "employee name": "Employee 25", "asset ID":"AK-124",category: "Server", status: "Request", stage: "pending" },
+  { "employee name": "Employee 26", "asset ID":"AK-125",category: "Chair", status: "Request", stage: "pending" },
+  { "employee name": "Employee 27", "asset ID":"AK-126",category: "Desktop", status: "Request", stage: "pending" },
+  { "employee name": "Employee 28", "asset ID":"AK-127",category: "Printer", status: "Request", stage: "pending" },
+  { "employee name": "Employee 29", "asset ID":"AK-128",category: "Tablet", status: "Request", stage: "pending" },
+  { "employee name": "Employee 30", "asset ID":"AK-129",category: "Laptop", status: "Request", stage: "pending" },
 ]

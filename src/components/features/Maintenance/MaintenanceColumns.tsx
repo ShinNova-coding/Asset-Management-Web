@@ -6,13 +6,13 @@ import type { Maintenance } from "@/data/maintenance"
 
 export const columns: ColumnDef<Maintenance>[] = [
   {
-    accessorKey: "employeeId",
-    header: "Employee ID",
+    accessorKey: "employee name",
+    header: "Employee Name",
   },
 
   {
-    accessorKey: "name",
-    header: "Name",
+    accessorKey: "asset ID",
+    header: "Asset ID",
   },
 
   {
@@ -22,7 +22,7 @@ export const columns: ColumnDef<Maintenance>[] = [
 
   {
     accessorKey: "status",
-    header: "Status",
+    header: "Progress",
     cell: ({ row }) => {
       const status = row.getValue("status") as string
 

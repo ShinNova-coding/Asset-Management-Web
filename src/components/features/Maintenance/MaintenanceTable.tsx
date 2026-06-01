@@ -21,10 +21,11 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import type { Maintenance } from "@/data/maintenance"
-import { columns } from "./MaintenanceColumns"
+import { columns as baseColumns } from "./MaintenanceColumns"
 import { MaintenanceSearch } from "./MaintenanceSearchBox"
 import { MaintenanceRemark } from "./MaintenanceRemark"
 import { MaintenanceDetailModal } from "./MaintenanceDetailModal"
+import { useNavigate } from "react-router-dom"
 
 const durationOptions = [
   { value: "1-hour", label: "1 hour" },
@@ -79,48 +80,54 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
     setLaptopType("")
   }
 
-  const submitRemark = () => {
-    if (!selectedItem) return
+const submitRemark = () => {
+  if (!selectedItem) return
 
-    setData((prev) =>
-      prev.map((row) =>
-        row.employeeId === selectedItem.employeeId
-          ? {
-              ...row,
-              stage: "approved",
-              status: "In Progress",
-              remark: remarkText || "No remark provided",
-            }
-          : row
-      )
+  setData((prev) =>
+    prev.map((row) =>
+      row["employee name"] === selectedItem["employee name"]
+        ? {
+            ...row,
+            stage: "approved",
+            status: "In Progress",
+            remark: remarkText || "No remark provided",
+          }
+        : row
     )
+  )
 
-    setToastMessage(`${selectedItem.name} approved and moved to in progress.`)
-    closeDialog()
-  }
+  setToastMessage(
+    `${selectedItem["employee name"]} approved and moved to in progress.`
+  )
 
-  const submitMaintenanceDetail = () => {
-    if (!selectedItem) return
+  closeDialog()
+}
 
-    setData((prev) =>
-      prev.map((row) =>
-        row.employeeId === selectedItem.employeeId
-          ? {
-              ...row,
-              stage: "completed",
-              status: "Complete",
-              vendorName: vendorName || "Unknown vendor",
-              estimatedCost,
-              duration: duration || "Not specified",
-              laptopType: laptopType || row.category,
-            }
-          : row
-      )
+const submitMaintenanceDetail = () => {
+  if (!selectedItem) return
+
+  setData((prev) =>
+    prev.map((row) =>
+      row["asset ID"] === selectedItem["asset ID"]
+        ? {
+            ...row,
+            stage: "completed",
+            status: "Complete",
+            vendorName: vendorName || "Unknown vendor",
+            estimatedCost,
+            duration: duration || "Not specified",
+            laptopType: laptopType || row.category,
+          }
+        : row
     )
+  )
 
-    setToastMessage(`${selectedItem.name} maintenance completed.`)
-    closeDialog()
-  }
+  setToastMessage(
+    `${selectedItem["employee name"]} maintenance completed.`
+  )
+
+  closeDialog()
+}
 
   React.useEffect(() => {
     if (toastMessage) {
@@ -128,6 +135,109 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
       return () => clearTimeout(timer)
     }
   }, [toastMessage])
+
+  // Patch columns to update status column and actions for 'with request' state
+  const columns = React.useMemo(() => {
+    return baseColumns.map((col) => {
+      // Use 'id' for matching status column
+      if ((col as any).accessorKey === "status" || (col as any).id === "status") {
+        return {
+          ...col,
+          header: "Status",
+          cell: ({ row }: { row: any }) => {
+            const status = row.getValue("status") as string
+            const statusStyles: Record<string, string> = {
+              Request: "bg-red-100 text-red-700 border border-red-200",
+              Pending: "bg-gray-200 text-gray-700 border border-gray-200",
+              "In Progress": "bg-amber-100 text-amber-700 border border-amber-200",
+              Complete: "bg-green-100 text-green-700 border border-green-200",
+              Cancelled: "bg-gray-200 text-gray-600 border border-gray-300",
+            }
+            return (
+              <div className="flex items-center">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[status] ?? "bg-slate-100 text-slate-700 border border-slate-200"}`}
+                >
+                  {status}
+                </span>
+              </div>
+            )
+          },
+        }
+      }
+      if ((col as any).id === "actions") {
+        return {
+          ...col,
+          cell: ({ row, table }: { row: any; table: any }) => {
+            const item = row.original as Maintenance & { status?: string }
+            // Show Approve/Cancel for 'with request' status
+            if (item.status === "Request") {
+              return (
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={e => {
+                      e.stopPropagation()
+                      setData(prev => prev.map(row =>
+                        row["asset ID"] === item["asset ID"]
+                          ? { ...row, status: "Pending", stage: "pending", _showMaintain: true } as Maintenance & { _showMaintain?: boolean }
+                          : row
+                      ))
+                      setToastMessage(`${item["employee name"]} request approved.`)
+                    }}
+                  >Approve</Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={e => {
+                      e.stopPropagation()
+                      setData(prev => prev.filter(row => row["asset ID"] !== item["asset ID"]))
+                      setToastMessage(`${item["employee name"]} request cancelled and removed.`)
+                    }}
+                  >Cancel</Button>
+                </div>
+              )
+            }
+            // After Approve, show Maintain button for this row only
+            if (item.status === "Pending" && (item as any)._showMaintain) {
+              return (
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleRowAction(item)
+                  }}
+                >Maintain</Button>
+              )
+            }
+            // Show Complete button when status is In Progress
+            if (item.status === "In Progress") {
+              return (
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={e => {
+                    e.stopPropagation()
+                    setSelectedItem(item)
+                    setVendorName(item.vendorName ?? "")
+                    setEstimatedCost(item.estimatedCost ?? "0.00")
+                    setDuration(item.duration ?? "")
+                    setLaptopType(item.laptopType ?? item.category ?? "")
+                    setDialogMode("detail")
+                  }}
+                >Complete</Button>
+              )
+            }
+            // Fallback to original action
+            return null
+          },
+        }
+      }
+      return col
+    })
+  }, [baseColumns, setData])
 
   const table = useReactTable({
     data,
@@ -147,6 +257,8 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
     initialState: { pagination: { pageSize: 5 } },
   })
 
+  const navigate = useNavigate()
+
   const pageCount = table.getPageCount()
   const currentPage = table.getState().pagination.pageIndex
 
@@ -158,7 +270,7 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
 
       <div className="rounded-md border-slate-400 overflow-hidden">
         <Table>
-          <TableHeader className="bg-blue-300">
+          <TableHeader className="bg-blue-400">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => (
@@ -175,7 +287,12 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="transition-colors hover:bg-slate-50 border-slate-300"
+                  className="transition-colors hover:bg-gray-100 border-slate-300 cursor-pointer"
+                  onClick={() => {
+                    const item = row.original as any
+                    // navigate to maintenance details using the asset ID
+                    navigate(`/maintenance/${encodeURIComponent(item["asset ID"])}`)
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-3">
@@ -283,8 +400,6 @@ export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
         duration={duration}
         onDurationChange={setDuration}
         durationOptions={durationOptions}
-        laptopType={laptopType}
-        onLaptopChange={setLaptopType}
         onClose={closeDialog}
         onSubmit={submitMaintenanceDetail}
       />
