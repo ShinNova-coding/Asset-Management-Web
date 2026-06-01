@@ -1,6 +1,6 @@
 import React from "react";
 
-type ActivityType = "Request" | "Return" | "Maintenance";
+type ActivityType = "Requested" | "Approved" | "Rejected" | "Returned";
 
 interface ActivityItem {
   id: string;
@@ -14,54 +14,56 @@ interface ActivityItem {
 const activities: ActivityItem[] = [
   {
     id: "1",
-    username: "Chaw Su Su Win",
+    username: "Employee 1",
     category: "Laptop",
     inventory: "HP",
-    activity: "Request",
+    activity: "Requested",
     date: "10.5.2026",
   },
   {
     id: "2",
-    username: "Khin Sandi Win",
+    username: "Employee 2",
     category: "Monitor",
     inventory: "Dell",
-    activity: "Maintenance",
+    activity: "Approved",
     date: "25.1.2026",
   },
   {
     id: "3",
-    username: "Team Leader",
+    username: "Employee 3",
     category: "Desktop",
     inventory: "Lenovo",
-    activity: "Return",
+    activity: "Rejected",
     date: "19.8.2025",
   },
   {
     id: "4",
-    username: "Network Admin",
+    username: "Employee 4",
     category: "Chair",
     inventory: "Ergonomic",
-    activity: "Request",
+    activity: "Returned",
     date: "15.3.2025",
   },
- {
+  {
     id: "5",
-    username: "Software Engineer",
+    username: "Employee 5",
     category: "Software",
     inventory: "Adobe",
-    activity: "Maintenance",
+    activity: "Requested",
     date: "18.11.2024",
-  }, 
+  },
 ];
 
 const getActivityStyle = (activity: ActivityType) => {
   switch (activity) {
-    case "Request":
-      return "bg-blue-100 text-blue-600";
-    case "Return":
-      return "bg-green-100 text-green-600";
-    case "Maintenance":
-      return "bg-yellow-100 text-yellow-600";
+    case "Requested":
+      return "bg-blue-100 text-blue-700";
+    case "Approved":
+      return "bg-green-100 text-green-700";
+    case "Rejected":
+      return "bg-red-100 text-red-700";
+    case "Returned":
+      return "bg-yellow-100 text-yellow-700";
     default:
       return "";
   }
@@ -71,13 +73,11 @@ const RecentActivities: React.FC = () => {
   return (
     <div className="p-6">
       <div className="bg-white shadow-sm rounded-lg border border-slate-200">
-
         {/* Header */}
         <div className="flex justify-between items-center px-4 py-3 border-b">
           <h2 className="text-lg font-bold text-black">
             Recent Activities
           </h2>
-          
         </div>
 
         {/* Table */}
@@ -85,7 +85,7 @@ const RecentActivities: React.FC = () => {
           <thead className="bg-blue-400 text-white border-amber-100 text-left border-slate-50">
             <tr>
               <th className="px-4 py-2 font-medium">Username</th>
-              <th className="px-4 py-2 font-medium">Category</th> 
+              <th className="px-4 py-2 font-medium">Category</th>
               <th className="px-4 py-2 font-medium">Asset Name</th>
               <th className="px-4 py-2 font-medium">Activity</th>
               <th className="px-4 py-2 font-medium">Date</th>
@@ -98,16 +98,8 @@ const RecentActivities: React.FC = () => {
                 key={item.id}
                 className="border-b last:border-none hover:bg-gray-100 transition-colors border-slate-300"
               >
-                <td className="px-4 py-3 flex items-center gap-2">
-                  {/* <span className="w-2 h-2 bg-gray-800 rounded-full"></span> */}
-
-                  <span
-                    className={`px-2 py-1 rounded text-md font-medium ${getActivityStyle(
-                      item.activity
-                    )}`}
-                  >
-                    {item.username}
-                  </span>
+                <td className="px-4 py-3">
+                  {item.username}
                 </td>
 
                 <td className="px-4 py-3 text-gray-700">
@@ -118,8 +110,14 @@ const RecentActivities: React.FC = () => {
                   {item.inventory}
                 </td>
 
-                <td className="px-4 py-3 text-gray-700">
-                  {item.activity}
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${getActivityStyle(
+                      item.activity
+                    )}`}
+                  >
+                    {item.activity}
+                  </span>
                 </td>
 
                 <td className="px-4 py-3 text-gray-700">
@@ -129,7 +127,6 @@ const RecentActivities: React.FC = () => {
             ))}
           </tbody>
         </table>
-
       </div>
     </div>
   );
