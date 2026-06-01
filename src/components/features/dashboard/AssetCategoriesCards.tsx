@@ -1,4 +1,8 @@
+// src/components/features/dashboard/AssetCategoriesCards.tsx
+
 import React from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   ComputerDesktopIcon,
   DevicePhoneMobileIcon,
@@ -7,26 +11,19 @@ import {
   CommandLineIcon,
 } from "@heroicons/react/24/outline";
 
-interface CategoryCardProps {
-  title: string;
-  count: string;
-  unit: string;
-  Icon: React.ElementType;
-  colorClass: string;
-  borderColor: string;
-}
-
-const CategoryCard: React.FC<CategoryCardProps> = ({
+const CategoryCard = ({
   title,
   count,
   unit,
   Icon,
   colorClass,
   borderColor,
-}) => {
+  onClick,
+}: any) => {
   return (
     <div
-      className={`bg-white p-6 rounded-xl border-t-3 ${borderColor} shadow-sm flex flex-col items-start w-full`}
+      onClick={onClick}
+      className={`bg-white p-6 rounded-xl border-t-4 ${borderColor} shadow-sm flex flex-col items-start w-full cursor-pointer hover:shadow-lg transition`}
     >
       <div className="bg-slate-50 p-2 rounded-lg mb-4">
         <Icon className="w-6 h-6 text-slate-400" />
@@ -41,15 +38,15 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
       </p>
 
       <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-        <div
-          className={`h-full ${colorClass} w-3/4 rounded-full`}
-        ></div>
+        <div className={`h-full ${colorClass} w-3/4 rounded-full`} />
       </div>
     </div>
   );
 };
 
-const AssetCategories: React.FC = () => {
+const AssetCategoriesCards = () => {
+  const navigate = useNavigate();
+
   const categories = [
     {
       title: "Laptop",
@@ -58,6 +55,7 @@ const AssetCategories: React.FC = () => {
       Icon: ComputerDesktopIcon,
       colorClass: "bg-indigo-900",
       borderColor: "border-indigo-900",
+      type: "laptop",
     },
     {
       title: "Phone",
@@ -66,6 +64,7 @@ const AssetCategories: React.FC = () => {
       Icon: DevicePhoneMobileIcon,
       colorClass: "bg-blue-500",
       borderColor: "border-blue-200",
+      type: "phone",
     },
     {
       title: "Monitor",
@@ -74,6 +73,7 @@ const AssetCategories: React.FC = () => {
       Icon: TvIcon,
       colorClass: "bg-teal-500",
       borderColor: "border-teal-100",
+      type: "monitor",
     },
     {
       title: "Chair",
@@ -82,6 +82,7 @@ const AssetCategories: React.FC = () => {
       Icon: TicketIcon,
       colorClass: "bg-orange-400",
       borderColor: "border-orange-200",
+      type: "chair",
     },
     {
       title: "Software",
@@ -90,30 +91,26 @@ const AssetCategories: React.FC = () => {
       Icon: CommandLineIcon,
       colorClass: "bg-purple-400",
       borderColor: "border-purple-200",
+      type: "software",
     },
   ];
 
   return (
     <div className="p-3 bg-slate-50 w-full">
-      <h2 className="text-xl font-bold text-black mb-8">
-        Asset Categories
-      </h2>
+      <h2 className="text-xl font-bold mb-8">Asset Categories</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 max-w-[1400px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {categories.map((item, index) => (
           <CategoryCard
             key={index}
-            title={item.title}
-            count={item.count}
-            unit={item.unit}
-            Icon={item.Icon}
-            colorClass={item.colorClass}
-            borderColor={item.borderColor}
+            {...item}
+            onClick={() => navigate(`/assets?type=${item.type}`)}
           />
         ))}
       </div>
+
     </div>
   );
 };
 
-export default AssetCategories;
+export default AssetCategoriesCards;
