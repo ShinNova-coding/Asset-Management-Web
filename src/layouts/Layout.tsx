@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +17,8 @@ import {
   FileEdit,
   ClipboardList,
   Wrench,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react"
 
 import {
@@ -58,12 +60,21 @@ const menuItems = [
     title: "Activity",
     icon: ClipboardList,
     path: "/activity",
+    // Added children items for the dropdown
+    children: [
+      { title: "Maintenance Logs", path: "/activity/maintenance-logs" },
+      { title: "Assignment Logs", path: "/activity/assignment-logs" },
+      { title: "Activity Logs", path: "/activity/activity-logs" },
+    ]
   },
 ]
 
 export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
+  
+  // State to track if the Activity dropdown is open
+  const [isActivityOpen, setIsActivityOpen] = useState(false)
 
   return (
     <SidebarProvider>
@@ -87,23 +98,69 @@ export default function Layout() {
             {/* MENU */}
             <SidebarMenu className="space-y-3 mt-6">
               {menuItems.map((item) => {
-                const isActive =
-                  location.pathname.startsWith(item.path) ||
-                  (item.path === "/dashboard" && location.pathname === "/")
+                const hasChildren = !!item.children
+                
+                // Active logic for parent menu items
+                const isActive = hasChildren 
+                  ? location.pathname.startsWith(item.path)
+                  : location.pathname.startsWith(item.path) || (item.path === "/dashboard" && location.pathname === "/")
 
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      onClick={() => navigate(item.path)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-md font-medium transition-colors ${
-                        isActive
-                          ? "bg-blue-500 text-white shadow-sm hover:bg-blue-500" 
-                          : "text-slate-600 hover:bg-blue-100 hover:text-blue-600"
-                      }`}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      {item.title}
-                    </SidebarMenuButton>
+                    {hasChildren ? (
+                      /* DROPDOWN PARENT BUTTON */
+                      <div>
+                        <SidebarMenuButton
+                          onClick={() => setIsActivityOpen(!isActivityOpen)}
+                          className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-md font-medium transition-colors ${
+                            isActive
+                              ? "bg-blue-100 text-blue-600" 
+                              : "text-slate-600 hover:bg-blue-100 hover:text-blue-600"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <item.icon className="h-5 w-5" />
+                            {item.title}
+                          </div>
+                          {isActivityOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </SidebarMenuButton>
+
+                        {/* DROPDOWN CHILD SUBMENU */}
+                        {isActivityOpen && (
+                          <div className="mt-2 ml-6 space-y-1 border-l-2 border-slate-200 pl-2 transition-all">
+                            {item.children?.map((child) => {
+                              const isChildActive = location.pathname === child.path
+                              return (
+                                <button
+                                  key={child.title}
+                                  onClick={() => navigate(child.path)}
+                                  className={`flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                                    isChildActive
+                                      ? "bg-blue-500 text-white shadow-sm"
+                                      : "text-slate-500 hover:bg-blue-100 hover:text-blue-600"
+                                  }`}
+                                >
+                                  {child.title}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* REGULAR BUTTON (No Dropdown) */
+                      <SidebarMenuButton
+                        onClick={() => navigate(item.path)}
+                        className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-md font-medium transition-colors ${
+                          isActive
+                            ? "bg-blue-500 text-white shadow-sm hover:bg-blue-500" 
+                            : "text-slate-600 hover:bg-blue-100 hover:text-blue-600"
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {item.title}
+                      </SidebarMenuButton>
+                    )}
                   </SidebarMenuItem>
                 )
               })}
@@ -115,7 +172,6 @@ export default function Layout() {
         <div className="flex flex-1 flex-col">
 
           {/* TOP BAR ACTION PANEL */}
-          {/* Cleaned layout: The duplicate bell icon and blue profile button block has been completely removed */}
           <div className="relative w-full bg-white border-b border-slate-200 flex items-center justify-between h-16">
             <div className="flex-1">
               <Navigation />

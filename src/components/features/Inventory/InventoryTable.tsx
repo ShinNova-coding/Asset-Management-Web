@@ -1,4 +1,3 @@
-// InventoryTable.tsx
 "use client"
 
 import * as React from "react"
@@ -34,25 +33,39 @@ interface InventoryTableProps {
 export function InventoryTable({ data: initialData }: InventoryTableProps) {
   const navigate = useNavigate() 
   
-  // Helper utility function to parse items and auto-retire expired warranties
   const processExpiredWarranties = (items: any[]): any[] => {
+    if (!Array.isArray(items)) return []
     return items.map((item) => {
-      const warrantyText = (item.warranty || "").toLowerCase()
+      const warrantyValue = item.warranty_period || item.warranty || ""
+      const warrantyText = String(warrantyValue).toLowerCase()
+      
       if (warrantyText.includes("expired")) {
-        return { ...item, status: "Retired" }
+        return { ...item, status: "retired" }
       }
       return item
     })
   }
 
-  // Instantly read data from localStorage on mount and apply auto-retire rules
+  // Helper to extract tracking arrays safely
+  const getExcludedDeletedItems = (baseItems: any[]): any[] => {
+    if (typeof window === "undefined") return baseItems
+    const excludedTrack = localStorage.getItem("deleted_asset_ids")
+    const deletedIds: string[] = excludedTrack ? JSON.parse(excludedTrack) : []
+    return baseItems.filter((item) => !deletedIds.includes(item.asset_id))
+  }
+
+  // Initialize data checking both cache and block-lists
   const [data, setData] = React.useState<any[]>(() => {
     if (typeof window !== "undefined") {
       const cachedData = localStorage.getItem("inventory_data")
-      const baseData = cachedData ? JSON.parse(cachedData) : initialData
-      return processExpiredWarranties(baseData)
+      if (cachedData) {
+        const parsed = JSON.parse(cachedData)
+        if (parsed.length > 0) {
+          return getExcludedDeletedItems(processExpiredWarranties(parsed))
+        }
+      }
     }
-    return processExpiredWarranties(initialData)
+    return getExcludedDeletedItems(processExpiredWarranties(initialData || []))
   }) 
 
   const [globalFilter, setGlobalFilter] = React.useState("")
@@ -64,19 +77,22 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   })
   const [showToast, setShowToast] = React.useState(false)
 
-  // Force table internal data state to fetch updates and process rules when returning from forms
+  // FIXED: Only let incoming props overwrite state if no custom client modifications exist
   React.useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (initialData && initialData.length > 0) {
       const cachedData = localStorage.getItem("inventory_data")
-      if (cachedData) {
-        setData(processExpiredWarranties(JSON.parse(cachedData)))
+      // If we don't have local user updates saved, safely load the raw initial data stream
+      if (!cachedData) {
+        setData(getExcludedDeletedItems(processExpiredWarranties(initialData)))
       }
     }
   }, [initialData])
 
-  // Sync state data safely back to localStorage cache pipeline whenever mutated
+  // Sync data updates to local storage cache pipeline
   React.useEffect(() => {
-    localStorage.setItem("inventory_data", JSON.stringify(data))
+    if (data) {
+      localStorage.setItem("inventory_data", JSON.stringify(data))
+    }
   }, [data])
 
   const handleDeleteTrigger = (id: string) => {
@@ -85,11 +101,23 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
 
   const handleConfirmDelete = () => {
     if (deleteModal.targetId) {
-      const updatedList = data.filter(
-        (item) => item.asset !== deleteModal.targetId && item.id !== deleteModal.targetId
-      )
+      const targetId = deleteModal.targetId
       
+      // 1. Remove from local screen UI state
+      const updatedList = data.filter((item) => item.asset_id !== targetId)
       setData(updatedList)
+
+      // 2. Persist deletion tracking block-list down to localStorage 
+      if (typeof window !== "undefined") {
+        const excludedTrack = localStorage.getItem("deleted_asset_ids")
+        const deletedIds: string[] = excludedTrack ? JSON.parse(excludedTrack) : []
+        
+        if (!deletedIds.includes(targetId)) {
+          deletedIds.push(targetId)
+          localStorage.setItem("deleted_asset_ids", JSON.stringify(deletedIds))
+        }
+      }
+      
       setDeleteModal({ isOpen: false, targetId: null })
       setShowToast(true)
     }
@@ -102,8 +130,11 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     }
   }, [showToast])
 
+  /* ========================================================
+     UPDATED EDIT FUNCTION: SENDS ONLY THE ID VALUE IN STATE
+     ======================================================== */
   const handleEdit = (item: any) => {
-    navigate("/inventory/add", { state: { editItem: item } })
+    navigate("/inventory/add", { state: { id: item.asset_id } })
   }
 
   const table = useReactTable({
@@ -119,9 +150,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
       updateRowAction: (targetId: string, newAction: string) => {
         setData((prevData) =>
           prevData.map((item) =>
-            item.id === targetId || item.asset === targetId
-              ? { ...item, action: newAction }
-              : item
+            item.asset_id === targetId ? { ...item, action: newAction } : item
           )
         )
       },
@@ -139,19 +168,12 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
 
   return (
     <div className="w-full space-y-4 p-3 relative">
-      
       <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full">
-        {/* Search Bar Block */}
         <div className="flex-1">
           <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 overflow-hidden">
-            <InventorySearch
-              value={globalFilter}
-              onChange={setGlobalFilter}
-            />
+            <InventorySearch value={globalFilter} onChange={setGlobalFilter} />
           </div>
         </div>
-
-        {/* Column Filters Selector Dropdown */}
         <div className="w-full md:w-[180px]">
           <div className="bg-transparent p-0">
             <InventoryFilter table={table} />
@@ -159,7 +181,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </div>
       </div>
 
-      {/* Main Table Interface Data View */}
       <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-xs">
         <Table>
           <TableHeader className="bg-blue-400">
@@ -185,7 +206,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
                     if (target.closest('button') || target.closest('svg') || target.closest('a')) {
                       return 
                     }
-                    navigate(`/inventory/${row.original.id || row.original.asset}`, { 
+                    navigate(`/inventory/${row.original.asset_id}`, { 
                       state: { item: row.original } 
                     })
                   }}
@@ -303,7 +324,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </div>
       )}
 
-      {/* Toast System Alert Popup */}
+      {/* Toast Alert */}
       {showToast && (
         <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-800 transition-all duration-300 transform translate-x-0 max-w-md">
           <FiCheckCircle className="text-green-400 shrink-0" size={20} />
@@ -320,7 +341,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
           </button>
         </div>
       )}
-
     </div>
   )
 }
