@@ -91,7 +91,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     setDeleteModal({ isOpen: true, targetId: id })
   }
 
-  // ✨ FIX: Fire a live server HTTP DELETE request to update Apidog/Database
   const handleConfirmDelete = async () => {
     if (deleteModal.targetId) {
       const targetId = deleteModal.targetId
@@ -99,8 +98,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
       try {
         const API_URL = `http://192.168.100.185:1010/api/asset/${targetId}`;
         const currentToken = localStorage.getItem("token") || "128|T7ZfI9NF6X0CnWSOpEIxdy4Xjka4mKtiYw4bllii6732bd8a";
-
-        console.log(`📡 Sending DELETE Request to: ${API_URL}`);
 
         const response = await fetch(API_URL, {
           method: "DELETE",
@@ -114,15 +111,10 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
           throw new Error(`Server returned status code: ${response.status}`);
         }
 
-        // --- SUCCESS FLOW ---
-        // 1. Remove from screen state UI
         const updatedList = data.filter((item) => item.asset_id !== targetId)
         setData(updatedList)
-
-        // 2. Clear old cached tables array so everything updates fresh
         localStorage.removeItem("inventory_data")
 
-        // 3. Fallback tracking safety block-list
         if (typeof window !== "undefined") {
           const excludedTrack = localStorage.getItem("deleted_asset_ids")
           const deletedIds: string[] = excludedTrack ? JSON.parse(excludedTrack) : []
@@ -134,7 +126,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         
         setShowToast(true)
       } catch (error: any) {
-        console.error("❌ Failed to delete asset from database backend server:", error);
+        console.error("❌ Failed to delete asset:", error);
         alert(`Could not delete asset from server:\n${error.message}`);
       } finally {
         setDeleteModal({ isOpen: false, targetId: null })
@@ -149,8 +141,26 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     }
   }, [showToast])
 
+  // 🛠️ Triggers when clicking "Edit" action button specifically (goes to /inventory/add)
   const handleEdit = (item: any) => {
-    navigate("/inventory/add", { state: { id: item.asset_id } })
+    const targetId = item.asset_id || item.id;
+    navigate("/inventory/add", { 
+      state: { 
+        id: targetId,
+        editItem: item 
+      } 
+    })
+  }
+
+  // 🌟 NEW: Triggers when clicking a Table Row (goes to read-only details page /inventory/:id)
+  const handleViewDetails = (item: any) => {
+    const targetId = item.asset_id || item.id;
+    navigate(`/inventory/${targetId}`, {
+      state: {
+        id: targetId,
+        detailsItem: item // Passes item details directly to your inventoryDetail.tsx view
+      }
+    })
   }
 
   const table = useReactTable({
@@ -162,7 +172,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     },
     meta: {
       deleteRow: handleDeleteTrigger,
-      editRow: handleEdit, 
+      editRow: handleEdit, // Kept for your dropdown action menus or edit icon columns
       updateRowAction: (targetId: string, newAction: string) => {
         setData((prevData) =>
           prevData.map((item) =>
@@ -220,8 +230,10 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
                       key={cell.id} 
                       className="py-3 text-slate-700 text-sm"
                       onClick={(e) => {
+                        // 🌟 FIX: If the user clicks any standard column field, route them to Details. 
+                        // If they specifically hit the "actions" block (edit/delete buttons), block this route.
                         if (cell.column.id !== "actions") {
-                          handleEdit(row.original);
+                          handleViewDetails(row.original);
                         }
                       }}
                     >

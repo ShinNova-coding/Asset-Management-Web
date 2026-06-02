@@ -22,14 +22,13 @@ import {
 } from "react-icons/fi"
 
 export function InventoryDetail() {
-  const { id } = useParams<{ id: string }>() // ✨ Extract the asset ID directly from the URL path parameter
+  const { id } = useParams<{ id: string }>() 
   const location = useLocation()
   const navigate = useNavigate()
   
-  // 1. Initial attempt: Grab asset data from React Router's pushed location state
   const [assetItem, setAssetItem] = useState<any>(location.state?.item || null)
   const [canEdit, setCanEdit] = useState(false)
-  const [loading, setLoading] = useState(!assetItem) // Only show loading spinner if state isn't preset
+  const [loading, setLoading] = useState(!assetItem)
 
   useEffect(() => {
     // --- 🔑 PERMISSIONS GUARD BLOCK ---
@@ -39,11 +38,11 @@ export function InventoryDetail() {
         const user = JSON.parse(localUserData)
         const userRole = user.role?.toLowerCase()
         
-        // Superadmins and managers can write changes; general admins remain read-only
+        // Superadmins and managers can write changes; general admins remain completely read-only
         if (userRole === "superadmin" || userRole === "manager") {
           setCanEdit(true)
         } else {
-          setCanEdit(false)
+          setCanEdit(false) // Standard Admin can only view data
         }
       }
     } catch (err) {
@@ -52,7 +51,6 @@ export function InventoryDetail() {
     }
 
     // --- 💾 DATA RECOVERY FALLBACK (On Refresh) ---
-    // If the page is reloaded and location.state is lost, query data using the URL ID
     if (!assetItem && id) {
       try {
         const cachedData = localStorage.getItem("inventory_data")
@@ -95,6 +93,7 @@ export function InventoryDetail() {
   }
 
   const handleEditRedirect = () => {
+    if (!canEdit) return
     navigate("/inventory/add", { 
       state: { 
         id: assetItem.asset_id || assetItem.id,
@@ -103,7 +102,6 @@ export function InventoryDetail() {
     })
   }
 
-  // --- RENDERING ROUTE GUARDS ---
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto my-32 text-center text-slate-500 text-sm animate-pulse">
@@ -145,7 +143,7 @@ export function InventoryDetail() {
           Back to Inventory Dashboard
         </Button>
 
-        {/* ROLE CONTEXT GUARD */}
+        {/* ROLE CONTEXT GUARD: Only displays if user has manager/superadmin flags */}
         {canEdit && (
           <Button 
             onClick={handleEditRedirect}
@@ -181,10 +179,7 @@ export function InventoryDetail() {
 
       {/* Detail Split Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        
-        {/* Left Side Specifications */}
         <div className="lg:col-span-2 space-y-6">
-          
           {/* Specifications Card */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
@@ -250,11 +245,9 @@ export function InventoryDetail() {
           </div>
 
          
-          
-
         </div>
 
-        {/* Right Sidebar - Profile Image */}
+        {/* Right Sidebar */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4 sticky top-6">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <FiFileText size={18} className="text-blue-600" />
@@ -295,7 +288,6 @@ export function InventoryDetail() {
             <p>System changes tracked on database endpoints are synchronized here every time you toggle list elements.</p>
           </div>
         </div>
-
       </div>
     </div>
   )
