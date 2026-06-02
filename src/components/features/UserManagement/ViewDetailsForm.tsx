@@ -51,10 +51,9 @@ export default function ViewDetailsForm({ data }: Props) {
           <Field label="Address" value={data.address} />
           <Field label="Position" value={data.position} />
           <Field label="Status" value={data.status} />
-          <Field label="Role / Access Level" value={data.role} />
-          <Field label="Position" value={data.position} />
-          <Field label="Start Date" value={data.startDate} />
-          <Field label="End Date" value={data.endDate} />
+      
+          <Field label="Joined Date" value={data.joinedDate} />
+          <Field label="Left Date" value={data.leftDate} />
         </div>
       </div>
     </div>

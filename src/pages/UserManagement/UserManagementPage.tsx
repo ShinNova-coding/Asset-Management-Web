@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Employee } from '../../types/employee';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
-import { apiFetch } from '../../lib/api';
 
 import {
   Search,
@@ -54,9 +53,13 @@ const mapApiUserToEmployee = (user: ApiUser): Employee => ({
   phone: user.phone_number || "-",
 });
 
+const API_URL = "http://192.168.100.185:1010/api/user";
+const DEFAULT_TOKEN = "119|6UBfGxzFSshZIwJu69IWBcmbq9gIb9opQwlL2eX51d4a76c8";
+
 const UserManagement: React.FC = () => {
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [currentPage, setCurrentPage] = useState(0);
   const [data, setData] = useState<Employee[]>([]);
@@ -73,13 +76,32 @@ const UserManagement: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const existingToken = localStorage.getItem('token');
+      if (!existingToken) {
+        localStorage.setItem('token', DEFAULT_TOKEN);
+      }
+    }
+
     const fetchUsers = async () => {
       setLoading(true);
       setError("");
 
       try {
-        const response = await apiFetch("/user");
-        const users = response.data?.data || [];
+        const token = localStorage.getItem('token');
+        const response = await fetch(API_URL, {
+          headers: {
+            Accept: 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const users = payload?.data?.data || payload?.data || [];
         setData(users.map(mapApiUserToEmployee));
       } catch (err) {
         console.error(err);
@@ -90,7 +112,7 @@ const UserManagement: React.FC = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, [location.key]);
 
   const handleDeleteTrigger = (id: string) => {
     setDeleteModal({
