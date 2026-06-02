@@ -2,6 +2,40 @@
 
 const BASE_URL = "http://192.168.100.185:1010/api";
 
+type ApiErrorResponse = {
+  message?: string;
+  errors?: Record<string, string[] | string>;
+};
+
+const parseJsonResponse = async (response: Response) => {
+  const text = await response.text();
+
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+};
+
+const getErrorMessage = (errorData: unknown, fallback: string) => {
+  if (!errorData || typeof errorData !== "object") {
+    return fallback;
+  }
+
+  const data = errorData as ApiErrorResponse;
+  const validationMessages = data.errors
+    ? Object.values(data.errors).flatMap((value) =>
+        Array.isArray(value) ? value : [value]
+      )
+    : [];
+
+  return validationMessages[0] || data.message || fallback;
+};
+
 export async function apiFetch(
   endpoint: string,
   options: RequestInit = {}
@@ -29,18 +63,11 @@ export async function apiFetch(
     headers,
   });
 
+  const responseData = await parseJsonResponse(response);
+
   if (!response.ok) {
-    let message = `API Error: ${response.status}`;
-
-    try {
-      const errorData = await response.json();
-      message = errorData.message || message;
-    } catch (error) {
-      console.error(error);
-    }
-
-    throw new Error(message);
+    throw new Error(getErrorMessage(responseData, `API Error: ${response.status}`));
   }
 
-  return response.json();
+  return responseData;
 }

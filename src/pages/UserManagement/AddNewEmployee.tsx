@@ -1,16 +1,80 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ArrowLeft,
   User,
   ChevronDown,
-  Calendar,
   Camera,
 } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import type { Employee } from '../../types/employee';
 
-import { Link } from 'react-router-dom';
+const API_URL = 'http://192.168.100.185:1010/api/user';
+const DEFAULT_TOKEN = '119|6UBfGxzFSshZIwJu69IWBcmbq9gIb9opQwlL2eX51d4a76c8';
+
+interface FormState {
+  name: string;
+  employeeId: string;
+  email: string;
+  position: string;
+  joinedDate: string;
+  leftDate: string;
+  phoneNumber: string;
+  status: string;
+}
 
 const AddEmployeeForm: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const editItem = (location.state as { editItem?: Employee } | null)?.editItem;
+  const isEditMode = Boolean(editItem);
+
+  const [formState, setFormState] = useState<FormState>({
+    name: '',
+    employeeId: '',
+    email: '',
+    position: '',
+    joinedDate: '',
+    leftDate: '',
+    phoneNumber: '',
+    status: 'active',
+  });
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const existingToken = localStorage.getItem('token');
+      if (!existingToken) {
+        localStorage.setItem('token', DEFAULT_TOKEN);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (editItem) {
+      setFormState({
+        name: editItem.name,
+        employeeId: editItem.employeeId,
+        email: editItem.email,
+        position: editItem.position === '-' ? '' : editItem.position,
+        joinedDate: editItem.startDate === '-' ? '' : editItem.startDate,
+        leftDate: editItem.endDate === '-' ? '' : editItem.endDate,
+        phoneNumber: editItem.phone === '-' ? '' : editItem.phone,
+        status: editItem.status.toLowerCase(),
+      });
+      setProfileImage(editItem.profileImage);
+    }
+  }, [editItem]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormState((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -18,6 +82,69 @@ const AddEmployeeForm: React.FC = () => {
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setProfileImage(imageUrl);
+      setProfileFile(file);
+    }
+  };
+
+  const handleCancel = () => {
+    navigate('/employees');
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const endpoint = isEditMode
+        ? `${API_URL}/${formState.employeeId}`
+        : API_URL;
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      const body = new FormData();
+      body.append('name', formState.name);
+      body.append('employee_id', formState.employeeId);
+      body.append('email', formState.email);
+      body.append('position', formState.position);
+      body.append('joined_date', formState.joinedDate);
+      body.append('left_date', formState.leftDate);
+      body.append('phone_number', formState.phoneNumber);
+      body.append('status', formState.status);
+
+      if (profileFile) {
+        body.append('image', profileFile);
+      }
+
+      const token = localStorage.getItem('token');
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body,
+      });
+
+      if (!response.ok) {
+        let message = `API Error: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          message = errorData.message || message;
+        } catch (parseErr) {
+          console.error('Error parsing API error response:', parseErr);
+        }
+        throw new Error(message);
+      }
+
+      navigate('/employees', { state: { refresh: true }, replace: true });
+    } catch (err) {
+      console.error('AddNewEmployee submit error:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to save employee. Please try again.'
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,11 +162,11 @@ const AddEmployeeForm: React.FC = () => {
         </Link>
 
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
-          Add New Employee
+          {isEditMode ? 'Edit Employee' : 'Add New Employee'}
         </h1>
 
         <div className="bg-gray-100 rounded-lg border border-slate-200 shadow-sm p-10">
-          <form className="space-y-10">
+          <form className="space-y-10" onSubmit={handleSubmit}>
 
             {/* PROFILE */}
             <div className="flex flex-col items-center justify-center">
@@ -77,6 +204,12 @@ const AddEmployeeForm: React.FC = () => {
               </p>
             </div>
 
+            {error && (
+              <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
+
             {/* GENERAL INFO */}
             <section>
               <div className="flex items-center gap-3 mb-4 pb-2 border-b border-slate-200">
@@ -93,7 +226,13 @@ const AddEmployeeForm: React.FC = () => {
                   <label className="text-xs font-bold uppercase text-slate-600">
                     Name
                   </label>
-                  <input className="w-full px-4 py-3 rounded-md border bg-white" />
+                  <input
+                    name="name"
+                    value={formState.name}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-md border bg-white"
+                    required
+                  />
                 </div>
 
                 {/* EMP ID */}
@@ -101,7 +240,14 @@ const AddEmployeeForm: React.FC = () => {
                   <label className="text-xs font-bold uppercase text-slate-600">
                     Employee ID
                   </label>
-                  <input className="w-full px-4 py-3 rounded-md border bg-white" />
+                  <input
+                    name="employeeId"
+                    value={formState.employeeId}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-md border bg-white"
+                    required
+                    disabled={isEditMode}
+                  />
                 </div>
 
                 {/* EMAIL */}
@@ -109,7 +255,14 @@ const AddEmployeeForm: React.FC = () => {
                   <label className="text-xs font-bold uppercase text-slate-600">
                     Email
                   </label>
-                  <input className="w-full px-4 py-3 rounded-md border bg-white" />
+                  <input
+                    name="email"
+                    type="email"
+                    value={formState.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-md border bg-white"
+                    required
+                  />
                 </div>
 
                 {/* POSITION */}
@@ -117,7 +270,12 @@ const AddEmployeeForm: React.FC = () => {
                   <label className="text-xs font-bold uppercase text-slate-600">
                     Position
                   </label>
-                  <input className="w-full px-4 py-3 rounded-md border bg-white" />
+                  <input
+                    name="position"
+                    value={formState.position}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-md border bg-white"
+                  />
                 </div>
 
                 {/* JOINED DATE */}
@@ -126,8 +284,13 @@ const AddEmployeeForm: React.FC = () => {
                     Joined Date
                   </label>
                   <div className="relative">
-                    <input type="date" className="w-full px-4 py-3 border rounded-md bg-white" />
-                    
+                    <input
+                      name="joinedDate"
+                      type="date"
+                      value={formState.joinedDate}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border rounded-md bg-white"
+                    />
                   </div>
                 </div>
 
@@ -137,8 +300,13 @@ const AddEmployeeForm: React.FC = () => {
                     Left Date
                   </label>
                   <div className="relative">
-                    <input type="date" className="w-full px-4 py-3 border rounded-md bg-white" />
-                    
+                    <input
+                      name="leftDate"
+                      type="date"
+                      value={formState.leftDate}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border rounded-md bg-white"
+                    />
                   </div>
                 </div>
 
@@ -153,7 +321,13 @@ const AddEmployeeForm: React.FC = () => {
                 <label className="text-xs font-bold uppercase text-slate-600">
                   Phone Number
                 </label>
-                <input className="w-full px-4 py-3 rounded-md border bg-white" />
+                <input
+                  name="phoneNumber"
+                  type="tel"
+                  value={formState.phoneNumber}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-md border bg-white"
+                />
               </div>
 
               {/* STATUS */}
@@ -163,7 +337,12 @@ const AddEmployeeForm: React.FC = () => {
                 </label>
 
                 <div className="relative">
-                  <select className="w-full px-4 py-3 border rounded-md bg-white appearance-none">
+                  <select
+                    name="status"
+                    value={formState.status}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border rounded-md bg-white appearance-none"
+                  >
                     <option value="active">Active</option>
                     <option value="suspended">Suspended</option>
                     <option value="resigned">Resigned</option>
@@ -180,12 +359,20 @@ const AddEmployeeForm: React.FC = () => {
 
             {/* BUTTONS */}
             <div className="flex justify-end gap-4 pt-6">
-              <button className="px-8 py-2 border rounded">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-8 py-2 border rounded"
+              >
                 Cancel
               </button>
 
-              <button className="px-8 py-2 bg-blue-600 text-white rounded">
-                Save Employee
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-8 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+              >
+                {loading ? 'Saving...' : 'Save Employee'}
               </button>
             </div>
 
