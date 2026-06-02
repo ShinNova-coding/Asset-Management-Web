@@ -1,7 +1,7 @@
 "use client"
 
-import React from "react"
-import { useLocation, useNavigate } from "react-router-dom"
+import React, { useEffect, useState } from "react"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { 
   FiArrowLeft, 
@@ -17,14 +17,100 @@ import {
   FiHardDrive,
   FiLayers,
   FiInfo,
-  FiHash
+  FiHash,
+  FiEdit3 
 } from "react-icons/fi"
 
 export function InventoryDetail() {
+  const { id } = useParams<{ id: string }>() // ✨ Extract the asset ID directly from the URL path parameter
   const location = useLocation()
   const navigate = useNavigate()
   
-  const assetItem = location.state?.item
+  // 1. Initial attempt: Grab asset data from React Router's pushed location state
+  const [assetItem, setAssetItem] = useState<any>(location.state?.item || null)
+  const [canEdit, setCanEdit] = useState(false)
+  const [loading, setLoading] = useState(!assetItem) // Only show loading spinner if state isn't preset
+
+  useEffect(() => {
+    // --- 🔑 PERMISSIONS GUARD BLOCK ---
+    try {
+      const localUserData = localStorage.getItem("user")
+      if (localUserData) {
+        const user = JSON.parse(localUserData)
+        const userRole = user.role?.toLowerCase()
+        
+        // Superadmins and managers can write changes; general admins remain read-only
+        if (userRole === "superadmin" || userRole === "manager") {
+          setCanEdit(true)
+        } else {
+          setCanEdit(false)
+        }
+      }
+    } catch (err) {
+      console.error("Failed to parse user role permissions:", err)
+      setCanEdit(false)
+    }
+
+    // --- 💾 DATA RECOVERY FALLBACK (On Refresh) ---
+    // If the page is reloaded and location.state is lost, query data using the URL ID
+    if (!assetItem && id) {
+      try {
+        const cachedData = localStorage.getItem("inventory_data")
+        if (cachedData) {
+          const parsedList = JSON.parse(cachedData)
+          const foundItem = parsedList.find((item: any) => String(item.asset_id || item.id) === String(id))
+          
+          if (foundItem) {
+            setAssetItem(foundItem)
+          }
+        }
+      } catch (err) {
+        console.error("Error recovering item state from fallback sync:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+  }, [id, assetItem])
+
+  const getStatusStyles = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "available": return "bg-green-50 text-green-700 border-green-200"
+      case "assigned": return "bg-blue-50 text-blue-700 border-blue-200"
+      case "maintenance": return "bg-amber-50 text-amber-700 border-amber-200"
+      case "pending": return "bg-yellow-50 text-yellow-700 border-yellow-200"
+      case "expired": return "bg-rose-50 text-rose-700 border-rose-200"
+      case "retired": return "bg-red-100 text-red-800 border-red-200 font-bold"
+      default: return "bg-slate-50 text-slate-700 border-slate-200"
+    }
+  }
+
+  const getConditionStyles = (condition: string) => {
+    switch (condition?.toLowerCase()) {
+      case "new": return "bg-emerald-50 text-emerald-700 border-emerald-200"
+      case "good": return "bg-indigo-50 text-indigo-700 border-indigo-200"
+      case "fair": return "bg-orange-50 text-orange-700 border-orange-200"
+      case "poor": return "bg-rose-50 text-rose-700 border-rose-200"
+      default: return "bg-slate-50 text-slate-600 border-slate-200"
+    }
+  }
+
+  const handleEditRedirect = () => {
+    navigate("/inventory/add", { 
+      state: { 
+        id: assetItem.asset_id || assetItem.id,
+        editItem: assetItem 
+      } 
+    })
+  }
+
+  // --- RENDERING ROUTE GUARDS ---
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto my-32 text-center text-slate-500 text-sm animate-pulse">
+        Synchronizing hardware records specifications...
+      </div>
+    )
+  }
 
   if (!assetItem) {
     return (
@@ -33,7 +119,7 @@ export function InventoryDetail() {
           <FiPackage size={24} />
         </div>
         <h3 className="text-lg font-semibold text-slate-900">No Asset Selected</h3>
-        <p className="text-sm text-slate-500">Please select an item directly from the inventory dashboard overview table to look over its documentation profiles.</p>
+        <p className="text-sm text-slate-500">Please select an item directly from the inventory dashboard table.</p>
         <Button onClick={() => navigate("/inventory")} className="bg-blue-600 hover:bg-blue-700 text-white w-full">
           Return to Dashboard
         </Button>
@@ -41,71 +127,47 @@ export function InventoryDetail() {
     )
   }
 
-  // Dynamic status badges mapping
-  const getStatusStyles = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "available":
-        return "bg-green-50 text-green-700 border-green-200"
-      case "assigned":
-        return "bg-blue-50 text-blue-700 border-blue-200"
-      case "maintenance":
-        return "bg-amber-50 text-amber-700 border-amber-200"
-      case "pending":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200"
-      case "expired":
-        return "bg-rose-50 text-rose-700 border-rose-200"
-      case "retired":
-        return "bg-red-100 text-red-800 border-red-200 font-bold"
-      default:
-        return "bg-slate-50 text-slate-700 border-slate-200"
-    }
-  }
-
-  // Dynamic condition badge mapping
-  const getConditionStyles = (condition: string) => {
-    switch (condition?.toLowerCase()) {
-      case "new":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200"
-      case "good":
-        return "bg-indigo-50 text-indigo-700 border-indigo-200"
-      case "fair":
-        return "bg-orange-50 text-orange-700 border-orange-200"
-      case "poor":
-        return "bg-rose-50 text-rose-700 border-rose-200"
-      default:
-        return "bg-slate-50 text-slate-600 border-slate-200"
-    }
-  }
-
-  // Safely grab structural text values matching your payload structure
-  const displayCategory = assetItem.category?.name || "Uncategorized"
+  const displayCategory = assetItem.category?.name || assetItem.category || "Uncategorized"
   const displayImage = assetItem.preview_url || assetItem.image_url || assetItem.image
 
   return (
     <div className="max-w-5xl mx-auto p-6 md:p-10 space-y-6 text-slate-950 font-sans">
       
       {/* Navigation Row */}
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={() => navigate(-1)} 
-        className="flex items-center gap-2 text-slate-600 hover:text-slate-900 -ml-2 group transition-colors"
-      >
-        <FiArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-        Back to Inventory Dashboard
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => navigate("/inventory")} 
+          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 -ml-2 group transition-colors"
+        >
+          <FiArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+          Back to Inventory Dashboard
+        </Button>
+
+        {/* ROLE CONTEXT GUARD */}
+        {canEdit && (
+          <Button 
+            onClick={handleEditRedirect}
+            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 shadow-sm text-xs rounded-lg px-4 py-2"
+          >
+            <FiEdit3 size={14} />
+            Modify Asset Record
+          </Button>
+        )}
+      </div>
 
       {/* Header Badge Stack */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-mono px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-600 font-semibold">
-              {assetItem.asset_id}
+              {assetItem.asset_id || assetItem.id}
             </span>
             <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border tracking-wide uppercase ${getStatusStyles(assetItem.status)}`}>
               {assetItem.status || "unspecified"}
             </span>
-            {assetItem.condition && (
+            {"condition" in assetItem && assetItem.condition && (
               <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border tracking-wide uppercase ${getConditionStyles(assetItem.condition)}`}>
                 Condition: {assetItem.condition}
               </span>
@@ -120,10 +182,10 @@ export function InventoryDetail() {
       {/* Detail Split Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
-        {/* Left Elements - Specifications Form Sheets */}
+        {/* Left Side Specifications */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* Segment 1: Device Configuration Matrix */}
+          {/* Specifications Card */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiPackage size={18} className="text-blue-600" />
@@ -137,28 +199,24 @@ export function InventoryDetail() {
                   <FiTag className="text-slate-400" size={14} /> {displayCategory}
                 </span>
               </div>
-
               <div className="space-y-1">
                 <span className="text-xs text-slate-400 block">Model Build</span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
                   <FiCpu className="text-slate-400" size={14} /> {assetItem.model || "Not Specified"}
                 </span>
               </div>
-
               <div className="space-y-1">
                 <span className="text-xs text-slate-400 block">RAM Capacity</span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
-                  <FiLayers className="text-slate-400" size={14} /> {assetItem.ram_capacity || "Not Specified"}
+                  <FiLayers className="text-slate-400" size={14} /> {assetItem.ram_capacity || assetItem.ram || "Not Specified"}
                 </span>
               </div>
-
               <div className="space-y-1">
                 <span className="text-xs text-slate-400 block">Storage Volume</span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
                   <FiHardDrive className="text-slate-400" size={14} /> {assetItem.storage || "Not Specified"}
                 </span>
               </div>
-
               <div className="col-span-1 md:col-span-2 space-y-1 pt-1 border-t border-dashed border-slate-100">
                 <span className="text-xs text-slate-400 block">Serial Number Base Log</span>
                 <span className="text-sm font-mono text-slate-700 flex items-center gap-2 bg-slate-50 px-2 py-1 rounded border border-slate-200/60 w-fit select-all">
@@ -168,7 +226,7 @@ export function InventoryDetail() {
             </div>
           </div>
 
-          {/* Segment 2: Financial & Contract Procurement */}
+          {/* Procurement Card */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiCalendar size={18} className="text-blue-600" />
@@ -179,50 +237,24 @@ export function InventoryDetail() {
               <div className="space-y-1">
                 <span className="text-xs text-slate-400 block">Date of Purchase</span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
-                  <FiCalendar className="text-slate-400" /> {assetItem.purchased_date || "N/A"}
+                  <FiCalendar className="text-slate-400" /> {assetItem.purchased_date || assetItem.purchase_date || "N/A"}
                 </span>
               </div>
               <div className="space-y-1">
                 <span className="text-xs text-slate-400 block">Warranty Period Arrangement</span>
                 <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
-                  <FiShield className="text-slate-400" /> {assetItem.warranty_period ? `${assetItem.warranty_period} Months` : "No active arrangement logs found"}
+                  <FiShield className="text-slate-400" /> {assetItem.warranty_period || assetItem.warranty ? `${assetItem.warranty_period || assetItem.warranty} Months` : "No active arrangement logs found"}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Segment 3: Vendor Logistics */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
-            <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-              <FiBriefcase size={18} className="text-blue-600" />
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Vendor Management</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
-              <div className="col-span-1 md:col-span-2 space-y-1">
-                <span className="text-xs text-slate-400 block">Software House Name</span>
-                <span className="text-sm font-medium text-slate-800">
-                  {assetItem.shopName || "Insight Enterprise Global Inc."}
-                </span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-xs text-slate-400 block">Phone Number</span>
-                <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
-                  <FiPhone className="text-slate-400" /> {assetItem.phone || "+95 9*********"}
-                </span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-xs text-slate-400 block">Location Address</span>
-                <span className="text-sm font-medium text-slate-800 flex items-center gap-2">
-                  <FiMapPin className="text-slate-400" /> {assetItem.address || "Yangon"}
-                </span>
-              </div>
-            </div>
-          </div>
+         
+          
 
         </div>
 
-        {/* Right Sidebar - Picture Attachments Frame */}
+        {/* Right Sidebar - Profile Image */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4 sticky top-6">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <FiFileText size={18} className="text-blue-600" />
@@ -236,7 +268,6 @@ export function InventoryDetail() {
                 alt={`${assetItem.name} hardware visualization`} 
                 className="w-full h-full object-contain rounded-md transition-transform duration-200 hover:scale-105"
                 onError={(e) => {
-                  // Fallback in case localhost storage files can't load
                   const target = e.target as HTMLImageElement
                   target.style.display = 'none'
                   const parent = target.parentElement
@@ -248,14 +279,13 @@ export function InventoryDetail() {
               />
             ) : null}
 
-            {/* Structured Fallback Frame */}
             <div className={`image-fallback-placeholder flex flex-col items-center justify-center text-slate-400 text-center space-y-2 p-4 ${displayImage ? 'hidden' : ''}`}>
               <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200/60 shadow-xs">
                 <FiPackage size={20} />
               </div>
               <div className="space-y-0.5">
                 <p className="text-xs font-medium text-slate-700">No Image Attachment</p>
-                <p className="text-[10px] text-slate-400 max-w-[180px]">No visual media configurations uploaded for this specific asset group node.</p>
+                <p className="text-[10px] text-slate-400 max-w-[180px]">No visual media configurations uploaded.</p>
               </div>
             </div>
           </div>

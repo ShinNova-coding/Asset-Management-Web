@@ -81,14 +81,19 @@ export const columns: ColumnDef<Inventory>[] = [
       const targetIdentifier = item.asset_id 
 
       return (
-        /* CRITICAL: We stop propagation right here on the container div element 
-          to block table row onClick handlers from intercepting button actions.
+        /* ✨ DOUBLE PROTECTION: e.stopPropagation() combined with e.preventDefault() 
+          instantly cancels event bubbling out to parent <TableRow /> components.
         */
-        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+        <div 
+          className="flex items-center gap-2" 
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
           <Edit 
             onEdit={() => {
               if (meta?.editRow) {
-                // Pass the true pristine item object containing 'asset_id' safely
                 meta.editRow(item)
               }
             }} 
