@@ -1,30 +1,33 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from "react-router-dom"; 
+import { useNavigate, useLocation, useParams } from "react-router-dom"; 
 import { ArrowLeft, Package, Settings, ImageIcon, Upload, X, Cpu } from 'lucide-react';
 
 const AddNewAsset = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { id: routeId } = useParams<{ id: string }>(); // Capture dynamic :id from route parameters
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const editItem = location.state?.editItem;
-  const isEditMode = !!editItem;
+  // Capture both potential variants from React Router state
+  const stateId = location.state?.id;
+  const stateEditItem = location.state?.editItem;
+
+  // Track if we are editing by checking route params or state variables
+  const isEditMode = !!stateEditItem || !!stateId || !!routeId;
 
   const [formData, setFormData] = useState({
+    assetId: '', 
     name: '',
-    category: '',
+    category: 'Laptops', // Default to Laptops instead of empty string to prevent payload errors
     model: '',
     ram: '',
     storage: '',
-    serialnumber:'',
-    purchaseDate: '',
+    serial_number: '', 
+    purchased_date: '', 
     warranty: '',
-    shopName: '',
-    phone: '',
-    address: '',
-    action: '' 
+    action: 'available' // Default to available instead of blank
   });
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -39,28 +42,73 @@ const AddNewAsset = () => {
     return ""; 
   };
 
+  // Resolve target asset data depending on what the table sent, or clear form if transitioning to "add" mode
   useEffect(() => {
-    if (editItem) {
+    if (!isEditMode) {
+      // ✨ FIX: If we are not in edit mode, reset the form and preview states completely
       setFormData({
-        name: editItem.name || '',
-        category: editItem.category || '',
-        model: editItem.model || '',
-        ram: editItem.ram || editItem.ram_capacity || '',
-        storage: editItem.storage || '',
-        serialnumber:editItem.serialnumber||'',
-        purchaseDate: formatToInputDate(editItem.purchase || editItem.purchaseDate || editItem.purchase_date),
-        warranty: editItem.warranty || editItem.warranty_period || '',
-        shopName: editItem.shopName || '',
-        phone: editItem.phone || '',
-        address: editItem.address || '',
-        action: editItem.action || editItem.status || ''
+        assetId: '',
+        name: '',
+        category: 'Laptops',
+        model: '',
+        ram: '',
+        storage: '',
+        serial_number: '',
+        purchased_date: '',
+        warranty: '',
+        action: 'available'
       });
+      setSelectedImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
-      if (editItem.image) {
-        setImagePreview(editItem.image);
+    let activeItem = stateEditItem;
+    const targetId = stateId || routeId;
+
+    if (!activeItem && targetId) {
+      const localRawData = localStorage.getItem("inventory_data");
+      if (localRawData) {
+        const currentInventory = JSON.parse(localRawData);
+        activeItem = currentInventory.find((item: any) => 
+          item.asset_id === targetId || item.id === targetId
+        );
       }
     }
-  }, [editItem]);
+
+    // Populate data states if a matching asset item was discovered
+    if (activeItem) {
+      let resolvedCategoryStr = "Laptops";
+      if (activeItem.category) {
+        resolvedCategoryStr = typeof activeItem.category === "object" 
+          ? activeItem.category.name 
+          : activeItem.category;
+      }
+
+      setFormData({
+        assetId: activeItem.asset_id || activeItem.id || String(targetId || ''),
+        name: activeItem.name || '',
+        category: resolvedCategoryStr || 'Laptops',
+        model: activeItem.model || '',
+        ram: activeItem.ram_capacity || activeItem.ram || '',
+        storage: activeItem.storage || '',
+        serial_number: activeItem.serial_number || '',
+        purchased_date: formatToInputDate(activeItem.purchased_date || activeItem.purchase_date || activeItem.purchase),
+        warranty: activeItem.warranty_period || activeItem.warranty || '',
+        action: activeItem.status || activeItem.action || 'available'
+      });
+
+      if (activeItem.image_url) {
+        setImagePreview(activeItem.image_url);
+      } else if (activeItem.image) {
+        setImagePreview(activeItem.image);
+      }
+    } else if (targetId) {
+      // If in edit mode via URL parameter but fallback cache hasn't loaded yet, preserve URL ID parameter inside form
+      setFormData(prev => ({ ...prev, assetId: String(targetId) }));
+    }
+  }, [stateId, stateEditItem, routeId, isEditMode]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -125,6 +173,14 @@ const AddNewAsset = () => {
     });
   };
 
+  const stripBase64Header = (base64String: string): string => {
+    if (!base64String) return "";
+    if (base64String.includes(",")) {
+      return base64String.split(",")[1];
+    }
+    return base64String;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -133,83 +189,94 @@ const AddNewAsset = () => {
       return;
     }
 
+    if (!formData.serial_number.trim()) {
+      alert("Serial Number is required by the server!");
+      return;
+    }
+
     try {
-      let finalizedImageString = imagePreview;
+      let finalizedImageString = "";
+
       if (selectedImage) {
-        finalizedImageString = await convertImageToBase64(selectedImage);
-      }
-
-      const localRawData = localStorage.getItem("inventory_data");
-      let currentInventory = localRawData ? JSON.parse(localRawData) : [];
-
-      const updatedStatusText = formData.action.trim() || "Available";
-
-      if (isEditMode) {
-        // 🎯 FIXED CORNER: Explicit lookup checking 'asset_id' or 'id' strings safely
-        const targetId = editItem.asset_id || editItem.id;
-
-        currentInventory = currentInventory.map((item: any) => {
-          const itemId = item.asset_id || item.id;
-          
-          if (itemId && itemId === targetId) {
-            return {
-              ...item,
-              name: formData.name,
-              category: formData.category || "Laptops",
-              model: formData.model,
-              ram: formData.ram,
-              ram_capacity: formData.ram, // Keep both naming conventions aligned
-              storage: formData.storage,
-              purchase: formData.purchaseDate, 
-              purchaseDate: formData.purchaseDate,
-              purchase_date: formData.purchaseDate,
-              warranty: formData.warranty,
-              warranty_period: formData.warranty,
-              shopName: formData.shopName,
-              phone: formData.phone,
-              address: formData.address,
-              image: finalizedImageString,
-              status: updatedStatusText, 
-              action: updatedStatusText
-            };
-          }
-          return item;
-        });
+        const base64WithHeader = await convertImageToBase64(selectedImage);
+        finalizedImageString = stripBase64Header(base64WithHeader);
+      } else if (imagePreview && (imagePreview.startsWith("data:") || !imagePreview.startsWith("http"))) {
+        finalizedImageString = stripBase64Header(imagePreview);
+      } else if (isEditMode && imagePreview && imagePreview.startsWith("http")) {
+        finalizedImageString = ""; 
       } else {
-        // --- CREATE CORNER ---
-        const generatedAssetId = `AST-${Math.floor(1000 + Math.random() * 9000)}`;
-        
-        const newAssetPayload = {
-          id: generatedAssetId, 
-          asset_id: generatedAssetId,
-          name: formData.name,
-          category: formData.category || "Laptops",
-          model: formData.model || "N/A",
-         
-          ram_capacity: formData.ram || "N/A",
-          storage: formData.storage || "N/A",
-         
-          purchase_date: formData.purchaseDate || new Date().toISOString().split('T')[0],
-          
-          warranty: formData.warranty || "No active logs found",
-          warranty_period: formData.warranty || "No active logs found",
-          shopName: formData.shopName,
-          phone: formData.phone,
-          address: formData.address,
-          status: updatedStatusText, 
-          action: updatedStatusText, 
-          image: finalizedImageString
-        };
-
-        currentInventory.unshift(newAssetPayload); 
+        const dummyWithHeader = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+        finalizedImageString = stripBase64Header(dummyWithHeader);
       }
 
-      localStorage.setItem("inventory_data", JSON.stringify(currentInventory));
+      const updatedStatusText = formData.action.trim() || "available";
+
+      const categoryMap: Record<string, number> = {
+        "Desktops": 1,
+        "Laptops": 2,
+        "Printers": 3,
+        "Monitors": 4,
+        "Networking": 5,
+        "Accessories": 6
+      };
+      const resolvedCategoryId = categoryMap[formData.category] || 2;
+
+      const assetPayload: Record<string, any> = {
+        asset_id: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`,
+        name: formData.name.trim(),
+        serial_number: formData.serial_number.trim(),
+        purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
+        warranty_period: parseInt(formData.warranty) || 12, 
+        model: formData.model.trim() || "N/A",
+        ram_capacity: formData.ram.trim() || "N/A",
+        storage: formData.storage.trim() || "N/A",
+        category_id: resolvedCategoryId, 
+        status: updatedStatusText.toLowerCase(), 
+        condition: "new",
+      };
+
+      if (finalizedImageString) {
+        assetPayload.image = finalizedImageString;
+      }
+
+      console.log("🚀 Payload sending to backend server stream:", assetPayload);
+
+      const API_URL = "http://192.168.100.185:1010/api/asset"; 
+      const targetId = stateEditItem?.asset_id || stateEditItem?.id || stateId || routeId;
+      const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
+      
+      const method = isEditMode ? "PUT" : "POST";
+      const currentToken = localStorage.getItem("token") || "128|T7ZfI9NF6X0CnWSOpEIxdy4Xjka4mKtiYw4bllii6732bd8a";
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${currentToken}`
+        },
+        body: JSON.stringify(assetPayload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ Backend Validation Errors:", errorData);
+        
+        if (errorData.errors) {
+          const validationErrors = Object.values(errorData.errors).flat().join("\n");
+          throw new Error(validationErrors);
+        }
+        throw new Error(errorData.message || `Server responded with status ${response.status}`);
+      }
+
+      alert(isEditMode ? "Asset entry altered successfully!" : "New asset entry saved!");
+      
+      localStorage.removeItem("inventory_data");
       navigate("/inventory");
 
-    } catch (err) {
-      console.error("Failed to compile item bundle payload:", err);
-      alert("An error occurred while saving your asset entry.");
+    } catch (err: any) {
+      console.error("Transmission Error details:", err);
+      alert(`Could not save item to backend server:\n${err.message}`);
     }
   };
 
@@ -227,7 +294,7 @@ const AddNewAsset = () => {
             Back to Inventory
           </button>
           <h1 className="text-2xl font-bold text-slate-900">
-            {isEditMode ? `Modify Asset: ${editItem.asset_id || editItem.name}` : "Register New IT Asset"}
+            {isEditMode ? "Modify Asset Records" : "Register New IT Asset"}
           </h1>
         </div>
 
@@ -244,6 +311,19 @@ const AddNewAsset = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-600">Asset ID</label>
+                    <input 
+                      type="text" 
+                      name="assetId"
+                      value={formData.assetId}
+                      onChange={handleInputChange}
+                      disabled={isEditMode} // Usually recommended to disable editing IDs
+                      placeholder="e.g. AST-2026-03" 
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm disabled:bg-slate-100 disabled:text-slate-500" 
+                    />
+                  </div>
+                  
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset Name</label>
                     <input 
@@ -265,9 +345,8 @@ const AddNewAsset = () => {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
                     >
-                      <option value="">Select Category</option>
-                      <option value="Laptops">Laptops</option>
                       <option value="Desktops">Desktops</option>
+                      <option value="Laptops">Laptops</option>
                       <option value="Printers">Printers</option>
                       <option value="Monitors">Monitors</option>
                       <option value="Networking">Networking</option>
@@ -282,7 +361,7 @@ const AddNewAsset = () => {
                       name="action"
                       value={formData.action}
                       onChange={handleInputChange}
-                      placeholder="e.g. Active, Returned, Pending, Maintenance" 
+                      placeholder="e.g. Assigned, Available, Maintenance, Pending, Expired, Retired" 
                       className="w-full px-3.5 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-sm bg-slate-50/50 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400" 
                     />
                   </div>
@@ -332,16 +411,19 @@ const AddNewAsset = () => {
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
-                  <div className="space-y-1">
+                  
+                  <div className="space-y-1 md:col-span-3">
                     <label className="text-xs font-semibold text-slate-600">Serial Number</label>
-                    <input type="text" name="serialnumber" 
-                    value={formData.serialnumber}
-                    onChange={handleInputChange}
-                    placeholder="e.g.SN123456789j2"
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500
-                    outline-none text-sm">
-                    </input>
-                    </div>
+                    <input 
+                      type="text" 
+                      name="serial_number"
+                      value={formData.serial_number}
+                      onChange={handleInputChange}
+                      placeholder="e.g. SN123456789j2"
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                      required
+                    />
+                  </div>
                 </div>
               </section>
 
@@ -357,64 +439,20 @@ const AddNewAsset = () => {
                     <label className="text-xs font-semibold text-slate-600">Purchase Date</label>
                     <input 
                       type="date" 
-                      name="purchaseDate"
-                      value={formData.purchaseDate}
+                      name="purchased_date"
+                      value={formData.purchased_date}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Warranty Expiration</label>
+                    <label className="text-xs font-semibold text-slate-600">Warranty Expiration (Months)</label>
                     <input 
                       type="text" 
                       name="warranty"
                       value={formData.warranty}
                       onChange={handleInputChange}
-                      placeholder="e.g. 12 Months" 
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                    />
-                  </div>
-                </div>
-              </section>
-
-              {/* Vendor House Details */}
-              <section className="space-y-4">
-                <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-                  <Settings size={18} className="text-blue-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Software House Details</h2>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1 col-span-2">
-                    <label className="text-xs font-semibold text-slate-600">Software House Name</label>
-                    <input 
-                      type="text" 
-                      name="shopName"
-                      value={formData.shopName}
-                      onChange={handleInputChange}
-                      placeholder="e.g. Insight Enterprise INC" 
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Phone No</label>
-                    <input 
-                      type="text" 
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder="09*********" 
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Software House Address</label>
-                    <input 
-                      type="text" 
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      placeholder="City" 
+                      placeholder="e.g. 12" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
@@ -461,7 +499,7 @@ const AddNewAsset = () => {
                     alt="Asset preview" 
                     className="w-full h-full object-cover rounded-md"
                   />
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity rounded-md">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity rounded-md">
                     <button
                       type="button"
                       onClick={removeImage}
