@@ -60,7 +60,7 @@ export default function InventoryPage() {
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-12 text-center text-sm font-medium text-slate-500 animate-pulse">
-            Loading live asset records from server...
+            Loading...
           </div>
         ) : error ? (
           <div className="p-12 text-center text-sm font-semibold text-red-500 bg-red-50/50">

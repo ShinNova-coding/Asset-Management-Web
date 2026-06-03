@@ -81,9 +81,7 @@ export const columns: ColumnDef<Inventory>[] = [
       const targetIdentifier = item.asset_id 
 
       return (
-        /* ✨ DOUBLE PROTECTION: e.stopPropagation() combined with e.preventDefault() 
-          instantly cancels event bubbling out to parent <TableRow /> components.
-        */
+       
         <div 
           className="flex items-center gap-2" 
           onClick={(e) => {

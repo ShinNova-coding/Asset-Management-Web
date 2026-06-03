@@ -97,7 +97,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
       
       try {
         const API_URL = `http://192.168.100.185:1010/api/asset/${targetId}`;
-        const currentToken = localStorage.getItem("token") || "128|T7ZfI9NF6X0CnWSOpEIxdy4Xjka4mKtiYw4bllii6732bd8a";
+        const currentToken = localStorage.getItem("token") || "164|VKg7JMMQY0PYISUcuJEollYCjBW3RztRghhl7QjN1976c639";
 
         const response = await fetch(API_URL, {
           method: "DELETE",
@@ -141,7 +141,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     }
   }, [showToast])
 
-  // 🛠️ Triggers when clicking "Edit" action button specifically (goes to /inventory/add)
   const handleEdit = (item: any) => {
     const targetId = item.asset_id || item.id;
     navigate("/inventory/add", { 
@@ -152,13 +151,12 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     })
   }
 
-  // 🌟 NEW: Triggers when clicking a Table Row (goes to read-only details page /inventory/:id)
   const handleViewDetails = (item: any) => {
     const targetId = item.asset_id || item.id;
     navigate(`/inventory/${targetId}`, {
       state: {
         id: targetId,
-        detailsItem: item // Passes item details directly to your inventoryDetail.tsx view
+        detailsItem: item 
       }
     })
   }
@@ -172,7 +170,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     },
     meta: {
       deleteRow: handleDeleteTrigger,
-      editRow: handleEdit, // Kept for your dropdown action menus or edit icon columns
+      editRow: handleEdit, 
       updateRowAction: (targetId: string, newAction: string) => {
         setData((prevData) =>
           prevData.map((item) =>
@@ -188,6 +186,9 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     getPaginationRowModel: getPaginationRowModel(),
     initialState: { pagination: { pageSize: 5 } },
   })
+
+  const pageCount = table.getPageCount()
+  const currentPage = table.getState().pagination.pageIndex
 
   return (
     <div className="w-full space-y-4 p-3 relative">
@@ -230,8 +231,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
                       key={cell.id} 
                       className="py-3 text-slate-700 text-sm"
                       onClick={(e) => {
-                        // 🌟 FIX: If the user clicks any standard column field, route them to Details. 
-                        // If they specifically hit the "actions" block (edit/delete buttons), block this route.
                         if (cell.column.id !== "actions") {
                           handleViewDetails(row.original);
                         }
@@ -253,16 +252,76 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </Table>
       </div>
 
+      {/* 🌟 UPDATED: Perfected Numbered Pagination UI */}
+      <div className="flex items-center justify-between px-2 py-1">
+        <div className="text-xs text-slate-500 font-medium">
+          Page {currentPage + 1} of{" "}
+          {pageCount} ({table.getFilteredRowModel().rows.length} total assets)
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1 disabled:opacity-50"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <FiChevronLeft size={16} />
+          </Button>
+
+          <div className="flex gap-1 items-center">
+            {Array.from({ length: pageCount }).map((_, index) => {
+              if (
+                index === 0 ||
+                index === pageCount - 1 ||
+                (index >= currentPage - 1 && index <= currentPage + 1)
+              ) {
+                return (
+                  <Button
+                    key={index}
+                    variant={currentPage === index ? "default" : "outline"}
+                    size="sm"
+                    className={`disabled:opacity-50 ${
+                      currentPage === index
+                        ? "bg-blue-300 hover:bg-blue-400 text-white border-none"
+                        : "bg-slate-200"
+                    }`}
+                    onClick={() => table.setPageIndex(index)}
+                  >
+                    {index + 1}
+                  </Button>
+                )
+              }
+              if (index === currentPage - 2 || index === currentPage + 2) {
+                return <span key={index} className="px-2 flex items-center text-gray-500">...</span>
+              }
+              return null
+            })}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1 disabled:opacity-50"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <FiChevronRight size={16} />
+          </Button>
+        </div>
+      </div>
+
       {/* Confirmation Delete Modal */}
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
           <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
             <div className="flex items-center gap-3 text-red-600">
               <FiAlertCircle size={22} />
-              <h3 className="text-base font-bold text-slate-900">Confirm Permanent Removal</h3>
+              <h3 className="text-base font-bold text-slate-900">Confirm Delete</h3>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Are you sure you want to completely delete this asset? This action will permanently remove the record from the database server and Apidog history.
+              Are you sure you want to completely delete this asset?
             </p>
             <div className="flex justify-end gap-2.5 pt-2">
               <button
@@ -277,7 +336,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
                 onClick={handleConfirmDelete}
                 className="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-xs transition-colors"
               >
-                Delete Permanently
+                Delete 
               </button>
             </div>
           </div>

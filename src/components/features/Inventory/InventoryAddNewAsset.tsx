@@ -8,7 +8,7 @@ export function InventoryAddNewAsset() {
   const navigate = useNavigate()
 
   const goToNewPage = () => {
-    // Navigates internally without breaking React state or forcing a browser reload
+    
     navigate("/inventory/add")
   }
 

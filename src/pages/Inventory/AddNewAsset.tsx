@@ -7,27 +7,25 @@ import { ArrowLeft, Package, Settings, ImageIcon, Upload, X, Cpu } from 'lucide-
 const AddNewAsset = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id: routeId } = useParams<{ id: string }>(); // Capture dynamic :id from route parameters
+  const { id: routeId } = useParams<{ id: string }>(); 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Capture both potential variants from React Router state
   const stateId = location.state?.id;
   const stateEditItem = location.state?.editItem;
 
-  // Track if we are editing by checking route params or state variables
   const isEditMode = !!stateEditItem || !!stateId || !!routeId;
 
   const [formData, setFormData] = useState({
     assetId: '', 
     name: '',
-    category: 'Laptops', // Default to Laptops instead of empty string to prevent payload errors
+    category: 'Laptops', 
     model: '',
     ram: '',
     storage: '',
     serial_number: '', 
     purchased_date: '', 
     warranty: '',
-    action: 'available' // Default to available instead of blank
+    action: 'available' 
   });
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -42,10 +40,8 @@ const AddNewAsset = () => {
     return ""; 
   };
 
-  // Resolve target asset data depending on what the table sent, or clear form if transitioning to "add" mode
   useEffect(() => {
     if (!isEditMode) {
-      // ✨ FIX: If we are not in edit mode, reset the form and preview states completely
       setFormData({
         assetId: '',
         name: '',
@@ -77,7 +73,6 @@ const AddNewAsset = () => {
       }
     }
 
-    // Populate data states if a matching asset item was discovered
     if (activeItem) {
       let resolvedCategoryStr = "Laptops";
       if (activeItem.category) {
@@ -99,13 +94,30 @@ const AddNewAsset = () => {
         action: activeItem.status || activeItem.action || 'available'
       });
 
-      if (activeItem.image_url) {
-        setImagePreview(activeItem.image_url);
-      } else if (activeItem.image) {
-        setImagePreview(activeItem.image);
+      // 🌟 FIX: Safe URL Handling for preview_url & localhost issues
+      const API_REAL_IP = "http://192.168.100.185:1010";
+      
+     
+      let rawImageSource = activeItem.preview_url || activeItem.image_url || activeItem.image || "";
+
+      if (rawImageSource) {
+        if (rawImageSource.startsWith("data:image")) {
+         
+          setImagePreview(rawImageSource);
+        } else if (rawImageSource.startsWith("http://localhost")) {
+          
+          const correctedUrl = rawImageSource.replace("http://localhost", API_REAL_IP);
+          setImagePreview(correctedUrl);
+        } else if (rawImageSource.startsWith("http")) {
+          
+          setImagePreview(rawImageSource);
+        } else {
+         
+          const cleanPath = rawImageSource.startsWith("/") ? rawImageSource : `/${rawImageSource}`;
+          setImagePreview(`${API_REAL_IP}${cleanPath}`);
+        }
       }
     } else if (targetId) {
-      // If in edit mode via URL parameter but fallback cache hasn't loaded yet, preserve URL ID parameter inside form
       setFormData(prev => ({ ...prev, assetId: String(targetId) }));
     }
   }, [stateId, stateEditItem, routeId, isEditMode]);
@@ -200,7 +212,7 @@ const AddNewAsset = () => {
       if (selectedImage) {
         const base64WithHeader = await convertImageToBase64(selectedImage);
         finalizedImageString = stripBase64Header(base64WithHeader);
-      } else if (imagePreview && (imagePreview.startsWith("data:") || !imagePreview.startsWith("http"))) {
+      } else if (imagePreview && imagePreview.startsWith("data:")) {
         finalizedImageString = stripBase64Header(imagePreview);
       } else if (isEditMode && imagePreview && imagePreview.startsWith("http")) {
         finalizedImageString = ""; 
@@ -246,7 +258,7 @@ const AddNewAsset = () => {
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       
       const method = isEditMode ? "PUT" : "POST";
-      const currentToken = localStorage.getItem("token") || "128|T7ZfI9NF6X0CnWSOpEIxdy4Xjka4mKtiYw4bllii6732bd8a";
+      const currentToken = localStorage.getItem("token") || "164|VKg7JMMQY0PYISUcuJEollYCjBW3RztRghhl7QjN1976c639";
 
       const response = await fetch(url, {
         method: method,
@@ -303,7 +315,7 @@ const AddNewAsset = () => {
           <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
               
-              {/* Core Info */}
+              {/* Asset Information */}
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Package size={18} className="text-blue-600" />
@@ -318,7 +330,7 @@ const AddNewAsset = () => {
                       name="assetId"
                       value={formData.assetId}
                       onChange={handleInputChange}
-                      disabled={isEditMode} // Usually recommended to disable editing IDs
+                      disabled={isEditMode} 
                       placeholder="e.g. AST-2026-03" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm disabled:bg-slate-100 disabled:text-slate-500" 
                     />
@@ -427,7 +439,7 @@ const AddNewAsset = () => {
                 </div>
               </section>
 
-              {/* Purchase Metadata */}
+              {/* Warranty & Procurement */}
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Settings size={18} className="text-blue-600" />
@@ -459,7 +471,6 @@ const AddNewAsset = () => {
                 </div>
               </section>
 
-              {/* Actions Footer */}
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                 <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
                 <button type="submit" className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
@@ -469,7 +480,7 @@ const AddNewAsset = () => {
             </form>
           </div>
 
-          {/* Photo Management Sidebar Block */}
+          {/* Photo Management Sidebar */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <ImageIcon size={18} className="text-blue-600" />

@@ -126,12 +126,33 @@ export function InventoryDetail() {
   }
 
   const displayCategory = assetItem.category?.name || assetItem.category || "Uncategorized"
-  const displayImage = assetItem.preview_url || assetItem.image_url || assetItem.image
+
+  
+  const API_REAL_IP = "http://192.168.100.185:1010"
+  let rawImageSource = assetItem.preview_url || assetItem.image_url || assetItem.image || ""
+  let displayImage = ""
+
+  if (rawImageSource) {
+    if (rawImageSource.startsWith("data:image")) {
+      
+      displayImage = rawImageSource
+    } else if (rawImageSource.startsWith("http://localhost")) {
+      
+      displayImage = rawImageSource.replace("http://localhost", API_REAL_IP)
+    } else if (rawImageSource.startsWith("http")) {
+      
+      displayImage = rawImageSource
+    } else {
+      
+      const cleanPath = rawImageSource.startsWith("/") ? rawImageSource : `/${rawImageSource}`
+      displayImage = `${API_REAL_IP}${cleanPath}`
+    }
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-6 md:p-10 space-y-6 text-slate-950 font-sans">
       
-      {/* Navigation Row */}
+     
       <div className="flex items-center justify-between">
         <Button 
           variant="ghost" 
@@ -243,8 +264,6 @@ export function InventoryDetail() {
               </div>
             </div>
           </div>
-
-         
         </div>
 
         {/* Right Sidebar */}
