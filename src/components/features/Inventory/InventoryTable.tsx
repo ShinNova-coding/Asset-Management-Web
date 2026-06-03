@@ -97,7 +97,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
       
       try {
         const API_URL = `http://192.168.100.185:1010/api/asset/${targetId}`;
-        const currentToken = localStorage.getItem("token") || "164|VKg7JMMQY0PYISUcuJEollYCjBW3RztRghhl7QjN1976c639";
+        const currentToken = localStorage.getItem("token") || "11|z7kS1l7X1p4y6k4rhK3xiwiO6reuNwdTDgJEQdNl44b535b9";
 
         const response = await fetch(API_URL, {
           method: "DELETE",

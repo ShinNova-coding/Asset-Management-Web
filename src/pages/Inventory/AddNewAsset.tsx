@@ -251,7 +251,7 @@ const AddNewAsset = () => {
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       
       const method = isEditMode ? "PUT" : "POST";
-      const currentToken = localStorage.getItem("token") || "164|VKg7JMMQY0PYISUcuJEollYCjBW3RztRghhl7QjN1976c639";
+      const currentToken = localStorage.getItem("token") || "11|z7kS1l7X1p4y6k4rhK3xiwiO6reuNwdTDgJEQdNl44b535b9";
 
       const response = await fetch(url, {
         method: method,
