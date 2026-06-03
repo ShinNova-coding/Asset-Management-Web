@@ -96,23 +96,17 @@ const AddNewAsset = () => {
 
       // 🌟 FIX: Safe URL Handling for preview_url & localhost issues
       const API_REAL_IP = "http://192.168.100.185:1010";
-      
-     
       let rawImageSource = activeItem.preview_url || activeItem.image_url || activeItem.image || "";
 
       if (rawImageSource) {
         if (rawImageSource.startsWith("data:image")) {
-         
           setImagePreview(rawImageSource);
         } else if (rawImageSource.startsWith("http://localhost")) {
-          
           const correctedUrl = rawImageSource.replace("http://localhost", API_REAL_IP);
           setImagePreview(correctedUrl);
         } else if (rawImageSource.startsWith("http")) {
-          
           setImagePreview(rawImageSource);
         } else {
-         
           const cleanPath = rawImageSource.startsWith("/") ? rawImageSource : `/${rawImageSource}`;
           setImagePreview(`${API_REAL_IP}${cleanPath}`);
         }
@@ -209,14 +203,16 @@ const AddNewAsset = () => {
     try {
       let finalizedImageString = "";
 
+      // 🌟 FIX: Backend ရဲ့ Image Required Validation ပြဿနာကို ကျော်ဖြတ်ရန် လှည့်ပြင်ခြင်း
       if (selectedImage) {
+        // ၁။ အသုံးပြုသူက ပုံအသစ် ရွေးချယ်လိုက်ရင်
         const base64WithHeader = await convertImageToBase64(selectedImage);
         finalizedImageString = stripBase64Header(base64WithHeader);
       } else if (imagePreview && imagePreview.startsWith("data:")) {
+        // ၂။ လက်ရှိ preview က Base64 စာသား ဖြစ်နေရင်
         finalizedImageString = stripBase64Header(imagePreview);
-      } else if (isEditMode && imagePreview && imagePreview.startsWith("http")) {
-        finalizedImageString = ""; 
       } else {
+        // ၃။ Edit Mode မှာ ပုံအသစ်မပြောင်းလဲဘဲ သိမ်းရင်ဖြစ်ဖြစ်၊ ပုံမရှိရင်ဖြစ်ဖြစ် စာသားအလွတ်မဖြစ်စေဘဲ Dummy 1x1 base64 ဖြည့်ပေးခြင်း
         const dummyWithHeader = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
         finalizedImageString = stripBase64Header(dummyWithHeader);
       }
@@ -245,11 +241,8 @@ const AddNewAsset = () => {
         category_id: resolvedCategoryId, 
         status: updatedStatusText.toLowerCase(), 
         condition: "new",
+        image: finalizedImageString, // 🌟 Image Field ကို Payload ထဲမှာ အမြဲတမ်း သေချာပေါက် ပါဝင်နေစေရမယ်
       };
-
-      if (finalizedImageString) {
-        assetPayload.image = finalizedImageString;
-      }
 
       console.log("🚀 Payload sending to backend server stream:", assetPayload);
 

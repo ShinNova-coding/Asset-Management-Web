@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi"
+import { FiChevronLeft, FiChevronRight, FiClock } from "react-icons/fi"
 
 import {
   flexRender,
@@ -46,6 +46,11 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
 
   const navigate = useNavigate()
 
+ 
+  const pendingCount = data.filter(
+    (item: any) => item.status === "pending" || item.status === "Pending"
+  ).length
+
   const table = useReactTable({
     data,
     columns: baseColumns,
@@ -75,6 +80,32 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
 
   return (
     <div className="w-full space-y-4 p-4 relative">
+
+     
+      <div className="max-w-xs bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-blue-500 uppercase tracking-wider">Pending Requests</p>
+          <h3 className="text-2xl font-bold text-slate-800">{pendingCount} Request</h3>
+          
+          <div className="flex items-center gap-2 pt-1">
+            <button 
+              onClick={() => alert("Accept clicked")}
+              className="px-3 py-1 bg-blue-400 text-white rounded text-xs font-medium hover:bg-emerald-700 transition-colors"
+            >
+              Accept
+            </button>
+            <button 
+              onClick={() => alert("Reject clicked")}
+              className="px-3 py-1 bg-rose-600 text-white rounded text-xs font-medium hover:bg-rose-700 transition-colors"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+        <div className="p-3 bg-blue-400 text-white rounded-lg self-start">
+          <FiClock size={20} />
+        </div>
+      </div>
 
       {/* SEARCH + FILTER */}
       <div className="flex items-center justify-between gap-4">
