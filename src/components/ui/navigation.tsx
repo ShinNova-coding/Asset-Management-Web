@@ -93,7 +93,7 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-slate-400 bg-blue-50 px-2">
+    <nav className="sticky top-0 z-30 flex h-[50px]  items-center justify-between border-b border-slate-400 bg-blue-50 px-2">
 
       {/* LEFT BLOCK */}
       <div className="flex items-center gap-4">
@@ -120,7 +120,7 @@ export default function Navigation() {
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowNotifications(false)} />
               
-              <div className="absolute right-0 z-20 mt-2 w-80 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+              <div className="absolute right-0 z-20 mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-xl">
                 <h4 className="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
                   Notifications
                 </h4>

@@ -46,15 +46,13 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     })
   }
 
-  // Helper to extract tracking arrays safely
   const getExcludedDeletedItems = (baseItems: any[]): any[] => {
     if (typeof window === "undefined") return baseItems
     const excludedTrack = localStorage.getItem("deleted_asset_ids")
     const deletedIds: string[] = excludedTrack ? JSON.parse(excludedTrack) : []
-    return baseItems.filter((item) => !deletedIds.includes(item.asset_id))
+    return baseItems.filter((item) => !deletedIds.includes(item.asset_id));
   }
 
-  // Initialize data checking both cache and block-lists
   const [data, setData] = React.useState<any[]>(() => {
     if (typeof window !== "undefined") {
       const cachedData = localStorage.getItem("inventory_data")
@@ -77,18 +75,12 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   })
   const [showToast, setShowToast] = React.useState(false)
 
-  // FIXED: Only let incoming props overwrite state if no custom client modifications exist
   React.useEffect(() => {
-    if (initialData && initialData.length > 0) {
-      const cachedData = localStorage.getItem("inventory_data")
-      // If we don't have local user updates saved, safely load the raw initial data stream
-      if (!cachedData) {
-        setData(getExcludedDeletedItems(processExpiredWarranties(initialData)))
-      }
+    if (initialData) {
+      setData(getExcludedDeletedItems(processExpiredWarranties(initialData)))
     }
   }, [initialData])
 
-  // Sync data updates to local storage cache pipeline
   React.useEffect(() => {
     if (data) {
       localStorage.setItem("inventory_data", JSON.stringify(data))
@@ -99,27 +91,46 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     setDeleteModal({ isOpen: true, targetId: id })
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deleteModal.targetId) {
       const targetId = deleteModal.targetId
       
-      // 1. Remove from local screen UI state
-      const updatedList = data.filter((item) => item.asset_id !== targetId)
-      setData(updatedList)
+      try {
+        const API_URL = `http://192.168.100.185:1010/api/asset/${targetId}`;
+        const currentToken = localStorage.getItem("token") || "128|T7ZfI9NF6X0CnWSOpEIxdy4Xjka4mKtiYw4bllii6732bd8a";
 
-      // 2. Persist deletion tracking block-list down to localStorage 
-      if (typeof window !== "undefined") {
-        const excludedTrack = localStorage.getItem("deleted_asset_ids")
-        const deletedIds: string[] = excludedTrack ? JSON.parse(excludedTrack) : []
-        
-        if (!deletedIds.includes(targetId)) {
-          deletedIds.push(targetId)
-          localStorage.setItem("deleted_asset_ids", JSON.stringify(deletedIds))
+        const response = await fetch(API_URL, {
+          method: "DELETE",
+          headers: {
+            "Accept": "application/json",
+            "Authorization": `Bearer ${currentToken}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server returned status code: ${response.status}`);
         }
+
+        const updatedList = data.filter((item) => item.asset_id !== targetId)
+        setData(updatedList)
+        localStorage.removeItem("inventory_data")
+
+        if (typeof window !== "undefined") {
+          const excludedTrack = localStorage.getItem("deleted_asset_ids")
+          const deletedIds: string[] = excludedTrack ? JSON.parse(excludedTrack) : []
+          if (!deletedIds.includes(targetId)) {
+            deletedIds.push(targetId)
+            localStorage.setItem("deleted_asset_ids", JSON.stringify(deletedIds))
+          }
+        }
+        
+        setShowToast(true)
+      } catch (error: any) {
+        console.error("❌ Failed to delete asset:", error);
+        alert(`Could not delete asset from server:\n${error.message}`);
+      } finally {
+        setDeleteModal({ isOpen: false, targetId: null })
       }
-      
-      setDeleteModal({ isOpen: false, targetId: null })
-      setShowToast(true)
     }
   }
 
@@ -130,11 +141,26 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     }
   }, [showToast])
 
-  /* ========================================================
-     UPDATED EDIT FUNCTION: SENDS ONLY THE ID VALUE IN STATE
-     ======================================================== */
+  // 🛠️ Triggers when clicking "Edit" action button specifically (goes to /inventory/add)
   const handleEdit = (item: any) => {
-    navigate("/inventory/add", { state: { id: item.asset_id } })
+    const targetId = item.asset_id || item.id;
+    navigate("/inventory/add", { 
+      state: { 
+        id: targetId,
+        editItem: item 
+      } 
+    })
+  }
+
+  // 🌟 NEW: Triggers when clicking a Table Row (goes to read-only details page /inventory/:id)
+  const handleViewDetails = (item: any) => {
+    const targetId = item.asset_id || item.id;
+    navigate(`/inventory/${targetId}`, {
+      state: {
+        id: targetId,
+        detailsItem: item // Passes item details directly to your inventoryDetail.tsx view
+      }
+    })
   }
 
   const table = useReactTable({
@@ -146,7 +172,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     },
     meta: {
       deleteRow: handleDeleteTrigger,
-      editRow: handleEdit, 
+      editRow: handleEdit, // Kept for your dropdown action menus or edit icon columns
       updateRowAction: (targetId: string, newAction: string) => {
         setData((prevData) =>
           prevData.map((item) =>
@@ -163,9 +189,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     initialState: { pagination: { pageSize: 5 } },
   })
 
-  const pageCount = table.getPageCount()
-  const currentPage = table.getState().pagination.pageIndex
-
   return (
     <div className="w-full space-y-4 p-3 relative">
       <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full">
@@ -181,7 +204,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </div>
       </div>
 
-      <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-xs">
+      <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-blue-400">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -201,18 +224,19 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
                 <TableRow 
                   key={row.id} 
                   className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer"
-                  onClick={(e) => {
-                    const target = e.target as HTMLElement
-                    if (target.closest('button') || target.closest('svg') || target.closest('a')) {
-                      return 
-                    }
-                    navigate(`/inventory/${row.original.asset_id}`, { 
-                      state: { item: row.original } 
-                    })
-                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3 text-slate-700 text-sm">
+                    <TableCell 
+                      key={cell.id} 
+                      className="py-3 text-slate-700 text-sm"
+                      onClick={(e) => {
+                        // 🌟 FIX: If the user clicks any standard column field, route them to Details. 
+                        // If they specifically hit the "actions" block (edit/delete buttons), block this route.
+                        if (cell.column.id !== "actions") {
+                          handleViewDetails(row.original);
+                        }
+                      }}
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -221,7 +245,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center text-slate-400 text-sm">
-                  No results found.
+                  No assets available.
                 </TableCell>
               </TableRow>
             )}
@@ -229,115 +253,44 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </Table>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="flex justify-end items-center space-x-2 py-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1 disabled:opacity-40 p-2"
-          onClick={(e) => {
-            e.stopPropagation() 
-            table.previousPage()
-          }}
-          disabled={!table.getCanPreviousPage()}
-        >
-          <FiChevronLeft size={16} />
-        </Button>
-
-        <div className="flex gap-1 items-center">
-          {Array.from({ length: pageCount }).map((_, index) => {
-            if (
-              index === 0 ||
-              index === pageCount - 1 ||
-              (index >= currentPage - 1 && index <= currentPage + 1)
-            ) {
-              return (
-                <Button
-                  key={index}
-                  variant={currentPage === index ? "default" : "outline"}
-                  size="sm"
-                  className={
-                    currentPage === index
-                      ? "bg-blue-300 hover:bg-blue-400 text-slate-800 font-semibold border-none"
-                      : "bg-slate-100 text-slate-700"
-                  }
-                  onClick={(e) => {
-                    e.stopPropagation() 
-                    table.setPageIndex(index)
-                  }}
-                >
-                  {index + 1}
-                </Button>
-              )
-            }
-            if (index === currentPage - 2 || index === currentPage + 2) {
-              return <span key={index} className="px-2 flex items-center text-slate-400 select-none text-sm">...</span>
-            }
-            return null
-          })}
-        </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1 disabled:opacity-40 p-2"
-          onClick={(e) => {
-            e.stopPropagation() 
-            table.nextPage()
-          }}
-          disabled={!table.getCanNextPage()}
-        >
-          <FiChevronRight size={16} />
-        </Button>
-      </div>
-
-      {/* Delete Confirmation Modal */}
+      {/* Confirmation Delete Modal */}
       {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs">
-          <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4 border border-slate-100 text-center space-y-4">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-50 text-red-600">
-              <FiAlertCircle size={24} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center gap-3 text-red-600">
+              <FiAlertCircle size={22} />
+              <h3 className="text-base font-bold text-slate-900">Confirm Permanent Removal</h3>
             </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-slate-900">Are you absolutely sure?</h3>
-              <p className="text-sm text-slate-500">
-                This action cannot be undone. This item will be permanently removed.
-              </p>
-            </div>
-            <div className="flex gap-3 pt-2">
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Are you sure you want to completely delete this asset? This action will permanently remove the record from the database server and Apidog history.
+            </p>
+            <div className="flex justify-end gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => setDeleteModal({ isOpen: false, targetId: null })}
-                className="w-full px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                className="px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDelete}
-                className="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors"
+                className="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-xs transition-colors"
               >
-                Delete
+                Delete Permanently
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Toast Alert */}
+      {/* UI Action Notification Toast */}
       {showToast && (
-        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-800 transition-all duration-300 transform translate-x-0 max-w-md">
-          <FiCheckCircle className="text-green-400 shrink-0" size={20} />
-          <div className="flex-1">
-            <p className="text-sm font-semibold">Delete Successful</p>
-            <p className="text-xs text-slate-400">The requested asset data records were updated safely.</p>
-          </div>
-          <button 
-            type="button" 
-            onClick={() => setShowToast(false)}
-            className="text-slate-400 hover:text-white transition-colors p-1"
-          >
-            <FiX size={16} />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-800">
+          <FiCheckCircle className="text-emerald-400" size={16} />
+          <span className="text-xs font-medium">Asset successfully deleted from database.</span>
+          <button onClick={() => setShowToast(false)} className="text-slate-400 hover:text-white ml-2 transition-colors">
+            <FiX size={14} />
           </button>
         </div>
       )}

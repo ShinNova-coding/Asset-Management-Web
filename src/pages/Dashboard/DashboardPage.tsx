@@ -5,8 +5,7 @@ import RecentActivities from "../../components/features/dashboard/RecentActiviti
 
 const DashboardPage: React.FC = () => {
   return (
-    <div className="min-h-screen p-6 space-y-8 bg-slate-50">
-      {/* Header */}
+    <div className="min-h-screen px-4 pt-4 pb-6 space-y-5 bg-slate-50">
       <h1 className="text-2xl font-bold">
         Dashboard
       </h1>
@@ -19,11 +18,8 @@ const DashboardPage: React.FC = () => {
         <AssetCategoriesCards />
         <RecentActivities />
       </div>
-
-     </div>
+    </div>
   );
-}; 
-          
-
+};
 
 export default DashboardPage;

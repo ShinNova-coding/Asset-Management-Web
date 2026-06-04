@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ViewDetailsForm from "../../components/features/UserManagement/ViewDetailsForm";
 import { apiFetch } from "../../lib/api";
@@ -42,7 +42,10 @@ export default function EmployeeDetailsPage() {
 
         // API responses vary: try multiple shapes
         const payload = (res && (res.data ?? res)) || res;
-        const user = payload?.data ?? payload;
+        let user = payload?.data ?? payload;
+        if (user?.data) {
+          user = user.data;
+        }
 
         if (!user) throw new Error("User not found");
 
@@ -55,8 +58,7 @@ export default function EmployeeDetailsPage() {
           position: user.position || "-",
           status: formatStatus(user.status),
           role: user.roles?.[0]?.name || "-",
-          joiningDate: user.joined_date || "-",
-          startDate: user.joined_date || "-",
+          joinedDate: user.joined_date || "-",
           leftDate: user.left_date || "-",
           phone: user.phone_number || "-",
         };

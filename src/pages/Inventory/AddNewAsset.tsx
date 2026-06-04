@@ -1,35 +1,33 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from "react-router-dom"; 
+import { useNavigate, useLocation, useParams } from "react-router-dom"; 
 import { ArrowLeft, Package, Settings, ImageIcon, Upload, X, Cpu } from 'lucide-react';
 
 const AddNewAsset = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { id: routeId } = useParams<{ id: string }>(); // Capture dynamic :id from route parameters
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Capture both potential variants from React Router state
   const stateId = location.state?.id;
   const stateEditItem = location.state?.editItem;
 
-  // Track if we are editing by checking either source
-  const isEditMode = !!stateEditItem || !!stateId;
+  // Track if we are editing by checking route params or state variables
+  const isEditMode = !!stateEditItem || !!stateId || !!routeId;
 
   const [formData, setFormData] = useState({
     assetId: '', 
     name: '',
-    category: '',
+    category: 'Laptops', // Default to Laptops instead of empty string to prevent payload errors
     model: '',
     ram: '',
     storage: '',
     serial_number: '', 
     purchased_date: '', 
     warranty: '',
-    shopName: '',
-    phone: '',
-    address: '',
-    action: '' 
+    action: 'available' // Default to available instead of blank
   });
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -44,36 +42,61 @@ const AddNewAsset = () => {
     return ""; 
   };
 
-  // Resolve target asset data depending on what the table sent
+  // Resolve target asset data depending on what the table sent, or clear form if transitioning to "add" mode
   useEffect(() => {
-    let activeItem = stateEditItem;
+    if (!isEditMode) {
+      // ✨ FIX: If we are not in edit mode, reset the form and preview states completely
+      setFormData({
+        assetId: '',
+        name: '',
+        category: 'Laptops',
+        model: '',
+        ram: '',
+        storage: '',
+        serial_number: '',
+        purchased_date: '',
+        warranty: '',
+        action: 'available'
+      });
+      setSelectedImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
-    if (!activeItem && stateId) {
+    let activeItem = stateEditItem;
+    const targetId = stateId || routeId;
+
+    if (!activeItem && targetId) {
       const localRawData = localStorage.getItem("inventory_data");
       if (localRawData) {
         const currentInventory = JSON.parse(localRawData);
         activeItem = currentInventory.find((item: any) => 
-          item.asset_id === stateId || item.id === stateId
+          item.asset_id === targetId || item.id === targetId
         );
       }
     }
 
     // Populate data states if a matching asset item was discovered
     if (activeItem) {
+      let resolvedCategoryStr = "Laptops";
+      if (activeItem.category) {
+        resolvedCategoryStr = typeof activeItem.category === "object" 
+          ? activeItem.category.name 
+          : activeItem.category;
+      }
+
       setFormData({
-        assetId: activeItem.asset_id || activeItem.id || '',
+        assetId: activeItem.asset_id || activeItem.id || String(targetId || ''),
         name: activeItem.name || '',
-        category: activeItem.category?.name || activeItem.category || '',
+        category: resolvedCategoryStr || 'Laptops',
         model: activeItem.model || '',
         ram: activeItem.ram_capacity || activeItem.ram || '',
         storage: activeItem.storage || '',
         serial_number: activeItem.serial_number || '',
         purchased_date: formatToInputDate(activeItem.purchased_date || activeItem.purchase_date || activeItem.purchase),
         warranty: activeItem.warranty_period || activeItem.warranty || '',
-        shopName: activeItem.shopName || '',
-        phone: activeItem.phone || '',
-        address: activeItem.address || '',
-        action: activeItem.status || activeItem.action || ''
+        action: activeItem.status || activeItem.action || 'available'
       });
 
       if (activeItem.image_url) {
@@ -81,8 +104,11 @@ const AddNewAsset = () => {
       } else if (activeItem.image) {
         setImagePreview(activeItem.image);
       }
+    } else if (targetId) {
+      // If in edit mode via URL parameter but fallback cache hasn't loaded yet, preserve URL ID parameter inside form
+      setFormData(prev => ({ ...prev, assetId: String(targetId) }));
     }
-  }, [stateId, stateEditItem]);
+  }, [stateId, stateEditItem, routeId, isEditMode]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -147,10 +173,17 @@ const AddNewAsset = () => {
     });
   };
 
+  const stripBase64Header = (base64String: string): string => {
+    if (!base64String) return "";
+    if (base64String.includes(",")) {
+      return base64String.split(",")[1];
+    }
+    return base64String;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Basic Field Validations
     if (!formData.name.trim()) {
       alert("Please provide at least an Asset Name before saving.");
       return;
@@ -161,27 +194,34 @@ const AddNewAsset = () => {
       return;
     }
 
-    // 2. Base64 Image Validation: Verify an image choice exists
-    if (!selectedImage && !imagePreview) {
-      alert("The backend requires an asset photo. Please upload an image first!");
-      return;
-    }
-
     try {
       let finalizedImageString = "";
 
       if (selectedImage) {
-        // Wait for conversion completion
-        finalizedImageString = await convertImageToBase64(selectedImage);
-      } else if (imagePreview) {
-        // Keep the preexisting string reference
-        finalizedImageString = imagePreview;
+        const base64WithHeader = await convertImageToBase64(selectedImage);
+        finalizedImageString = stripBase64Header(base64WithHeader);
+      } else if (imagePreview && (imagePreview.startsWith("data:") || !imagePreview.startsWith("http"))) {
+        finalizedImageString = stripBase64Header(imagePreview);
+      } else if (isEditMode && imagePreview && imagePreview.startsWith("http")) {
+        finalizedImageString = ""; 
+      } else {
+        const dummyWithHeader = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+        finalizedImageString = stripBase64Header(dummyWithHeader);
       }
 
       const updatedStatusText = formData.action.trim() || "available";
 
-      // 3. Assemble complete JSON payload bundle
-      const assetPayload = {
+      const categoryMap: Record<string, number> = {
+        "Desktops": 1,
+        "Laptops": 2,
+        "Printers": 3,
+        "Monitors": 4,
+        "Networking": 5,
+        "Accessories": 6
+      };
+      const resolvedCategoryId = categoryMap[formData.category] || 2;
+
+      const assetPayload: Record<string, any> = {
         asset_id: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`,
         name: formData.name.trim(),
         serial_number: formData.serial_number.trim(),
@@ -190,29 +230,30 @@ const AddNewAsset = () => {
         model: formData.model.trim() || "N/A",
         ram_capacity: formData.ram.trim() || "N/A",
         storage: formData.storage.trim() || "N/A",
-        category_id: formData.category === "Laptops" ? 2 : 1, 
+        category_id: resolvedCategoryId, 
         status: updatedStatusText.toLowerCase(), 
         condition: "new",
-        shop_name: formData.shopName.trim(),
-        phone: formData.phone.trim(),
-        address: formData.address.trim(),
-        image: finalizedImageString 
       };
 
-      // Debug check print string length logs directly to the terminal environment
-      console.log("🚀 Payload sending to backend:", assetPayload);
+      if (finalizedImageString) {
+        assetPayload.image = finalizedImageString;
+      }
+
+      console.log("🚀 Payload sending to backend server stream:", assetPayload);
 
       const API_URL = "http://192.168.100.185:1010/api/asset"; 
-      const targetId = stateEditItem?.asset_id || stateEditItem?.id || stateId;
+      const targetId = stateEditItem?.asset_id || stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
+      
       const method = isEditMode ? "PUT" : "POST";
+      const currentToken = localStorage.getItem("token") || "128|T7ZfI9NF6X0CnWSOpEIxdy4Xjka4mKtiYw4bllii6732bd8a";
 
       const response = await fetch(url, {
         method: method,
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": "Bearer 75|ecXvly4g06pAEgaOezO53PZP7XFej6OiXUEe40CZ21f2564c"
+          "Authorization": `Bearer ${currentToken}`
         },
         body: JSON.stringify(assetPayload),
       });
@@ -229,6 +270,8 @@ const AddNewAsset = () => {
       }
 
       alert(isEditMode ? "Asset entry altered successfully!" : "New asset entry saved!");
+      
+      localStorage.removeItem("inventory_data");
       navigate("/inventory");
 
     } catch (err: any) {
@@ -275,9 +318,9 @@ const AddNewAsset = () => {
                       name="assetId"
                       value={formData.assetId}
                       onChange={handleInputChange}
+                      disabled={isEditMode} // Usually recommended to disable editing IDs
                       placeholder="e.g. AST-2026-03" 
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                      required
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm disabled:bg-slate-100 disabled:text-slate-500" 
                     />
                   </div>
                   
@@ -302,9 +345,8 @@ const AddNewAsset = () => {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
                     >
-                      <option value="">Select Category</option>
-                      <option value="Laptops">Laptops</option>
                       <option value="Desktops">Desktops</option>
+                      <option value="Laptops">Laptops</option>
                       <option value="Printers">Printers</option>
                       <option value="Monitors">Monitors</option>
                       <option value="Networking">Networking</option>
@@ -319,7 +361,7 @@ const AddNewAsset = () => {
                       name="action"
                       value={formData.action}
                       onChange={handleInputChange}
-                      placeholder="e.g. Active, Returned, Pending, Maintenance" 
+                      placeholder="e.g. Assigned, Available, Maintenance, Pending, Expired, Retired" 
                       className="w-full px-3.5 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-sm bg-slate-50/50 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400" 
                     />
                   </div>
@@ -379,6 +421,7 @@ const AddNewAsset = () => {
                       onChange={handleInputChange}
                       placeholder="e.g. SN123456789j2"
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                      required
                     />
                   </div>
                 </div>
@@ -410,50 +453,6 @@ const AddNewAsset = () => {
                       value={formData.warranty}
                       onChange={handleInputChange}
                       placeholder="e.g. 12" 
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                    />
-                  </div>
-                </div>
-              </section>
-
-              {/* Vendor House Details */}
-              <section className="space-y-4">
-                <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-                  <Settings size={18} className="text-blue-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Software House Details</h2>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1 col-span-2">
-                    <label className="text-xs font-semibold text-slate-600">Software House Name</label>
-                    <input 
-                      type="text" 
-                      name="shopName"
-                      value={formData.shopName}
-                      onChange={handleInputChange}
-                      placeholder="e.g. Insight Enterprise INC" 
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Phone No</label>
-                    <input 
-                      type="text" 
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange} 
-                      placeholder="09*********" 
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Software House Address</label>
-                    <input 
-                      type="text" 
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      placeholder="City" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
@@ -500,7 +499,7 @@ const AddNewAsset = () => {
                     alt="Asset preview" 
                     className="w-full h-full object-cover rounded-md"
                   />
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity rounded-md">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity rounded-md">
                     <button
                       type="button"
                       onClick={removeImage}

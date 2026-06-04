@@ -1,6 +1,7 @@
 // src/lib/api.ts
 
 const BASE_URL = "http://192.168.100.185:1010/api";
+const DEFAULT_TOKEN = "119|6UBfGxzFSshZIwJu69IWBcmbq9gIb9opQwlL2eX51d4a76c8";
 
 type ApiErrorResponse = {
   message?: string;
@@ -40,16 +41,14 @@ export async function apiFetch(
   endpoint: string,
   options: RequestInit = {}
 ) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || DEFAULT_TOKEN;
 
   const isFormData = options.body instanceof FormData;
 
   const headers: HeadersInit = {
     Accept: "application/json",
 
-    ...(token && {
-      Authorization: `Bearer ${token}`,
-    }),
+    Authorization: `Bearer ${token}`,
 
     ...(!isFormData && {
       "Content-Type": "application/json",
