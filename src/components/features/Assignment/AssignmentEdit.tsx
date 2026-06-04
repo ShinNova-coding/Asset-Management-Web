@@ -23,7 +23,6 @@ export default function AssignmentEdit({
   onSave,
   onCancel,
 }: AssignmentEditFormProps) {
-  // Local state tracks snake_case keys coming from your live database payload
   const [employeeId, setEmployeeId] = React.useState(assignment.employee_id || "")
   const [assetId, setAssetId] = React.useState(assignment.asset_id || "")
   const [assignedDate, setAssignedDate] = React.useState(assignment.assigned_date || "")
@@ -34,9 +33,8 @@ export default function AssignmentEdit({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Constructing the payload exactly as your PUT endpoint expects it
     onSave({
-      ...assignment, // Preserves internal fields like assignment.id and asset relations
+      ...assignment,
       employee_id: employeeId,
       asset_id: assetId,
       assigned_date: assignedDate,
@@ -47,11 +45,10 @@ export default function AssignmentEdit({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-slate-50 rounded-xl border shadow-sm">
+    <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
       <h3 className="text-lg font-bold text-slate-900 mb-2">Modify Assignment Properties</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* EMPLOYEE ID */}
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1">Employee ID</label>
           <Input
@@ -62,15 +59,13 @@ export default function AssignmentEdit({
           />
         </div>
 
-        {/* ASSET NAME DISPLAY (READ ONLY) */}
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1">Target Asset Name</label>
-          <div className="text-sm font-semibold text-slate-800 p-2 bg-slate-200/60 border rounded-md h-9 flex items-center">
+          <div className="text-sm font-semibold text-slate-800 p-2 bg-slate-100 border border-slate-200/60 rounded-md h-9 flex items-center">
             {assignment.asset?.name || "Unknown Asset Unit"}
           </div>
         </div>
 
-        {/* ASSET DATABASE ID LINK */}
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1">Asset ID Code</label>
           <Input
@@ -80,7 +75,6 @@ export default function AssignmentEdit({
           />
         </div>
 
-        {/* ASSIGNED DATE */}
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1">Assigned Date</label>
           <Input
@@ -91,7 +85,6 @@ export default function AssignmentEdit({
           />
         </div>
 
-        {/* RETURNED DATE */}
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1">Returned Date</label>
           <Input
@@ -101,13 +94,9 @@ export default function AssignmentEdit({
           />
         </div>
 
-        {/* STATUS PICKER */}
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1">Status Mode</label>
-          <Select
-            value={status}
-            onValueChange={(value) => setStatus(value)}
-          >
+          <Select value={status} onValueChange={(value) => setStatus(value)}>
             <SelectTrigger className="bg-white">
               <SelectValue placeholder="Select assignment status" />
             </SelectTrigger>
@@ -120,23 +109,21 @@ export default function AssignmentEdit({
         </div>
       </div>
 
-      {/* INTERNAL REMARKS AND NOTES */}
       <div className="pt-2">
         <label className="block text-xs font-semibold text-slate-600 mb-1">Internal Asset Remarks & Notes</label>
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Provide clear remarks outlining device condition metrics..."
-          className="min-h-[100px] w-full rounded-md border border-slate-200 px-3 py-2 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+          className="min-h-[100px] w-full rounded-md border border-slate-200 px-3 py-2 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition"
         />
       </div>
 
-      {/* ACTION CONTROLS */}
       <div className="flex gap-2 justify-end pt-4 border-t border-slate-200">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" variant="default">
+        <Button type="submit">
           Save Changes
         </Button>
       </div>

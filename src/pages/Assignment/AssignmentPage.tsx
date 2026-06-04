@@ -7,7 +7,7 @@ import { FiTrash2 } from "react-icons/fi";
 import axios from "axios";
 
 // Targeted Local Network Endpoint
-const API_URL = "http://192.168.18.9:1010/api/assignment";
+const API_URL = "http://192.168.100.185:1010/api/assignment";
 
 const AssignmentPage = () => {
   const [data, setData] = useState<Assignment[]>([]);

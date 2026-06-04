@@ -96,8 +96,8 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
       const targetId = deleteModal.targetId
       
       try {
-        const API_URL = `http://192.168.18.9:1010/api/asset/${targetId}`;
-        const currentToken = localStorage.getItem("token") || "11|z7kS1l7X1p4y6k4rhK3xiwiO6reuNwdTDgJEQdNl44b535b9";
+        const API_URL = `http://192.168.100.185:1010/api/asset/${targetId}`;
+        const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
 
         const response = await fetch(API_URL, {
           method: "DELETE",

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { FiChevronLeft, FiChevronRight, FiClock, FiPlus } from "react-icons/fi"
+import { FiChevronLeft, FiChevronRight, FiPlus } from "react-icons/fi"
 
 import {
   flexRender,
@@ -42,28 +42,19 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
 
   const navigate = useNavigate()
 
-  // Clean, explicit typing checking lowercase strings from your live API payload
-  const pendingCount = data.filter(
-    (item: Assignment) => item.status?.toLowerCase() === "pending"
-  ).length
-
   const table = useReactTable({
     data,
     columns: baseColumns,
     meta,
-
     state: {
       globalFilter,
       columnFilters,
     },
-
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
-
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-
     initialState: {
       pagination: {
         pageSize: 5,
@@ -77,7 +68,7 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
   return (
     <div className="w-full space-y-4 p-4 relative">
 
-      {/* TOP CONTROLS: CREATE BUTTON (Top Right Placement) */}
+      {/* TOP CONTROLS: CREATE BUTTON */}
       <div className="flex justify-end w-full">
         <Button
           onClick={() => navigate("/assignment/add")}
@@ -92,16 +83,11 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
       <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full">
         <div className="flex-1">
           <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 overflow-hidden">
-            <AssignmentSearch
-              value={globalFilter}
-              onChange={setGlobalFilter}
-            />
+            <AssignmentSearch value={globalFilter} onChange={setGlobalFilter} />
           </div>
         </div>
         <div className="w-full md:w-[180px]">
-          <div className="bg-transparent p-0">
-            <AssignmentFilter table={table} />
-          </div>
+          <AssignmentFilter table={table} />
         </div>
       </div>
 
@@ -129,17 +115,28 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
                   onClick={(e) => {
                     const item = row.original;
                     const target = e.target as HTMLElement;
-                    // Action button သို့မဟုတ် action panel တွေကို နှိပ်မိရင် Detail ဆီ မသွားအောင် ကာကွယ်ထားခြင်း
-                    if (!target.closest('button') && !target.closest('.actions-cell')) {
-                      navigate(`/assignment/${item.id}`, { state: { editItem: item } });
+                    
+                    // ခလုတ် သို့မဟုတ် Actions ကော်လံကို နှိပ်မိရင် Detail ဆီ သွားမယ့် လမ်းကြောင်းကို ရပ်တန့်ပေးသည်
+                    if (target.closest('[data-actions-cell="true"]') || target.closest('button')) {
+                      return;
                     }
+                    
+                    // ရိုးရိုး နေရာလွတ်တွေကို နှိပ်မှသာ Detail View (Read-Only) ဆီ သွားမည်
+                    navigate(`/assignment/${item.id}`);
                   }}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3 text-slate-700 text-sm">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const isActions = cell.column.id === "actions";
+                    return (
+                      <TableCell 
+                        key={cell.id} 
+                        className="py-3 text-slate-700 text-sm"
+                        {...(isActions ? { "data-actions-cell": "true" } : {})}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             ) : (
@@ -156,15 +153,13 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
       {/* PAGINATION CONTROLS */}
       <div className="flex items-center justify-between px-2 py-1">
         <div className="text-xs text-slate-500 font-medium">
-          Page {currentPage + 1} of{" "}
-          {pageCount} ({table.getFilteredRowModel().rows.length} total assignments)
+          Page {currentPage + 1} of {pageCount} ({table.getFilteredRowModel().rows.length} total assignments)
         </div>
 
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             size="sm"
-            className="flex items-center gap-1 disabled:opacity-50"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -183,11 +178,7 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
                     key={index}
                     variant={currentPage === index ? "default" : "outline"}
                     size="sm"
-                    className={`disabled:opacity-50 ${
-                      currentPage === index
-                        ? "bg-blue-300 hover:bg-blue-400 text-white border-none"
-                        : "bg-slate-200"
-                    }`}
+                    className={currentPage === index ? "bg-blue-300 hover:bg-blue-400 text-white border-none" : "bg-slate-200"}
                     onClick={() => table.setPageIndex(index)}
                   >
                     {index + 1}
@@ -195,7 +186,7 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
                 )
               }
               if (index === currentPage - 2 || index === currentPage + 2) {
-                return <span key={index} className="px-2 flex items-center text-gray-500">...</span>
+                return <span key={index} className="px-2 text-gray-500">...</span>
               }
               return null
             })}
@@ -204,7 +195,6 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
           <Button
             variant="outline"
             size="sm"
-            className="flex items-center gap-1 disabled:opacity-50"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >

@@ -95,7 +95,7 @@ const AddNewAsset = () => {
       });
 
       
-      const API_REAL_IP = "http://192.168.18.9:1010";
+      const API_REAL_IP = "http://192.168.100.185:1010";
       let rawImageSource = activeItem.preview_url || activeItem.image_url || activeItem.image || "";
 
       if (rawImageSource) {
@@ -246,12 +246,12 @@ const AddNewAsset = () => {
 
       console.log("🚀 Payload sending to backend server stream:", assetPayload);
 
-      const API_URL = "http://192.168.18.9:1010/api/asset"; 
+      const API_URL = "http://192.168.100.185:1010/api/asset"; 
       const targetId = stateEditItem?.asset_id || stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       
       const method = isEditMode ? "PUT" : "POST";
-      const currentToken = localStorage.getItem("token") || "11|z7kS1l7X1p4y6k4rhK3xiwiO6reuNwdTDgJEQdNl44b535b9";
+      const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
 
       const response = await fetch(url, {
         method: method,

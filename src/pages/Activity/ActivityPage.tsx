@@ -28,7 +28,7 @@ export default function ActivityPage() {
         const token = localStorage.getItem("token")
 
         // Fetching from your general activity endpoint
-        const response = await fetch("http://192.168.18.9:1010/api/activitylogs", {
+        const response = await fetch("http://192.168.100.185:1010/api/activitylogs", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

@@ -4,24 +4,32 @@ import * as React from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FiChevronLeft } from "react-icons/fi"
+import { Card, CardContent } from "@/components/ui/card"
+import { 
+  FiChevronLeft, 
+  FiCalendar, 
+  FiUser, 
+  FiCpu, 
+  FiHash, 
+  FiFileText, 
+  FiClock 
+} from "react-icons/fi"
 import type { Assignment } from "@/data/assignmentdata"
 import axios from "axios"
 
-const API_URL = "http://192.168.18.9:1010/api/assignment"
+const API_URL = "http://192.168.100.185:1010/api/assignment"
 
 const AssignmentDetailPage = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const [formData, setFormData] = useState<Assignment | null>(null)
+  const [formData, setFormData] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // Helper function to dynamically generate authentication headers
   const getAuthHeaders = () => {
-    const token = localStorage.getItem("token") // Pull client token securely
+    const token = localStorage.getItem("token")
     return {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -70,101 +78,162 @@ const AssignmentDetailPage = () => {
     }
   }, [id, location.state])
 
+  // UI STATE HANDLING: Loading Spinner
   if (loading) {
     return (
-      <div className="p-10 flex flex-col items-center justify-center min-h-screen text-slate-500 space-y-2">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
-        <p className="text-sm">Retrieving database assignment content...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 text-slate-500 space-y-4">
+        <div className="animate-spin rounded-full h-9 w-9 border-2 border-slate-300 border-t-slate-900"></div>
+        <p className="text-sm font-medium tracking-wide">Retrieving asset lifecycle context...</p>
       </div>
     )
   }
 
+  // UI STATE HANDLING: Error Alert View
   if (error || !formData) {
     return (
-      <div className="p-10 max-w-4xl mx-auto space-y-4">
-        <h1 className="text-xl font-bold text-red-600">
-          {error || "Assignment Not Found"}
+      <div className="p-6 max-w-xl mx-auto mt-20 text-center space-y-6">
+        <div className="inline-flex p-4 bg-red-50 text-red-600 rounded-full">
+          <FiFileText size={32} />
+        </div>
+        <h1 className="text-xl font-bold text-slate-900">
+          {error || "Assignment Record Not Found"}
         </h1>
-        <Button onClick={() => navigate("/assignment")}>
-          Back to Assignment
+        <p className="text-sm text-slate-500 max-w-sm mx-auto">
+          The asset linkage system was unable to pull a matching log instance for ID token reference: {id}
+        </p>
+        <Button onClick={() => navigate("/assignment")} variant="outline" className="shadow-sm">
+          Return to Manifest
         </Button>
       </div>
     )
   }
 
+  const isActive = formData.status?.toLowerCase() === "active"
+
   return (
-    <div className="p-10 min-h-screen bg-slate-50">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="p-6 md:p-12 min-h-screen bg-slate-50/50 text-slate-900 antialiased">
+      <div className="max-w-3xl mx-auto space-y-8">
         
-        {/* ACTION BAR */}
-        <div className="flex justify-between items-center">
+        {/* HEADER NAVIGATION */}
+        <div className="flex items-center justify-between">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={() => navigate("/assignment")}
-            className="gap-2"
+            className="text-slate-600 hover:text-slate-900 -ml-3 gap-2 text-sm font-medium transition-colors"
           >
-            <FiChevronLeft />
-            Back 
+            <FiChevronLeft className="w-4 h-4" />
+            Back to Overview
           </Button>
         </div>
 
-        {/* DETAILS PANEL */}
-        <div className="bg-gray-100 p-6 rounded-xl shadow border space-y-5">
-          <h1 className="text-2xl font-bold text-slate-900">
-            Assignment Details Profile
-          </h1>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Employee ID</label>
-              <p className="text-sm font-semibold text-slate-800">{formData.employee_id}</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Asset Name</label>
-              <p className="text-sm font-semibold text-slate-800 p-2 bg-slate-200/50 rounded">
-                {formData.asset?.name || "Unknown Asset Unit"}
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Asset ID Code</label>
-              <p className="text-sm font-semibold text-slate-800">{formData.asset_id}</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Assigned Date</label>
-              <p className="text-sm font-semibold text-slate-800">{formData.assigned_date}</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Returned Date</label>
-              <p className="text-sm font-semibold text-slate-800">
-                {formData.returned_date ? formData.returned_date : "Currently Active"}
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Status Mode</label>
-              <p className="text-sm font-semibold text-slate-800 capitalize">{formData.status}</p>
-            </div>
+        {/* HERO TITLE BLOCK */}
+        <div className="space-y-2 border-b border-slate-200 pb-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+              Assignment Detail
+            </h1>
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide shadow-sm transition-all ${
+              isActive 
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60" 
+                : "bg-slate-100 text-slate-700 border border-slate-200"
+            }`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-emerald-500" : "bg-slate-400"}`}></span>
+              {formData.status || "Unknown Status"}
+            </span>
           </div>
         </div>
 
-        {/* NOTES COMPONENT BLOCK */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Internal Asset Remarks & Notes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <textarea
-              value={formData.note || ""}
-              disabled={true}
-              placeholder="No operational evaluation text found."
-              className="min-h-[120px] w-full rounded-md border border-slate-300 px-3 py-2 bg-slate-100 text-sm focus:outline-none cursor-not-allowed"
-            />
+        {/* METRIC SPECIFICATION TILES */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          {/* CUSTODY ENTITY CARD */}
+          <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <FiUser className="w-4 h-4 text-slate-400" />
+                Employee Detail
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-tight">Employee ID</label>
+                  <p className="text-base font-semibold text-slate-800 mt-0.5 font-mono text-sm">{formData.employee_id}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* HARDWARE SPECIFICATION CARD */}
+          <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-xl">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <FiCpu className="w-4 h-4 text-slate-400" />
+                Hardware Allocation
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-tight">Asset Name</label>
+                  <p className="text-base font-semibold text-slate-800 mt-0.5">
+                    {formData.asset?.name || "Unknown Asset Unit"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-tight">Asset ID</label>
+                  <div className="flex items-center gap-1.5 text-slate-700 font-mono text-xs mt-1 bg-slate-50 px-2 py-1 rounded w-max border border-slate-100">
+                    <FiHash className="w-3 h-3 text-slate-400" />
+                    {formData.asset_id}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* LIFECYCLE CHRONOLOGY BAR */}
+        <Card className="border border-slate-200/80 shadow-sm bg-white rounded-xl">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
+              <FiCalendar className="w-4 h-4 text-slate-400" />
+              Allocation Timeline
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative">
+              <div className="space-y-1 border-l-2 border-slate-200 pl-4">
+                <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider">Assigned Date</label>
+                <p className="text-sm font-semibold text-slate-700">{formData.assigned_date || "Not set"}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
+
+        {/* NARRATIVE INSIGHT CARD */}
+        <div className="relative mt-2">
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-100 to-indigo-50/20 rounded-2xl -m-2 opacity-60 blur-sm pointer-events-none" />
+          <Card className="relative border border-slate-200 shadow-sm bg-white rounded-xl overflow-hidden">
+            <CardContent className="p-6 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <FiClock className="w-4 h-4 text-slate-400" />
+                Operational History Activity
+              </div>
+              
+              <div className="pt-2">
+                <p className="text-base font-normal text-slate-700 leading-relaxed tracking-wide">
+                  Employee ID <span className="font-semibold text-slate-900 font-mono text-sm">{formData.employee_id}</span> was assigned to the{" "}
+                  <span className="font-semibold text-slate-900">{formData.asset?.name || "hardware asset"}</span> unit.
+                </p>
+                {formData.note ? (
+                  <div className="block mt-4 text-sm text-slate-600 bg-slate-50/80 p-4 rounded-xl border border-slate-200/60 leading-relaxed">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">System Remarks</span>
+                    &ldquo;{formData.note}&rdquo;
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-400 italic mt-3">
+                    No custom remarks or contextual history details were logged for this event entry.
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
       </div>
     </div>
   )

@@ -117,13 +117,13 @@ const AddNewAsset = () => {
 
       // 💡 နေရာမှန်ဖြစ်တဲ့ /api/assignment (သို့မဟုတ် အများကိန်း /api/assignments) ကို ပြောင်းသုံးရပါမယ်
       // မင်းရဲ့ Backend API configuration အရ စမ်းကြည့်ပါ
-      const API_URL = "http://192.168.18.9:1010/api/assignment"; 
+      const API_URL = "http://192.168.100.185:1010/api/assignment"; 
       
       const targetId = stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       const method = isEditMode ? "PUT" : "POST";
       
-      const currentToken = localStorage.getItem("token") || "11|z7kS1l7X1p4y6k4rhK3xiwiO6reuNwdTDgJEQdNl44b535b9";
+      const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
 
       const response = await fetch(url, {
         method: method,
