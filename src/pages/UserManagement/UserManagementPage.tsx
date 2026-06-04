@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Employee } from '../../types/employee';
+import { normalizeImageSource } from '../../lib/utils';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
 
 import {
@@ -21,6 +22,7 @@ import { RiDeleteBin4Fill } from "react-icons/ri";
 const pageSize = 5;
 
 type ApiUser = {
+  id: string;
   employee_id: string;
   name: string;
   email: string;
@@ -31,6 +33,11 @@ type ApiUser = {
   left_date: string | null;
   image_url: string | null;
   preview_url?: string | null;
+  image?: string | null;
+  media?: Array<{
+    original_url?: string | null;
+    preview_url?: string | null;
+  }>;
   roles?: Array<{
     name: string;
   }>;
@@ -40,8 +47,16 @@ const formatStatus = (status: string) =>
   status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : "-";
 
 const mapApiUserToEmployee = (user: ApiUser): Employee => ({
-  profileImage: user.preview_url || user.image_url || "https://via.placeholder.com/120",
-  employeeId: user.employee_id,
+  id: user.id,
+  profileImage: normalizeImageSource(
+    user.preview_url ||
+      user.image_url ||
+      user.image ||
+      user.media?.[0]?.preview_url ||
+      user.media?.[0]?.original_url ||
+      null
+  ),
+  employee_id: user.employee_id,
   name: user.name,
   email: user.email,
   address: "-",
@@ -128,7 +143,7 @@ const UserManagement: React.FC = () => {
   const handleConfirmDelete = () => {
     if (deleteModal.targetId) {
       setData((prev) =>
-        prev.filter((item) => item.employeeId !== deleteModal.targetId)
+        prev.filter((item) => item.employee_id !== deleteModal.targetId)
       );
 
       setDeleteModal({
@@ -161,7 +176,7 @@ const UserManagement: React.FC = () => {
     const matchesSearch =
       emp.name.toLowerCase().includes(searchTerm) ||
       emp.email.toLowerCase().includes(searchTerm) ||
-      emp.employeeId.toLowerCase().includes(searchTerm);
+      emp.employee_id.toLowerCase().includes(searchTerm);
 
     const matchesStatus =
       !statusFilter || emp.status.toLowerCase() === statusFilter.toLowerCase();
@@ -271,12 +286,12 @@ const UserManagement: React.FC = () => {
 
             {!loading && !error && currentPaginatedData.map((emp) => (
               <tr
-                key={emp.employeeId}
+                key={emp.id ?? emp.employee_id}
                 className="hover:bg-gray-100 cursor-pointer"
-                onClick={() => navigate(`/employee/${emp.employeeId}`)}
+                onClick={() => navigate(`/employee/${emp.id ?? emp.employee_id}`)}
               >
 
-                <td className="px-6 py-5 text-sm">{emp.employeeId}</td>
+                <td className="px-6 py-5 text-sm">{emp.employee_id}</td>
                 <td className="px-6 py-5 text-sm font-medium">{emp.name}</td>
                 <td className="px-6 py-5 text-sm">{emp.email}</td>
 
@@ -307,7 +322,7 @@ const UserManagement: React.FC = () => {
                     <button
                       onClick={(event) => {
                         event.stopPropagation();
-                        handleDeleteTrigger(emp.employeeId);
+                        handleDeleteTrigger(emp.employee_id);
                       }}
                       className="text-red-500 hover:text-red-700"
                     >
