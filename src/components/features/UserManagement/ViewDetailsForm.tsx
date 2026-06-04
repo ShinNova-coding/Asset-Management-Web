@@ -48,7 +48,7 @@ export default function ViewDetailsForm({ data }: Props) {
           <Field label="Employee ID" value={data.employeeId} />
           <Field label="Email" value={data.email} />
           <Field label="Phone Number" value={data.phone} />
-          <Field label="Address" value={data.address} />
+          <Field label="Role" value={data.role} />
           <Field label="Position" value={data.position} />
           <Field label="Status" value={data.status} />
       

@@ -13,14 +13,57 @@ const DEFAULT_TOKEN = '119|6UBfGxzFSshZIwJu69IWBcmbq9gIb9opQwlL2eX51d4a76c8';
 
 interface FormState {
   name: string;
-  employeeId: string;
+  employee_id: string;
   email: string;
   position: string;
-  joinedDate: string;
-  leftDate: string;
-  phoneNumber: string;
+  joined_date: string;
+  left_date: string;
+  phone_number: string;
   status: string;
+  role: string;
+  password: string;
+  password_confirmation: string;
 }
+
+const formatToInputDate = (dateString: string) => {
+  if (!dateString || dateString === '-') return '';
+  const date = new Date(dateString);
+
+  if (!Number.isNaN(date.getTime())) {
+    return date.toISOString().split('T')[0];
+  }
+
+  return dateString;
+};
+
+const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || '');
+      const base64 = result.includes(',') ? result.split(',')[1] : result;
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+const getApiErrorMessage = async (response: Response) => {
+  let message = `API Error: ${response.status}`;
+
+  try {
+    const errorData = await response.json();
+    const validationMessages = errorData?.errors
+      ? Object.values(errorData.errors).flat()
+      : [];
+
+    message = validationMessages[0] || errorData?.message || message;
+  } catch (parseErr) {
+    console.error('Error parsing API error response:', parseErr);
+  }
+
+  return String(message);
+};
 
 const AddEmployeeForm: React.FC = () => {
   const location = useLocation();
@@ -31,13 +74,16 @@ const AddEmployeeForm: React.FC = () => {
 
   const [formState, setFormState] = useState<FormState>({
     name: '',
-    employeeId: '',
+    employee_id: '',
     email: '',
     position: '',
-    joinedDate: '',
-    leftDate: '',
-    phoneNumber: '',
+    joined_date: '',
+    left_date: '',
+    phone_number: '',
     status: 'active',
+    role: 'admin',
+    password: '',
+    password_confirmation: '',
   });
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileFile, setProfileFile] = useState<File | null>(null);
@@ -45,27 +91,29 @@ const AddEmployeeForm: React.FC = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const existingToken = localStorage.getItem('token');
-      if (!existingToken) {
-        localStorage.setItem('token', DEFAULT_TOKEN);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
     if (editItem) {
+      const normalizedRole = editItem.role
+        ? editItem.role.toLowerCase().replace(/-/g, ' ')
+        : 'admin';
+
       setFormState({
         name: editItem.name,
-        employeeId: editItem.employeeId,
+        employee_id: editItem.employeeId,
         email: editItem.email,
         position: editItem.position === '-' ? '' : editItem.position,
-        joinedDate: editItem.startDate === '-' ? '' : editItem.startDate,
-        leftDate: editItem.endDate === '-' ? '' : editItem.endDate,
-        phoneNumber: editItem.phone === '-' ? '' : editItem.phone,
-        status: editItem.status.toLowerCase(),
+        joined_date: formatToInputDate(editItem.joinedDate || ''),
+        left_date: formatToInputDate(editItem.leftDate || ''),
+        phone_number: editItem.phone === '-' ? '' : editItem.phone,
+        status: editItem.status === '-' ? 'active' : editItem.status.toLowerCase(),
+        role: editItem.role === '-' ? 'admin' : normalizedRole || 'admin',
+        password: '',
+        password_confirmation: '',
       });
-      setProfileImage(editItem.profileImage);
+      setProfileImage(
+        editItem.profileImage === 'https://via.placeholder.com/120'
+          ? null
+          : editItem.profileImage
+      );
     }
   }, [editItem]);
 
@@ -96,43 +144,79 @@ const AddEmployeeForm: React.FC = () => {
     setError('');
 
     try {
+      if (!formState.employee_id.trim()) {
+        throw new Error('Employee ID is required.');
+      }
+
+      if (!formState.name.trim()) {
+        throw new Error('Name is required.');
+      }
+
+      if (!formState.email.trim()) {
+        throw new Error('Email is required.');
+      }
+
+      if (!formState.role.trim()) {
+        throw new Error('Role is required.');
+      }
+
+      if (!isEditMode) {
+        if (!formState.password) {
+          throw new Error('Password is required.');
+        }
+
+        if (formState.password !== formState.password_confirmation) {
+          throw new Error('Password and confirmation must match.');
+        }
+      } else if (formState.password && formState.password !== formState.password_confirmation) {
+        throw new Error('Password and confirmation must match.');
+      }
+
       const endpoint = isEditMode
-        ? `${API_URL}/${formState.employeeId}`
+        ? `${API_URL}/${encodeURIComponent(formState.employee_id)}`
         : API_URL;
       const method = isEditMode ? 'PUT' : 'POST';
 
-      const body = new FormData();
-      body.append('name', formState.name);
-      body.append('employee_id', formState.employeeId);
-      body.append('email', formState.email);
-      body.append('position', formState.position);
-      body.append('joined_date', formState.joinedDate);
-      body.append('left_date', formState.leftDate);
-      body.append('phone_number', formState.phoneNumber);
-      body.append('status', formState.status);
+      const payload: Record<string, string> = {
+        name: formState.name.trim(),
+        employee_id: formState.employee_id.trim(),
+        email: formState.email.trim(),
+        position: formState.position.trim(),
+        joined_date: formState.joined_date,
+        left_date: formState.left_date,
+        phone_number: formState.phone_number.trim(),
+        status: formState.status,
+        role: formState.role.trim(),
+      };
 
-      if (profileFile) {
-        body.append('image', profileFile);
+      if (formState.password) {
+        payload.password = formState.password;
+        payload.password_confirmation = formState.password_confirmation;
       }
 
-      const token = localStorage.getItem('token');
+      const savedToken = localStorage.getItem('token') || DEFAULT_TOKEN;
+      if (!localStorage.getItem('token')) {
+        localStorage.setItem('token', savedToken);
+      }
+
+      if (profileFile) {
+        payload.image = await fileToBase64(profileFile);
+      }
+
+      const headers: HeadersInit = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${savedToken}`,
+      };
+
       const response = await fetch(endpoint, {
         method,
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body,
+        headers,
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        let message = `API Error: ${response.status}`;
-        try {
-          const errorData = await response.json();
-          message = errorData.message || message;
-        } catch (parseErr) {
-          console.error('Error parsing API error response:', parseErr);
-        }
-        throw new Error(message);
+        throw new Error(await getApiErrorMessage(response));
       }
 
       navigate('/employees', { state: { refresh: true }, replace: true });
@@ -152,7 +236,7 @@ const AddEmployeeForm: React.FC = () => {
     <div className="min-h-screen bg-slate-50 p-8 font-sans text-slate-900">
       <div className="max-w-4xl mx-auto">
 
-        {/* BACK */}
+        
         <Link
           to="/employees"
           className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline"
@@ -168,7 +252,7 @@ const AddEmployeeForm: React.FC = () => {
         <div className="bg-gray-100 rounded-lg border border-slate-200 shadow-sm p-10">
           <form className="space-y-10" onSubmit={handleSubmit}>
 
-            {/* PROFILE */}
+            
             <div className="flex flex-col items-center justify-center">
               <div className="relative">
                 <div className="w-28 h-28 rounded-full border-4 border-white shadow-md overflow-hidden bg-slate-200 flex items-center justify-center">
@@ -210,7 +294,7 @@ const AddEmployeeForm: React.FC = () => {
               </div>
             )}
 
-            {/* GENERAL INFO */}
+            
             <section>
               <div className="flex items-center gap-3 mb-4 pb-2 border-b border-slate-200">
                 <User size={20} className="text-slate-400" />
@@ -221,7 +305,7 @@ const AddEmployeeForm: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                {/* NAME */}
+                
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase text-slate-600">
                     Name
@@ -230,27 +314,29 @@ const AddEmployeeForm: React.FC = () => {
                     name="name"
                     value={formState.name}
                     onChange={handleInputChange}
+                    placeholder="e.g. Aung Aung"
                     className="w-full px-4 py-3 rounded-md border bg-white"
                     required
                   />
                 </div>
 
-                {/* EMP ID */}
+                
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase text-slate-600">
                     Employee ID
                   </label>
                   <input
-                    name="employeeId"
-                    value={formState.employeeId}
+                    name="employee_id"
+                    value={formState.employee_id}
                     onChange={handleInputChange}
+                    placeholder="e.g. EMP-2026-001"
                     className="w-full px-4 py-3 rounded-md border bg-white"
                     required
                     disabled={isEditMode}
                   />
                 </div>
 
-                {/* EMAIL */}
+                
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase text-slate-600">
                     Email
@@ -260,12 +346,13 @@ const AddEmployeeForm: React.FC = () => {
                     type="email"
                     value={formState.email}
                     onChange={handleInputChange}
+                    placeholder="e.g. aung.aung@example.com"
                     className="w-full px-4 py-3 rounded-md border bg-white"
                     required
                   />
                 </div>
 
-                {/* POSITION */}
+                
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase text-slate-600">
                     Position
@@ -274,36 +361,37 @@ const AddEmployeeForm: React.FC = () => {
                     name="position"
                     value={formState.position}
                     onChange={handleInputChange}
+                    placeholder="e.g. IT Support"
                     className="w-full px-4 py-3 rounded-md border bg-white"
                   />
                 </div>
 
-                {/* JOINED DATE */}
+                
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase text-slate-600">
                     Joined Date
                   </label>
                   <div className="relative">
                     <input
-                      name="joinedDate"
+                      name="joined_date"
                       type="date"
-                      value={formState.joinedDate}
+                      value={formState.joined_date}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border rounded-md bg-white"
                     />
                   </div>
                 </div>
 
-                {/* LEFT DATE */}
+                
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase text-slate-600">
                     Left Date
                   </label>
                   <div className="relative">
                     <input
-                      name="leftDate"
+                      name="left_date"
                       type="date"
-                      value={formState.leftDate}
+                      value={formState.left_date}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border rounded-md bg-white"
                     />
@@ -313,24 +401,25 @@ const AddEmployeeForm: React.FC = () => {
               </div>
             </section>
 
-            {/* PHONE + STATUS */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-              {/* PHONE */}
+              
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-slate-600">
                   Phone Number
                 </label>
                 <input
-                  name="phoneNumber"
+                  name="phone_number"
                   type="tel"
-                  value={formState.phoneNumber}
+                  value={formState.phone_number}
                   onChange={handleInputChange}
+                  placeholder="e.g. 09123456789"
                   className="w-full px-4 py-3 rounded-md border bg-white"
                 />
               </div>
 
-              {/* STATUS */}
+              
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-slate-600">
                   Status
@@ -355,9 +444,71 @@ const AddEmployeeForm: React.FC = () => {
                 </div>
               </div>
 
+              
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-600">
+                  Role
+                </label>
+
+                <div className="relative">
+                  <select
+                    name="role"
+                    value={formState.role}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border rounded-md bg-white appearance-none"
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="super admin">Super Admin</option>
+                    <option value="employee">Employee</option>
+                    <option value="manager">Manager</option>
+                  </select>
+
+                  <ChevronDown
+                    size={18}
+                    className="absolute right-3 top-3 text-gray-400 pointer-events-none"
+                  />
+                </div>
+              </div>
+
             </div>
 
-            {/* BUTTONS */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-600">
+                  Password
+                </label>
+                <input
+                  name="password"
+                  type="password"
+                  value={formState.password}
+                  onChange={handleInputChange}
+                  placeholder="Enter password"
+                  className="w-full px-4 py-3 rounded-md border bg-white"
+                  autoComplete="new-password"
+                  {...(!isEditMode ? { required: true } : {})}
+                />
+              </div>
+
+              
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-600">
+                  Confirm Password
+                </label>
+                <input
+                  name="password_confirmation"
+                  type="password"
+                  value={formState.password_confirmation}
+                  onChange={handleInputChange}
+                  placeholder="Confirm password"
+                  className="w-full px-4 py-3 rounded-md border bg-white"
+                  autoComplete="new-password"
+                  {...(!isEditMode ? { required: true } : {})}
+                />
+              </div>
+            </div>
+
+            
             <div className="flex justify-end gap-4 pt-6">
               <button
                 type="button"
