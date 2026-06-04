@@ -6,6 +6,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { normalizeImageSource } from '../../lib/utils';
 import type { Employee } from '../../types/employee';
 
 const API_URL = 'http://192.168.100.185:1010/api/user';
@@ -36,17 +37,20 @@ const formatToInputDate = (dateString: string) => {
   return dateString;
 };
 
-const fileToBase64 = (file: File): Promise<string> =>
+const convertImageToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
-      const result = String(reader.result || '');
-      const base64 = result.includes(',') ? result.split(',')[1] : result;
-      resolve(base64);
+      resolve(String(reader.result || ''));
     };
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+
+const stripBase64Header = (base64String: string): string => {
+  if (!base64String) return '';
+  return base64String.includes(',') ? base64String.split(',')[1] : base64String;
+};
 
 const getApiErrorMessage = async (response: Response) => {
   let message = `API Error: ${response.status}`;
@@ -98,7 +102,7 @@ const AddEmployeeForm: React.FC = () => {
 
       setFormState({
         name: editItem.name,
-        employee_id: editItem.employeeId,
+        employee_id: editItem.employee_id,
         email: editItem.email,
         position: editItem.position === '-' ? '' : editItem.position,
         joined_date: formatToInputDate(editItem.joinedDate || ''),
@@ -112,7 +116,7 @@ const AddEmployeeForm: React.FC = () => {
       setProfileImage(
         editItem.profileImage === 'https://via.placeholder.com/120'
           ? null
-          : editItem.profileImage
+          : normalizeImageSource(editItem.profileImage)
       );
     }
   }, [editItem]);
@@ -199,8 +203,23 @@ const AddEmployeeForm: React.FC = () => {
         localStorage.setItem('token', savedToken);
       }
 
+      let finalizedImageString = '';
+      const imagePreview = profileImage;
+
       if (profileFile) {
-        payload.image = await fileToBase64(profileFile);
+        const base64WithHeader = await convertImageToBase64(profileFile);
+        finalizedImageString = stripBase64Header(base64WithHeader);
+      } else if (imagePreview && (imagePreview.startsWith('data:') || !imagePreview.startsWith('http'))) {
+        finalizedImageString = stripBase64Header(imagePreview);
+      } else if (isEditMode && imagePreview && imagePreview.startsWith('http')) {
+        finalizedImageString = '';
+      } else {
+        const dummyWithHeader = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+        finalizedImageString = stripBase64Header(dummyWithHeader);
+      }
+
+      if (finalizedImageString) {
+        payload.image = finalizedImageString;
       }
 
       const headers: HeadersInit = {
@@ -458,7 +477,7 @@ const AddEmployeeForm: React.FC = () => {
                     className="w-full px-4 py-3 border rounded-md bg-white appearance-none"
                   >
                     <option value="admin">Admin</option>
-                    <option value="super admin">Super Admin</option>
+                    
                     <option value="employee">Employee</option>
                     <option value="manager">Manager</option>
                   </select>

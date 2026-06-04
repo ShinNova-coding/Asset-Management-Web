@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ViewDetailsForm from "../../components/features/UserManagement/ViewDetailsForm";
 import { apiFetch } from "../../lib/api";
+import { normalizeImageSource } from "../../lib/utils";
 import type { Employee } from "../../types/employee";
 
 const formatStatus = (status: string) =>
   status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : "-";
 
 export default function EmployeeDetailsPage() {
-  const { employeeId } = useParams<{ employeeId: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const [employee, setEmployee] = useState<Employee | null>(null);
@@ -16,7 +17,7 @@ export default function EmployeeDetailsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!employeeId) return;
+    if (!id) return;
 
     // For development convenience: set token if not present (do not use in production)
     try {
@@ -38,7 +39,7 @@ export default function EmployeeDetailsPage() {
       setError(null);
 
       try {
-        const res = await apiFetch(`/user/${employeeId}`);
+        const res = await apiFetch(`/user/${id}`);
 
         // API responses vary: try multiple shapes
         const payload = (res && (res.data ?? res)) || res;
@@ -50,8 +51,15 @@ export default function EmployeeDetailsPage() {
         if (!user) throw new Error("User not found");
 
         const mapped: Employee = {
-          profileImage: user.preview_url || user.image_url || "https://via.placeholder.com/120",
-          employeeId: user.employee_id,
+          profileImage: normalizeImageSource(
+            user.preview_url ||
+              user.image_url ||
+              user.image ||
+              user.media?.[0]?.preview_url ||
+              user.media?.[0]?.original_url ||
+              null
+          ),
+          employee_id: user.employee_id,
           name: user.name,
           email: user.email,
           address: "-",
@@ -73,9 +81,9 @@ export default function EmployeeDetailsPage() {
     };
 
     fetchUser();
-  }, [employeeId]);
+  }, [id]);
 
-  if (!employeeId) {
+  if (!id) {
     return <div className="p-6">Employee not specified</div>;
   }
 

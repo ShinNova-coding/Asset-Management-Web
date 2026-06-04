@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../lib/api";
+import { normalizeImageSource } from "../../lib/utils";
 import type { Employee } from "../../types/employee";
 
 type ApiUser = {
+  id: string;
   employee_id: string;
   name: string;
   email: string;
@@ -14,6 +16,11 @@ type ApiUser = {
   left_date: string | null;
   image_url: string | null;
   preview_url?: string | null;
+  image?: string | null;
+  media?: Array<{
+    original_url?: string | null;
+    preview_url?: string | null;
+  }>;
   roles?: Array<{
     name: string;
   }>;
@@ -23,9 +30,16 @@ const formatStatus = (status: string) =>
   status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : "-";
 
 const mapApiUserToEmployee = (user: ApiUser): Employee => ({
-
-  profileImage: user.preview_url || user.image_url || "https://via.placeholder.com/120",
-  employeeId: user.employee_id,
+  id: user.id,
+  profileImage: normalizeImageSource(
+    user.preview_url ||
+      user.image_url ||
+      user.image ||
+      user.media?.[0]?.preview_url ||
+      user.media?.[0]?.original_url ||
+      null
+  ),
+  employee_id: user.employee_id,
   name: user.name,
   email: user.email,
   address: "-",
@@ -85,11 +99,11 @@ export default function EmployeeListPage() {
           <tbody>
             {employees.map((emp) => (
               <tr
-                key={emp.employeeId}
-                onClick={() => navigate(`/employee/${emp.employeeId}`)}
+                key={emp.id ?? emp.employee_id}
+                onClick={() => navigate(`/employee/${emp.id ?? emp.employee_id}`)}
                 className="cursor-pointer hover:bg-gray-100"
               >
-                <td>{emp.employeeId}</td>
+                <td>{emp.employee_id}</td>
                 <td>{emp.name}</td>
                 <td>{emp.email}</td>
                 <td>{emp.position}</td>

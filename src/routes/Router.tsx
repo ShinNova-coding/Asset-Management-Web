@@ -121,7 +121,7 @@ export const router = createBrowserRouter([
     element: <EmployeeListPage />,
   },
   {
-    path: "/employee/:employeeId",
+    path: "employee/:id",
     element: <EmployeeDetailsPage />,
   },
        {
