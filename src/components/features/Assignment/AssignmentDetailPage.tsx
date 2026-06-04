@@ -1,114 +1,102 @@
+"use client"
+
+import * as React from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
-import { assignmentData } from "@/data/assignmentdata"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FiChevronLeft, FiSave, FiTrash2 } from "react-icons/fi"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { FiChevronLeft } from "react-icons/fi"
 import type { Assignment } from "@/data/assignmentdata"
+import axios from "axios"
+
+const API_URL = "http://192.168.18.9:1010/api/assignment"
 
 const AssignmentDetailPage = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState<Assignment | null>(null)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Load assignment data from localStorage
+  // Helper function to dynamically generate authentication headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token") // Pull client token securely
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  }
+
+  // Load target assignment details from the remote API
   useEffect(() => {
-    const savedData = localStorage.getItem("assignment_data")
-    if (savedData) {
-      try {
-        const parsedData: Assignment[] = JSON.parse(savedData)
-        const assignment = parsedData.find((item) => item.assetId === id)
-        
-        // Check if we're coming from edit action with state data
-        const stateData = location.state as { editItem?: Assignment } | null
-        
-        if (stateData?.editItem) {
-          // Use the passed edit item data
-          setFormData(stateData.editItem)
-          setIsEditing(true)
-        } else if (assignment) {
-          // Normal view mode
-          setFormData(assignment)
-        }
-      } catch (error) {
-        console.error("Error loading assignment data:", error)
+    const fetchRecordDetails = async () => {
+      // Prioritize fast path if the state is already passed via routing transitions
+      const stateData = location.state as { editItem?: Assignment } | null
+      if (stateData?.editItem) {
+        setFormData(stateData.editItem)
+        setLoading(false)
+        return
       }
+
+      try {
+        setLoading(true)
+        setError(null)
+        
+        // Dynamic reading call using authorization configuration
+        const response = await axios.get(`${API_URL}/${id}`, getAuthHeaders())
+        
+        if (response.data?.success) {
+          const fetchedData = Array.isArray(response.data.data) 
+            ? response.data.data[0] 
+            : response.data.data
+            
+          setFormData(fetchedData)
+        } else {
+          setError(response.data?.message || "Failed to locate target record.")
+        }
+      } catch (err: any) {
+        console.error("Error reading specific assignment:", err)
+        setError(`Unable to pull assignment record: ${err.response?.data?.message || err.message}`)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (id) {
+      fetchRecordDetails()
     }
   }, [id, location.state])
 
-  if (!formData) {
+  if (loading) {
     return (
-      <div className="p-10">
-        <h1 className="text-xl font-bold text-red-600">
-          Assignment Not Found
-        </h1>
+      <div className="p-10 flex flex-col items-center justify-center min-h-screen text-slate-500 space-y-2">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+        <p className="text-sm">Retrieving database assignment content...</p>
+      </div>
+    )
+  }
 
-        <Button
-          className="mt-4"
-          onClick={() => navigate("/assignment")}
-        >
+  if (error || !formData) {
+    return (
+      <div className="p-10 max-w-4xl mx-auto space-y-4">
+        <h1 className="text-xl font-bold text-red-600">
+          {error || "Assignment Not Found"}
+        </h1>
+        <Button onClick={() => navigate("/assignment")}>
           Back to Assignment
         </Button>
       </div>
     )
   }
 
-  const handleInputChange = (field: keyof Assignment, value: string) => {
-    setFormData(prev => prev ? { ...prev, [field]: value } : null)
-  }
-
-  const handleSave = () => {
-    if (!formData) return
-    
-    const savedData = localStorage.getItem("assignment_data")
-    if (savedData) {
-      try {
-        const parsedData: Assignment[] = JSON.parse(savedData)
-        const updatedData = parsedData.map(item => 
-          item.assetId === formData.assetId ? formData : item
-        )
-        localStorage.setItem("assignment_data", JSON.stringify(updatedData))
-        setIsEditing(false)
-        // Navigate back to assignment list with success message
-        navigate("/assignment", { 
-          state: { showMessage: true, updatedItem: formData } 
-        })
-      } catch (error) {
-        console.error("Error saving assignment data:", error)
-      }
-    }
-  }
-
-  const handleDelete = () => {
-    if (!formData) return
-    setShowDeleteDialog(true)
-  }
-
-  const confirmDelete = () => {
-    if (!formData) return
-    
-    // Navigate back to assignment page and let it handle the session deletion
-    navigate("/assignment", { 
-      state: { deleteItem: formData.assetId } 
-    })
-    setShowDeleteDialog(false)
-  }
-
   return (
     <div className="p-10 min-h-screen bg-slate-50">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* BACK AND ACTION BUTTONS */}
+        
+        {/* ACTION BAR */}
         <div className="flex justify-between items-center">
           <Button
             variant="outline"
@@ -118,211 +106,65 @@ const AssignmentDetailPage = () => {
             <FiChevronLeft />
             Back 
           </Button>
-          
-          <div className="flex gap-2">
-            {!isEditing ? (
-              <>
-                <Button
-                  variant="default"
-                  onClick={() => setIsEditing(true)}
-                >
-                  Edit Assignment
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleDelete}
-                  className="gap-2"
-                >
-                  <FiTrash2 />
-                  Delete
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEditing(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="default"
-                  onClick={handleSave}
-                  className="gap-2"
-                >
-                  <FiSave />
-                  Save Changes
-                </Button>
-              </>
-            )}
-          </div>
         </div>
 
-        {/* DETAIL/EDIT CONTENT */}
+        {/* DETAILS PANEL */}
         <div className="bg-gray-100 p-6 rounded-xl shadow border space-y-5">
-
           <h1 className="text-2xl font-bold text-slate-900">
-            {isEditing ? "Edit Assignment" : "Assignment Details"}
+            Assignment Details Profile
           </h1>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Employee ID</label>
-              {isEditing ? (
-                <Input
-                  value={formData.employeeId}
-                  onChange={(e) => handleInputChange("employeeId", e.target.value)}
-                />
-              ) : (
-                <p className="text-sm">{formData.employeeId}</p>
-              )}
+              <label className="block text-sm font-medium text-slate-600 mb-1">Employee ID</label>
+              <p className="text-sm font-semibold text-slate-800">{formData.employee_id}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Employee Name</label>
-              {isEditing ? (
-                <Input
-                  value={formData.employeeName}
-                  onChange={(e) => handleInputChange("employeeName", e.target.value)}
-                />
-              ) : (
-                <p className="text-sm">{formData.employeeName}</p>
-              )}
+              <label className="block text-sm font-medium text-slate-600 mb-1">Asset Name</label>
+              <p className="text-sm font-semibold text-slate-800 p-2 bg-slate-200/50 rounded">
+                {formData.asset?.name || "Unknown Asset Unit"}
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Asset ID</label>
-              {isEditing ? (
-                <Input
-                  value={formData.assetId}
-                  onChange={(e) => handleInputChange("assetId", e.target.value)}
-                />
-              ) : (
-                <p className="text-sm">{formData.assetId}</p>
-              )}
+              <label className="block text-sm font-medium text-slate-600 mb-1">Asset ID Code</label>
+              <p className="text-sm font-semibold text-slate-800">{formData.asset_id}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Assigned Date</label>
-              {isEditing ? (
-                <Input
-                  type="date"
-                  value={formData.assignedDate}
-                  onChange={(e) => handleInputChange("assignedDate", e.target.value)}
-                />
-              ) : (
-                <p className="text-sm">{formData.assignedDate}</p>
-              )}
+              <label className="block text-sm font-medium text-slate-600 mb-1">Assigned Date</label>
+              <p className="text-sm font-semibold text-slate-800">{formData.assigned_date}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Returned Date</label>
-              {isEditing ? (
-                <Input
-                  type="date"
-                  value={formData.returnedDate === "_" ? "" : formData.returnedDate}
-                  onChange={(e) => handleInputChange("returnedDate", e.target.value || "_")}
-                  placeholder="Leave empty if not returned"
-                />
-              ) : (
-                <p className="text-sm">{formData.returnedDate === "_" ? "Not returned" : formData.returnedDate}</p>
-              )}
+              <label className="block text-sm font-medium text-slate-600 mb-1">Returned Date</label>
+              <p className="text-sm font-semibold text-slate-800">
+                {formData.returned_date ? formData.returned_date : "Currently Active"}
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Status</label>
-              {isEditing ? (
-                <Select
-                  value={formData.status}
-                  onValueChange={(value) => handleInputChange("status", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Returned">Returned</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="text-sm">{formData.status}</p>
-              )}
+              <label className="block text-sm font-medium text-slate-600 mb-1">Status Mode</label>
+              <p className="text-sm font-semibold text-slate-800 capitalize">{formData.status}</p>
             </div>
           </div>
-
         </div>
 
-        {/* NOTE INPUT BOX */}
+        {/* NOTES COMPONENT BLOCK */}
         <Card>
           <CardHeader>
-            <CardTitle>Assignment Notes</CardTitle>
+            <CardTitle className="text-lg">Internal Asset Remarks & Notes</CardTitle>
           </CardHeader>
           <CardContent>
             <textarea
-  value={formData.notes || ""}
-  onChange={(e) =>
-    setFormData((prev) =>
-      prev ? { ...prev, notes: e.target.value } : null
-    )
-  }
-  disabled={!isEditing}
-  placeholder={isEditing ? "Write your notes..." : "No notes available"}
-  className="min-h-[120px] w-full rounded-md border px-3 py-2 bg-gray-100 text-sm"
-/>
+              value={formData.note || ""}
+              disabled={true}
+              placeholder="No operational evaluation text found."
+              className="min-h-[120px] w-full rounded-md border border-slate-300 px-3 py-2 bg-slate-100 text-sm focus:outline-none cursor-not-allowed"
+            />
           </CardContent>
         </Card>
-
-        {/* DELETE CONFIRMATION DIALOG */}
-        {showDeleteDialog && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="w-full max-w-sm rounded-xl bg-gray-100 p-6 shadow-xl">
-              <div className="flex justify-end">
-                <button
-                  onClick={() => setShowDeleteDialog(false)}
-                  className="text-slate-400 hover:text-slate-600"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
-              </div>
-
-              <div className="mt-2 text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
-                  <FiTrash2
-                    className="text-red-600"
-                    size={24}
-                  />
-                </div>
-
-                <h2 className="text-lg font-semibold text-slate-800">
-                  Delete Assignment
-                </h2>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  Are you sure you want to delete this assignment?
-                </p>
-              </div>
-
-              <div className="mt-6 flex gap-3">
-                <button
-                  onClick={() => setShowDeleteDialog(false)}
-                  className="flex-1 rounded-lg border border-slate-300 py-2 text-sm font-medium hover:bg-slate-100"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={confirmDelete}
-                  className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-medium text-white hover:bg-red-700"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

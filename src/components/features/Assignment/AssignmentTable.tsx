@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { FiChevronLeft, FiChevronRight, FiClock } from "react-icons/fi"
+import { FiChevronLeft, FiChevronRight, FiClock, FiPlus } from "react-icons/fi"
 
 import {
   flexRender,
@@ -22,33 +22,29 @@ import {
 } from "@/components/ui/table"
 
 import { Button } from "@/components/ui/button"
-
 import type { Assignment } from "@/data/assignmentdata"
-
 import { columns as baseColumns } from "./AssignmentColumns"
 import { AssignmentSearch } from "./AssignmentSearchBox"
 import { AssignmentFilter } from "./AssignmentFilter"
-
 import { useNavigate } from "react-router-dom"
 
 interface AssignmentTableProps {
   data: Assignment[]
   meta?: {
     editRow?: (row: Assignment) => void
-    deleteRow?: (assetId: string) => void
+    deleteRow?: (id: number) => void 
   }
 }
 
 export function AssignmentTable({ data, meta }: AssignmentTableProps) {
   const [globalFilter, setGlobalFilter] = React.useState("")
-  const [columnFilters, setColumnFilters] =
-    React.useState<ColumnFiltersState>([])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
 
   const navigate = useNavigate()
 
- 
+  // Clean, explicit typing checking lowercase strings from your live API payload
   const pendingCount = data.filter(
-    (item: any) => item.status === "pending" || item.status === "Pending"
+    (item: Assignment) => item.status?.toLowerCase() === "pending"
   ).length
 
   const table = useReactTable({
@@ -81,49 +77,42 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
   return (
     <div className="w-full space-y-4 p-4 relative">
 
-     
-      <div className="max-w-xs bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold text-blue-500 uppercase tracking-wider">Pending Requests</p>
-          <h3 className="text-2xl font-bold text-slate-800">{pendingCount} Request</h3>
-          
-          <div className="flex items-center gap-2 pt-1">
-            <button 
-              onClick={() => alert("Accept clicked")}
-              className="px-3 py-1 bg-blue-400 text-white rounded text-xs font-medium hover:bg-emerald-700 transition-colors"
-            >
-              Accept
-            </button>
-            <button 
-              onClick={() => alert("Reject clicked")}
-              className="px-3 py-1 bg-rose-600 text-white rounded text-xs font-medium hover:bg-rose-700 transition-colors"
-            >
-              Reject
-            </button>
+      {/* TOP CONTROLS: CREATE BUTTON (Top Right Placement) */}
+      <div className="flex justify-end w-full">
+        <Button
+          onClick={() => navigate("/assignment/add")}
+          className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl px-4 py-2 flex items-center gap-2 shadow-sm text-sm font-medium transition-colors"
+        >
+          <FiPlus size={16} />
+          Create
+        </Button>
+      </div>
+
+      {/* SEARCH + FILTER AREA */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full">
+        <div className="flex-1">
+          <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 overflow-hidden">
+            <AssignmentSearch
+              value={globalFilter}
+              onChange={setGlobalFilter}
+            />
           </div>
         </div>
-        <div className="p-3 bg-blue-400 text-white rounded-lg self-start">
-          <FiClock size={20} />
+        <div className="w-full md:w-[180px]">
+          <div className="bg-transparent p-0">
+            <AssignmentFilter table={table} />
+          </div>
         </div>
       </div>
 
-      {/* SEARCH + FILTER */}
-      <div className="flex items-center justify-between gap-4">
-        <AssignmentSearch
-          value={globalFilter}
-          onChange={setGlobalFilter}
-        />
-        <AssignmentFilter table={table} />
-      </div>
-
-      {/* TABLE */}
-      <div className="rounded-md border-slate-400 overflow-hidden">
+      {/* MAIN DATA TABLE */}
+      <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-blue-400">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-white font-semibold py-3">
+                  <TableHead key={header.id} className="text-white font-semibold py-3 text-sm">
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
@@ -136,14 +125,18 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="transition-colors hover:bg-gray-100 border-slate-300 cursor-pointer"
-                  onClick={() => {
-                    const item = row.original
-                    navigate(`/assignment/${item.assetId}`)
+                  className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer"
+                  onClick={(e) => {
+                    const item = row.original;
+                    const target = e.target as HTMLElement;
+                    // Action button သို့မဟုတ် action panel တွေကို နှိပ်မိရင် Detail ဆီ မသွားအောင် ကာကွယ်ထားခြင်း
+                    if (!target.closest('button') && !target.closest('.actions-cell')) {
+                      navigate(`/assignment/${item.id}`, { state: { editItem: item } });
+                    }
                   }}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3">
+                    <TableCell key={cell.id} className="py-3 text-slate-700 text-sm">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -151,7 +144,7 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={baseColumns.length} className="h-24 text-center text-slate-500">
+                <TableCell colSpan={baseColumns.length} className="h-24 text-center text-slate-400 text-sm">
                   No results found.
                 </TableCell>
               </TableRow>
@@ -160,57 +153,64 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
         </Table>
       </div>
 
-      {/* PAGINATION */}
-      <div className="flex justify-end items-center space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1 disabled:opacity-50"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          <FiChevronLeft size={16} />
-        </Button>
-
-        <div className="flex gap-1 items-center">
-          {Array.from({ length: pageCount }).map((_, index) => {
-            if (
-              index === 0 ||
-              index === pageCount - 1 ||
-              (index >= currentPage - 1 && index <= currentPage + 1)
-            ) {
-              return (
-                <Button
-                  key={index}
-                  variant={currentPage === index ? "default" : "outline"}
-                  size="sm"
-                  className={`disabled:opacity-50 ${
-                    currentPage === index
-                      ? "bg-blue-300 hover:bg-blue-400 text-white border-none"
-                      : "bg-slate-200"
-                  }`}
-                  onClick={() => table.setPageIndex(index)}
-                >
-                  {index + 1}
-                </Button>
-              )
-            }
-            if (index === currentPage - 2 || index === currentPage + 2) {
-              return <span key={index} className="px-2 flex items-center text-gray-500">...</span>
-            }
-            return null
-          })}
+      {/* PAGINATION CONTROLS */}
+      <div className="flex items-center justify-between px-2 py-1">
+        <div className="text-xs text-slate-500 font-medium">
+          Page {currentPage + 1} of{" "}
+          {pageCount} ({table.getFilteredRowModel().rows.length} total assignments)
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1 disabled:opacity-50"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          <FiChevronRight size={16} />
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1 disabled:opacity-50"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <FiChevronLeft size={16} />
+          </Button>
+
+          <div className="flex gap-1 items-center">
+            {Array.from({ length: pageCount }).map((_, index) => {
+              if (
+                index === 0 ||
+                index === pageCount - 1 ||
+                (index >= currentPage - 1 && index <= currentPage + 1)
+              ) {
+                return (
+                  <Button
+                    key={index}
+                    variant={currentPage === index ? "default" : "outline"}
+                    size="sm"
+                    className={`disabled:opacity-50 ${
+                      currentPage === index
+                        ? "bg-blue-300 hover:bg-blue-400 text-white border-none"
+                        : "bg-slate-200"
+                    }`}
+                    onClick={() => table.setPageIndex(index)}
+                  >
+                    {index + 1}
+                  </Button>
+                )
+              }
+              if (index === currentPage - 2 || index === currentPage + 2) {
+                return <span key={index} className="px-2 flex items-center text-gray-500">...</span>
+              }
+              return null
+            })}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1 disabled:opacity-50"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <FiChevronRight size={16} />
+          </Button>
+        </div>
       </div>
 
     </div>

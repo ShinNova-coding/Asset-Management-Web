@@ -96,7 +96,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
       const targetId = deleteModal.targetId
       
       try {
-        const API_URL = `http://192.168.100.185:1010/api/asset/${targetId}`;
+        const API_URL = `http://192.168.18.9:1010/api/asset/${targetId}`;
         const currentToken = localStorage.getItem("token") || "11|z7kS1l7X1p4y6k4rhK3xiwiO6reuNwdTDgJEQdNl44b535b9";
 
         const response = await fetch(API_URL, {
@@ -252,7 +252,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </Table>
       </div>
 
-      {/* 🌟 UPDATED: Perfected Numbered Pagination UI */}
+    
       <div className="flex items-center justify-between px-2 py-1">
         <div className="text-xs text-slate-500 font-medium">
           Page {currentPage + 1} of{" "}
@@ -312,7 +312,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </div>
       </div>
 
-      {/* Confirmation Delete Modal */}
+     
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
           <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
@@ -343,7 +343,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </div>
       )}
 
-      {/* UI Action Notification Toast */}
+     
       {showToast && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-800">
           <FiCheckCircle className="text-emerald-400" size={16} />

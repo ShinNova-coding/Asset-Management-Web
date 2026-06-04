@@ -15,7 +15,7 @@ export default function InventoryPage() {
         setIsLoading(true)
         setError(null)
         
-        const response = await fetch("http://192.168.100.185:1010/api/asset", {
+        const response = await fetch("http://192.168.18.9:1010/api/asset", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -29,8 +29,6 @@ export default function InventoryPage() {
         }
 
         const jsonPayload = await response.json()
-        
-        // Destructures nested pagination structures safely
         const liveAssets = jsonPayload?.data?.data || jsonPayload?.data || []
         
         setInventoryData(liveAssets)
@@ -48,6 +46,7 @@ export default function InventoryPage() {
   return (
     <div className="p-10 space-y-6 min-h-screen bg-slate-50/30">
       
+      {/* TITLE & ADD BUTTON BLOCK */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
@@ -57,19 +56,29 @@ export default function InventoryPage() {
         <InventoryAddNewAsset />
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        {isLoading ? (
-          <div className="p-12 text-center text-sm font-medium text-slate-500 animate-pulse">
-            Loading...
+      {/* UI STATE HANDLING (Assignment Page Style) */}
+      {isLoading ? (
+        /* Spinner Loading Style */
+        <div className="flex flex-col justify-center items-center h-48 space-y-2 text-slate-500">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+          <p className="text-sm">Loading...</p>
+        </div>
+      ) : error ? (
+        /* Error Alert Box Style */
+        <div className="space-y-4">
+          <div className="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 text-sm">
+            💡 <strong>Notice:</strong> Temporary connection issue. (Reason: {error})
           </div>
-        ) : error ? (
-          <div className="p-12 text-center text-sm font-semibold text-red-500 bg-red-50/50">
-            ⚠️ {error}
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden opacity-75">
+            <InventoryTable data={inventoryData} />
           </div>
-        ) : (
+        </div>
+      ) : (
+        /* Success Active Data Table view */
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <InventoryTable data={inventoryData} />
-        )}
-      </div>
+        </div>
+      )}
       
     </div>
   )

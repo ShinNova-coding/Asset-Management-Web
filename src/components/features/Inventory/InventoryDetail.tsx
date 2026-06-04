@@ -31,18 +31,18 @@ export function InventoryDetail() {
   const [loading, setLoading] = useState(!assetItem)
 
   useEffect(() => {
-    // --- 🔑 PERMISSIONS GUARD BLOCK ---
+   
     try {
       const localUserData = localStorage.getItem("user")
       if (localUserData) {
         const user = JSON.parse(localUserData)
         const userRole = user.role?.toLowerCase()
         
-        // Superadmins and managers can write changes; general admins remain completely read-only
+       
         if (userRole === "superadmin" || userRole === "manager") {
           setCanEdit(true)
         } else {
-          setCanEdit(false) // Standard Admin can only view data
+          setCanEdit(false)
         }
       }
     } catch (err) {
@@ -50,7 +50,7 @@ export function InventoryDetail() {
       setCanEdit(false)
     }
 
-    // --- 💾 DATA RECOVERY FALLBACK (On Refresh) ---
+    
     if (!assetItem && id) {
       try {
         const cachedData = localStorage.getItem("inventory_data")
@@ -128,7 +128,7 @@ export function InventoryDetail() {
   const displayCategory = assetItem.category?.name || assetItem.category || "Uncategorized"
 
   
-  const API_REAL_IP = "http://192.168.100.185:1010"
+  const API_REAL_IP = "http://192.168.18.9:1010"
   let rawImageSource = assetItem.preview_url || assetItem.image_url || assetItem.image || ""
   let displayImage = ""
 
@@ -164,7 +164,7 @@ export function InventoryDetail() {
           Back to Inventory Dashboard
         </Button>
 
-        {/* ROLE CONTEXT GUARD: Only displays if user has manager/superadmin flags */}
+        
         {canEdit && (
           <Button 
             onClick={handleEditRedirect}
@@ -176,7 +176,7 @@ export function InventoryDetail() {
         )}
       </div>
 
-      {/* Header Badge Stack */}
+     
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
@@ -198,10 +198,10 @@ export function InventoryDetail() {
         </div>
       </div>
 
-      {/* Detail Split Grid */}
+      
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2 space-y-6">
-          {/* Specifications Card */}
+          
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiPackage size={18} className="text-blue-600" />
@@ -242,7 +242,7 @@ export function InventoryDetail() {
             </div>
           </div>
 
-          {/* Procurement Card */}
+          
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiCalendar size={18} className="text-blue-600" />
@@ -266,7 +266,7 @@ export function InventoryDetail() {
           </div>
         </div>
 
-        {/* Right Sidebar */}
+       
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4 sticky top-6">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <FiFileText size={18} className="text-blue-600" />

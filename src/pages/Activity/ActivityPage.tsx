@@ -1,118 +1,170 @@
+// src/pages/Activity/ActivityPage.tsx
 "use client"
 
-import React from "react"
-import { FiClock } from "react-icons/fi"
+import { useState, useEffect } from "react"
 
-import { ActivityTable } from "@/components/features/Activity/ActivityTable"
-import type { ActivityLog } from "@/components/features/Activity/ActivityColumns"
+interface SystemActivityLogItem {
+  id: number
+  causer_id: string
+  causer_name: string
+  description: string
+  asset_id: string
+  asset_name: string
+  created_at: string
+}
 
-const mockActivities: ActivityLog[] = [
-  {
-    id: "ACT-1001",
-    username: "John",
-    category: "Laptop",
-    action: "Active",
-    name: "MacBook Pro",
-    date: "2023-10-02",
-  },
-  {
-    id: "ACT-1002",
-    username: "Alice",
-    category: "Monitor",
-    action: "Pending",
-    name: "Dell UltraSharp",
-    date: "2023-10-05",
-  },
-  {
-    id: "ACT-1003",
-    username: "Michael",
-    category: "Keyboard",
-    action: "Returned",
-    name: "Logitech MX Keys",
-    date: "2023-10-06",
-  },
-  {
-    id: "ACT-1004",
-    username: "Sophia",
-    category: "Mouse",
-    action: "Active",
-    name: "Razer DeathAdder",
-    date: "2023-10-07",
-  },
-  {
-    id: "ACT-1005",
-    username: "Daniel",
-    category: "Printer",
-    action: "Pending",
-    name: "HP LaserJet",
-    date: "2023-10-08",
-  },
-  {
-    id: "ACT-1006",
-    username: "Emma",
-    category: "Tablet",
-    action: "Returned",
-    name: "iPad Pro",
-    date: "2023-10-09",
-  },
-  {
-    id: "ACT-1007",
-    username: "William",
-    category: "Laptop",
-    action: "Active",
-    name: "Lenovo ThinkPad",
-    date: "2023-10-10",
-  },
-  {
-    id: "ACT-1008",
-    username: "Olivia",
-    category: "Projector",
-    action: "Pending",
-    name: "Epson X500",
-    date: "2023-10-11",
-  },
-  {
-    id: "ACT-1009",
-    username: "James",
-    category: "Phone",
-    action: "Returned",
-    name: "iPhone 15",
-    date: "2023-10-12",
-  },
-  {
-    id: "ACT-1010",
-    username: "Charlotte",
-    category: "Desktop",
-    action: "Active",
-    name: "Dell OptiPlex",
-    date: "2023-10-13",
-  },
-]
+export default function ActivityPage() {
+  const [logs, setLogs] = useState<SystemActivityLogItem[]>([])
+  const [message, setMessage] = useState("Loading general activity logs...")
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-const ActivityPage = () => {
+  useEffect(() => {
+    const fetchSystemLogs = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const token = localStorage.getItem("token")
+
+        // Fetching from your general activity endpoint
+        const response = await fetch("http://192.168.18.9:1010/api/activitylogs", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}`)
+        }
+
+        const result = await response.json()
+
+        if (result.success) {
+          // Sort descending by ID so latest database actions show at the top
+          const sortedLogs = (result.data || []).sort((a: SystemActivityLogItem, b: SystemActivityLogItem) => b.id - a.id)
+          setLogs(sortedLogs)
+          setMessage(result.message || "General activity logs retrieved successfully")
+        } else {
+          throw new Error(result.message || "Failed to parse system activity logs.")
+        }
+      } catch (err: any) {
+        setError(err.message || "An unexpected error occurred connecting to the API.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSystemLogs()
+  }, [])
+
+  // Action styling highlights based on data operation descriptions
+  const getDescriptionBadge = (description: string) => {
+    const normalized = description.toLowerCase()
+    if (normalized === "created") return "bg-green-50 text-green-700 ring-green-600/20"
+    if (normalized === "updated") return "bg-blue-50 text-blue-700 ring-blue-600/20"
+    if (normalized === "deleted") return "bg-red-50 text-red-700 ring-red-600/20"
+    return "bg-slate-50 text-slate-700 ring-slate-600/10"
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50/50 p-8 space-y-6">
-
-      {/* Page Header */}
-      <div className="flex items-center gap-3 pb-2">
-       
-
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Activity Management
+    <div className="p-10 space-y-6 min-h-screen bg-slate-50/30">
+      
+      {/* TITLE HEADLINE SECTION */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            General Activity Logs
           </h1>
-
-         
+          {!loading && !error && <p className="text-sm text-slate-500">{message}</p>}
         </div>
       </div>
 
-      {/* Table Container */}
-      <div className="rounded-xl border border-slate-200 bg-white shadow-xs p-6">
-        <ActivityTable data={mockActivities} />
-      </div>
+      {/* UI STATE HANDLING (Assignment Page Dynamic Loading & Error Styles) */}
+      {loading ? (
+        /* Spinner Loading View */
+        <div className="flex flex-col justify-center items-center h-48 space-y-2 text-slate-500">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+          <p className="text-sm">Loading...</p>
+        </div>
+      ) : error ? (
+        /* Amber Notice Alert + Table Fallback Frame */
+        <div className="space-y-4">
+          <div className="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 text-sm flex items-center justify-between">
+            <div>
+              💡 <strong>Notice:</strong> Using offline view or server connection failure. (Reason: {error})
+            </div>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-md transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden opacity-75">
+            {renderTableStructure(logs, getDescriptionBadge)}
+          </div>
+        </div>
+      ) : (
+        /* Active Data Found View */
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          {renderTableStructure(logs, getDescriptionBadge)}
+        </div>
+      )}
 
     </div>
   )
 }
 
-export default ActivityPage
+// Reusable Pure Function to render Table presentation to clear clutter above
+function renderTableStructure(logs: SystemActivityLogItem[], getDescriptionBadge: (desc: string) => string) {
+  return (
+    <table className="w-full text-left border-collapse">
+      <thead>
+        <tr className="border-b border-slate-200 bg-slate-50 text-sm font-semibold text-slate-600">
+          <th className="px-6 py-4">Log ID</th>
+          <th className="px-6 py-4">Action Event</th>
+          <th className="px-6 py-4">Asset ID</th>
+          <th className="px-6 py-4">Asset Name</th>
+          <th className="px-6 py-4">Operator Info</th>
+          <th className="px-6 py-4">Timestamp</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-slate-200 text-sm text-slate-700">
+        {logs.length === 0 ? (
+          <tr>
+            <td colSpan={6} className="px-6 py-8 text-center text-slate-400 font-medium">
+              No tracking logs returned from the server.
+            </td>
+          </tr>
+        ) : (
+          logs.map((row) => (
+            <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
+              <td className="px-6 py-4 font-mono text-xs text-slate-400">#{row.id}</td>
+              <td className="px-6 py-4">
+                <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${getDescriptionBadge(row.description)}`}>
+                  {row.description}
+                </span>
+              </td>
+              <td className="px-6 py-4 font-mono font-medium text-xs text-slate-600">{row.asset_id}</td>
+              <td className="px-6 py-4 text-slate-900 font-medium">
+                {row.asset_name === "N/A" ? <span className="text-slate-400 italic">No Modification</span> : row.asset_name}
+              </td>
+              <td className="px-6 py-4 text-slate-700">
+                <div className="flex flex-col">
+                  <span className="font-medium">{row.causer_name}</span>
+                  <span className="text-xs text-slate-400 font-mono">{row.causer_id}</span>
+                </div>
+              </td>
+              <td className="px-6 py-4 text-slate-500 text-xs font-mono">
+                {row.created_at ? new Date(row.created_at).toLocaleString() : "N/A"}
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  )
+}

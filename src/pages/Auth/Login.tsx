@@ -31,7 +31,7 @@ const Login = () => {
 
     try {
       
-      const API_URL = "http://192.168.100.185:1010/api/login"; 
+      const API_URL = "http://192.168.18.9:1010/api/login"; 
 
       const response = await fetch(API_URL, {
         method: "POST",
