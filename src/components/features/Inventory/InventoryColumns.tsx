@@ -4,14 +4,15 @@ import type { ColumnDef } from "@tanstack/react-table"
 import Delete from "./InventoryDelete"
 import Edit from "./InventoryEdit"
 
+// Updated to match your API response keys (using 'id' instead of 'asset_id')
 export type Inventory = {
-  asset_id: string        
+  id: string
   name: string
   model?: string
-  ram_capacity?: string   
+  ram_capacity?: string
   storage?: string
-  purchased_date: string  
-  warranty_period: number | string 
+  purchased_date: string
+  warranty_period: number | string
   status: "assigned" | "available" | "maintenance" | "expired" | "pending" | "retired"
   category?: { id: number; name: string }
 }
@@ -78,10 +79,10 @@ export const columns: ColumnDef<Inventory>[] = [
     cell: ({ row, table }) => {
       const item = row.original
       const meta = table.options.meta as any
-      const targetIdentifier = item.asset_id 
+      // Use 'id' from the item instead of 'asset_id'
+      const targetId = item.id 
 
       return (
-       
         <div 
           className="flex items-center gap-2" 
           onClick={(e) => {
@@ -96,13 +97,15 @@ export const columns: ColumnDef<Inventory>[] = [
               }
             }} 
           />
-          <Delete 
-            onDelete={() => {
-              if (meta?.deleteRow) {
-                meta.deleteRow(targetIdentifier)
-              }
-            }} 
-          />
+          
+<Delete 
+  onDelete={() => {
+    if (meta?.deleteRow) {
+     
+      meta.deleteRow(item.id) 
+    }
+  }} 
+/>
         </div>
       )
     },

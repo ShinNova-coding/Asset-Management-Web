@@ -219,30 +219,36 @@ const AddNewAsset = () => {
 
       const updatedStatusText = formData.action.trim() || "available";
 
-      const categoryMap: Record<string, number> = {
-        "Desktops": 1,
-        "Laptops": 2,
-        "Printers": 3,
-        "Monitors": 4,
-        "Networking": 5,
-        "Accessories": 6
-      };
-      const resolvedCategoryId = categoryMap[formData.category] || 2;
+    // handleSubmit ထဲက categoryMap အပိုင်းကို ဒီအတိုင်း ပြင်ပါ
+const categoryMap: Record<string, string> = {
+  "Desktops": "a1f0d854-58b0-45b5-9541-448f080e1bbc", 
+  "Laptops": "a1f0d854-58b0-45b5-9541-448f080e1bbc",  
+  "Printers": "a1f0d854-58b0-45b5-9541-448f080e1bbc",
+  "Monitors": "a1f0d854-58b0-45b5-9541-448f080e1bbc",
+  "Networking": "a1f0d854-58b0-45b5-9541-448f080e1bbc",
+  "Accessories": "a1f0d854-58b0-45b5-9541-448f080e1bbc"
+};
 
-      const assetPayload: Record<string, any> = {
-        asset_id: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`,
-        name: formData.name.trim(),
-        serial_number: formData.serial_number.trim(),
-        purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
-        warranty_period: parseInt(formData.warranty) || 12, 
-        model: formData.model.trim() || "N/A",
-        ram_capacity: formData.ram.trim() || "N/A",
-        storage: formData.storage.trim() || "N/A",
-        category_id: resolvedCategoryId, 
-        status: updatedStatusText.toLowerCase(), 
-        condition: "new",
-        image: finalizedImageString, 
-      };
+// အကယ်၍ Category က တစ်ခုတည်းပဲ အလုပ်လုပ်တာဆိုရင် ဒီလိုမျိုး တိုက်ရိုက်လုပ်လို့ရပါတယ်
+const resolvedCategoryId = categoryMap[formData.category] || "a1f0ce92-963b-48d6-a40b-4f44477cdac6";
+
+     // handleSubmit ထဲက assetPayload ကို ဒီအတိုင်း ပြင်ပါ
+const assetPayload: Record<string, any> = {
+  // asset_id ကို asset_code လို့ ပြောင်းလိုက်ပါ
+  asset_code: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`, 
+  
+  name: formData.name.trim(),
+  serial_number: formData.serial_number.trim(),
+  purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
+  warranty_period: parseInt(formData.warranty) || 12, 
+  model: formData.model.trim() || "N/A",
+  ram_capacity: formData.ram.trim() || "N/A",
+  storage: formData.storage.trim() || "N/A",
+  category_id: resolvedCategoryId, 
+  status: updatedStatusText.toLowerCase(), 
+  condition: "new",
+  image: finalizedImageString, 
+};
 
       console.log("🚀 Payload sending to backend server stream:", assetPayload);
 
@@ -250,7 +256,7 @@ const AddNewAsset = () => {
       const targetId = stateEditItem?.asset_id || stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       
-      const method = isEditMode ? "PUT" : "POST";
+      const method = isEditMode ? "PATCH" : "POST";
       const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
 
       const response = await fetch(url, {
@@ -284,6 +290,7 @@ const AddNewAsset = () => {
       alert(`Could not save item to backend server:\n${err.message}`);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-slate-50 p-10 font-sans text-slate-900">
