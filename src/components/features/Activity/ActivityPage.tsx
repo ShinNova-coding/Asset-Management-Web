@@ -92,7 +92,7 @@ const ActivityPage = () => {
   return (
     <div className="min-h-screen bg-slate-50/50 p-8 space-y-6">
 
-      {/* Header */}
+     
       <div className="flex items-center gap-3 pb-2">
         <div className="p-2 bg-blue-100 text-blue-600 rounded-lg shadow-xs">
           <FiClock size={22} />
@@ -103,7 +103,7 @@ const ActivityPage = () => {
         </h1>
       </div>
 
-      {/* Table */}
+      
       <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-xs">
         <ActivityTable data={mockActivities} />
       </div>

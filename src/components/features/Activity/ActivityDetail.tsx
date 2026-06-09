@@ -14,7 +14,7 @@ import {
   FiFileText
 } from "react-icons/fi"
 
-// Interface for type safety on dynamic timeline events
+
 interface TimelineEvent {
   title: string
   description: string
@@ -27,7 +27,7 @@ export default function ActivityDetail() {
   const navigate = useNavigate()
   const [filter, setFilter] = useState<"all" | "critical">("all")
 
-  // Get the selected item row from the router state safely
+  
   const activityItem = location.state?.item || {
     id: "ACT-1001",
     action: "Active",
@@ -37,7 +37,7 @@ export default function ActivityDetail() {
     image: ""
   }
 
-  // Dynamic Icon & Style picker based on the event's action type
+ 
   const getTimelineStyles = (action: string) => {
     switch (action?.toLowerCase()) {
       case "active":
@@ -57,7 +57,7 @@ export default function ActivityDetail() {
     }
   }
 
-  // DYNAMIC TIMELINE GENERATION: 
+  
   const timelineEvents: TimelineEvent[] = location.state?.history || [
     {
       title: activityItem.action || "Activity Log Entry",
@@ -82,7 +82,7 @@ export default function ActivityDetail() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
       
-      {/* Top Navbar Header */}
+      
       <header className="bg-white border-b border-slate-200 h-16 px-8 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-6">
           <Button 
@@ -97,10 +97,10 @@ export default function ActivityDetail() {
         </div>
       </header>
 
-      {/* Main Content Area */}
+     
       <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-10 space-y-8">
         
-        {/* Asset Identity Banner */}
+        
         <section className="bg-white border border-slate-200 rounded-xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
           <div className="flex items-center gap-5">
             <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
@@ -124,16 +124,16 @@ export default function ActivityDetail() {
           </div>
         </section>
 
-        {/* Timeline Layout Split */}
+       
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           
-          {/* Left Dynamic Timeline Body */}
+         
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-900">Activity History</h2>
             </div>
 
-            {/* Dynamic Timeline Card */}
+           
             <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
               <div className="relative border-l-2 border-slate-100 ml-4 pl-10 space-y-10">
                 
@@ -143,12 +143,12 @@ export default function ActivityDetail() {
 
                   return (
                     <div key={index} className="relative">
-                      {/* Dynamic Icon Node */}
+                     
                       <div className={`absolute -left-[61px] top-0 w-10 h-10 rounded-full border-4 border-white flex items-center justify-center shadow-sm ${styles.bg}`}>
                         <Icon className={`w-4 h-4 ${styles.text}`} />
                       </div>
                       
-                      {/* Dynamic Text Content */}
+                     
                       <div className="flex items-start justify-between gap-4">
                         <div className="space-y-1">
                           <h3 className="font-bold text-slate-900 text-base capitalize">
@@ -170,7 +170,7 @@ export default function ActivityDetail() {
             </div>
           </div>
 
-          {/* Right Image/Receipt Evidence Sidebar */}
+          
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-slate-900">Activity Evidence</h2>
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">

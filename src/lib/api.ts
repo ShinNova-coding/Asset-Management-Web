@@ -1,6 +1,6 @@
 // src/lib/api.ts
 
-const BASE_URL = "http://192.168.100.185:1010/api";
+const BASE_URL = "http://192.168.100.186:1010/api";
 
 export async function apiFetch(
   endpoint: string,

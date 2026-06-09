@@ -18,7 +18,7 @@ const AddNewAsset = () => {
   const [formData, setFormData] = useState({
     assetId: '', 
     name: '',
-    category: 'Laptops', 
+    category: 'Goods', // Updated from 'Laptops' to a valid default category
     model: '',
     ram: '',
     storage: '',
@@ -45,7 +45,7 @@ const AddNewAsset = () => {
       setFormData({
         assetId: '',
         name: '',
-        category: 'Laptops',
+        category: 'Goods', // Updated here as well
         model: '',
         ram: '',
         storage: '',
@@ -74,7 +74,7 @@ const AddNewAsset = () => {
     }
 
     if (activeItem) {
-      let resolvedCategoryStr = "Laptops";
+      let resolvedCategoryStr = "Goods";
       if (activeItem.category) {
         resolvedCategoryStr = typeof activeItem.category === "object" 
           ? activeItem.category.name 
@@ -82,9 +82,9 @@ const AddNewAsset = () => {
       }
 
       setFormData({
-        assetId: activeItem.asset_id || activeItem.id || String(targetId || ''),
+        assetId: activeItem.asset_code || activeItem.asset_id||activeItem.id || String(targetId || ''),
         name: activeItem.name || '',
-        category: resolvedCategoryStr || 'Laptops',
+        category: resolvedCategoryStr || 'Goods',
         model: activeItem.model || '',
         ram: activeItem.ram_capacity || activeItem.ram || '',
         storage: activeItem.storage || '',
@@ -93,22 +93,21 @@ const AddNewAsset = () => {
         warranty: activeItem.warranty_period || activeItem.warranty || '',
         action: activeItem.status || activeItem.action || 'available'
       });
-
       
-      const API_REAL_IP = "http://192.168.100.185:1010";
+      const API_REAL_IP = "http://192.168.100.186:1010";
       let rawImageSource = activeItem.preview_url || activeItem.image_url || activeItem.image || "";
 
       if (rawImageSource) {
         if (rawImageSource.startsWith("data:image")) {
           setImagePreview(rawImageSource);
         } else if (rawImageSource.startsWith("http://localhost")) {
-          const correctedUrl = rawImageSource.replace("http://localhost", API_REAL_IP);
+          const correctedUrl = rawImageSource.replace("http://localhost", API_REALIP);
           setImagePreview(correctedUrl);
         } else if (rawImageSource.startsWith("http")) {
           setImagePreview(rawImageSource);
         } else {
           const cleanPath = rawImageSource.startsWith("/") ? rawImageSource : `/${rawImageSource}`;
-          setImagePreview(`${API_REAL_IP}${cleanPath}`);
+          setImagePreview(`${API_REALIP}${cleanPath}`);
         }
       }
     } else if (targetId) {
@@ -203,59 +202,52 @@ const AddNewAsset = () => {
     try {
       let finalizedImageString = "";
 
-     
       if (selectedImage) {
-       
         const base64WithHeader = await convertImageToBase64(selectedImage);
         finalizedImageString = stripBase64Header(base64WithHeader);
       } else if (imagePreview && imagePreview.startsWith("data:")) {
-       
         finalizedImageString = stripBase64Header(imagePreview);
       } else {
-       
         const dummyWithHeader = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
         finalizedImageString = stripBase64Header(dummyWithHeader);
       }
 
       const updatedStatusText = formData.action.trim() || "available";
 
-    // handleSubmit ထဲက categoryMap အပိုင်းကို ဒီအတိုင်း ပြင်ပါ
-const categoryMap: Record<string, string> = {
-  "Desktops": "a1f0d854-58b0-45b5-9541-448f080e1bbc", 
-  "Laptops": "a1f0d854-58b0-45b5-9541-448f080e1bbc",  
-  "Printers": "a1f0d854-58b0-45b5-9541-448f080e1bbc",
-  "Monitors": "a1f0d854-58b0-45b5-9541-448f080e1bbc",
-  "Networking": "a1f0d854-58b0-45b5-9541-448f080e1bbc",
-  "Accessories": "a1f0d854-58b0-45b5-9541-448f080e1bbc"
-};
+      const categoryMap: Record<string, string> = {
+        "Goods": "a1f0d854-58b0-45b5-9541-448f080e1bbc", 
+        "Funitures": "a1f29511-0c11-47a3-91db-d90c44852afe"
+      };
 
-// အကယ်၍ Category က တစ်ခုတည်းပဲ အလုပ်လုပ်တာဆိုရင် ဒီလိုမျိုး တိုက်ရိုက်လုပ်လို့ရပါတယ်
-const resolvedCategoryId = categoryMap[formData.category] || "a1f0ce92-963b-48d6-a40b-4f44477cdac6";
+      // Resolved category ID using the mapped UUIDs
+      const resolvedCategoryId = categoryMap[formData.category] || "a1f0d854-58b0-45b5-9541-448f080e1bbc";
+      const targetId = routeId || stateId || stateEditItem?.asset_id || stateEditItem?.id;
 
-     // handleSubmit ထဲက assetPayload ကို ဒီအတိုင်း ပြင်ပါ
-const assetPayload: Record<string, any> = {
-  // asset_id ကို asset_code လို့ ပြောင်းလိုက်ပါ
-  asset_code: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`, 
-  
-  name: formData.name.trim(),
-  serial_number: formData.serial_number.trim(),
-  purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
-  warranty_period: parseInt(formData.warranty) || 12, 
-  model: formData.model.trim() || "N/A",
-  ram_capacity: formData.ram.trim() || "N/A",
-  storage: formData.storage.trim() || "N/A",
-  category_id: resolvedCategoryId, 
-  status: updatedStatusText.toLowerCase(), 
-  condition: "new",
-  image: finalizedImageString, 
-};
+      if (isEditMode && (!targetId || targetId === "undefined" || targetId === "id")) {
+        alert("Invalid Asset ID detected.");
+        return;
+      }
+
+      const assetPayload: Record<string, any> = {
+        ...(isEditMode && { id: targetId }),
+        asset_code: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`, 
+        name: formData.name.trim(),
+        serial_number: formData.serial_number.trim(),
+        purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
+        warranty_period: formData.warranty || "12", 
+        model: formData.model.trim() || "N/A",
+        ram_capacity: formData.ram.trim() || "N/A",
+        storage: formData.storage.trim() || "N/A",
+        category_id: resolvedCategoryId, 
+        status: updatedStatusText.toLowerCase(), 
+        condition: "fair", 
+        image: finalizedImageString, 
+      };
 
       console.log("🚀 Payload sending to backend server stream:", assetPayload);
 
-      const API_URL = "http://192.168.100.185:1010/api/asset"; 
-      const targetId = stateEditItem?.asset_id || stateEditItem?.id || stateId || routeId;
+      const API_URL = "http://192.168.100.186:1010/api/asset"; 
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
-      
       const method = isEditMode ? "PATCH" : "POST";
       const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
 
@@ -290,7 +282,6 @@ const assetPayload: Record<string, any> = {
       alert(`Could not save item to backend server:\n${err.message}`);
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-slate-50 p-10 font-sans text-slate-900">
@@ -314,7 +305,6 @@ const assetPayload: Record<string, any> = {
           
           <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
-              
               
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
@@ -357,12 +347,8 @@ const assetPayload: Record<string, any> = {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
                     >
-                      <option value="Desktops">Desktops</option>
-                      <option value="Laptops">Laptops</option>
-                      <option value="Printers">Printers</option>
-                      <option value="Monitors">Monitors</option>
-                      <option value="Networking">Networking</option>
-                      <option value="Accessories">Accessories</option>
+                      <option value="Goods">Goods</option>
+                      <option value="Funitures">Funitures</option>
                     </select>
                   </div>
 
@@ -379,7 +365,6 @@ const assetPayload: Record<string, any> = {
                   </div>
                 </div>
               </section>
-
               
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
@@ -438,7 +423,6 @@ const assetPayload: Record<string, any> = {
                   </div>
                 </div>
               </section>
-
             
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
@@ -480,7 +464,6 @@ const assetPayload: Record<string, any> = {
             </form>
           </div>
 
-         
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <ImageIcon size={18} className="text-blue-600" />

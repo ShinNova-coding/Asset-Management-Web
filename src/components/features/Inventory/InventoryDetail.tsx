@@ -128,7 +128,7 @@ export function InventoryDetail() {
   const displayCategory = assetItem.category?.name || assetItem.category || "Uncategorized"
 
   
-  const API_REAL_IP = "http://192.168.100.185:1010"
+  const API_REAL_IP = "http://192.168.100.186:1010"
   let rawImageSource = assetItem.preview_url || assetItem.image_url || assetItem.image || ""
   let displayImage = ""
 
@@ -181,8 +181,8 @@ export function InventoryDetail() {
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-mono px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-600 font-semibold">
-              {assetItem.asset_id || assetItem.id}
-            </span>
+  {assetItem.asset_code || assetItem.asset_id || assetItem.id}
+</span>
             <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border tracking-wide uppercase ${getStatusStyles(assetItem.status)}`}>
               {assetItem.status || "unspecified"}
             </span>

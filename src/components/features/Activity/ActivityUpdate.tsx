@@ -38,7 +38,7 @@ export default function ActivityUpdate() {
     if (editItem) {
       setFormData({
         id: editItem.id || "",
-        name: editItem.name || editItem.username || "", // Pulls existing user names safely
+        name: editItem.name || editItem.username || "", 
         action: editItem.action || "",
         assigndate: formatToInputDate(editItem.assigndate),
         returndate: formatToInputDate(editItem.returndate),
@@ -112,13 +112,13 @@ export default function ActivityUpdate() {
       ...editItem, 
       ...formData,
       id: editItem?.id || formData.id || `AST-${Math.floor(1000 + Math.random() * 9000)}`,
-      username: formData.name, // Ensure username matches what your detail view expects
+      username: formData.name, 
       image: imagePreview
     };
 
     console.log("Submitting asset dataset payload:", payload);
     
-    // Smooth redirect back to your activity routing engine table dashboard
+    
     navigate("/activity", { state: { updatedItem: payload } });
   };
 
@@ -126,7 +126,6 @@ export default function ActivityUpdate() {
     <div className="min-h-screen bg-slate-50/50 px-6 py-10 md:px-12 font-sans text-slate-800">
       <div className="max-w-5xl mx-auto space-y-8">
         
-        {/* Navigation Action Area */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
           <div className="space-y-1.5">
             <button 
@@ -144,14 +143,14 @@ export default function ActivityUpdate() {
           </div>
         </div>
 
-        {/* Master Content Dashboard Split */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           
-          {/* Form Content Hub */}
+         
           <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
               
-              {/* Box Section 1: Core Details */}
+              
               <section className="space-y-4">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-slate-100">
                   <div className="p-1.5 bg-blue-50 rounded-md text-blue-600">
@@ -187,7 +186,7 @@ export default function ActivityUpdate() {
                 </div>
               </section>
 
-              {/* Box Section 2: Timeline Loops */}
+              
               <section className="space-y-4">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-slate-100">
                   <div className="p-1.5 bg-amber-50 rounded-md text-amber-600">
@@ -223,7 +222,7 @@ export default function ActivityUpdate() {
                       <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input 
                         type="text" 
-                        name="name" // Changed back to dynamic payload binding key map identifier
+                        name="name" 
                         value={formData.name}
                         onChange={handleInputChange}
                         placeholder="e.g. John Doe" 
@@ -283,7 +282,7 @@ export default function ActivityUpdate() {
                 </div>
               </section>
 
-              {/* Action Operations Panel */}
+              
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                 <button 
                   type="button" 
@@ -302,7 +301,7 @@ export default function ActivityUpdate() {
             </form>
           </div>
 
-          {/* Right Column Canvas Sidebar: Upload Evidence Box */}
+          
           <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-4 sticky top-6">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <ImageIcon size={16} className="text-blue-600" />

@@ -68,6 +68,10 @@ export const router = createBrowserRouter([
             element: <AddNewAsset />,
           },
           {
+            path:"inventory/:id/edit",
+            element:<AddNewAsset/>,
+          },
+          {
             path: "inventory/:id",
             element: <InventoryDetail />,
           },

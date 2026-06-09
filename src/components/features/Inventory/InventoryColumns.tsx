@@ -4,7 +4,6 @@ import type { ColumnDef } from "@tanstack/react-table"
 import Delete from "./InventoryDelete"
 import Edit from "./InventoryEdit"
 
-// Updated to match your API response keys (using 'id' instead of 'asset_id')
 export type Inventory = {
   id: string
   name: string
@@ -79,7 +78,7 @@ export const columns: ColumnDef<Inventory>[] = [
     cell: ({ row, table }) => {
       const item = row.original
       const meta = table.options.meta as any
-      // Use 'id' from the item instead of 'asset_id'
+     
       const targetId = item.id 
 
       return (

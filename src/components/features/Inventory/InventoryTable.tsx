@@ -33,7 +33,7 @@ interface InventoryTableProps {
 export function InventoryTable({ data: initialData }: InventoryTableProps) {
   const navigate = useNavigate()
 
-  // --- Logic Helpers ---
+  
   const processExpiredWarranties = (items: any[]): any[] => {
     if (!Array.isArray(items)) return []
     return items.map((item) => {
@@ -53,7 +53,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     return baseItems.filter((item) => !deletedIds.includes(item.id))
   }
 
-  // --- State ---
+  
   const [data, setData] = React.useState<any[]>(() => {
     if (typeof window !== "undefined") {
       const cachedData = localStorage.getItem("inventory_data")
@@ -73,7 +73,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   })
   const [showToast, setShowToast] = React.useState(false)
 
-  // --- Effects ---
+  
   React.useEffect(() => {
     if (initialData) {
       setData(getExcludedDeletedItems(processExpiredWarranties(initialData)))
@@ -91,9 +91,9 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   const handleConfirmDelete = async () => {
     if (!deleteModal.targetId) return;
 
-    // UUID ကို URL ထဲမှာ အစားထိုးထည့်ခြင်း
+    
     const targetId = deleteModal.targetId.trim();
-    const API_URL = `http://192.168.100.185:1010/api/asset/${targetId}`;
+    const API_URL = `http://192.168.100.186:1010/api/asset/${targetId}`;
     const token = localStorage.getItem("token") || "";
 
     try {
