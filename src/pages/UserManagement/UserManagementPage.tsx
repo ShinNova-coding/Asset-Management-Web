@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Employee } from '../../types/employee';
 import { normalizeImageSource } from '../../lib/utils';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
+import { apiFetch } from '../../lib/api';
 
 import {
   Search,
@@ -68,7 +69,7 @@ const mapApiUserToEmployee = (user: ApiUser): Employee => ({
   phone: user.phone_number || "-",
 });
 
-const API_URL = "http://192.168.100.185:1010/api/user";
+const API_URL = "http://192.168.100.186:1010/api/user";
 
 const UserManagement: React.FC = () => {
 
@@ -96,7 +97,7 @@ const UserManagement: React.FC = () => {
       setError("");
 
       try {
-        const token = localStorage.getItem('token') || '119|6UBfGxzFSshZIwJu69IWBcmbq9gIb9opQwlL2eX51d4a76c8';
+        const token = localStorage.getItem('token') || '66|5TalCJ8YD62FDIoYKzJy0w7XosM72oLkVWdPFt4xf8ff92b9';
         if (!localStorage.getItem('token')) {
           localStorage.setItem('token', token);
         }
@@ -140,20 +141,34 @@ const UserManagement: React.FC = () => {
     });
   };
 
-  const handleConfirmDelete = () => {
-    if (deleteModal.targetId) {
-      setData((prev) =>
-        prev.filter((item) => item.employee_id !== deleteModal.targetId)
-      );
+  const handleConfirmDelete = async () => {
+  const targetId = deleteModal.targetId; // ဖျက်မယ့် User ရဲ့ UUID (ဥပမာ - "a1f103a9-...")
+  if (!targetId) return;
 
-      setDeleteModal({
-        isOpen: false,
-        targetId: null,
-      });
+  setLoading(true);
+  setError("");
 
-      setShowToast(true);
-    }
-  };
+  try {
+    // 💡 Backend ရဲ့ ပုံစံအတိုင်း Endpoint ကို /user/id လို့ပဲ ပေးရပါမယ် (URL ထဲ ID မထည့်ရပါ)
+    // 💡 ပြီးရင် ဖျက်မယ့် ID ကို body ထဲမှာ JSON ပုံစံနဲ့ ထည့်ပေးလိုက်ရပါမယ်
+    const res = await apiFetch("/user/id", {
+      method: 'DELETE',
+      body: JSON.stringify({ id: targetId }) // Backend က မျှော်လင့်ထားတဲ့ raw JSON body
+    });
+
+    // အောင်မြင်ရင် UI စာရင်းထဲကနေပါ ဖယ်ထုတ်လိုက်မယ်
+    setData((prev) => prev.filter((item) => item.id !== targetId));
+    
+    // Success Toast ပြမယ်
+    setShowToast(true);
+  } catch (err: any) {
+    console.error('Delete user error:', err);
+    setError(err?.message || 'Failed to delete user.');
+  } finally {
+    setLoading(false);
+    setDeleteModal({ isOpen: false, targetId: null });
+  }
+};
 
   React.useEffect(() => {
     if (showToast) {
@@ -322,7 +337,7 @@ const UserManagement: React.FC = () => {
                     <button
                       onClick={(event) => {
                         event.stopPropagation();
-                        handleDeleteTrigger(emp.employee_id);
+                        handleDeleteTrigger(emp.id ?? emp.employee_id);
                       }}
                       className="text-red-500 hover:text-red-700"
                     >

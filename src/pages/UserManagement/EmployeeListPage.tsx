@@ -21,15 +21,10 @@ type ApiUser = {
     original_url?: string | null;
     preview_url?: string | null;
   }>;
-  roles?: Array<{
-    name: string;
-  }>;
+  roles?: Array<{ name: string }>;
 };
 
-const formatStatus = (status: string) =>
-  status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : "-";
-
-const mapApiUserToEmployee = (user: ApiUser): Employee => ({
+const mapUser = (user: ApiUser): Employee => ({
   id: user.id,
   profileImage: normalizeImageSource(
     user.preview_url ||
@@ -37,14 +32,14 @@ const mapApiUserToEmployee = (user: ApiUser): Employee => ({
       user.image ||
       user.media?.[0]?.preview_url ||
       user.media?.[0]?.original_url ||
-      null
+      ""
   ),
   employee_id: user.employee_id,
   name: user.name,
   email: user.email,
   address: "-",
   position: user.position || "-",
-  status: formatStatus(user.status),
+  status: user.status,
   role: user.roles?.[0]?.name || "-",
   joinedDate: user.joined_date || "-",
   leftDate: user.left_date || "-",
@@ -58,56 +53,61 @@ export default function EmployeeListPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchEmployees = async () => {
-      setLoading(true);
-      setError("");
-
+    const fetchData = async () => {
       try {
-        const res = await apiFetch("/user");
-        const payload = (res && (res.data ?? res)) || res;
-        const users = payload?.data?.data || payload?.data || [];
+        setLoading(true);
 
-        setEmployees(Array.isArray(users) ? users.map(mapApiUserToEmployee) : []);
+        const res = await apiFetch("/user");
+
+        const users = res?.data?.data || res?.data || [];
+
+        setEmployees(Array.isArray(users) ? users.map(mapUser) : []);
       } catch (err: any) {
-        console.error(err);
-        setError(err?.message || "Unable to load employees.");
+        setError(err.message || "Failed to load employees");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEmployees();
+    fetchData();
   }, []);
 
   return (
     <div className="p-6">
-      {loading && <div className="text-sm text-slate-500">Loading employees...</div>}
-      {error && <div className="text-sm text-red-600">{error}</div>}
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
 
       {!loading && !error && (
         <table className="w-full border">
-          <thead>
-            <tr className="bg-blue-400 text-white">
+          <thead className="bg-blue-500 text-white">
+            <tr>
               <th>ID</th>
               <th>Name</th>
               <th>Email</th>
               <th>Position</th>
               <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
 
           <tbody>
             {employees.map((emp) => (
-              <tr
-                key={emp.id ?? emp.employee_id}
-                onClick={() => navigate(`/employee/${emp.id ?? emp.employee_id}`)}
-                className="cursor-pointer hover:bg-gray-100"
-              >
+              <tr key={emp.id} className="hover:bg-gray-100">
                 <td>{emp.employee_id}</td>
                 <td>{emp.name}</td>
                 <td>{emp.email}</td>
                 <td>{emp.position}</td>
                 <td>{emp.status}</td>
+
+                <td>
+                  {/* ✅ FIXED BUTTON LOCATION */}
+                  <button
+                    onClick={() => navigate(`/employee/${emp.id}`)}
+                    className="px-3 py-1 bg-blue-600 text-white rounded"
+                  >
+                    View Details
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
