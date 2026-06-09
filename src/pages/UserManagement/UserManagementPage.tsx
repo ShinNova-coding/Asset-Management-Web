@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Employee } from '../../types/employee';
+import { normalizeImageSource } from '../../lib/utils';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
 import { apiFetch } from '../../lib/api';
 
@@ -22,6 +23,7 @@ import { RiDeleteBin4Fill } from "react-icons/ri";
 const pageSize = 5;
 
 type ApiUser = {
+  id: string;
   employee_id: string;
   name: string;
   email: string;
@@ -31,6 +33,12 @@ type ApiUser = {
   joined_date: string | null;
   left_date: string | null;
   image_url: string | null;
+  preview_url?: string | null;
+  image?: string | null;
+  media?: Array<{
+    original_url?: string | null;
+    preview_url?: string | null;
+  }>;
   roles?: Array<{
     name: string;
   }>;
@@ -40,23 +48,33 @@ const formatStatus = (status: string) =>
   status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : "-";
 
 const mapApiUserToEmployee = (user: ApiUser): Employee => ({
-  profileImage: user.image_url || "https://via.placeholder.com/120",
-  employeeId: user.employee_id,
+  id: user.id,
+  profileImage: normalizeImageSource(
+    user.preview_url ||
+      user.image_url ||
+      user.image ||
+      user.media?.[0]?.preview_url ||
+      user.media?.[0]?.original_url ||
+      null
+  ),
+  employee_id: user.employee_id,
   name: user.name,
   email: user.email,
   address: "-",
   position: user.position || "-",
   status: formatStatus(user.status),
   role: user.roles?.[0]?.name || "-",
-  joiningDate: user.joined_date || "-",
-  startDate: user.joined_date || "-",
-  endDate: user.left_date || "-",
+  joinedDate: user.joined_date || "-",
+  leftDate: user.left_date || "-",
   phone: user.phone_number || "-",
 });
+
+const API_URL = "http://192.168.100.186:1010/api/user";
 
 const UserManagement: React.FC = () => {
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [currentPage, setCurrentPage] = useState(0);
   const [data, setData] = useState<Employee[]>([]);
@@ -64,6 +82,7 @@ const UserManagement: React.FC = () => {
   const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
@@ -78,8 +97,31 @@ const UserManagement: React.FC = () => {
       setError("");
 
       try {
-        const response = await apiFetch("/user");
-        const users = response.data?.data || [];
+        const token = localStorage.getItem('token') || '66|5TalCJ8YD62FDIoYKzJy0w7XosM72oLkVWdPFt4xf8ff92b9';
+        if (!localStorage.getItem('token')) {
+          localStorage.setItem('token', token);
+        }
+
+        const response = await fetch(API_URL, {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            navigate('/', { replace: true });
+            return;
+          }
+
+          throw new Error(`API Error: ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const users = payload?.data?.data || payload?.data || [];
         setData(users.map(mapApiUserToEmployee));
       } catch (err) {
         console.error(err);
@@ -90,7 +132,7 @@ const UserManagement: React.FC = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, [location.key, navigate]);
 
   const handleDeleteTrigger = (id: string) => {
     setDeleteModal({
@@ -99,20 +141,34 @@ const UserManagement: React.FC = () => {
     });
   };
 
-  const handleConfirmDelete = () => {
-    if (deleteModal.targetId) {
-      setData((prev) =>
-        prev.filter((item) => item.employeeId !== deleteModal.targetId)
-      );
+  const handleConfirmDelete = async () => {
+  const targetId = deleteModal.targetId; // ဖျက်မယ့် User ရဲ့ UUID (ဥပမာ - "a1f103a9-...")
+  if (!targetId) return;
 
-      setDeleteModal({
-        isOpen: false,
-        targetId: null,
-      });
+  setLoading(true);
+  setError("");
 
-      setShowToast(true);
-    }
-  };
+  try {
+    // 💡 Backend ရဲ့ ပုံစံအတိုင်း Endpoint ကို /user/id လို့ပဲ ပေးရပါမယ် (URL ထဲ ID မထည့်ရပါ)
+    // 💡 ပြီးရင် ဖျက်မယ့် ID ကို body ထဲမှာ JSON ပုံစံနဲ့ ထည့်ပေးလိုက်ရပါမယ်
+    const res = await apiFetch("/user/id", {
+      method: 'DELETE',
+      body: JSON.stringify({ id: targetId }) // Backend က မျှော်လင့်ထားတဲ့ raw JSON body
+    });
+
+    // အောင်မြင်ရင် UI စာရင်းထဲကနေပါ ဖယ်ထုတ်လိုက်မယ်
+    setData((prev) => prev.filter((item) => item.id !== targetId));
+    
+    // Success Toast ပြမယ်
+    setShowToast(true);
+  } catch (err: any) {
+    console.error('Delete user error:', err);
+    setError(err?.message || 'Failed to delete user.');
+  } finally {
+    setLoading(false);
+    setDeleteModal({ isOpen: false, targetId: null });
+  }
+};
 
   React.useEffect(() => {
     if (showToast) {
@@ -131,15 +187,19 @@ const UserManagement: React.FC = () => {
   };
 
   const filteredData = data.filter((emp) => {
-  return (
-    emp.name.toLowerCase().includes(search.toLowerCase()) ||
-    emp.email.toLowerCase().includes(search.toLowerCase()) ||
-    emp.employeeId.toLowerCase().includes(search.toLowerCase()) ||
-    emp.status.toLowerCase().includes(search.toLowerCase())
-  );
-});
+    const searchTerm = search.toLowerCase();
+    const matchesSearch =
+      emp.name.toLowerCase().includes(searchTerm) ||
+      emp.email.toLowerCase().includes(searchTerm) ||
+      emp.employee_id.toLowerCase().includes(searchTerm);
 
-  // ✅ PAGINATION FIXED (IMPORTANT PART)
+    const matchesStatus =
+      !statusFilter || emp.status.toLowerCase() === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesStatus;
+  });
+
+ 
   const totalPages = Math.ceil(filteredData.length / pageSize);
 
   const startIndex = currentPage * pageSize;
@@ -150,7 +210,7 @@ const UserManagement: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-1 font-sans text-slate-800">
 
-      {/* HEADER */}
+      
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-black">User Management</h1>
 
@@ -162,10 +222,10 @@ const UserManagement: React.FC = () => {
         </Link>
       </div>
 
-      {/* FILTERS */}
+      
       <div className="flex gap-4 rounded-t-xl bg-white p-4 border border-slate-100 border-b-0">
 
-        {/* SEARCH */}
+        
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
 
@@ -181,22 +241,22 @@ const UserManagement: React.FC = () => {
           />
         </div>
 
-        {/* STATUS FILTER (unchanged) */}
+        
         <div className="relative w-48">
-  <select
-    value={search}
-    onChange={(e) => {
-      setSearch(e.target.value);
-      setCurrentPage(0);
-    }}
-    className="w-full rounded-md border border-slate-400 bg-slate-50 px-4 py-2 text-sm"
-  >
-    <option value="">All Status</option>
-    <option value="Active">Active</option>
-    <option value="Suspended">Suspended</option>
-    <option value="Resigned">Resigned</option>
-  </select>
-</div>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(0);
+            }}
+            className="w-full rounded-md border border-slate-400 bg-slate-50 px-4 py-2 text-sm"
+          >
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+            <option value="resigned">Resigned</option>
+          </select>
+        </div>
       </div>
 
       {/* TABLE */}
@@ -241,12 +301,12 @@ const UserManagement: React.FC = () => {
 
             {!loading && !error && currentPaginatedData.map((emp) => (
               <tr
-                key={emp.employeeId}
+                key={emp.id ?? emp.employee_id}
                 className="hover:bg-gray-100 cursor-pointer"
-                onClick={() => navigate(`/employee/${emp.employeeId}`)}
+                onClick={() => navigate(`/employee/${emp.id ?? emp.employee_id}`)}
               >
 
-                <td className="px-6 py-5 text-sm">{emp.employeeId}</td>
+                <td className="px-6 py-5 text-sm">{emp.employee_id}</td>
                 <td className="px-6 py-5 text-sm font-medium">{emp.name}</td>
                 <td className="px-6 py-5 text-sm">{emp.email}</td>
 
@@ -258,18 +318,17 @@ const UserManagement: React.FC = () => {
 
                 <td className="px-6 py-5">
                   <span className={`text-xs px-3 py-1 rounded-full ${
-                    emp.status === 'Active'
+                    emp.status.toLowerCase() === 'active'
                       ? 'bg-green-100 text-green-700'
-                      : emp.status === 'Suspend'
+                      : emp.status.toLowerCase() === 'suspended'
                       ? 'bg-blue-100 text-blue-700'
-                      : 'bg-yellow-100 text-yellow-700'   
-                      
-                      }`}>
+                      : 'bg-yellow-100 text-yellow-700'
+                  }`}>
                     {emp.status}
                   </span>
                 </td>
 
-                {/* ACTION */}
+                
                 <td className="px-6 py-5 text-right">
                   <div className="flex justify-end gap-2">
 
@@ -278,7 +337,7 @@ const UserManagement: React.FC = () => {
                     <button
                       onClick={(event) => {
                         event.stopPropagation();
-                        handleDeleteTrigger(emp.employeeId);
+                        handleDeleteTrigger(emp.id ?? emp.employee_id);
                       }}
                       className="text-red-500 hover:text-red-700"
                     >
@@ -294,10 +353,10 @@ const UserManagement: React.FC = () => {
         </table>
       </div>
 
-      {/* PAGINATION */}
+      
 <div className="flex items-center justify-end gap-2 py-4">
 
-  {/* PREVIOUS */}
+  
   <button
     onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
     disabled={currentPage === 0}
@@ -312,7 +371,7 @@ const UserManagement: React.FC = () => {
     <FiChevronLeft size={18} />
   </button>
 
-  {/* PAGE NUMBERS */}
+  
   {Array.from({ length: totalPages }).map((_, index) => {
     const showFirst = index === 0;
     const showLast = index === totalPages - 1;
@@ -378,13 +437,13 @@ const UserManagement: React.FC = () => {
   </button>
 
 </div>
-{/* DELETE MODAL */}
+
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
 
-            {/* CLOSE */}
+            
             <div className="flex justify-end">
               <button
                 onClick={() =>
@@ -398,7 +457,7 @@ const UserManagement: React.FC = () => {
               </button>
             </div>
 
-            {/* CONTENT */}
+            
             <div className="mt-2 text-center">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
                 <FiTrash2
@@ -416,7 +475,7 @@ const UserManagement: React.FC = () => {
               </p>
             </div>
 
-            {/* BUTTONS */}
+            
             <div className="mt-6 flex gap-3">
 
               <button
@@ -443,7 +502,7 @@ const UserManagement: React.FC = () => {
         </div>
       )}
 
-      {/* TOAST */}
+      
       {showToast && (
         <div className="fixed top-5 right-5 z-50 flex items-center gap-3 rounded-lg bg-slate-900 px-4 py-3 text-white shadow-xl">
 

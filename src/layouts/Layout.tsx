@@ -38,11 +38,7 @@ const menuItems = [
     icon: Boxes,
     path: "/inventory",
   },
-  {
-    title: "UserManagement",
-    icon: Users,
-    path: "/usermanagement",
-  },
+  
   {
     title: "Assignment",
     icon: FileEdit,
@@ -53,6 +49,13 @@ const menuItems = [
     icon: Wrench,
     path: "/maintenance",
   },
+
+  {
+    title: "UserManagement",
+    icon: Users,
+    path: "/usermanagement",
+  },
+  
   {
     title: "Activity",
     icon: ClipboardList,
@@ -65,11 +68,11 @@ export default function Layout() {
   const navigate = useNavigate()
 
   return (
-    <SidebarProvider>
+    <SidebarProvider style={{ "--sidebar-width": "220px" } as any}>
       <div className="flex min-h-screen w-full bg-[#F8FAFC]">
 
-        {/* SIDEBAR (Left Side) */}
-        <Sidebar className="w-[255px] border-r border-slate-400 bg-white-100">
+        {/* SIDEBAR (Completely Untouched Left Side) */}
+        <Sidebar className="border-r border-slate-400 bg-white-100">
           <SidebarContent className="bg-blue-50 px-4 py-6">
 
             {/* LOGO */}
@@ -114,14 +117,14 @@ export default function Layout() {
         <div className="flex flex-1 flex-col">
 
           {/* TOP BAR ACTION PANEL */}
-          <div className="relative w-full bg-white border-b border-slate-200 flex items-center justify-between h-16">
+          <div className="relative w-full bg-white flex items-center justify-between h-16">
             <div className="flex-1">
               <Navigation />
             </div>
           </div>
 
           {/* PAGE CONTENT */}
-          <main className="flex-1 p-8">
+          <main className="flex-1 px-4 pt-4 pb-8">
             <Outlet />
           </main>
         </div>

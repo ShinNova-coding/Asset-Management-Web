@@ -89,8 +89,8 @@ const DashboardStats: React.FC = () => {
   ];
 
   return (
-    <div className="w-full p-8 bg-slate-50">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 max-w-[1400px] mx-auto">
+    <div className="w-full py-6 bg-slate-50">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 w-full">
         {stats.map((stat, index) => (
           <StatCard
             key={index}

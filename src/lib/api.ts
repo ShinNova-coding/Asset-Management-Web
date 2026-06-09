@@ -6,16 +6,14 @@ export async function apiFetch(
   endpoint: string,
   options: RequestInit = {}
 ) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || DEFAULT_TOKEN;
 
   const isFormData = options.body instanceof FormData;
 
   const headers: HeadersInit = {
     Accept: "application/json",
 
-    ...(token && {
-      Authorization: `Bearer ${token}`,
-    }),
+    Authorization: `Bearer ${token}`,
 
     ...(!isFormData && {
       "Content-Type": "application/json",
@@ -29,18 +27,11 @@ export async function apiFetch(
     headers,
   });
 
+  const responseData = await parseJsonResponse(response);
+
   if (!response.ok) {
-    let message = `API Error: ${response.status}`;
-
-    try {
-      const errorData = await response.json();
-      message = errorData.message || message;
-    } catch (error) {
-      console.error(error);
-    }
-
-    throw new Error(message);
+    throw new Error(getErrorMessage(responseData, `API Error: ${response.status}`));
   }
 
-  return response.json();
+  return responseData;
 }

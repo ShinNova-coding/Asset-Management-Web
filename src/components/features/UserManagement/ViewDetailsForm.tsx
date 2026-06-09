@@ -33,8 +33,8 @@ export default function ViewDetailsForm({ data }: Props) {
 
         <div className="flex items-center gap-4">
           <img
-            src={data.profileImage || "https://via.placeholder.com/120"}
-            alt=""
+            src={data.profileImage || "https://dummyimage.com/120" }
+            alt={data.name || 'Employee'}
             className="w-20 h-20 rounded-full border object-cover"
           />
 
@@ -45,16 +45,15 @@ export default function ViewDetailsForm({ data }: Props) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field label="Employee ID" value={data.employeeId} />
+          <Field label="Employee ID" value={data.employee_id} />
           <Field label="Email" value={data.email} />
           <Field label="Phone Number" value={data.phone} />
-          <Field label="Address" value={data.address} />
+          <Field label="Role" value={data.role} />
           <Field label="Position" value={data.position} />
           <Field label="Status" value={data.status} />
-          <Field label="Role / Access Level" value={data.role} />
-          <Field label="Position" value={data.position} />
-          <Field label="Start Date" value={data.startDate} />
-          <Field label="End Date" value={data.endDate} />
+      
+          <Field label="Joined Date" value={data.joinedDate} />
+          <Field label="Left Date" value={data.leftDate} />
         </div>
       </div>
     </div>
