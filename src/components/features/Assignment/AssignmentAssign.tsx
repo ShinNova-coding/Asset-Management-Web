@@ -17,7 +17,8 @@ export function AssignmentAssign() {
       onClick={goToNewPage}
       className="flex items-center gap-2 bg-blue-500 hover:bg-blue-700 text-white shadow-sm font-medium px-6 py-6"
     >
-      <FaCirclePlus size={16} /> Create
+     <FaCirclePlus size={16} /> Create
     </Button>
   )
 }
+ 

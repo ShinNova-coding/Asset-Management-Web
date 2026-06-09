@@ -16,11 +16,11 @@ const AddNewAsset = () => {
 
   const [formData, setFormData] = useState({
     employeeId: '',
-    assetId: '',         // 💡 ဝန်ထမ်းကို ထုတ်ပေးမယ့် လက်ရှိရှိပြီးသား Asset ID (e.g., AST-2026-004)
+    assetId: '',        
     assignDate: '',
     returnedDate: '',
     note: '',
-    status: 'active'     // JSON အရ Default က "active" ဖြစ်ပါတယ်
+    status: 'active'     
   });
 
   const formatToInputDate = (dateString: string) => {
@@ -59,7 +59,7 @@ const AddNewAsset = () => {
     }
 
     if (activeItem) {
-      // Backend JSON alignment အတိုင်း ဒေတာပြန်ဖြည့်ခြင်း
+      
       setFormData({
         employeeId: activeItem.employee_id || '',
         assetId: activeItem.asset_id || '',
@@ -103,7 +103,6 @@ const AddNewAsset = () => {
     }
 
     try {
-      // 💡 Backend JSON Structure အတိုင်း Payload ကို သန့်စင်လိုက်ပါတယ်
       const assignmentPayload = {
         employee_id: formData.employeeId.trim(),
         asset_id: formData.assetId.trim(),
@@ -115,9 +114,8 @@ const AddNewAsset = () => {
 
       console.log("🚀 Sending Payload to Assignment API:", assignmentPayload);
 
-      // 💡 နေရာမှန်ဖြစ်တဲ့ /api/assignment (သို့မဟုတ် အများကိန်း /api/assignments) ကို ပြောင်းသုံးရပါမယ်
-      // မင်းရဲ့ Backend API configuration အရ စမ်းကြည့်ပါ
-      const API_URL = "http://192.168.100.185:1010/api/assignment"; 
+     
+      const API_URL = "http://192.168.100.186:1010/api/assignment"; 
       
       const targetId = stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;

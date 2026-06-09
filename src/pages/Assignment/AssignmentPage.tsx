@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AssignmentTable } from "@/components/features/Assignment/AssignmentTable";
@@ -7,7 +9,7 @@ import { FiTrash2 } from "react-icons/fi";
 import axios from "axios";
 
 // Targeted Local Network Endpoint
-const API_URL = "http://192.168.100.185:1010/api/assignment";
+const API_URL = "http://192.168.100.186:1010/api/assignment";
 
 const AssignmentPage = () => {
   const [data, setData] = useState<Assignment[]>([]);
@@ -24,7 +26,7 @@ const AssignmentPage = () => {
 
   // Helper function to dynamically generate authentication headers
   const getAuthHeaders = () => {
-    const token = localStorage.getItem("token"); // Fallback check: adjust key if your app uses 'auth_token', etc.
+    const token = localStorage.getItem("token");
     return {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -39,7 +41,6 @@ const AssignmentPage = () => {
       setLoading(true);
       setError(null);
       
-      // Included authorization configurations
       const response = await axios.get(API_URL, getAuthHeaders());
 
       if (response.data?.success) {
@@ -50,7 +51,6 @@ const AssignmentPage = () => {
     } catch (err: any) {
       console.error("API error reading assignments:", err);
       setError(`Network error: ${err.response?.data?.message || err.message || "Could not reach local server"}`);
-      // Graceful local environment fallback
       setData(fallbackData);
     } finally {
       setLoading(false);
@@ -69,13 +69,11 @@ const AssignmentPage = () => {
       setData((prev) =>
         prev.map((item) => (item.id === state.updatedItem?.id ? state.updatedItem : item))
       );
-      // Clean history state to prevent unexpected loop re-triggers
       navigate(location.pathname, { replace: true, state: {} });
     }
     
     if (state?.deleteItem) {
       setData((prev) => prev.filter((item) => item.id !== state.deleteItem));
-      // Clean history state to prevent unexpected loop re-triggers
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location.state, navigate, location.pathname]);
@@ -93,10 +91,7 @@ const AssignmentPage = () => {
     if (!deleteModal.targetId) return;
 
     try {
-      // Included authorization configurations to authorize server-side table row destruction
       await axios.delete(`${API_URL}/${deleteModal.targetId}`, getAuthHeaders());
-      
-      // Update Client Side Layout immediately
       setData((prev) => prev.filter((item) => item.id !== deleteModal.targetId));
     } catch (err: any) {
       console.error("Could not run delete execution:", err);

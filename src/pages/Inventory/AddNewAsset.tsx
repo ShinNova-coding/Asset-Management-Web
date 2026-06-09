@@ -18,13 +18,14 @@ const AddNewAsset = () => {
   const [formData, setFormData] = useState({
     assetId: '', 
     name: '',
-    category: 'Goods', // Updated from 'Laptops' to a valid default category
+    category: 'Goods',
     model: '',
     ram: '',
     storage: '',
     serial_number: '', 
     purchased_date: '', 
     warranty: '',
+    condition: 'fair', // Added condition state
     action: 'available' 
   });
 
@@ -45,13 +46,14 @@ const AddNewAsset = () => {
       setFormData({
         assetId: '',
         name: '',
-        category: 'Goods', // Updated here as well
+        category: 'Goods',
         model: '',
         ram: '',
         storage: '',
         serial_number: '',
         purchased_date: '',
         warranty: '',
+        condition: 'fair',
         action: 'available'
       });
       setSelectedImage(null);
@@ -82,7 +84,7 @@ const AddNewAsset = () => {
       }
 
       setFormData({
-        assetId: activeItem.asset_code || activeItem.asset_id||activeItem.id || String(targetId || ''),
+        assetId: activeItem.asset_code || activeItem.asset_id || activeItem.id || String(targetId || ''),
         name: activeItem.name || '',
         category: resolvedCategoryStr || 'Goods',
         model: activeItem.model || '',
@@ -91,6 +93,7 @@ const AddNewAsset = () => {
         serial_number: activeItem.serial_number || '',
         purchased_date: formatToInputDate(activeItem.purchased_date || activeItem.purchase_date || activeItem.purchase),
         warranty: activeItem.warranty_period || activeItem.warranty || '',
+        condition: activeItem.condition || 'fair', // Populate condition
         action: activeItem.status || activeItem.action || 'available'
       });
       
@@ -101,13 +104,13 @@ const AddNewAsset = () => {
         if (rawImageSource.startsWith("data:image")) {
           setImagePreview(rawImageSource);
         } else if (rawImageSource.startsWith("http://localhost")) {
-          const correctedUrl = rawImageSource.replace("http://localhost", API_REALIP);
+          const correctedUrl = rawImageSource.replace("http://localhost", API_REAL_IP);
           setImagePreview(correctedUrl);
         } else if (rawImageSource.startsWith("http")) {
           setImagePreview(rawImageSource);
         } else {
           const cleanPath = rawImageSource.startsWith("/") ? rawImageSource : `/${rawImageSource}`;
-          setImagePreview(`${API_REALIP}${cleanPath}`);
+          setImagePreview(`${API_REAL_IP}${cleanPath}`);
         }
       }
     } else if (targetId) {
@@ -219,7 +222,6 @@ const AddNewAsset = () => {
         "Funitures": "a1f29511-0c11-47a3-91db-d90c44852afe"
       };
 
-      // Resolved category ID using the mapped UUIDs
       const resolvedCategoryId = categoryMap[formData.category] || "a1f0d854-58b0-45b5-9541-448f080e1bbc";
       const targetId = routeId || stateId || stateEditItem?.asset_id || stateEditItem?.id;
 
@@ -240,7 +242,7 @@ const AddNewAsset = () => {
         storage: formData.storage.trim() || "N/A",
         category_id: resolvedCategoryId, 
         status: updatedStatusText.toLowerCase(), 
-        condition: "fair", 
+        condition: formData.condition, // Uses dynamic form condition selection
         image: finalizedImageString, 
       };
 
@@ -349,6 +351,22 @@ const AddNewAsset = () => {
                     >
                       <option value="Goods">Goods</option>
                       <option value="Funitures">Funitures</option>
+                    </select>
+                  </div>
+
+                  {/* Added Condition Dropdown */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-600">Asset Condition</label>
+                    <select
+                      name="condition"
+                      value={formData.condition}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                    >
+                      <option value="new">New</option>
+                      <option value="good">Good</option>
+                      <option value="fair">Fair</option>
+                      <option value="bad">Bad</option>
                     </select>
                   </div>
 

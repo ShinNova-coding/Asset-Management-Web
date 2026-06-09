@@ -17,7 +17,7 @@ import {
 import type { Assignment } from "@/data/assignmentdata"
 import axios from "axios"
 
-const API_URL = "http://192.168.100.185:1010/api/assignment"
+const API_URL = "http://192.168.100.186:1010/api/assignment"
 
 const AssignmentDetailPage = () => {
   const { id } = useParams<{ id: string }>()
@@ -27,7 +27,7 @@ const AssignmentDetailPage = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Helper function to dynamically generate authentication headers
+  
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token")
     return {
@@ -36,12 +36,10 @@ const AssignmentDetailPage = () => {
         Accept: "application/json",
       },
     }
-  }
-
-  // Load target assignment details from the remote API
+  }  
   useEffect(() => {
     const fetchRecordDetails = async () => {
-      // Prioritize fast path if the state is already passed via routing transitions
+     
       const stateData = location.state as { editItem?: Assignment } | null
       if (stateData?.editItem) {
         setFormData(stateData.editItem)
@@ -53,7 +51,7 @@ const AssignmentDetailPage = () => {
         setLoading(true)
         setError(null)
         
-        // Dynamic reading call using authorization configuration
+        
         const response = await axios.get(`${API_URL}/${id}`, getAuthHeaders())
         
         if (response.data?.success) {
@@ -78,12 +76,12 @@ const AssignmentDetailPage = () => {
     }
   }, [id, location.state])
 
-  // UI STATE HANDLING: Loading Spinner
+  // UI
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 text-slate-500 space-y-4">
         <div className="animate-spin rounded-full h-9 w-9 border-2 border-slate-300 border-t-slate-900"></div>
-        <p className="text-sm font-medium tracking-wide">Retrieving asset lifecycle context...</p>
+        <p className="text-sm font-medium tracking-wide">Retrieving...</p>
       </div>
     )
   }
@@ -142,11 +140,7 @@ const AssignmentDetailPage = () => {
             </span>
           </div>
         </div>
-
-        {/* METRIC SPECIFICATION TILES */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          {/* CUSTODY ENTITY CARD */}
           <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-xl">
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
@@ -193,7 +187,7 @@ const AssignmentDetailPage = () => {
           <CardContent className="p-6">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
               <FiCalendar className="w-4 h-4 text-slate-400" />
-              Allocation Timeline
+               Timeline
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative">
               <div className="space-y-1 border-l-2 border-slate-200 pl-4">
@@ -211,7 +205,7 @@ const AssignmentDetailPage = () => {
             <CardContent className="p-6 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
                 <FiClock className="w-4 h-4 text-slate-400" />
-                Operational History Activity
+                 History Activity
               </div>
               
               <div className="pt-2">

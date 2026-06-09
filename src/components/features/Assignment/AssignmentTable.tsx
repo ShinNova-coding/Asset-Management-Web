@@ -1,7 +1,9 @@
 "use client"
 
 import * as React from "react"
+import { useNavigate } from "react-router-dom"
 import { FiChevronLeft, FiChevronRight, FiPlus } from "react-icons/fi"
+import { Search } from "lucide-react"
 
 import {
   flexRender,
@@ -24,9 +26,6 @@ import {
 import { Button } from "@/components/ui/button"
 import type { Assignment } from "@/data/assignmentdata"
 import { columns as baseColumns } from "./AssignmentColumns"
-import { AssignmentSearch } from "./AssignmentSearchBox"
-import { AssignmentFilter } from "./AssignmentFilter"
-import { useNavigate } from "react-router-dom"
 
 interface AssignmentTableProps {
   data: Assignment[]
@@ -72,7 +71,7 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
       <div className="flex justify-end w-full">
         <Button
           onClick={() => navigate("/assignment/add")}
-          className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl px-4 py-2 flex items-center gap-2 shadow-sm text-sm font-medium transition-colors"
+          className="h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 gap-2 shadow-sm text-xs font-bold transition-colors border border-blue-600"
         >
           <FiPlus size={16} />
           Create
@@ -80,14 +79,31 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
       </div>
 
       {/* SEARCH + FILTER AREA */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full">
-        <div className="flex-1">
-          <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 overflow-hidden">
-            <AssignmentSearch value={globalFilter} onChange={setGlobalFilter} />
-          </div>
+      <div className="flex gap-4 rounded-xl bg-white p-4 border border-slate-200 shadow-sm items-center">
+        {/* SEARCH */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
+          <input
+            type="text"
+            placeholder="Search assignments by name, details, or ID..."
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
-        <div className="w-full md:w-[180px]">
-          <AssignmentFilter table={table} />
+        
+        {/* FILTER */}
+        <div className="relative w-48">
+          <select
+            value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
+            onChange={(e) => table.getColumn("status")?.setFilterValue(e.target.value)}
+            className="w-full rounded-md border border-slate-400 bg-slate-50 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="submitted">Submitted</option>
+            <option value="graded">Graded</option>
+          </select>
         </div>
       </div>
 
@@ -113,15 +129,13 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
                   key={row.id}
                   className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer"
                   onClick={(e) => {
-                    const item = row.original;
+                    const item = row.original as any;
                     const target = e.target as HTMLElement;
                     
-                    // ခလုတ် သို့မဟုတ် Actions ကော်လံကို နှိပ်မိရင် Detail ဆီ သွားမယ့် လမ်းကြောင်းကို ရပ်တန့်ပေးသည်
                     if (target.closest('[data-actions-cell="true"]') || target.closest('button')) {
                       return;
                     }
                     
-                    // ရိုးရိုး နေရာလွတ်တွေကို နှိပ်မှသာ Detail View (Read-Only) ဆီ သွားမည်
                     navigate(`/assignment/${item.id}`);
                   }}
                 >

@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { FiChevronLeft, FiChevronRight, FiAlertCircle, FiCheckCircle, FiX } from "react-icons/fi"
+import { Search } from "lucide-react"
 import {
   flexRender,
   getCoreRowModel,
@@ -23,7 +24,6 @@ import {
 import { Button } from "@/components/ui/button"
 
 import { columns } from "./InventoryColumns"
-import { InventorySearch } from "./InventorySearchBox"
 import { InventoryFilter } from "./InventoryFilter"
 
 interface InventoryTableProps {
@@ -33,7 +33,6 @@ interface InventoryTableProps {
 export function InventoryTable({ data: initialData }: InventoryTableProps) {
   const navigate = useNavigate()
 
-  
   const processExpiredWarranties = (items: any[]): any[] => {
     if (!Array.isArray(items)) return []
     return items.map((item) => {
@@ -53,7 +52,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     return baseItems.filter((item) => !deletedIds.includes(item.id))
   }
 
-  
   const [data, setData] = React.useState<any[]>(() => {
     if (typeof window !== "undefined") {
       const cachedData = localStorage.getItem("inventory_data")
@@ -73,14 +71,13 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   })
   const [showToast, setShowToast] = React.useState(false)
 
-  
-  React.useEffect(() => {
+   React.useEffect(() => {
     if (initialData) {
       setData(getExcludedDeletedItems(processExpiredWarranties(initialData)))
     }
   }, [initialData])
 
-  React.useEffect(() => {
+   React.useEffect(() => {
     if (data) localStorage.setItem("inventory_data", JSON.stringify(data))
   }, [data])
 
@@ -91,7 +88,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   const handleConfirmDelete = async () => {
     if (!deleteModal.targetId) return;
 
-    
     const targetId = deleteModal.targetId.trim();
     const API_URL = `http://192.168.100.186:1010/api/asset/${targetId}`;
     const token = localStorage.getItem("token") || "";
@@ -155,18 +151,35 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
 
   return (
     <div className="w-full space-y-4 p-3 relative">
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full">
-        <div className="flex-1">
-          <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <InventorySearch value={globalFilter} onChange={setGlobalFilter} />
-          </div>
+      {/* SEARCH AND FILTERS */}
+      <div className="flex gap-4 rounded-t-xl bg-white p-4 border border-slate-100 shadow-sm">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
+          <input
+            type="text"
+            placeholder="Search by name, email, or ID..."
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm"
+          />
         </div>
-        <div className="w-full md:w-[180px]">
-          <InventoryFilter table={table} />
+
+        <div className="relative w-48">
+          <select
+            value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
+            onChange={(e) => table.getColumn("status")?.setFilterValue(e.target.value)}
+            className="w-full rounded-md border border-slate-400 bg-slate-50 px-4 py-2 text-sm"
+          >
+            <option value="">All Status</option>
+            <option value="available">Available</option>
+            <option value="assigned">Assigned</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="retired">Retired</option>
+          </select>
         </div>
       </div>
 
-      <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
+      <div className="rounded-b-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-blue-400">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -195,6 +208,59 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* PAGINATION CONTROLS */}
+      <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
+        <div className="text-xs text-slate-500 font-medium">
+          Page {currentPage + 1} of {pageCount} ({table.getFilteredRowModel().rows.length} total assets)
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <FiChevronLeft size={16} />
+          </Button>
+
+          <div className="flex gap-1 items-center">
+            {Array.from({ length: pageCount }).map((_, index) => {
+              if (
+                index === 0 ||
+                index === pageCount - 1 ||
+                (index >= currentPage - 1 && index <= currentPage + 1)
+              ) {
+                return (
+                  <Button
+                    key={index}
+                    variant={currentPage === index ? "default" : "outline"}
+                    size="sm"
+                    className={currentPage === index ? "bg-blue-300 hover:bg-blue-400 text-white border-none" : "bg-slate-200"}
+                    onClick={() => table.setPageIndex(index)}
+                  >
+                    {index + 1}
+                  </Button>
+                )
+              }
+              if (index === currentPage - 2 || index === currentPage + 2) {
+                return <span key={index} className="px-2 text-gray-500">...</span>
+              }
+              return null
+            })}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <FiChevronRight size={16} />
+          </Button>
+        </div>
       </div>
 
       {deleteModal.isOpen && (

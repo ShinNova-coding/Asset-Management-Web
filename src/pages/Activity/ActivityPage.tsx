@@ -15,7 +15,7 @@ interface SystemActivityLogItem {
 
 export default function ActivityPage() {
   const [logs, setLogs] = useState<SystemActivityLogItem[]>([])
-  const [message, setMessage] = useState("Loading general activity logs...")
+  const [message, setMessage] = useState("Loading...")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,7 +28,7 @@ export default function ActivityPage() {
         const token = localStorage.getItem("token")
 
        
-        const response = await fetch("http://192.168.100.185:1010/api/activitylogs", {
+        const response = await fetch("http://192.168.100.186:1010/api/activitylogs", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -46,7 +46,7 @@ export default function ActivityPage() {
           // Sort descending by ID so latest database actions show at the top
           const sortedLogs = (result.data || []).sort((a: SystemActivityLogItem, b: SystemActivityLogItem) => b.id - a.id)
           setLogs(sortedLogs)
-          setMessage(result.message || "General activity logs retrieved successfully")
+          setMessage(result.message || "Activity logs retrieved successfully")
         } else {
           throw new Error(result.message || "Failed to parse system activity logs.")
         }
@@ -72,11 +72,11 @@ export default function ActivityPage() {
   return (
     <div className="p-10 space-y-6 min-h-screen bg-slate-50/30">
       
-      {/* TITLE HEADLINE SECTION */}
+     
       <div className="flex items-center justify-between mb-6">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            General Activity Logs
+             Activity Logs
           </h1>
           {!loading && !error && <p className="text-sm text-slate-500">{message}</p>}
         </div>
