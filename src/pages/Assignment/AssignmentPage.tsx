@@ -31,6 +31,7 @@ const AssignmentPage = () => {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
+        "Content-Type": "application/json",
       },
     };
   };
@@ -41,7 +42,12 @@ const AssignmentPage = () => {
       setLoading(true);
       setError(null);
       
-      const response = await axios.get(API_URL, getAuthHeaders());
+      const response = await axios.get(API_URL, {
+        headers: {
+          Authorization: getAuthHeaders().headers.Authorization,
+          Accept: "application/json",
+        }
+      });
 
       if (response.data?.success) {
         setData(response.data.data);
@@ -86,12 +92,17 @@ const AssignmentPage = () => {
     setDeleteModal({ isOpen: true, targetId: id });
   };
 
-  // Perform operational DELETE network method with security tokens
+  // Perform operational DELETE network method with security tokens in body payload
   const handleConfirmDelete = async () => {
     if (!deleteModal.targetId) return;
 
     try {
-      await axios.delete(`${API_URL}/${deleteModal.targetId}`, getAuthHeaders());
+      await axios.delete(`${API_URL}/assignment_id`, {
+        ...getAuthHeaders(),
+        data: {
+          assignment_id: deleteModal.targetId,
+        }
+      });
       setData((prev) => prev.filter((item) => item.id !== deleteModal.targetId));
     } catch (err: any) {
       console.error("Could not run delete execution:", err);
@@ -106,7 +117,7 @@ const AssignmentPage = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Assignment Management
+            Assignment
           </h1>
         </div>
       </div>

@@ -31,7 +31,7 @@ interface AssignmentTableProps {
   data: Assignment[]
   meta?: {
     editRow?: (row: Assignment) => void
-    deleteRow?: (id: number) => void 
+    deleteRow?: (id: string | number) => void 
   }
 }
 
@@ -85,7 +85,7 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
           <input
             type="text"
-            placeholder="Search assignments by name, details, or ID..."
+            placeholder="Search..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -100,9 +100,8 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
             className="w-full rounded-md border border-slate-400 bg-slate-50 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="submitted">Submitted</option>
-            <option value="graded">Graded</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
           </select>
         </div>
       </div>

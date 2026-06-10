@@ -4,40 +4,39 @@ import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { RiDeleteBin4Fill } from "react-icons/ri"
 import { FaEdit } from "react-icons/fa"
-import type { Assignment } from "@/data/assignmentdata"
 
-export const columns: ColumnDef<Assignment>[] = [
+export const columns: ColumnDef<any>[] = [
   {
-    accessorKey: "employee_id", // Updated to match backend key
+    id: "employeeId",
+    accessorFn: (row) => row.user?.employee_id || row.users_id,
     header: "Employee ID",
     enableGlobalFilter: true,
   },
   {
-    // API lacks direct employeeName, parsing dynamically from employee_id or fallback
-    id: "employeeName",
-    accessorFn: (row) => `Employee (${row.employee_id})`,
+    id: "userName",
+    accessorFn: (row) => row.user?.name || "Unknown User",
     header: "Employee Name",
     enableGlobalFilter: true,
   },
   {
-    accessorKey: "asset_id", // Updated to match backend key
-    header: "Asset ID",
+    id: "assetCode",
+    accessorFn: (row) => row.asset?.asset_code || "N/A",
+    header: "Asset Code",
     enableGlobalFilter: true,
   },
   {
-    // Accessing the nested asset name safely via row data object
     id: "assetName",
     accessorFn: (row) => row.asset?.name || "Unknown Asset",
     header: "Asset Name",
     enableGlobalFilter: true,
   },
   {
-    accessorKey: "assigned_date", // Updated to match backend key
+    accessorKey: "assigned_date",
     header: "Assigned Date",
     enableGlobalFilter: true,
   },
   {
-    accessorKey: "returned_date", // Updated to match backend key
+    accessorKey: "returned_date",
     header: "Returned Date",
     enableGlobalFilter: true,
     cell: ({ getValue }) => {
@@ -52,9 +51,9 @@ export const columns: ColumnDef<Assignment>[] = [
     cell: ({ row }) => {
       const status = (row.getValue("status") as string || "").toLowerCase()
 
-      // Normalized style mapping to handle any case variation from API strings
       const statusStyles: Record<string, string> = {
         active: "bg-green-100 text-green-700 border-green-200",
+        inactive: "bg-gray-100 text-gray-700 border-gray-200",
         assigned: "bg-green-100 text-green-700 border-green-200",
         returned: "bg-yellow-100 text-yellow-700 border-yellow-200",
         pending: "bg-blue-100 text-blue-700 border-blue-200",
@@ -66,7 +65,7 @@ export const columns: ColumnDef<Assignment>[] = [
             statusStyles[status] || "bg-gray-100 text-gray-700"
           }`}
         >
-          {status}
+          {status || "N/A"}
         </span>
       )
     },
@@ -87,7 +86,7 @@ export const columns: ColumnDef<Assignment>[] = [
           <button
             className="text-blue-400 hover:text-blue-700 transition p-1"
             onClick={(e) => {
-              e.stopPropagation() // Block standard parent TableRow click navigation
+              e.stopPropagation()
               onEdit?.(item)
             }}
             title="Edit Assignment"
@@ -99,8 +98,8 @@ export const columns: ColumnDef<Assignment>[] = [
           <button
             className="text-red-500 hover:text-red-700 transition p-1"
             onClick={(e) => {
-              e.stopPropagation() // Block standard parent TableRow click navigation
-              onDelete?.(item.id) // FIXED: Passing database incremental ID integer instead of assetId
+              e.stopPropagation()
+              onDelete?.(item.id)
             }}
             title="Delete Assignment"
           >

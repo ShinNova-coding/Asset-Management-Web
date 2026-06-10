@@ -157,7 +157,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
           <input
             type="text"
-            placeholder="Search by name, email, or ID..."
+            placeholder="Search..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm"

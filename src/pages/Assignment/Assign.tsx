@@ -15,13 +15,46 @@ const AddNewAsset = () => {
   const isEditMode = !!stateEditItem || !!stateId || !!routeId;
 
   const [formData, setFormData] = useState({
-    employeeId: '',
-    assetId: '',        
-    assignDate: '',
-    returnedDate: '',
+    employee_id: '',
+    asset_code: '',        
+    assigned_date: '',
+    returned_date: '',
     note: '',
     status: 'active'     
   });
+
+  // Dropdown states for Employees and Assets
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [assets, setAssets] = useState<any[]>([]);
+
+  // Fetch dropdown data on mount
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        const currentToken = localStorage.getItem("token") || "107|hJ8zVmOwBwWAjbODhurIz0EFCvEWc4MdiICpLPxPf5c8837f";
+        const headers = { 
+          "Authorization": `Bearer ${currentToken}`,
+          "Accept": "application/json"
+        };
+
+        const empRes = await fetch("http://192.168.100.186:1010/api/users", { headers });
+        const assetRes = await fetch("http://192.168.100.186:1010/api/assets", { headers });
+
+        if (empRes.ok) {
+          const empData = await empRes.json();
+          setEmployees(Array.isArray(empData) ? empData : empData.data || []);
+        }
+        if (assetRes.ok) {
+          const assetData = await assetRes.json();
+          setAssets(Array.isArray(assetData) ? assetData : assetData.data || []);
+        }
+      } catch (err) {
+        console.error("Failed to load dropdown data", err);
+      }
+    };
+
+    fetchDropdownData();
+  }, []);
 
   const formatToInputDate = (dateString: string) => {
     if (!dateString) return "";
@@ -35,10 +68,10 @@ const AddNewAsset = () => {
   useEffect(() => {
     if (!isEditMode) {
       setFormData({
-        employeeId: '',
-        assetId: '',
-        assignDate: '',
-        returnedDate: '',
+        employee_id: '',
+        asset_code: '',
+        assigned_date: '',
+        returned_date: '',
         note: '',
         status: 'active'
       });
@@ -53,18 +86,17 @@ const AddNewAsset = () => {
       if (localRawData) {
         const currentInventory = JSON.parse(localRawData);
         activeItem = currentInventory.find((item: any) => 
-          item.id === Number(targetId) || item.asset_id === targetId
+          item.id === Number(targetId) || item.users_id === targetId || item.assets_id === targetId
         );
       }
     }
 
     if (activeItem) {
-      
       setFormData({
-        employeeId: activeItem.employee_id || '',
-        assetId: activeItem.asset_id || '',
-        assignDate: formatToInputDate(activeItem.assigned_date || activeItem.assign_date),
-        returnedDate: formatToInputDate(activeItem.returned_date),
+        employee_id: activeItem.users_id || activeItem.employee_id || '',
+        asset_code: activeItem.assets_id || activeItem.asset_code || '',
+        assigned_date: formatToInputDate(activeItem.assigned_date),
+        returned_date: formatToInputDate(activeItem.returned_date),
         note: activeItem.note || '',
         status: activeItem.status || 'active'
       });
@@ -87,41 +119,40 @@ const AddNewAsset = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.employeeId.trim()) {
-      alert("Employee ID is required!");
+    if (!formData.employee_id.trim()) {
+      alert("Employee is required!");
       return;
     }
 
-    if (!formData.assetId.trim()) {
-      alert("Asset ID is required!");
+    if (!formData.asset_code.trim()) {
+      alert("Asset is required!");
       return;
     }
 
-    if (!formData.assignDate) {
+    if (!formData.assigned_date) {
       alert("Assigned Date is required!");
       return;
     }
 
     try {
       const assignmentPayload = {
-        employee_id: formData.employeeId.trim(),
-        asset_id: formData.assetId.trim(),
-        assigned_date: formData.assignDate,
-        returned_date: formData.returnedDate || null,
+        users_id: formData.employee_id.trim(),
+        assets_id: formData.asset_code.trim(),
+        assigned_date: formData.assigned_date,
+        returned_date: formData.returned_date || null,
         note: formData.note.trim() || null,
         status: formData.status
       };
 
       console.log("🚀 Sending Payload to Assignment API:", assignmentPayload);
 
-     
       const API_URL = "http://192.168.100.186:1010/api/assignment"; 
       
       const targetId = stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       const method = isEditMode ? "PUT" : "POST";
       
-      const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
+      const currentToken = localStorage.getItem("token") || "107|hJ8zVmOwBwWAjbODhurIz0EFCvEWc4MdiICpLPxPf5c8837f";
 
       const response = await fetch(url, {
         method: method,
@@ -183,16 +214,21 @@ const AddNewAsset = () => {
                 <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Employee</h2>
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">Employee ID</label>
-                <input 
-                  type="text" 
-                  name="employeeId"
-                  value={formData.employeeId}
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Select Employee</label>
+                <select 
+                  name="employee_id"
+                  value={formData.employee_id}
                   onChange={handleInputChange}
-                  placeholder="e.g. EMP-001" 
-                  className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                  className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white text-slate-800" 
                   required
-                />
+                >
+                  <option value="">-- Choose an Employee --</option>
+                  {employees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.name} {emp.employee_id ? `(${emp.employee_id})` : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -203,16 +239,21 @@ const AddNewAsset = () => {
                 <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Asset to Assign</h2>
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">Asset ID (Must match existing inventory)</label>
-                <input 
-                  type="text" 
-                  name="assetId"
-                  value={formData.assetId}
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Select Asset</label>
+                <select 
+                  name="asset_code"
+                  value={formData.asset_code}
                   onChange={handleInputChange}
-                  placeholder="e.g. AST-2026-004" 
-                  className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono text-slate-800" 
+                  className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white text-slate-800" 
                   required
-                />
+                >
+                  <option value="">-- Choose an Asset --</option>
+                  {assets.map((ast) => (
+                    <option key={ast.id} value={ast.id}>
+                      {ast.name} {ast.asset_code ? `(${ast.asset_code})` : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -227,8 +268,8 @@ const AddNewAsset = () => {
                   <label className="text-xs font-semibold text-slate-600 block mb-1">Assigned Date</label>
                   <input 
                     type="date" 
-                    name="assignDate"
-                    value={formData.assignDate}
+                    name="assigned_date"
+                    value={formData.assigned_date}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     required
@@ -239,8 +280,8 @@ const AddNewAsset = () => {
                   <label className="text-xs font-semibold text-slate-600 block mb-1">Returned Date</label>
                   <input 
                     type="date" 
-                    name="returnedDate"
-                    value={formData.returnedDate}
+                    name="returned_date"
+                    value={formData.returned_date}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                   />
@@ -268,7 +309,7 @@ const AddNewAsset = () => {
                 name="note"
                 value={formData.note}
                 onChange={handleInputChange}
-                placeholder="Write reason or remarks here (e.g., Employee cannot afford new laptop)..."
+                placeholder="Write reason or remarks here..."
                 rows={3}
                 className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none"
               />
