@@ -107,7 +107,6 @@ const AssignmentDetailPage = () => {
 
   const isActive = formData.status?.toLowerCase() === "active"
 
-  // Resolve ID values safely based on relational models or direct properties
   const displayUserId = formData.user?.employee_id || formData.employee_id || formData.users_id || "N/A"
   const displayUserName = formData.user?.name || formData.user_name || "Unknown User"
   
@@ -115,28 +114,27 @@ const AssignmentDetailPage = () => {
   const displayAssetName = formData.asset?.name || formData.asset_name || "Unknown Asset Unit"
 
   return (
-    <div className="p-6 md:p-12 min-h-screen bg-slate-50/50 text-slate-900 antialiased">
-      <div className="max-w-3xl mx-auto space-y-8">
+    <div className="p-4 md:p-8 min-h-screen bg-slate-50/50 text-slate-900 antialiased">
+      <div className="max-w-3xl mx-auto space-y-4">
         
-        {/* HEADER NAVIGATION */}
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/assignment")}
-            className="text-slate-600 hover:text-slate-900 -ml-3 gap-2 text-sm font-medium transition-colors"
-          >
-            <FiChevronLeft className="w-4 h-4" />
-            Back 
-          </Button>
-        </div>
+        {/* HEADER NAVIGATION & TITLE BLOCK (Tighter spacing at the top) */}
+        <div className="space-y-3 border-b border-slate-200 pb-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/assignment")}
+              className="text-slate-600 hover:text-slate-900 -ml-3 gap-2 text-sm font-medium transition-colors h-8"
+            >
+              <FiChevronLeft className="w-4 h-4" />
+              Back 
+            </Button>
+          </div>
 
-        {/* HERO TITLE BLOCK */}
-        <div className="space-y-2 border-b border-slate-200 pb-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Assignment Detail
             </h1>
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide shadow-sm transition-all ${
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide shadow-sm transition-all ${
               isActive 
                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60" 
                 : "bg-slate-100 text-slate-700 border border-slate-200"
@@ -147,43 +145,43 @@ const AssignmentDetailPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-xl">
-            <CardContent className="p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-lg">
+            <CardContent className="p-4 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-                <FiUser className="w-4 h-4 text-slate-400" />
+                <FiUser className="w-3.5 h-3.5 text-slate-400" />
                 User Detail
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-tight">Employee ID</label>
-                  <p className="text-base font-semibold text-slate-800 mt-0.5 font-mono text-sm">{displayUserId}</p>
+                  <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-tight">Employee ID</label>
+                  <p className="font-semibold text-slate-800 font-mono text-xs mt-0.5">{displayUserId}</p>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-tight">Employee Name</label>
-                  <p className="text-base font-semibold text-slate-800 mt-0.5">{displayUserName}</p>
+                  <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-tight">Employee Name</label>
+                  <p className="font-semibold text-slate-800 text-sm mt-0.5">{displayUserName}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* HARDWARE SPECIFICATION CARD */}
-          <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-xl">
-            <CardContent className="p-6 space-y-4">
+          <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-lg">
+            <CardContent className="p-4 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-                <FiCpu className="w-4 h-4 text-slate-400" />
+                <FiCpu className="w-3.5 h-3.5 text-slate-400" />
                 Hardware Allocation
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-tight">Asset Name</label>
-                  <p className="text-base font-semibold text-slate-800 mt-0.5">
+                  <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-tight">Asset Name</label>
+                  <p className="font-semibold text-slate-800 text-sm mt-0.5">
                     {displayAssetName}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 uppercase tracking-tight">Asset Code</label>
-                  <div className="flex items-center gap-1.5 text-slate-700 font-mono text-xs mt-1 bg-slate-50 px-2 py-1 rounded w-max border border-slate-100">
+                  <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-tight">Asset Code</label>
+                  <div className="flex items-center gap-1.5 text-slate-700 font-mono text-[11px] mt-0.5 bg-slate-50 px-2 py-0.5 rounded w-max border border-slate-100">
                     <FiHash className="w-3 h-3 text-slate-400" />
                     {displayAssetCode}
                   </div>
@@ -194,46 +192,36 @@ const AssignmentDetailPage = () => {
         </div>
 
         {/* LIFECYCLE CHRONOLOGY BAR */}
-        <Card className="border border-slate-200/80 shadow-sm bg-white rounded-xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
-              <FiCalendar className="w-4 h-4 text-slate-400" />
+        <Card className="border border-slate-200/80 shadow-sm bg-white rounded-lg">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+              <FiCalendar className="w-3.5 h-3.5 text-slate-400" />
               Timeline
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative">
-              <div className="space-y-1 border-l-2 border-slate-200 pl-4">
-                <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider">Assigned Date</label>
-                <p className="text-sm font-semibold text-slate-700">{formData.assigned_date || "Not set"}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
+              <div className="space-y-0.5 border-l-2 border-slate-200 pl-3">
+                <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-wider">Assigned Date</label>
+                <p className="text-xs font-semibold text-slate-700">{formData.assigned_date || "Not set"}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* NARRATIVE INSIGHT CARD */}
-        <div className="relative mt-2">
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-100 to-indigo-50/20 rounded-2xl -m-2 opacity-60 blur-sm pointer-events-none" />
-          <Card className="relative border border-slate-200 shadow-sm bg-white rounded-xl overflow-hidden">
-            <CardContent className="p-6 space-y-3">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-100 to-indigo-50/20 rounded-lg -m-1 opacity-60 blur-sm pointer-events-none" />
+          <Card className="relative border border-slate-200 shadow-sm bg-white rounded-lg overflow-hidden">
+            <CardContent className="p-4 space-y-2">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-                <FiClock className="w-4 h-4 text-slate-400" />
-                History Activity
+                <FiClock className="w-3.5 h-3.5 text-slate-400" />
+                Note
               </div>
               
-              <div className="pt-2">
-                <p className="text-base font-normal text-slate-700 leading-relaxed tracking-wide">
-                  Employee ID <span className="font-semibold text-slate-900 font-mono text-sm">{displayUserId}</span> was assigned to the{" "}
+              <div>
+                <p className="text-xs font-normal text-slate-700 leading-relaxed tracking-wide">
+                  Employee ID <span className="font-semibold text-slate-900 font-mono text-[11px]">{displayUserId}</span> was assigned to the{" "}
                   <span className="font-semibold text-slate-900">{displayAssetName}</span> hardware unit.
                 </p>
-                {formData.note ? (
-                  <div className="block mt-4 text-sm text-slate-600 bg-slate-50/80 p-4 rounded-xl border border-slate-200/60 leading-relaxed">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">System Remarks</span>
-                    &ldquo;{formData.note}&rdquo;
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-400 italic mt-3">
-                    No custom remarks or contextual history details were logged for this event entry.
-                  </p>
-                )}
               </div>
             </CardContent>
           </Card>

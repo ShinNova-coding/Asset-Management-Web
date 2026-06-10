@@ -65,18 +65,11 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
   const currentPage = table.getState().pagination.pageIndex
 
   return (
+    
     <div className="w-full space-y-4 p-4 relative">
 
-      {/* TOP CONTROLS: CREATE BUTTON */}
-      <div className="flex justify-end w-full">
-        <Button
-          onClick={() => navigate("/assignment/add")}
-          className="h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 gap-2 shadow-sm text-xs font-bold transition-colors border border-blue-600"
-        >
-          <FiPlus size={16} />
-          Create
-        </Button>
-      </div>
+     
+      
 
       {/* SEARCH + FILTER AREA */}
       <div className="flex gap-4 rounded-xl bg-white p-4 border border-slate-200 shadow-sm items-center">
@@ -101,7 +94,7 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
           >
             <option value="">All Status</option>
             <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="returned">Returned</option>
           </select>
         </div>
       </div>

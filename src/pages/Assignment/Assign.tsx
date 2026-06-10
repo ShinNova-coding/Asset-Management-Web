@@ -15,38 +15,37 @@ const AddNewAsset = () => {
   const isEditMode = !!stateEditItem || !!stateId || !!routeId;
 
   const [formData, setFormData] = useState({
-    employee_id: '',
-    asset_code: '',        
+    users_name: '',
+    assets_name: '',        
     assigned_date: '',
-    returned_date: '',
     note: '',
     status: 'active'     
   });
 
-  // Dropdown states for Employees and Assets
-  const [employees, setEmployees] = useState<any[]>([]);
-  const [assets, setAssets] = useState<any[]>([]);
+  const [usersList, setUsersList] = useState<any[]>([]);
+  const [assetsList, setAssetsList] = useState<any[]>([]);
 
-  // Fetch dropdown data on mount
   useEffect(() => {
     const fetchDropdownData = async () => {
+      const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
+      const headers = {
+        "Accept": "application/json",
+        "Authorization": `Bearer ${currentToken}`
+      };
+
       try {
-        const currentToken = localStorage.getItem("token") || "107|hJ8zVmOwBwWAjbODhurIz0EFCvEWc4MdiICpLPxPf5c8837f";
-        const headers = { 
-          "Authorization": `Bearer ${currentToken}`,
-          "Accept": "application/json"
-        };
-
-        const empRes = await fetch("http://192.168.100.186:1010/api/users", { headers });
-        const assetRes = await fetch("http://192.168.100.186:1010/api/assets", { headers });
-
-        if (empRes.ok) {
-          const empData = await empRes.json();
-          setEmployees(Array.isArray(empData) ? empData : empData.data || []);
+        // Fetch Users (handling Laravel pagination structure)
+        const usersResponse = await fetch("http://192.168.100.186:1010/api/user", { headers });
+        if (usersResponse.ok) {
+          const usersData = await usersResponse.json();
+          setUsersList(usersData.data?.data || usersData.data || []);
         }
-        if (assetRes.ok) {
-          const assetData = await assetRes.json();
-          setAssets(Array.isArray(assetData) ? assetData : assetData.data || []);
+
+        // Fetch Assets
+        const assetsResponse = await fetch("http://192.168.100.186:1010/api/asset", { headers });
+        if (assetsResponse.ok) {
+          const assetsData = await assetsResponse.json();
+          setAssetsList(assetsData.data?.data || assetsData.data || []);
         }
       } catch (err) {
         console.error("Failed to load dropdown data", err);
@@ -68,10 +67,9 @@ const AddNewAsset = () => {
   useEffect(() => {
     if (!isEditMode) {
       setFormData({
-        employee_id: '',
-        asset_code: '',
+        users_name: '',
+        assets_name: '',
         assigned_date: '',
-        returned_date: '',
         note: '',
         status: 'active'
       });
@@ -86,17 +84,16 @@ const AddNewAsset = () => {
       if (localRawData) {
         const currentInventory = JSON.parse(localRawData);
         activeItem = currentInventory.find((item: any) => 
-          item.id === Number(targetId) || item.users_id === targetId || item.assets_id === targetId
+          item.id === Number(targetId) || item.assets_name === targetId || item.asset_id === targetId
         );
       }
     }
 
     if (activeItem) {
       setFormData({
-        employee_id: activeItem.users_id || activeItem.employee_id || '',
-        asset_code: activeItem.assets_id || activeItem.asset_code || '',
+        users_name: activeItem.users_name || activeItem.employee_name || '',
+        assets_name: activeItem.assets_name || activeItem.asset_name || '',
         assigned_date: formatToInputDate(activeItem.assigned_date),
-        returned_date: formatToInputDate(activeItem.returned_date),
         note: activeItem.note || '',
         status: activeItem.status || 'active'
       });
@@ -119,13 +116,13 @@ const AddNewAsset = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.employee_id.trim()) {
-      alert("Employee is required!");
+    if (!formData.users_name.trim()) {
+      alert("Employee Name is required!");
       return;
     }
 
-    if (!formData.asset_code.trim()) {
-      alert("Asset is required!");
+    if (!formData.assets_name.trim()) {
+      alert("Asset Name is required!");
       return;
     }
 
@@ -136,10 +133,9 @@ const AddNewAsset = () => {
 
     try {
       const assignmentPayload = {
-        users_id: formData.employee_id.trim(),
-        assets_id: formData.asset_code.trim(),
+        users_name: formData.users_name.trim(),
+        assets_name: formData.assets_name.trim(),
         assigned_date: formData.assigned_date,
-        returned_date: formData.returned_date || null,
         note: formData.note.trim() || null,
         status: formData.status
       };
@@ -152,7 +148,7 @@ const AddNewAsset = () => {
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       const method = isEditMode ? "PUT" : "POST";
       
-      const currentToken = localStorage.getItem("token") || "107|hJ8zVmOwBwWAjbODhurIz0EFCvEWc4MdiICpLPxPf5c8837f";
+      const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
 
       const response = await fetch(url, {
         method: method,
@@ -197,10 +193,10 @@ const AddNewAsset = () => {
             className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
           >
             <ArrowLeft size={16} className="mr-2" />
-            Back to Assignment List
+            Back   
           </button>
           <h1 className="text-2xl font-bold text-slate-900">
-            {isEditMode ? "Edit Handover Record" : "New Handover Assignment"}
+            {isEditMode ? "Edit Handover Record" : "New Assignment"}
           </h1>
         </div>
 
@@ -213,20 +209,18 @@ const AddNewAsset = () => {
                 <User size={18} className="text-blue-600" />
                 <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Employee</h2>
               </div>
-              <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">Select Employee</label>
+              <div className="relative">
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Employee Name</label>
                 <select 
-                  name="employee_id"
-                  value={formData.employee_id}
+                  name="users_name"
+                  value={formData.users_name}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white text-slate-800" 
+                  className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
                   required
                 >
-                  <option value="">-- Choose an Employee --</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.name} {emp.employee_id ? `(${emp.employee_id})` : ''}
-                    </option>
+                  <option value="">Select an Employee</option>
+                  {usersList.map((user: any) => (
+                    <option key={user.id} value={user.name}>{user.name} ({user.employee_id})</option>
                   ))}
                 </select>
               </div>
@@ -236,22 +230,20 @@ const AddNewAsset = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
                 <Package size={18} className="text-blue-600" />
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Asset to Assign</h2>
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Asset</h2>
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">Select Asset</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Asset Name</label>
                 <select 
-                  name="asset_code"
-                  value={formData.asset_code}
+                  name="assets_name"
+                  value={formData.assets_name}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white text-slate-800" 
+                  className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
                   required
                 >
-                  <option value="">-- Choose an Asset --</option>
-                  {assets.map((ast) => (
-                    <option key={ast.id} value={ast.id}>
-                      {ast.name} {ast.asset_code ? `(${ast.asset_code})` : ''}
-                    </option>
+                  <option value="">Select an Asset</option>
+                  {assetsList.map((asset: any) => (
+                    <option key={asset.id} value={asset.name}>{asset.name}</option>
                   ))}
                 </select>
               </div>
@@ -261,43 +253,29 @@ const AddNewAsset = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
                 <Calendar size={18} className="text-blue-600" />
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Timeline</h2>
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Timeline & Status</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-semibold text-slate-600 block mb-1">Assigned Date</label>
-                  <input 
-                    type="date" 
+                  <input
+                    type="date"
                     name="assigned_date"
                     value={formData.assigned_date}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
                     required
                   />
                 </div>
-
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 block mb-1">Returned Date</label>
-                  <input 
-                    type="date" 
-                    name="returned_date"
-                    value={formData.returned_date}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-slate-600 block mb-1">Assignment Status</label>
-                  <select
+                  <label className="text-xs font-semibold text-slate-600 block mb-1">Status</label>
+                  <input
+                    type="text"
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
-                  >
-                    <option value="active">Active</option>
-                    <option value="returned">Returned</option>
-                  </select>
+                  />
                 </div>
               </div>
             </div>
@@ -318,7 +296,7 @@ const AddNewAsset = () => {
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
               <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
               <button type="submit" className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
-                {isEditMode ? "Update Record" : "Confirm Handover"}
+                {isEditMode ? "Update Record" : "Assign"}
               </button>
             </div>
           </form>

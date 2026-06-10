@@ -161,7 +161,7 @@ export function InventoryDetail() {
           className="flex items-center gap-2 text-slate-600 hover:text-slate-900 -ml-2 group transition-colors"
         >
           <FiArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-          Back to Inventory Dashboard
+          Back
         </Button>
 
         
@@ -171,7 +171,7 @@ export function InventoryDetail() {
             className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 shadow-sm text-xs rounded-lg px-4 py-2"
           >
             <FiEdit3 size={14} />
-            Modify Asset Record
+            Edit Asset
           </Button>
         )}
       </div>
@@ -302,10 +302,7 @@ export function InventoryDetail() {
             </div>
           </div>
           
-          <div className="rounded-lg bg-slate-50 border border-slate-100 p-3 flex gap-2 items-start text-[11px] text-slate-400 leading-relaxed">
-            <FiInfo className="text-blue-400 shrink-0 mt-0.5" size={14} />
-            <p>System changes tracked on database endpoints are synchronized here every time you toggle list elements.</p>
-          </div>
+         
         </div>
       </div>
     </div>

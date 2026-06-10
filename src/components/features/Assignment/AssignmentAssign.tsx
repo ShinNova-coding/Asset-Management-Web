@@ -15,10 +15,11 @@ export function AssignmentAssign() {
   return (
     <Button 
       onClick={goToNewPage}
-      className="flex items-center gap-2 bg-blue-500 hover:bg-blue-700 text-white shadow-sm font-medium px-6 py-6"
+      className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
     >
-     <FaCirclePlus size={16} /> Create
+     <FaCirclePlus size={16} /> Assign
     </Button>
+    
   )
 }
  

@@ -1,132 +1,25 @@
 "use client"
 
-import * as React from "react"
-import type { Assignment } from "@/data/assignmentdata"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import React from "react"
+import { FaEdit } from "react-icons/fa"
 
-interface AssignmentEditFormProps {
-  assignment: Assignment
-  onSave: (updated: Assignment) => void
-  onCancel: () => void
+interface EditProps {
+  onEdit?: () => void
 }
 
-export default function AssignmentEdit({
-  assignment,
-  onSave,
-  onCancel,
-}: AssignmentEditFormProps) {
-  const [employeeId, setEmployeeId] = React.useState(assignment.employee_id || "")
-  const [assetId, setAssetId] = React.useState(assignment.asset_id || "")
-  const [assignedDate, setAssignedDate] = React.useState(assignment.assigned_date || "")
-  const [returnedDate, setReturnedDate] = React.useState(assignment.returned_date || "")
-  const [status, setStatus] = React.useState(assignment.status || "pending")
-  const [note, setNote] = React.useState(assignment.note || "")
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    onSave({
-      ...assignment,
-      employee_id: employeeId,
-      asset_id: assetId,
-      assigned_date: assignedDate,
-      returned_date: returnedDate || null,
-      status: status,
-      note: note,
-    })
-  }
-
+export default function Edit({ onEdit }: EditProps) {
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
-      <h3 className="text-lg font-bold text-slate-900 mb-2">Modify Assignment Properties</h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Employee ID</label>
-          <Input
-            value={employeeId}
-            onChange={e => setEmployeeId(e.target.value)}
-            required
-            placeholder="e.g. EMP1002"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Target Asset Name</label>
-          <div className="text-sm font-semibold text-slate-800 p-2 bg-slate-100 border border-slate-200/60 rounded-md h-9 flex items-center">
-            {assignment.asset?.name || "Unknown Asset Unit"}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Asset ID Code</label>
-          <Input
-            value={assetId}
-            onChange={e => setAssetId(e.target.value)}
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Assigned Date</label>
-          <Input
-            type="date"
-            value={assignedDate}
-            onChange={e => setAssignedDate(e.target.value)}
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Returned Date</label>
-          <Input
-            type="date"
-            value={returnedDate}
-            onChange={e => setReturnedDate(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Status Mode</label>
-          <Select value={status} onValueChange={(value) => setStatus(value)}>
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Select assignment status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="returned">Returned</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="pt-2">
-        <label className="block text-xs font-semibold text-slate-600 mb-1">Internal Asset Remarks & Notes</label>
-        <textarea
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="Provide clear remarks outlining device condition metrics..."
-          className="min-h-[100px] w-full rounded-md border border-slate-200 px-3 py-2 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition"
-        />
-      </div>
-
-      <div className="flex gap-2 justify-end pt-4 border-t border-slate-200">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit">
-          Save Changes
-        </Button>
-      </div>
-    </form>
+    <button 
+      type="button"
+      onClick={(e) => {
+       
+        e.stopPropagation() 
+        if (onEdit) onEdit()
+      }} 
+      className="text-blue-400 hover:text-blue-600 active:scale-95 transition-all p-1.5 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 flex items-center justify-center shadow-xs"
+      title="Edit Asset"
+    >
+      <FaEdit size={16} />
+    </button>
   )
 }

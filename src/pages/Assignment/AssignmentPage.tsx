@@ -7,6 +7,7 @@ import { assignmentData as fallbackData } from "@/data/assignmentdata";
 import type { Assignment } from "@/data/assignmentdata";
 import { FiTrash2 } from "react-icons/fi";
 import axios from "axios";
+import { AssignmentAssign } from "@/components/features/Assignment/AssignmentAssign";
 
 // Targeted Local Network Endpoint
 const API_URL = "http://192.168.100.186:1010/api/assignment";
@@ -97,7 +98,8 @@ const AssignmentPage = () => {
     if (!deleteModal.targetId) return;
 
     try {
-      await axios.delete(`${API_URL}/assignment_id`, {
+      // FIX: Changed `/assignment_id` to dynamically pass `${deleteModal.targetId}`
+      await axios.delete(`${API_URL}/${deleteModal.targetId}`, {
         ...getAuthHeaders(),
         data: {
           assignment_id: deleteModal.targetId,
@@ -113,13 +115,14 @@ const AssignmentPage = () => {
   };
 
   return (
-    <div className="p-10 space-y-6 min-h-screen bg-slate-50/30">
-      <div className="flex items-center justify-between mb-6">
+    <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-slate-50/30">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Assignment
           </h1>
         </div>
+        <AssignmentAssign />
       </div>
 
       {loading ? (
