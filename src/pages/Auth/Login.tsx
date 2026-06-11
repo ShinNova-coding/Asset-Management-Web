@@ -145,12 +145,7 @@ const Login = () => {
               >
                 {loading ? "Logging in..." : "Login"}
               </Button>
-              <Link
-                to="/forget-password"
-                className="mx-auto inline-block text-sm underline-offset-4 text-center hover:underline text-blue-500 font-medium"
-              >
-                Forgot your password?
-              </Link>
+             
             </CardFooter>
           </form>
         </CardContent>

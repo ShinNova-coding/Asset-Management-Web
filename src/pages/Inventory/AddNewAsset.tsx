@@ -93,7 +93,7 @@ const AddNewAsset = () => {
         serial_number: activeItem.serial_number || '',
         purchased_date: formatToInputDate(activeItem.purchased_date || activeItem.purchase_date || activeItem.purchase),
         warranty: activeItem.warranty_period || activeItem.warranty || '',
-        condition: activeItem.condition || 'fair', // Populate condition
+        condition: activeItem.condition || 'fair', 
         action: activeItem.status || activeItem.action || 'available'
       });
       
@@ -210,10 +210,9 @@ const AddNewAsset = () => {
         finalizedImageString = stripBase64Header(base64WithHeader);
       } else if (imagePreview && imagePreview.startsWith("data:")) {
         finalizedImageString = stripBase64Header(imagePreview);
-      } else {
-        const dummyWithHeader = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
-        finalizedImageString = stripBase64Header(dummyWithHeader);
-      }
+      }  else {
+  finalizedImageString = ""; 
+}
 
       const updatedStatusText = formData.action.trim() || "available";
 
@@ -231,20 +230,24 @@ const AddNewAsset = () => {
       }
 
       const assetPayload: Record<string, any> = {
-        ...(isEditMode && { id: targetId }),
-        asset_code: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`, 
-        name: formData.name.trim(),
-        serial_number: formData.serial_number.trim(),
-        purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
-        warranty_period: formData.warranty || "12", 
-        model: formData.model.trim() || "N/A",
-        ram_capacity: formData.ram.trim() || "N/A",
-        storage: formData.storage.trim() || "N/A",
-        category_id: resolvedCategoryId, 
-        status: updatedStatusText.toLowerCase(), 
-        condition: formData.condition, // Uses dynamic form condition selection
-        image: finalizedImageString, 
-      };
+  ...(isEditMode && { id: targetId }),
+  asset_code: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`, 
+  name: formData.name.trim(),
+  serial_number: formData.serial_number.trim(),
+  purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
+  warranty_period: formData.warranty || "12", 
+  model: formData.model.trim() || "N/A",
+  ram_capacity: formData.ram.trim() || "N/A",
+  storage: formData.storage.trim() || "N/A",
+  category_id: resolvedCategoryId, 
+  status: updatedStatusText.toLowerCase(), 
+  condition: formData.condition,
+};
+
+
+if (finalizedImageString && finalizedImageString.trim() !== "") {
+  assetPayload.image = finalizedImageString;
+}
 
       console.log("🚀 Payload sending to backend server stream:", assetPayload);
 
