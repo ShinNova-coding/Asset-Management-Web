@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useParams } from "react-router-dom"; 
-import { ArrowLeft, User, Package, Calendar } from 'lucide-react';
+import { ArrowLeft, User, Package, Calendar, ChevronDown } from 'lucide-react';
 
 const AddNewAsset = () => {
   const navigate = useNavigate();
@@ -24,6 +24,14 @@ const AddNewAsset = () => {
 
   const [usersList, setUsersList] = useState<any[]>([]);
   const [assetsList, setAssetsList] = useState<any[]>([]);
+
+  // Custom dropdown open/close states
+  const [isUserOpen, setIsUserOpen] = useState(false);
+  const [isAssetOpen, setIsAssetOpen] = useState(false);
+
+  // Refs to handle clicks outside dropdowns
+  const userDropdownRef = useRef<HTMLDivElement>(null);
+  const assetDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchDropdownData = async () => {
@@ -53,6 +61,21 @@ const AddNewAsset = () => {
     };
 
     fetchDropdownData();
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setIsUserOpen(false);
+      }
+      if (assetDropdownRef.current && !assetDropdownRef.current.contains(event.target as Node)) {
+        setIsAssetOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const formatToInputDate = (dateString: string) => {
@@ -101,12 +124,22 @@ const AddNewAsset = () => {
   }, [stateId, stateEditItem, routeId, isEditMode]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleUserSelect = (user: any) => {
+    setFormData({ ...formData, users_name: user.name });
+    setIsUserOpen(false);
+  };
+
+  const handleAssetSelect = (asset: any) => {
+    setFormData({ ...formData, assets_name: asset.name });
+    setIsAssetOpen(false);
   };
 
   const goBack = () => {
@@ -137,7 +170,7 @@ const AddNewAsset = () => {
         assets_name: formData.assets_name.trim(),
         assigned_date: formData.assigned_date,
         note: formData.note.trim() || null,
-        status: formData.status
+        status: formData.status || 'active'
       };
 
       console.log("🚀 Sending Payload to Assignment API:", assignmentPayload);
@@ -203,49 +236,82 @@ const AddNewAsset = () => {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
             
-            {/* EMPLOYEE INFO */}
+            {/* EMPLOYEE INFO (CUSTOM SCROLLABLE CUSTOM DROPDOWN ) */}
             <div className="space-y-3">
               <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
                 <User size={18} className="text-blue-600" />
                 <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Employee</h2>
               </div>
-              <div className="relative">
+              <div className="relative" ref={userDropdownRef}>
                 <label className="text-xs font-semibold text-slate-600 block mb-1">Employee Name</label>
-                <select 
-                  name="users_name"
-                  value={formData.users_name}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
-                  required
+                
+                <button
+                  type="button"
+                  onClick={() => setIsUserOpen(!isUserOpen)}
+                  className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white flex justify-between items-center focus:ring-2 focus:ring-blue-500 outline-none text-sm text-left"
                 >
-                  <option value="">Select an Employee</option>
-                  {usersList.map((user: any) => (
-                    <option key={user.id} value={user.name}>{user.name} ({user.employee_id})</option>
-                  ))}
-                </select>
+                  <span className={formData.users_name ? "text-slate-900" : "text-slate-400"}>
+                    {formData.users_name || "Select an Employee"}
+                  </span>
+                  <ChevronDown size={16} className={`text-slate-500 transition-transform ${isUserOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isUserOpen && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    {usersList.map((user: any, index: number) => (
+                      <div
+                        key={user.id}
+                        onClick={() => handleUserSelect(user)}
+                        className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between items-center border-b border-slate-50 last:border-b-0"
+                      >
+                        <span>{String(index + 1).padStart(2, '0')} {user.name}</span>
+                        <span className="text-xs text-slate-400">{user.employee_id}</span>
+                      </div>
+                    ))}
+                    {usersList.length === 0 && (
+                      <div className="px-3 py-4 text-center text-sm text-slate-400">No employees found</div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* ASSET INFO */}
+            {/* ASSET INFO ( SCROLLABLE CUSTOM DROPDOWN ) */}
             <div className="space-y-3">
               <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
                 <Package size={18} className="text-blue-600" />
                 <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Asset</h2>
               </div>
-              <div>
+              <div className="relative" ref={assetDropdownRef}>
                 <label className="text-xs font-semibold text-slate-600 block mb-1">Asset Name</label>
-                <select 
-                  name="assets_name"
-                  value={formData.assets_name}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" 
-                  required
+                
+                <button
+                  type="button"
+                  onClick={() => setIsAssetOpen(!isAssetOpen)}
+                  className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white flex justify-between items-center focus:ring-2 focus:ring-blue-500 outline-none text-sm text-left"
                 >
-                  <option value="">Select an Asset</option>
-                  {assetsList.map((asset: any) => (
-                    <option key={asset.id} value={asset.name}>{asset.name}</option>
-                  ))}
-                </select>
+                  <span className={formData.assets_name ? "text-slate-900" : "text-slate-400"}>
+                    {formData.assets_name || "Select an Asset"}
+                  </span>
+                  <ChevronDown size={16} className={`text-slate-500 transition-transform ${isAssetOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isAssetOpen && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    {assetsList.map((asset: any, index: number) => (
+                      <div
+                        key={asset.id}
+                        onClick={() => handleAssetSelect(asset)}
+                        className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-slate-50 last:border-b-0"
+                      >
+                        <span>{String(index + 1).padStart(2, '0')} {asset.name}</span>
+                      </div>
+                    ))}
+                    {assetsList.length === 0 && (
+                      <div className="px-3 py-4 text-center text-sm text-slate-400">No assets found</div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -273,8 +339,9 @@ const AddNewAsset = () => {
                     type="text"
                     name="status"
                     value={formData.status}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                    onChange={() => {}}
+                    readOnly
+                    className="w-full px-3 py-2 rounded-md border border-slate-200 bg-slate-50 text-slate-600 outline-none text-sm cursor-not-allowed"
                   />
                 </div>
               </div>

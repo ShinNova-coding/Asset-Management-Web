@@ -117,7 +117,7 @@ const AssignmentDetailPage = () => {
     <div className="p-4 md:p-8 min-h-screen bg-slate-50/50 text-slate-900 antialiased">
       <div className="max-w-3xl mx-auto space-y-4">
         
-        {/* HEADER NAVIGATION & TITLE BLOCK (Tighter spacing at the top) */}
+        {/* HEADER NAVIGATION & TITLE BLOCK */}
         <div className="space-y-3 border-b border-slate-200 pb-4">
           <div className="flex items-center justify-between">
             <Button
@@ -207,7 +207,7 @@ const AssignmentDetailPage = () => {
           </CardContent>
         </Card>
 
-        {/* NARRATIVE INSIGHT CARD */}
+        {/* NARRATIVE INSIGHT/NOTE CARD */}
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-slate-100 to-indigo-50/20 rounded-lg -m-1 opacity-60 blur-sm pointer-events-none" />
           <Card className="relative border border-slate-200 shadow-sm bg-white rounded-lg overflow-hidden">
@@ -218,9 +218,8 @@ const AssignmentDetailPage = () => {
               </div>
               
               <div>
-                <p className="text-xs font-normal text-slate-700 leading-relaxed tracking-wide">
-                  Employee ID <span className="font-semibold text-slate-900 font-mono text-[11px]">{displayUserId}</span> was assigned to the{" "}
-                  <span className="font-semibold text-slate-900">{displayAssetName}</span> hardware unit.
+                <p className="text-xs font-normal text-slate-700 leading-relaxed tracking-wide whitespace-pre-wrap">
+                  {formData.note || "No additional notes provided for this assignment."}
                 </p>
               </div>
             </CardContent>

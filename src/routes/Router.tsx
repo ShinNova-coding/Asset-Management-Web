@@ -24,9 +24,8 @@ import EmployeeListPage from "@/pages/UserManagement/EmployeeListPage"
 import EmployeeDetailsPage from "@/pages/UserManagement/EmployeeDetailsPage"
 import MaintenanceDetailsForm from "@/components/features/Maintenance/MaintenanceDetailsForm"
 import AssignmentDetailPage from "@/components/features/Assignment/AssignmentDetailPage"
-import AssignmentEditPage from "@/components/features/Assignment/AssignmentEdit"
+import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
 import AssetListPage from "@/components/features/Dashboard/AssetListPage"
-
 
 export const router = createBrowserRouter([
   // Public Routes (Anyone can access these)
@@ -45,11 +44,11 @@ export const router = createBrowserRouter([
 
   // Protected Routes (Wrapped inside ProtectedRoute)
   {
-    element: <ProtectedRoute />, // 2. Put the Guard component here
+    element: <ProtectedRoute />, 
     children: [
       {
         path: "/",
-        element: <Layout />, // Your Layout sits inside the guard now
+        element: <Layout />, 
         children: [
           {
             path: "dashboard",
@@ -68,8 +67,8 @@ export const router = createBrowserRouter([
             element: <AddNewAsset />,
           },
           {
-            path:"inventory/:id/edit",
-            element:<AddNewAsset/>,
+            path: "inventory/:id/edit",
+            element: <AddNewAsset />,
           },
           {
             path: "inventory/:id",
@@ -84,8 +83,16 @@ export const router = createBrowserRouter([
             element: <AssignmentPage />,
           },
           {
-            path:"assignment/add",
-            element:<Assign/>
+            path: "assignment/add",
+            element: <Assign />,
+          },
+          {
+            path: "assignment/:id",
+            element: <AssignmentDetailPage />,
+          },
+          {
+            path: "assignment/edit/:id",
+            element: <AssignmentEditPage />, // Added route to match your edit navigation
           },
           {
             path: "activity",
@@ -103,7 +110,6 @@ export const router = createBrowserRouter([
             path: "activity/:id",
             element: <ActivityDetail />,
           },
-          
           {
             path: "/employees",
             element: <UserManagement />,
@@ -124,11 +130,6 @@ export const router = createBrowserRouter([
             path: "maintenance/:id",
             element: <MaintenanceDetailsForm />,
           },
-          {
-            path: "assignment/:id",
-            element: <AssignmentDetailPage />,
-          },
-         
         ],
       },
     ],

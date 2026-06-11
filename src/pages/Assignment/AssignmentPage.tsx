@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AssignmentTable } from "@/components/features/Assignment/AssignmentTable";
 import { assignmentData as fallbackData } from "@/data/assignmentdata";
 import type { Assignment } from "@/data/assignmentdata";
-import { FiTrash2 } from "react-icons/fi";
+import { FiTrash2, FiEdit2, FiX } from "react-icons/fi";
 import axios from "axios";
 import { AssignmentAssign } from "@/components/features/Assignment/AssignmentAssign";
 
@@ -22,7 +22,7 @@ const AssignmentPage = () => {
 
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
-    targetId: null as number | null,
+    targetId: null as string | number | null,
   });
 
   // Helper function to dynamically generate authentication headers
@@ -68,16 +68,9 @@ const AssignmentPage = () => {
     fetchAssignments();
   }, []);
 
-  // Synchronize incoming react router mutations (Both Updates and Deletions)
+  // Synchronize incoming react router mutations (Deletions)
   useEffect(() => {
-    const state = location.state as { updatedItem?: Assignment; deleteItem?: number } | null;
-    
-    if (state?.updatedItem) {
-      setData((prev) =>
-        prev.map((item) => (item.id === state.updatedItem?.id ? state.updatedItem : item))
-      );
-      navigate(location.pathname, { replace: true, state: {} });
-    }
+    const state = location.state as { deleteItem?: string | number } | null;
     
     if (state?.deleteItem) {
       setData((prev) => prev.filter((item) => item.id !== state.deleteItem));
@@ -86,20 +79,20 @@ const AssignmentPage = () => {
   }, [location.state, navigate, location.pathname]);
 
   const handleEdit = (row: Assignment) => {
-    navigate(`/assignment/${row.id}`, { state: { editItem: row } });
+    // Navigate to dedicated edit page and pass row data via state
+    navigate(`/assignment/edit/${row.id}`, { state: { assignment: row } });
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string | number) => {
     setDeleteModal({ isOpen: true, targetId: id });
   };
 
-  // Perform operational DELETE network method with security tokens in body payload
+  // Perform operational DELETE network method with security tokens matching API endpoint
   const handleConfirmDelete = async () => {
     if (!deleteModal.targetId) return;
 
     try {
-      // FIX: Changed `/assignment_id` to dynamically pass `${deleteModal.targetId}`
-      await axios.delete(`${API_URL}/${deleteModal.targetId}`, {
+      await axios.delete(`${API_URL}/assignment_id`, {
         ...getAuthHeaders(),
         data: {
           assignment_id: deleteModal.targetId,
@@ -154,7 +147,7 @@ const AssignmentPage = () => {
                 onClick={() => setDeleteModal({ isOpen: false, targetId: null })}
                 className="text-slate-400 hover:text-slate-600"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <FiX size={20} />
               </button>
             </div>
 

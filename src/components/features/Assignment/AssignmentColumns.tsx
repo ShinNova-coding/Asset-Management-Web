@@ -80,6 +80,10 @@ export const columns: ColumnDef<any>[] = [
       const onEdit = meta?.editRow
       const onDelete = meta?.deleteRow
 
+      // Determine if status is active
+      const status = (item.status || "").toLowerCase()
+      const isDeleteDisabled = status === "active"
+
       return (
         <div className="flex items-center gap-3">
           {/* EDIT */}
@@ -96,12 +100,21 @@ export const columns: ColumnDef<any>[] = [
 
           {/* DELETE */}
           <button
-            className="text-red-500 hover:text-red-700 transition p-1"
+            className={`transition p-1 ${
+              isDeleteDisabled 
+                ? "text-red-300 cursor-not-allowed opacity-50" 
+                : "text-red-500 hover:text-red-700"
+            }`}
+            disabled={isDeleteDisabled}
             onClick={(e) => {
               e.stopPropagation()
               onDelete?.(item.id)
             }}
-            title="Delete Assignment"
+            title={
+              isDeleteDisabled 
+                ? "Cannot delete an active assignment" 
+                : "Delete Assignment"
+            }
           >
             <RiDeleteBin4Fill size={20} />
           </button>
