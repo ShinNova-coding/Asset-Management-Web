@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
-import { FiChevronLeft, FiChevronRight, FiPlus } from "react-icons/fi"
+import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiX } from "react-icons/fi"
 import { Search } from "lucide-react"
 
 import {
@@ -29,22 +29,76 @@ import { columns as baseColumns } from "./AssignmentColumns"
 
 interface AssignmentTableProps {
   data: Assignment[]
-  meta?: {
-    editRow?: (row: Assignment) => void
-    deleteRow?: (id: string | number) => void 
-  }
+  onDeleteSuccess?: (id: string | number) => void
 }
 
-export function AssignmentTable({ data, meta }: AssignmentTableProps) {
+export function AssignmentTable({ data: initialData, onDeleteSuccess }: AssignmentTableProps) {
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [data, setData] = React.useState<Assignment[]>(initialData)
+
+  const [deleteModal, setDeleteModal] = React.useState<{ isOpen: boolean; targetId: string | number | null }>({
+    isOpen: false,
+    targetId: null,
+  })
+  const [showToast, setShowToast] = React.useState(false)
+
+  React.useEffect(() => {
+    setData(initialData)
+  }, [initialData])
 
   const navigate = useNavigate()
+
+  const handleDeleteTrigger = (id: string | number) => {
+    setDeleteModal({ isOpen: true, targetId: id })
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.targetId) return
+
+    const targetId = String(deleteModal.targetId).trim()
+    const API_URL = `http://192.168.100.186:1010/api/assignment/${targetId}`
+    const token = localStorage.getItem("token") || ""
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "DELETE",
+        headers: {
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}))
+        throw new Error(result.message || "Delete failed")
+      }
+
+      setData((prev) => prev.filter((item) => String(item.id) !== targetId))
+      if (onDeleteSuccess) {
+        onDeleteSuccess(targetId)
+      }
+      setShowToast(true)
+    } catch (error: any) {
+      console.error("❌ Delete failed:", error)
+      alert(`Delete failed: ${error.message}`)
+    } finally {
+      setDeleteModal({ isOpen: false, targetId: null })
+    }
+  }
+
+  const handleEdit = (item: any) => {
+    navigate(`/assignment/edit/${item.id}`, { state: { assignment: item } })
+  }
 
   const table = useReactTable({
     data,
     columns: baseColumns,
-    meta,
+    meta: {
+      deleteRow: handleDeleteTrigger,
+      editRow: handleEdit,
+    },
     state: {
       globalFilter,
       columnFilters,
@@ -65,12 +119,7 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
   const currentPage = table.getState().pagination.pageIndex
 
   return (
-    
-    <div className="w-full space-y-4 p-4 relative">
-
-     
-      
-
+    <div className="w-full space-y-4 p-3 relative">
       {/* SEARCH + FILTER AREA */}
       <div className="flex gap-4 rounded-xl bg-white p-4 border border-slate-200 shadow-sm items-center">
         {/* SEARCH */}
@@ -121,18 +170,18 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
                   key={row.id}
                   className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer"
                   onClick={(e) => {
-                    const item = row.original as any;
-                    const target = e.target as HTMLElement;
+                    const item = row.original as any
+                    const target = e.target as HTMLElement
                     
                     if (target.closest('[data-actions-cell="true"]') || target.closest('button')) {
-                      return;
+                      return
                     }
                     
-                    navigate(`/assignment/${item.id}`);
+                    navigate(`/assignment/${item.id}`)
                   }}
                 >
                   {row.getVisibleCells().map((cell) => {
-                    const isActions = cell.column.id === "actions";
+                    const isActions = cell.column.id === "actions"
                     return (
                       <TableCell 
                         key={cell.id} 
@@ -141,7 +190,7 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
-                    );
+                    )
                   })}
                 </TableRow>
               ))
@@ -157,7 +206,7 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
       </div>
 
       {/* PAGINATION CONTROLS */}
-      <div className="flex items-center justify-between px-2 py-1">
+      <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
         <div className="text-xs text-slate-500 font-medium">
           Page {currentPage + 1} of {pageCount} ({table.getFilteredRowModel().rows.length} total assignments)
         </div>
@@ -209,6 +258,36 @@ export function AssignmentTable({ data, meta }: AssignmentTableProps) {
         </div>
       </div>
 
+      {deleteModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
+            <h3 className="text-base font-bold text-slate-900">Confirm Delete</h3>
+            <p className="text-xs text-slate-500">Are you sure you want to delete this assignment record?</p>
+            <div className="flex justify-end gap-2.5 pt-2">
+              <button 
+                onClick={() => setDeleteModal({ isOpen: false, targetId: null })} 
+                className="px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleConfirmDelete} 
+                className="px-4 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg animate-fade-in">
+          <FiCheckCircle className="text-emerald-400" size={16} />
+          <span className="text-xs font-medium">Assignment successfully deleted.</span>
+          <button onClick={() => setShowToast(false)}><FiX size={14} /></button>
+        </div>
+      )}
     </div>
   )
 }

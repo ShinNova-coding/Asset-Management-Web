@@ -134,12 +134,12 @@ const AssignmentDetailPage = () => {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Assignment Detail
             </h1>
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide shadow-sm transition-all ${
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-md font-semibold tracking-wide shadow-sm transition-all ${
               isActive 
                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60" 
                 : "bg-slate-100 text-slate-700 border border-slate-200"
             }`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-emerald-500" : "bg-slate-400"}`}></span>
+              <span className={`h-1.5 w-1.5 rounded-full  ${isActive ? "bg-emerald-500" : "bg-slate-400"}`}></span>
               {formData.status || "Unknown Status"}
             </span>
           </div>
@@ -148,17 +148,17 @@ const AssignmentDetailPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-lg">
             <CardContent className="p-4 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400">
                 <FiUser className="w-3.5 h-3.5 text-slate-400" />
                 User Detail
               </div>
               <div className="space-y-2">
                 <div>
-                  <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-tight">Employee ID</label>
-                  <p className="font-semibold text-slate-800 font-mono text-xs mt-0.5">{displayUserId}</p>
+                  <label className="block text-xs font-medium text-bold uppercase tracking-tight">Employee ID</label>
+                  <p className="font-semibold text-slate-800  text-sm mt-0.5">{displayUserId}</p>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-tight">Employee Name</label>
+                  <label className="block text-xs font-medium text-bold uppercase tracking-tight">Employee Name</label>
                   <p className="font-semibold text-slate-800 text-sm mt-0.5">{displayUserName}</p>
                 </div>
               </div>
@@ -168,21 +168,21 @@ const AssignmentDetailPage = () => {
           {/* HARDWARE SPECIFICATION CARD */}
           <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-lg">
             <CardContent className="p-4 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400">
                 <FiCpu className="w-3.5 h-3.5 text-slate-400" />
                 Hardware Allocation
               </div>
               <div className="space-y-2">
                 <div>
-                  <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-tight">Asset Name</label>
+                  <label className="block text-xs font-medium text-bold uppercase tracking-tight">Asset Name</label>
                   <p className="font-semibold text-slate-800 text-sm mt-0.5">
                     {displayAssetName}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-tight">Asset Code</label>
-                  <div className="flex items-center gap-1.5 text-slate-700 font-mono text-[11px] mt-0.5 bg-slate-50 px-2 py-0.5 rounded w-max border border-slate-100">
-                    <FiHash className="w-3 h-3 text-slate-400" />
+                  <label className="block text-xs font-medium text-bold uppercase tracking-tight">Asset Code</label>
+                  <div className="font-semibold text-slate-800 text-sm mt-0.5  ">
+                   
                     {displayAssetCode}
                   </div>
                 </div>
@@ -194,14 +194,14 @@ const AssignmentDetailPage = () => {
         {/* LIFECYCLE CHRONOLOGY BAR */}
         <Card className="border border-slate-200/80 shadow-sm bg-white rounded-lg">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+            <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400 mb-2">
               <FiCalendar className="w-3.5 h-3.5 text-slate-400" />
               Timeline
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
               <div className="space-y-0.5 border-l-2 border-slate-200 pl-3">
-                <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-wider">Assigned Date</label>
-                <p className="text-xs font-semibold text-slate-700">{formData.assigned_date || "Not set"}</p>
+                <label className="block text-xs font-medium uppercase tracking-wider">Assigned Date</label>
+                <p className="font-semibold text-slate-800 text-sm mt-0.5">{formData.assigned_date || "Not set"}</p>
               </div>
             </div>
           </CardContent>
@@ -212,13 +212,13 @@ const AssignmentDetailPage = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-slate-100 to-indigo-50/20 rounded-lg -m-1 opacity-60 blur-sm pointer-events-none" />
           <Card className="relative border border-slate-200 shadow-sm bg-white rounded-lg overflow-hidden">
             <CardContent className="p-4 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400">
                 <FiClock className="w-3.5 h-3.5 text-slate-400" />
                 Note
               </div>
               
               <div>
-                <p className="text-xs font-normal text-slate-700 leading-relaxed tracking-wide whitespace-pre-wrap">
+                <p className="font-semibold text-slate-800 text-sm mt-0.5">
                   {formData.note || "No additional notes provided for this assignment."}
                 </p>
               </div>
