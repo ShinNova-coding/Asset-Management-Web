@@ -25,7 +25,7 @@ const AddNewAsset = () => {
     serial_number: '', 
     purchased_date: '', 
     warranty: '',
-    condition: 'fair', // Added condition state
+    condition: 'fair', 
     action: 'available' 
   });
 
@@ -357,7 +357,7 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
                     </select>
                   </div>
 
-                  {/* Added Condition Dropdown */}
+                  
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset Condition</label>
                     <select

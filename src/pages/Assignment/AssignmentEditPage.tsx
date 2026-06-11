@@ -9,7 +9,7 @@ const EditAssignmentPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Attempt to retrieve state passed from AssignmentTable, or fallback
+  
   const assignment = location.state?.assignment || {};
 
   const [assignedDate, setAssignedDate] = useState("");
@@ -55,7 +55,7 @@ const EditAssignmentPage = () => {
       
       if (response.ok) {
         alert("Assignment updated successfully!");
-        navigate("/assignment"); // Adjust redirect path as needed
+        navigate("/assignment"); 
       } else {
         const errorData = await response.json();
         alert(`Failed to update: ${errorData.message || 'Unknown error'}`);

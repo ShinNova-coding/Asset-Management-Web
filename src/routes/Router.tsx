@@ -1,4 +1,4 @@
-// src/routes/Router.tsx
+
 import { createBrowserRouter } from "react-router-dom"
 
 import Login from "@/pages/Auth/Login"
@@ -28,7 +28,7 @@ import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
 import AssetListPage from "@/components/features/Dashboard/AssetListPage"
 
 export const router = createBrowserRouter([
-  // Public Routes (Anyone can access these)
+  
   {
     path: "/",
     element: <Login />,
@@ -36,7 +36,7 @@ export const router = createBrowserRouter([
   
   
 
-  // Protected Routes (Wrapped inside ProtectedRoute)
+  
   {
     element: <ProtectedRoute />, 
     children: [
@@ -86,7 +86,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "assignment/edit/:id",
-            element: <AssignmentEditPage />, // Added route to match your edit navigation
+            element: <AssignmentEditPage />, 
           },
           {
             path: "activity",
