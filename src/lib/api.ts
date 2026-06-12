@@ -1,7 +1,7 @@
 // src/lib/api.ts
 
-const BASE_URL = "http://192.168.100.185:1010/api";
-const DEFAULT_TOKEN = "119|6UBfGxzFSshZIwJu69IWBcmbq9gIb9opQwlL2eX51d4a76c8";
+const BASE_URL = "http://192.168.100.186:1010/api";
+const DEFAULT_TOKEN = "66|5TalCJ8YD62FDIoYKzJy0w7XosM72oLkVWdPFt4xf8ff92b9";
 
 type ApiErrorResponse = {
   message?: string;

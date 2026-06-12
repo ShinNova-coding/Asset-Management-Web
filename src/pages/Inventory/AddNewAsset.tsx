@@ -241,7 +241,7 @@ const AddNewAsset = () => {
 
       console.log("🚀 Payload sending to backend server stream:", assetPayload);
 
-      const API_URL = "http://192.168.100.185:1010/api/asset"; 
+      const API_URL = "http://192.168.100.186:1010/api/asset"; 
       const targetId = stateEditItem?.asset_id || stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       

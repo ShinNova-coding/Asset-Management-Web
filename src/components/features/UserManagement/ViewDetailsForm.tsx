@@ -11,7 +11,7 @@ const Field = ({ label, value }: { label: string; value: string }) => (
       type="text"
       value={value || "-"}
       disabled
-      className="border rounded-xl px-3 py-2 bg-gray-100 text-gray-700"
+      className="border rounded-xl px-3 py-2 bg-white text-gray-700"
     />
   </div>
 );
@@ -27,14 +27,14 @@ export default function ViewDetailsForm({ data }: Props) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white shadow-xl rounded-2xl p-6 space-y-6">
+    <div className="max-w-3xl mx-auto p-2">
+      <div className="bg-white shadow-xl rounded-2xl p-3 space-y-5">
         <h2 className="text-2xl font-semibold">Employee Details</h2>
 
         <div className="flex items-center gap-4">
           <img
-            src={data.profileImage || "https://via.placeholder.com/120"}
-            alt=""
+            src={data.profileImage || "https://dummyimage.com/120" }
+            alt={data.name || 'Employee'}
             className="w-20 h-20 rounded-full border object-cover"
           />
 
@@ -45,7 +45,7 @@ export default function ViewDetailsForm({ data }: Props) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field label="Employee ID" value={data.employeeId} />
+          <Field label="Employee ID" value={data.employee_id} />
           <Field label="Email" value={data.email} />
           <Field label="Phone Number" value={data.phone} />
           <Field label="Role" value={data.role} />

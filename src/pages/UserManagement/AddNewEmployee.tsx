@@ -6,11 +6,11 @@ import {
   Camera,
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { apiFetch } from '../../lib/api';
 import { normalizeImageSource } from '../../lib/utils';
 import type { Employee } from '../../types/employee';
 
-const API_URL = 'http://192.168.100.185:1010/api/user';
-const DEFAULT_TOKEN = '119|6UBfGxzFSshZIwJu69IWBcmbq9gIb9opQwlL2eX51d4a76c8';
+const DEFAULT_TOKEN = '66|5TalCJ8YD62FDIoYKzJy0w7XosM72oLkVWdPFt4xf8ff92b9';
 
 interface FormState {
   name: string;
@@ -52,28 +52,14 @@ const stripBase64Header = (base64String: string): string => {
   return base64String.includes(',') ? base64String.split(',')[1] : base64String;
 };
 
-const getApiErrorMessage = async (response: Response) => {
-  let message = `API Error: ${response.status}`;
 
-  try {
-    const errorData = await response.json();
-    const validationMessages = errorData?.errors
-      ? Object.values(errorData.errors).flat()
-      : [];
-
-    message = validationMessages[0] || errorData?.message || message;
-  } catch (parseErr) {
-    console.error('Error parsing API error response:', parseErr);
-  }
-
-  return String(message);
-};
 
 const AddEmployeeForm: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const editItem = (location.state as { editItem?: Employee } | null)?.editItem;
+  const editItemId = editItem?.id || editItem?.employee_id;
   const isEditMode = Boolean(editItem);
 
   const [formState, setFormState] = useState<FormState>({
@@ -143,122 +129,110 @@ const AddEmployeeForm: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      if (!formState.employee_id.trim()) {
-        throw new Error('Employee ID is required.');
-      }
+  try {
+    
+    if (!formState.employee_id.trim()) throw new Error('Employee ID is required.');
+    if (!formState.name.trim()) throw new Error('Name is required.');
+    if (!formState.email.trim()) throw new Error('Email is required.');
+    if (!formState.role.trim()) throw new Error('Role is required.');
 
-      if (!formState.name.trim()) {
-        throw new Error('Name is required.');
-      }
-
-      if (!formState.email.trim()) {
-        throw new Error('Email is required.');
-      }
-
-      if (!formState.role.trim()) {
-        throw new Error('Role is required.');
-      }
-
-      if (!isEditMode) {
-        if (!formState.password) {
-          throw new Error('Password is required.');
-        }
-
-        if (formState.password !== formState.password_confirmation) {
-          throw new Error('Password and confirmation must match.');
-        }
-      } else if (formState.password && formState.password !== formState.password_confirmation) {
+    if (!isEditMode) {
+      if (!formState.password) throw new Error('Password is required.');
+      if (formState.password !== formState.password_confirmation) {
         throw new Error('Password and confirmation must match.');
       }
-
-      const endpoint = isEditMode
-        ? `${API_URL}/${encodeURIComponent(formState.employee_id)}`
-        : API_URL;
-      const method = isEditMode ? 'PUT' : 'POST';
-
-      const payload: Record<string, string> = {
-        name: formState.name.trim(),
-        employee_id: formState.employee_id.trim(),
-        email: formState.email.trim(),
-        position: formState.position.trim(),
-        joined_date: formState.joined_date,
-        left_date: formState.left_date,
-        phone_number: formState.phone_number.trim(),
-        status: formState.status,
-        role: formState.role.trim(),
-      };
-
-      if (formState.password) {
-        payload.password = formState.password;
-        payload.password_confirmation = formState.password_confirmation;
-      }
-
-      const savedToken = localStorage.getItem('token') || DEFAULT_TOKEN;
-      if (!localStorage.getItem('token')) {
-        localStorage.setItem('token', savedToken);
-      }
-
-      let finalizedImageString = '';
-      const imagePreview = profileImage;
-
-      if (profileFile) {
-        const base64WithHeader = await convertImageToBase64(profileFile);
-        finalizedImageString = stripBase64Header(base64WithHeader);
-      } else if (imagePreview && (imagePreview.startsWith('data:') || !imagePreview.startsWith('http'))) {
-        finalizedImageString = stripBase64Header(imagePreview);
-      } else if (isEditMode && imagePreview && imagePreview.startsWith('http')) {
-        finalizedImageString = '';
-      } else {
-        const dummyWithHeader = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-        finalizedImageString = stripBase64Header(dummyWithHeader);
-      }
-
-      if (finalizedImageString) {
-        payload.image = finalizedImageString;
-      }
-
-      const headers: HeadersInit = {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${savedToken}`,
-      };
-
-      const response = await fetch(endpoint, {
-        method,
-        headers,
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error(await getApiErrorMessage(response));
-      }
-
-      navigate('/employees', { state: { refresh: true }, replace: true });
-    } catch (err) {
-      console.error('AddNewEmployee submit error:', err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Unable to save employee. Please try again.'
-      );
-    } finally {
-      setLoading(false);
+    } else if (formState.password && formState.password !== formState.password_confirmation) {
+      throw new Error('Password and confirmation must match.');
     }
-  };
 
+    
+    const endpointPath = isEditMode ? '/user/id' : '/user';
+    const method = isEditMode ? 'PATCH' : 'POST';
+
+    
+    const payload: Record<string, string> = {
+      name: formState.name.trim(),
+      employee_id: formState.employee_id.trim(),
+      email: formState.email.trim(),
+      position: formState.position.trim(),
+      joined_date: formState.joined_date, // Ensure format matches backend syntax 'YYYY-MM-DD'
+      left_date: formState.left_date,
+      phone_number: formState.phone_number.trim(),
+      status: formState.status,
+      role: formState.role.trim(), // e.g., 'super-admin'
+    };
+
+    
+    if (isEditMode) {
+      if (!editItem?.id) {
+        throw new Error('Could not update profile: Missing unique account identifier (UUID).');
+      }
+      payload.id = editItem.id;
+    }
+
+    if (formState.password) {
+      payload.password = formState.password;
+      payload.password_confirmation = formState.password_confirmation;
+    }
+
+    
+    let finalizedImageString = '';
+
+    if (profileFile) {
+      
+      const base64WithHeader = await convertImageToBase64(profileFile);
+      finalizedImageString = stripBase64Header(base64WithHeader);
+    } else if (profileImage && profileImage.startsWith('data:image')) {
+      
+      finalizedImageString = stripBase64Header(profileImage);
+    } else if (isEditMode && editItem?.image) {
+      
+      finalizedImageString = stripBase64Header(editItem.image);
+    } else {
+      
+      const dummyWithHeader = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+      finalizedImageString = stripBase64Header(dummyWithHeader);
+    }
+
+    
+    payload.image = finalizedImageString;
+
+    
+    const savedToken = localStorage.getItem('token') || DEFAULT_TOKEN;
+    if (!localStorage.getItem('token')) {
+      localStorage.setItem('token', savedToken);
+    }
+
+    
+    await apiFetch(endpointPath, {
+      method,
+      body: JSON.stringify(payload),
+    });
+
+    navigate('/employees', { state: { refresh: true }, replace: true });
+  } catch (err) {
+    console.error('AddNewEmployee submit error:', err);
+    setError(
+      err instanceof Error
+        ? err.message
+        : 'Unable to save employee. Please try again.'
+    );
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="min-h-screen bg-slate-50 p-8 font-sans text-slate-900">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-3xl center mx-auto">
 
         
         <Link
           to="/employees"
-          className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline"
+          className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline "
         >
           <ArrowLeft size={16} className="mr-2" />
           Back
@@ -268,8 +242,8 @@ const AddEmployeeForm: React.FC = () => {
           {isEditMode ? 'Edit Employee' : 'Add New Employee'}
         </h1>
 
-        <div className="bg-gray-100 rounded-lg border border-slate-200 shadow-sm p-10">
-          <form className="space-y-10" onSubmit={handleSubmit}>
+        <div className="bg-white rounded-lg border border-slate-100 shadow-sm p-10">
+          <form className="space-y-5" onSubmit={handleSubmit}>
 
             
             <div className="flex flex-col items-center justify-center">

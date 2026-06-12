@@ -1,6 +1,5 @@
 import { MaintenanceTable } from "@/components/features/Maintenance/MaintenanceTable"
-import { maintenanceData } from "@/data/maintenance"
-import { Link } from "react-router-dom";
+
 const MaintenancePage = () => {
   return (
     <div className="p-10 space-y-6 min-h-screen bg-slate-50/30">
@@ -9,15 +8,14 @@ const MaintenancePage = () => {
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Maintenance
           </h1>
-          {/* Top-level link removed — row clicks open details now */}
         </div>
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <MaintenanceTable data={maintenanceData} />
+        <MaintenanceTable />
       </div>
     </div>
   )
 }
 
-export default MaintenancePage;
+export default MaintenancePage

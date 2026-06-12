@@ -1,6 +1,6 @@
 // src/routes/Router.tsx
 
-import { createBrowserRouter } from "react-router-dom"
+import { createBrowserRouter, Route } from "react-router-dom"
 
 import Login from "@/pages/Auth/Login"
 import ForgetPassword from "@/pages/Auth/ForgetPassword"
@@ -117,7 +117,7 @@ export const router = createBrowserRouter([
     element: <AddEmployeeForm />,
   },
   {
-    path: "/",
+    path: "employees",
     element: <EmployeeListPage />,
   },
   {
@@ -127,7 +127,11 @@ export const router = createBrowserRouter([
        {
         path: "maintenance/:id",
         element: <MaintenanceDetailsForm />,
-      },
+  },
+
+ 
+
+
     { path: "assignment/:id",
         element: <AssignmentDetailPage />,
         },
