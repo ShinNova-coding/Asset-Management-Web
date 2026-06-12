@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
-import { FiChevronLeft, FiChevronRight, FiAlertCircle, FiCheckCircle, FiX } from "react-icons/fi"
+import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiX } from "react-icons/fi"
 import { Search } from "lucide-react"
 import {
   flexRender,
@@ -23,8 +23,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 
-import { columns } from "./InventoryColumns"
-import { InventoryFilter } from "./InventoryFilter"
+import { columns as baseColumns } from "./InventoryColumns"
 
 interface InventoryTableProps {
   data: any[]
@@ -127,6 +126,18 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     navigate(`/inventory/${item.id}`, { state: { id: item.id, detailsItem: item } })
   }
 
+ 
+  const columns = React.useMemo(() => {
+    return [
+      {
+        id: "number",
+        header: "No.",
+        cell: ({ row }: any) => row.index + 1,
+      },
+      ...baseColumns,
+    ]
+  }, [])
+
   const table = useReactTable({
     data,
     columns,
@@ -157,7 +168,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search by name,date,warranty,status..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm"

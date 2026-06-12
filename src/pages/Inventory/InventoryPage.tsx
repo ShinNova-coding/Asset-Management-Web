@@ -48,7 +48,7 @@ export default function InventoryPage() {
       
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight  text-blue-500">
             Inventory
           </h1>
         </div>

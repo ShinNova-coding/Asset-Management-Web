@@ -212,7 +212,7 @@ const AddNewAsset = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 p-10 font-sans text-slate-900">
-      <div className="max-w-4xl mx-auto space-y-6">
+      
         
         <div className="space-y-2">
           <button 
@@ -231,7 +231,7 @@ const AddNewAsset = () => {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
             
-            {/* Employee & Asset side-by-side section */}
+           
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
                 <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
@@ -311,7 +311,7 @@ const AddNewAsset = () => {
               </div>
             </div>
             
-            {/* Timeline & Status */}
+            
             <div className="space-y-3">
               <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
                 <Calendar size={18} className="text-blue-600" />
@@ -343,7 +343,7 @@ const AddNewAsset = () => {
               </div>
             </div>
 
-            {/* Expanded Admin Remarks / Notes */}
+           
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-600 block mb-1">Admin Remarks / Notes</label>
               <textarea 
@@ -366,7 +366,7 @@ const AddNewAsset = () => {
         </div>
 
       </div>
-    </div>
+    
   );
 };
 

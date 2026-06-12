@@ -383,11 +383,11 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
                      
                       className="w-full px-3.5 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-sm bg-slate-50/50 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400" 
                     >
-                      <option value="assigned">Assigned</option>
+                     
                       <option value="available">Available</option>
-                      <option value="maintenance">Maintenance</option>
-                      <option value="pending">Pending</option>
-                      <option value="expired">Expired</option>
+                     
+                      
+                     
                       <option value="retired">Retired</option>
                     </select>
                   </div>

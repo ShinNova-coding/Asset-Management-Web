@@ -30,7 +30,6 @@ const StatCard: React.FC<StatCardProps> = ({
         </p>
 
         <div className="flex items-center gap-2">
-          {/* Value Color */}
           <span className={`text-2xl font-bold ${color}`}>
             {value}
           </span>
@@ -43,7 +42,6 @@ const StatCard: React.FC<StatCardProps> = ({
         </div>
       </div>
 
-      {/* Icon Color */}
       {Icon && (
         <div className="self-end mt-auto">
           <Icon className={`w-5 h-5 ${color}`} />
@@ -53,36 +51,45 @@ const StatCard: React.FC<StatCardProps> = ({
   );
 };
 
-const DashboardStats: React.FC = () => {
+// Accept the API data object as a prop
+const DashboardStats: React.FC<{ data?: any }> = ({ data }) => {
+  // Fallback to zeros if API data isn't loaded yet
+  const assetData = data?.asset || {
+    total_assets: 0,
+    available_assets: 0,
+    assigned_assets: 0,
+    maintenance_assets: 0,
+    retired_assets: 0,
+  };
+
   const stats = [
     {
       label: "Total Assets",
-      value: "1,284",
+      value: assetData.total_assets,
       color: "text-blue-500",
-      percentage: "+12%",
       Icon: CubeIcon,
     },
     {
       label: "Available",
-      value: "412",
+      value: assetData.available_assets,
       color: "text-green-500",
       Icon: CheckCircleIcon,
     },
     {
       label: "Current Use",
-      value: "842",
+      value: assetData.assigned_assets,
       color: "text-black",
       Icon: UserIcon,
     },
     {
       label: "In Repair",
-      value: "26",
+      value: assetData.maintenance_assets,
       color: "text-red-500",
       Icon: WrenchIcon,
     },
     {
       label: "Retired",
-      value: "4",
+      value: assetData.retired_assets,
       color: "text-yellow-500",
       Icon: TrashIcon,
     },
@@ -90,13 +97,13 @@ const DashboardStats: React.FC = () => {
 
   return (
     <div className="w-full py-6 bg-slate-50">
+       <h2 className="text-base font-bold text-slate-800">Assets</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 w-full">
         {stats.map((stat, index) => (
           <StatCard
             key={index}
             label={stat.label}
             value={stat.value}
-            percentage={stat.percentage}
             Icon={stat.Icon}
             color={stat.color}
           />

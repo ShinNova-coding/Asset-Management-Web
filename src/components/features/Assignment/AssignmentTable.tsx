@@ -57,7 +57,8 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
     if (!deleteModal.targetId) return
 
     const targetId = String(deleteModal.targetId).trim()
-    const API_URL = `http://192.168.100.186:1010/api/assignment/${targetId}`
+   
+    const API_URL = `http://192.168.100.186:1010/api/assignment/assignment_id`
     const token = localStorage.getItem("token") || ""
 
     try {
@@ -68,6 +69,10 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
+       
+        body: JSON.stringify({
+          assignment_id: targetId,
+        }),
       })
 
       if (!response.ok) {
@@ -91,10 +96,19 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
   const handleEdit = (item: any) => {
     navigate(`/assignment/edit/${item.id}`, { state: { assignment: item } })
   }
-
+const columns = React.useMemo(() => {
+  return [
+    {
+      id: "number",
+      header: "No.",
+      cell: ({ row }: any) => row.index + 1, 
+    },
+    ...baseColumns, 
+  ]
+}, [])
   const table = useReactTable({
     data,
-    columns: baseColumns,
+    columns,
     meta: {
       deleteRow: handleDeleteTrigger,
       editRow: handleEdit,
@@ -120,21 +134,20 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
 
   return (
     <div className="w-full space-y-4 p-3 relative">
-      
       <div className="flex gap-4 rounded-xl bg-white p-4 border border-slate-200 shadow-sm items-center">
-        
+       
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search by ID,name,asset code,date,status..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         
-       
+        
         <div className="relative w-48">
           <select
             value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}

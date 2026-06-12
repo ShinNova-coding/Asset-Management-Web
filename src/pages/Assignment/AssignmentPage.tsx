@@ -25,7 +25,7 @@ const AssignmentPage = () => {
     targetId: null as string | number | null,
   });
 
-  
+ 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token");
     return {
@@ -37,7 +37,7 @@ const AssignmentPage = () => {
     };
   };
 
-  
+ 
   const fetchAssignments = async () => {
     try {
       setLoading(true);
@@ -87,17 +87,13 @@ const AssignmentPage = () => {
     setDeleteModal({ isOpen: true, targetId: id });
   };
 
- 
   const handleConfirmDelete = async () => {
     if (!deleteModal.targetId) return;
 
     try {
-      await axios.delete(`${API_URL}/assignment_id`, {
-        ...getAuthHeaders(),
-        data: {
-          assignment_id: deleteModal.targetId,
-        }
-      });
+      
+      await axios.delete(`${API_URL}/${deleteModal.targetId}`, getAuthHeaders());
+      
       setData((prev) => prev.filter((item) => item.id !== deleteModal.targetId));
     } catch (err: any) {
       console.error("Could not run delete execution:", err);
@@ -111,7 +107,7 @@ const AssignmentPage = () => {
     <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-slate-50/30">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-blue-500">
             Assignment
           </h1>
         </div>
@@ -138,7 +134,7 @@ const AssignmentPage = () => {
         </div>
       )}
 
-      
+     
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
