@@ -1,192 +1,176 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AssignmentTable } from "@/components/features/Assignment/AssignmentTable";
-import { assignmentData as initialAssignmentData } from "@/data/assignmentdata";
+import { assignmentData as fallbackData } from "@/data/assignmentdata";
 import type { Assignment } from "@/data/assignmentdata";
-import { FiTrash2 } from "react-icons/fi";
+import { FiTrash2, FiEdit2, FiX } from "react-icons/fi";
+import axios from "axios";
+import { AssignmentAssign } from "@/components/features/Assignment/AssignmentAssign";
+
+// Targeted Local Network Endpoint
+const API_URL = "http://192.168.100.186:1010/api/assignment";
 
 const AssignmentPage = () => {
-  const [data, setData] = useState<Assignment[]>(initialAssignmentData);
+  const [data, setData] = useState<Assignment[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   const navigate = useNavigate();
   const location = useLocation();
 
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
-    targetId: null as string | null,
+    targetId: null as string | number | null,
   });
 
-  // Load data from localStorage on mount
-  useEffect(() => {
-    const savedData = localStorage.getItem("assignment_data");
+  // Helper function to dynamically generate authentication headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    };
+  };
 
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-
-        if (parsedData.length > 0) {
-          setData(parsedData);
+  // Fetch from live database URL with security tokens
+  const fetchAssignments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await axios.get(API_URL, {
+        headers: {
+          Authorization: getAuthHeaders().headers.Authorization,
+          Accept: "application/json",
         }
-      } catch (error) {
-        console.error("Error loading assignment data:", error);
-        setData(initialAssignmentData);
+      });
+
+      if (response.data?.success) {
+        setData(response.data.data);
+      } else {
+        setError(response.data?.message || "Failed to parse system data structure.");
       }
-    } else {
-      localStorage.setItem(
-        "assignment_data",
-        JSON.stringify(initialAssignmentData)
-      );
+    } catch (err: any) {
+      console.error("API error reading assignments:", err);
+      setError(`Network error: ${err.response?.data?.message || err.message || "Could not reach local server"}`);
+      setData(fallbackData);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchAssignments();
   }, []);
 
-  // Save data to localStorage
+  // Synchronize incoming react router mutations (Deletions)
   useEffect(() => {
-    localStorage.setItem("assignment_data", JSON.stringify(data));
-  }, [data]);
-
-  // Handle updated or deleted item
-  useEffect(() => {
-    const state = location.state as {
-      showMessage?: boolean;
-      updatedItem?: Assignment;
-      deleteItem?: string;
-    } | null;
-
-    if (state?.updatedItem) {
-      setData((prevData) =>
-        prevData.map((item) =>
-          item.assetId === state.updatedItem?.assetId
-            ? state.updatedItem
-            : item
-        )
-      );
-    }
-
+    const state = location.state as { deleteItem?: string | number } | null;
+    
     if (state?.deleteItem) {
-      setData((prevData) =>
-        prevData.filter((item) => item.assetId !== state.deleteItem)
-      );
+      setData((prev) => prev.filter((item) => item.id !== state.deleteItem));
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state]);
+  }, [location.state, navigate, location.pathname]);
 
-  // Edit handler
   const handleEdit = (row: Assignment) => {
-    navigate(`/assignment/${row.assetId}`, {
-      state: { editItem: row },
-    });
+    // Navigate to dedicated edit page and pass row data via state
+    navigate(`/assignment/edit/${row.id}`, { state: { assignment: row } });
   };
 
-  // Delete handler
-  const handleDelete = (assetId: string) => {
-    setDeleteModal({
-      isOpen: true,
-      targetId: assetId,
-    });
+  const handleDelete = (id: string | number) => {
+    setDeleteModal({ isOpen: true, targetId: id });
   };
 
-  // Confirm delete
-  const handleConfirmDelete = () => {
-    if (deleteModal.targetId) {
-      setData((prev) =>
-        prev.filter((item) => item.assetId !== deleteModal.targetId)
-      );
+  // Perform operational DELETE network method with security tokens matching API endpoint
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.targetId) return;
 
-      setDeleteModal({
-        isOpen: false,
-        targetId: null,
+    try {
+      await axios.delete(`${API_URL}/assignment_id`, {
+        ...getAuthHeaders(),
+        data: {
+          assignment_id: deleteModal.targetId,
+        }
       });
+      setData((prev) => prev.filter((item) => item.id !== deleteModal.targetId));
+    } catch (err: any) {
+      console.error("Could not run delete execution:", err);
+      alert(`Delete operation failed: ${err.response?.data?.message || err.message}`);
+    } finally {
+      setDeleteModal({ isOpen: false, targetId: null });
     }
   };
 
   return (
-    <div className="p-10 space-y-6 min-h-screen bg-slate-50/30">
-      <div className="flex items-center justify-between mb-6">
+    <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-slate-50/30">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Assignment
           </h1>
         </div>
+        <AssignmentAssign />
       </div>
 
-      <div className="rounded-xl  bg-white shadow-sm overflow-hidden">
-        <AssignmentTable
-          key="assignment-table"
-          data={data}
-          meta={{
-            editRow: handleEdit,
-            deleteRow: handleDelete,
-          }}
-        />
-      </div>
+      {loading ? (
+        <div className="flex flex-col justify-center items-center h-48 space-y-2 text-slate-500">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+          <p className="text-sm">Loading...</p>
+        </div>
+      ) : error ? (
+        <div className="space-y-4">
+          <div className="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 text-sm">
+            💡 <strong>Notice:</strong> Using offline local mock data template. (Reason: {error})
+          </div>
+          <div className="rounded-xl bg-white shadow-sm overflow-hidden opacity-75">
+            <AssignmentTable data={data} meta={{ editRow: handleEdit, deleteRow: handleDelete }} />
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl bg-white shadow-sm overflow-hidden">
+          <AssignmentTable data={data} meta={{ editRow: handleEdit, deleteRow: handleDelete }} />
+        </div>
+      )}
 
       {/* DELETE CONFIRMATION MODAL */}
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
-            {/* Close Button */}
             <div className="flex justify-end">
               <button
-                onClick={() =>
-                  setDeleteModal({
-                    isOpen: false,
-                    targetId: null,
-                  })
-                }
+                onClick={() => setDeleteModal({ isOpen: false, targetId: null })}
                 className="text-slate-400 hover:text-slate-600"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <FiX size={20} />
               </button>
             </div>
 
-            {/* Modal Content */}
             <div className="mt-2 text-center">
-              <button className="p-2 hover:bg-gray-100 rounded-md">
-                <FiTrash2
-                  className="text-red-600"
-                  size={24}
-                />
-              </button>
-
-              <h2 className="text-lg font-semibold text-slate-800 mt-2">
-                Delete Assignment
-              </h2>
-
-              <p className="mt-2 text-sm text-slate-500">
-                Are you sure you want to delete this assignment?
-              </p>
+              <div className="p-2 inline-block bg-red-50 rounded-md">
+                <FiTrash2 className="text-red-600" size={24} />
+              </div>
+              <h2 className="text-lg font-semibold text-slate-800 mt-2">Delete Assignment</h2>
+              <p className="mt-2 text-sm text-slate-500">Are you sure you want to drop this assignment record from the database?</p>
             </div>
 
-            {/* Action Buttons */}
             <div className="mt-6 flex gap-3">
               <button
-                onClick={() =>
-                  setDeleteModal({
-                    isOpen: false,
-                    targetId: null,
-                  })
-                }
+                onClick={() => setDeleteModal({ isOpen: false, targetId: null })}
                 className="flex-1 rounded-lg border border-slate-300 py-2 text-sm font-medium hover:bg-slate-100"
               >
                 Cancel
               </button>
-
               <button
                 onClick={handleConfirmDelete}
                 className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-medium text-white hover:bg-red-700"
               >
-                Delete
+                Confirm Delete
               </button>
             </div>
           </div>

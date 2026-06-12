@@ -1,328 +1,231 @@
+"use client"
+
+import * as React from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
-import { assignmentData } from "@/data/assignmentdata"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FiChevronLeft, FiSave, FiTrash2 } from "react-icons/fi"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Card, CardContent } from "@/components/ui/card"
+import { 
+  FiChevronLeft, 
+  FiCalendar, 
+  FiUser, 
+  FiCpu, 
+  FiHash, 
+  FiFileText, 
+  FiClock 
+} from "react-icons/fi"
 import type { Assignment } from "@/data/assignmentdata"
+import axios from "axios"
+
+const API_URL = "http://192.168.100.186:1010/api/assignment"
 
 const AssignmentDetailPage = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const [isEditing, setIsEditing] = useState(false)
-  const [formData, setFormData] = useState<Assignment | null>(null)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [formData, setFormData] = useState<any | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token")
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  }   
 
-  // Load assignment data from localStorage
   useEffect(() => {
-    const savedData = localStorage.getItem("assignment_data")
-    if (savedData) {
-      try {
-        const parsedData: Assignment[] = JSON.parse(savedData)
-        const assignment = parsedData.find((item) => item.assetId === id)
-        
-        // Check if we're coming from edit action with state data
-        const stateData = location.state as { editItem?: Assignment } | null
-        
-        if (stateData?.editItem) {
-          // Use the passed edit item data
-          setFormData(stateData.editItem)
-          setIsEditing(true)
-        } else if (assignment) {
-          // Normal view mode
-          setFormData(assignment)
-        }
-      } catch (error) {
-        console.error("Error loading assignment data:", error)
+    const fetchRecordDetails = async () => {
+      const stateData = location.state as { editItem?: Assignment } | null
+      if (stateData?.editItem) {
+        setFormData(stateData.editItem)
+        setLoading(false)
+        return
       }
+
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const response = await axios.get(`${API_URL}/assignment_id`, {
+          ...getAuthHeaders(),
+          params: { assignment_id: id }
+        })
+        
+        if (response.data?.success) {
+          const fetchedData = Array.isArray(response.data.data) 
+            ? response.data.data[0] 
+            : response.data.data
+            
+          setFormData(fetchedData)
+        } else {
+          setError(response.data?.message || "Failed to locate target record.")
+        }
+      } catch (err: any) {
+        console.error("Error reading specific assignment:", err)
+        setError(`Unable to pull assignment record: ${err.response?.data?.message || err.message}`)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (id) {
+      fetchRecordDetails()
     }
   }, [id, location.state])
 
-  if (!formData) {
+  if (loading) {
     return (
-      <div className="p-10">
-        <h1 className="text-xl font-bold text-red-600">
-          Assignment Not Found
-        </h1>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 text-slate-500 space-y-4">
+        <div className="animate-spin rounded-full h-9 w-9 border-2 border-slate-300 border-t-slate-900"></div>
+        <p className="text-sm font-medium tracking-wide">Loading...</p>
+      </div>
+    )
+  }
 
-        <Button
-          className="mt-4"
-          onClick={() => navigate("/assignment")}
-        >
-          Back to Assignment
+  if (error || !formData) {
+    return (
+      <div className="p-6 max-w-xl mx-auto mt-20 text-center space-y-6">
+        <div className="inline-flex p-4 bg-red-50 text-red-600 rounded-full">
+          <FiFileText size={32} />
+        </div>
+        <h1 className="text-xl font-bold text-slate-900">
+          {error || "Assignment Record Not Found"}
+        </h1>
+        <p className="text-sm text-slate-500 max-w-sm mx-auto">
+          The asset linkage system was unable to pull a matching log instance for ID token reference: {id}
+        </p>
+        <Button onClick={() => navigate("/assignment")} variant="outline" className="shadow-sm">
+          Return
         </Button>
       </div>
     )
   }
 
-  const handleInputChange = (field: keyof Assignment, value: string) => {
-    setFormData(prev => prev ? { ...prev, [field]: value } : null)
-  }
+  const isActive = formData.status?.toLowerCase() === "active"
 
-  const handleSave = () => {
-    if (!formData) return
-    
-    const savedData = localStorage.getItem("assignment_data")
-    if (savedData) {
-      try {
-        const parsedData: Assignment[] = JSON.parse(savedData)
-        const updatedData = parsedData.map(item => 
-          item.assetId === formData.assetId ? formData : item
-        )
-        localStorage.setItem("assignment_data", JSON.stringify(updatedData))
-        setIsEditing(false)
-        // Navigate back to assignment list with success message
-        navigate("/assignment", { 
-          state: { showMessage: true, updatedItem: formData } 
-        })
-      } catch (error) {
-        console.error("Error saving assignment data:", error)
-      }
-    }
-  }
-
-  const handleDelete = () => {
-    if (!formData) return
-    setShowDeleteDialog(true)
-  }
-
-  const confirmDelete = () => {
-    if (!formData) return
-    
-    // Navigate back to assignment page and let it handle the session deletion
-    navigate("/assignment", { 
-      state: { deleteItem: formData.assetId } 
-    })
-    setShowDeleteDialog(false)
-  }
+  const displayUserId = formData.user?.employee_id || formData.employee_id || formData.users_id || "N/A"
+  const displayUserName = formData.user?.name || formData.user_name || "Unknown User"
+  
+  const displayAssetCode = formData.asset?.asset_code || formData.asset_code || formData.assets_id || "N/A"
+  const displayAssetName = formData.asset?.name || formData.asset_name || "Unknown Asset Unit"
 
   return (
-    <div className="p-10 min-h-screen bg-slate-50">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* BACK AND ACTION BUTTONS */}
-        <div className="flex justify-between items-center">
-          <Button
-            variant="outline"
-            onClick={() => navigate("/assignment")}
-            className="gap-2"
-          >
-            <FiChevronLeft />
-            Back 
-          </Button>
-          
-          <div className="flex gap-2">
-            {!isEditing ? (
-              <>
-                <Button
-                  variant="default"
-                  onClick={() => setIsEditing(true)}
-                >
-                  Edit Assignment
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleDelete}
-                  className="gap-2"
-                >
-                  <FiTrash2 />
-                  Delete
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEditing(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="default"
-                  onClick={handleSave}
-                  className="gap-2"
-                >
-                  <FiSave />
-                  Save Changes
-                </Button>
-              </>
-            )}
+    <div className="p-4 md:p-8 min-h-screen bg-slate-50/50 text-slate-900 antialiased">
+      <div className="max-w-3xl mx-auto space-y-4">
+        
+        {/* HEADER NAVIGATION & TITLE BLOCK */}
+        <div className="space-y-3 border-b border-slate-200 pb-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/assignment")}
+              className="text-slate-600 hover:text-slate-900 -ml-3 gap-2 text-sm font-medium transition-colors h-8"
+            >
+              <FiChevronLeft className="w-4 h-4" />
+              Back 
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              Assignment Detail
+            </h1>
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-md font-semibold tracking-wide shadow-sm transition-all ${
+              isActive 
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60" 
+                : "bg-slate-100 text-slate-700 border border-slate-200"
+            }`}>
+              <span className={`h-1.5 w-1.5 rounded-full  ${isActive ? "bg-emerald-500" : "bg-slate-400"}`}></span>
+              {formData.status || "Unknown Status"}
+            </span>
           </div>
         </div>
 
-        {/* DETAIL/EDIT CONTENT */}
-        <div className="bg-gray-100 p-6 rounded-xl shadow border space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-lg">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400">
+                <FiUser className="w-3.5 h-3.5 text-slate-400" />
+                User Detail
+              </div>
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-xs font-medium text-bold uppercase tracking-tight">Employee ID</label>
+                  <p className="font-semibold text-slate-800  text-sm mt-0.5">{displayUserId}</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-bold uppercase tracking-tight">Employee Name</label>
+                  <p className="font-semibold text-slate-800 text-sm mt-0.5">{displayUserName}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <h1 className="text-2xl font-bold text-slate-900">
-            {isEditing ? "Edit Assignment" : "Assignment Details"}
-          </h1>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Employee ID</label>
-              {isEditing ? (
-                <Input
-                  value={formData.employeeId}
-                  onChange={(e) => handleInputChange("employeeId", e.target.value)}
-                />
-              ) : (
-                <p className="text-sm">{formData.employeeId}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Employee Name</label>
-              {isEditing ? (
-                <Input
-                  value={formData.employeeName}
-                  onChange={(e) => handleInputChange("employeeName", e.target.value)}
-                />
-              ) : (
-                <p className="text-sm">{formData.employeeName}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Asset ID</label>
-              {isEditing ? (
-                <Input
-                  value={formData.assetId}
-                  onChange={(e) => handleInputChange("assetId", e.target.value)}
-                />
-              ) : (
-                <p className="text-sm">{formData.assetId}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Assigned Date</label>
-              {isEditing ? (
-                <Input
-                  type="date"
-                  value={formData.assignedDate}
-                  onChange={(e) => handleInputChange("assignedDate", e.target.value)}
-                />
-              ) : (
-                <p className="text-sm">{formData.assignedDate}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Returned Date</label>
-              {isEditing ? (
-                <Input
-                  type="date"
-                  value={formData.returnedDate === "_" ? "" : formData.returnedDate}
-                  onChange={(e) => handleInputChange("returnedDate", e.target.value || "_")}
-                  placeholder="Leave empty if not returned"
-                />
-              ) : (
-                <p className="text-sm">{formData.returnedDate === "_" ? "Not returned" : formData.returnedDate}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Status</label>
-              {isEditing ? (
-                <Select
-                  value={formData.status}
-                  onValueChange={(value) => handleInputChange("status", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Returned">Returned</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="text-sm">{formData.status}</p>
-              )}
-            </div>
-          </div>
-
+          {/* HARDWARE SPECIFICATION CARD */}
+          <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-lg">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400">
+                <FiCpu className="w-3.5 h-3.5 text-slate-400" />
+                Hardware Allocation
+              </div>
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-xs font-medium text-bold uppercase tracking-tight">Asset Name</label>
+                  <p className="font-semibold text-slate-800 text-sm mt-0.5">
+                    {displayAssetName}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-bold uppercase tracking-tight">Asset Code</label>
+                  <div className="font-semibold text-slate-800 text-sm mt-0.5  ">
+                   
+                    {displayAssetCode}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* NOTE INPUT BOX */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Assignment Notes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <textarea
-  value={formData.notes || ""}
-  onChange={(e) =>
-    setFormData((prev) =>
-      prev ? { ...prev, notes: e.target.value } : null
-    )
-  }
-  disabled={!isEditing}
-  placeholder={isEditing ? "Write your notes..." : "No notes available"}
-  className="min-h-[120px] w-full rounded-md border px-3 py-2 bg-gray-100 text-sm"
-/>
+        {/* LIFECYCLE CHRONOLOGY BAR */}
+        <Card className="border border-slate-200/80 shadow-sm bg-white rounded-lg">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400 mb-2">
+              <FiCalendar className="w-3.5 h-3.5 text-slate-400" />
+              Timeline
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
+              <div className="space-y-0.5 border-l-2 border-slate-200 pl-3">
+                <label className="block text-xs font-medium uppercase tracking-wider">Assigned Date</label>
+                <p className="font-semibold text-slate-800 text-sm mt-0.5">{formData.assigned_date || "Not set"}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        {/* DELETE CONFIRMATION DIALOG */}
-        {showDeleteDialog && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="w-full max-w-sm rounded-xl bg-gray-100 p-6 shadow-xl">
-              <div className="flex justify-end">
-                <button
-                  onClick={() => setShowDeleteDialog(false)}
-                  className="text-slate-400 hover:text-slate-600"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
+        {/* NARRATIVE INSIGHT/NOTE CARD */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-100 to-indigo-50/20 rounded-lg -m-1 opacity-60 blur-sm pointer-events-none" />
+          <Card className="relative border border-slate-200 shadow-sm bg-white rounded-lg overflow-hidden">
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400">
+                <FiClock className="w-3.5 h-3.5 text-slate-400" />
+                Note
               </div>
-
-              <div className="mt-2 text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
-                  <FiTrash2
-                    className="text-red-600"
-                    size={24}
-                  />
-                </div>
-
-                <h2 className="text-lg font-semibold text-slate-800">
-                  Delete Assignment
-                </h2>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  Are you sure you want to delete this assignment?
+              
+              <div>
+                <p className="font-semibold text-slate-800 text-sm mt-0.5">
+                  {formData.note || "No additional notes provided for this assignment."}
                 </p>
               </div>
+            </CardContent>
+          </Card>
+        </div>
 
-              <div className="mt-6 flex gap-3">
-                <button
-                  onClick={() => setShowDeleteDialog(false)}
-                  className="flex-1 rounded-lg border border-slate-300 py-2 text-sm font-medium hover:bg-slate-100"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={confirmDelete}
-                  className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-medium text-white hover:bg-red-700"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

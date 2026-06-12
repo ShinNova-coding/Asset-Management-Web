@@ -1,7 +1,7 @@
 import React from "react";
-import DashboardCards from "../../components/features/dashboard/DashboardCards";
-import AssetCategoriesCards from "../../components/features/dashboard/AssetCategoriesCards";
-import RecentActivities from "../../components/features/dashboard/RecentActivities"
+import DashboardCards from "../../components/features/Dashboard/DashboardCards";
+import AssetCategoriesCards from "../../components/features/Dashboard/AssetCategoriesCards";
+import RecentActivities from "../../components/features/Dashboard/RecentActivities"
 
 const DashboardPage: React.FC = () => {
   return (
@@ -16,7 +16,7 @@ const DashboardPage: React.FC = () => {
       {/* Combined Section */}
       <div className="space-y-6">
         <AssetCategoriesCards />
-        <RecentActivities />
+        
       </div>
     </div>
   );

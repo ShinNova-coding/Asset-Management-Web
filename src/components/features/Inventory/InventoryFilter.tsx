@@ -1,4 +1,4 @@
-// InventoryFilter.tsx
+
 "use client"
 
 import type { Table } from "@tanstack/react-table"
@@ -19,7 +19,7 @@ export function InventoryFilter<TData>({ table }: InventoryFilterProps<TData>) {
 
   if (!statusColumn) return null
 
-  // 1. Change fallback to an empty string so the placeholder can render
+ 
   const currentValue = (statusColumn.getFilterValue() as string) ?? ""
 
   return (
@@ -27,7 +27,7 @@ export function InventoryFilter<TData>({ table }: InventoryFilterProps<TData>) {
       <Select
         value={currentValue}
         onValueChange={(value) => {
-          // 2. Clear filter if "all" is picked, otherwise set the value
+          
           statusColumn.setFilterValue(value === "all" ? undefined : value)
         }}
       >
@@ -36,7 +36,7 @@ export function InventoryFilter<TData>({ table }: InventoryFilterProps<TData>) {
         </SelectTrigger>
         
         <SelectContent className="bg-white border border-slate-200 rounded-xl shadow-lg">
-          {/* 3. Leave value as "all" so your onValueChange handler clears the filter */}
+         
           <SelectItem value="all">All Status</SelectItem>
           <SelectItem value="available">Available</SelectItem>
           <SelectItem value="returned">Returned</SelectItem>

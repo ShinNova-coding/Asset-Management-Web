@@ -37,7 +37,7 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
   const navigate = useNavigate()
   const location = useLocation()
   
-  // Initialize state directly from localStorage if it exists
+  
   const [tableData, setTableData] = React.useState<ActivityLog[]>(() => {
     if (typeof window !== "undefined") {
       const savedData = localStorage.getItem("asset_guard_logs")
@@ -55,21 +55,21 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
     message: ""
   })
 
-  // Synchronize state if the incoming initialData prop changes
+ 
   React.useEffect(() => {
     if (initialData && initialData.length > 0) {
       setTableData(initialData)
     }
   }, [initialData])
 
-  // Automatically sync state arrays to localStorage whenever they change
+  
   React.useEffect(() => {
     if (tableData && tableData.length > 0) {
       localStorage.setItem("asset_guard_logs", JSON.stringify(tableData))
     }
   }, [tableData])
 
-  // Handle incoming router layout state updates safely
+ 
   React.useEffect(() => {
     if (location.state?.updatedItem) {
       const updated = location.state.updatedItem
@@ -89,12 +89,12 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
         message: "The log changes were mapped safely to the current dataset array context view."
       })
 
-      // Clear layout state route memory so it won't pop up again on component refreshes
+      
       navigate(location.pathname, { replace: true, state: {} })
     }
   }, [location.state, navigate, location.pathname])
 
-  // Toast auto-dismiss timer
+  
   React.useEffect(() => {
     if (toastConfig.show) {
       const timer = setTimeout(() => setToastConfig((prev) => ({ ...prev, show: false })), 3000)
@@ -120,7 +120,7 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
   const pageCount = table.getPageCount()
   const currentPage = table.getState().pagination.pageIndex
 
-  // Helper method to construct neat UI pagination ranges dynamically
+ 
   const renderPageButtons = () => {
     const buttons: React.ReactNode[] = []
     
@@ -177,7 +177,7 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
           />
         </div>
 
-        {/* Column-Specific Activity Type Filter */}
+       
         <div className="relative flex items-center gap-2 w-full sm:w-auto">
           <select
             value={(table.getColumn("action")?.getFilterValue() as string) ?? ""}
@@ -198,7 +198,7 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
         </div>
       </div>
 
-      {/* Main Data Table View */}
+     
       <div className="rounded-md border border-slate-200 overflow-hidden bg-white">
         <Table>
           <TableHeader className="bg-blue-400">
@@ -247,7 +247,7 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
         </Table>
       </div>
 
-      {/* Pagination Controls */}
+     
       <div className="flex justify-end items-center space-x-2 pt-2">
         <Button
           variant="outline"
@@ -274,7 +274,7 @@ export function ActivityTable({ data: initialData }: ActivityTableProps) {
         </Button>
       </div>
 
-      {/* Action Notification Toast */}
+     
       {toastConfig.show && (
         <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-800 max-w-md animate-slide-in">
           <FiCheckCircle className="text-green-400 shrink-0" size={20} />

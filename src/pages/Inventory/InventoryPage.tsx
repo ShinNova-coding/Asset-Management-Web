@@ -29,8 +29,6 @@ export default function InventoryPage() {
         }
 
         const jsonPayload = await response.json()
-        
-        // Destructures nested pagination structures safely
         const liveAssets = jsonPayload?.data?.data || jsonPayload?.data || []
         
         setInventoryData(liveAssets)
@@ -46,9 +44,9 @@ export default function InventoryPage() {
   }, [])
 
   return (
-    <div className="p-10 space-y-6 min-h-screen bg-slate-50/30">
+    <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-slate-50/30">
       
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             Inventory
@@ -57,19 +55,25 @@ export default function InventoryPage() {
         <InventoryAddNewAsset />
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        {isLoading ? (
-          <div className="p-12 text-center text-sm font-medium text-slate-500 animate-pulse">
-            Loading live asset records from server...
+      {isLoading ? (
+        <div className="flex flex-col justify-center items-center h-48 space-y-2 text-slate-500">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+          <p className="text-sm">Loading...</p>
+        </div>
+      ) : error ? (
+        <div className="space-y-4">
+          <div className="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 text-sm">
+            💡 <strong>Notice:</strong> Temporary connection issue. (Reason: {error})
           </div>
-        ) : error ? (
-          <div className="p-12 text-center text-sm font-semibold text-red-500 bg-red-50/50">
-            ⚠️ {error}
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden opacity-75">
+            <InventoryTable data={inventoryData} />
           </div>
-        ) : (
+        </div>
+      ) : (
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <InventoryTable data={inventoryData} />
-        )}
-      </div>
+        </div>
+      )}
       
     </div>
   )

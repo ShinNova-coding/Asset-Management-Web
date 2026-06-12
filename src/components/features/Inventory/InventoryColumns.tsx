@@ -5,13 +5,13 @@ import Delete from "./InventoryDelete"
 import Edit from "./InventoryEdit"
 
 export type Inventory = {
-  asset_id: string        
+  id: string
   name: string
   model?: string
-  ram_capacity?: string   
+  ram_capacity?: string
   storage?: string
-  purchased_date: string  
-  warranty_period: number | string 
+  purchased_date: string
+  warranty_period: number | string
   status: "assigned" | "available" | "maintenance" | "expired" | "pending" | "retired"
   category?: { id: number; name: string }
 }
@@ -78,12 +78,10 @@ export const columns: ColumnDef<Inventory>[] = [
     cell: ({ row, table }) => {
       const item = row.original
       const meta = table.options.meta as any
-      const targetIdentifier = item.asset_id 
+     
+      const targetId = item.id 
 
       return (
-        /* ✨ DOUBLE PROTECTION: e.stopPropagation() combined with e.preventDefault() 
-          instantly cancels event bubbling out to parent <TableRow /> components.
-        */
         <div 
           className="flex items-center gap-2" 
           onClick={(e) => {
@@ -98,13 +96,15 @@ export const columns: ColumnDef<Inventory>[] = [
               }
             }} 
           />
-          <Delete 
-            onDelete={() => {
-              if (meta?.deleteRow) {
-                meta.deleteRow(targetIdentifier)
-              }
-            }} 
-          />
+          
+<Delete 
+  onDelete={() => {
+    if (meta?.deleteRow) {
+     
+      meta.deleteRow(item.id) 
+    }
+  }} 
+/>
         </div>
       )
     },

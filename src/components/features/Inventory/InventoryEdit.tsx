@@ -12,7 +12,7 @@ export default function Edit({ onEdit }: EditProps) {
     <button 
       type="button"
       onClick={(e) => {
-        // Prevents triggering the parent row's link navigation redirect
+       
         e.stopPropagation() 
         if (onEdit) onEdit()
       }} 

@@ -1,41 +1,6 @@
 // src/lib/api.ts
 
 const BASE_URL = "http://192.168.100.186:1010/api";
-const DEFAULT_TOKEN = "66|5TalCJ8YD62FDIoYKzJy0w7XosM72oLkVWdPFt4xf8ff92b9";
-
-type ApiErrorResponse = {
-  message?: string;
-  errors?: Record<string, string[] | string>;
-};
-
-const parseJsonResponse = async (response: Response) => {
-  const text = await response.text();
-
-  if (!text) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
-};
-
-const getErrorMessage = (errorData: unknown, fallback: string) => {
-  if (!errorData || typeof errorData !== "object") {
-    return fallback;
-  }
-
-  const data = errorData as ApiErrorResponse;
-  const validationMessages = data.errors
-    ? Object.values(data.errors).flatMap((value) =>
-        Array.isArray(value) ? value : [value]
-      )
-    : [];
-
-  return validationMessages[0] || data.message || fallback;
-};
 
 export async function apiFetch(
   endpoint: string,

@@ -31,18 +31,18 @@ export function InventoryDetail() {
   const [loading, setLoading] = useState(!assetItem)
 
   useEffect(() => {
-    // --- 🔑 PERMISSIONS GUARD BLOCK ---
+   
     try {
       const localUserData = localStorage.getItem("user")
       if (localUserData) {
         const user = JSON.parse(localUserData)
         const userRole = user.role?.toLowerCase()
         
-        // Superadmins and managers can write changes; general admins remain completely read-only
+       
         if (userRole === "superadmin" || userRole === "manager") {
           setCanEdit(true)
         } else {
-          setCanEdit(false) // Standard Admin can only view data
+          setCanEdit(false)
         }
       }
     } catch (err) {
@@ -50,7 +50,7 @@ export function InventoryDetail() {
       setCanEdit(false)
     }
 
-    // --- 💾 DATA RECOVERY FALLBACK (On Refresh) ---
+    
     if (!assetItem && id) {
       try {
         const cachedData = localStorage.getItem("inventory_data")
@@ -126,12 +126,33 @@ export function InventoryDetail() {
   }
 
   const displayCategory = assetItem.category?.name || assetItem.category || "Uncategorized"
-  const displayImage = assetItem.preview_url || assetItem.image_url || assetItem.image
+
+  
+  const API_REAL_IP = "http://192.168.100.186:1010"
+  let rawImageSource = assetItem.preview_url || assetItem.image_url || assetItem.image || ""
+  let displayImage = ""
+
+  if (rawImageSource) {
+    if (rawImageSource.startsWith("data:image")) {
+      
+      displayImage = rawImageSource
+    } else if (rawImageSource.startsWith("http://localhost")) {
+      
+      displayImage = rawImageSource.replace("http://localhost", API_REAL_IP)
+    } else if (rawImageSource.startsWith("http")) {
+      
+      displayImage = rawImageSource
+    } else {
+      
+      const cleanPath = rawImageSource.startsWith("/") ? rawImageSource : `/${rawImageSource}`
+      displayImage = `${API_REAL_IP}${cleanPath}`
+    }
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-6 md:p-10 space-y-6 text-slate-950 font-sans">
       
-      {/* Navigation Row */}
+     
       <div className="flex items-center justify-between">
         <Button 
           variant="ghost" 
@@ -140,28 +161,28 @@ export function InventoryDetail() {
           className="flex items-center gap-2 text-slate-600 hover:text-slate-900 -ml-2 group transition-colors"
         >
           <FiArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-          Back to Inventory Dashboard
+          Back
         </Button>
 
-        {/* ROLE CONTEXT GUARD: Only displays if user has manager/superadmin flags */}
+        
         {canEdit && (
           <Button 
             onClick={handleEditRedirect}
             className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 shadow-sm text-xs rounded-lg px-4 py-2"
           >
             <FiEdit3 size={14} />
-            Modify Asset Record
+            Edit Asset
           </Button>
         )}
       </div>
 
-      {/* Header Badge Stack */}
+     
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-mono px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-600 font-semibold">
-              {assetItem.asset_id || assetItem.id}
-            </span>
+  {assetItem.asset_code || assetItem.asset_id || assetItem.id}
+</span>
             <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border tracking-wide uppercase ${getStatusStyles(assetItem.status)}`}>
               {assetItem.status || "unspecified"}
             </span>
@@ -177,10 +198,10 @@ export function InventoryDetail() {
         </div>
       </div>
 
-      {/* Detail Split Grid */}
+      
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2 space-y-6">
-          {/* Specifications Card */}
+          
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiPackage size={18} className="text-blue-600" />
@@ -221,7 +242,7 @@ export function InventoryDetail() {
             </div>
           </div>
 
-          {/* Procurement Card */}
+          
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiCalendar size={18} className="text-blue-600" />
@@ -243,11 +264,9 @@ export function InventoryDetail() {
               </div>
             </div>
           </div>
-
-         
         </div>
 
-        {/* Right Sidebar */}
+       
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4 sticky top-6">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <FiFileText size={18} className="text-blue-600" />
@@ -283,10 +302,7 @@ export function InventoryDetail() {
             </div>
           </div>
           
-          <div className="rounded-lg bg-slate-50 border border-slate-100 p-3 flex gap-2 items-start text-[11px] text-slate-400 leading-relaxed">
-            <FiInfo className="text-blue-400 shrink-0 mt-0.5" size={14} />
-            <p>System changes tracked on database endpoints are synchronized here every time you toggle list elements.</p>
-          </div>
+         
         </div>
       </div>
     </div>

@@ -1,218 +1,168 @@
-export type Assignment = {
-  employeeId: string
-  employeeName: string
-  assetId: string
-  assignedDate: string
-  returnedDate: string
-  status: string
-  actions: string
-  notes?: string   
+export interface Asset {
+  asset_id: string;
+  name: string;
+  serial_number: string;
+  purchased_date: string;
+  warranty_period: number;
+  model: string;
+  ram_capacity: string;
+  storage: string;
+  category_id: number;
+  status: string;
+  condition: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+export interface Assignment {
+  id: number; // Primary database key
+  employee_id: string;
+  asset_id: string;
+  note: string | null;
+  status: string;
+  assigned_date: string;
+  returned_date: string | null;
+  created_at: string;
+  updated_at: string;
+  asset: Asset; // Nested asset relationship from backend
 }
 
 export const assignmentData: Assignment[] = [
   {
-    employeeId: "EMP-001",
-    employeeName: "John Doe",
-    assetId: "AST-001",
-    assignedDate: "2023-01-01",
-    returnedDate: "_",
-    status: "Active",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-
-  {
-    employeeId: "EMP-002",
-    employeeName: "Jane Smith",
-    assetId: "AST-002",
-    assignedDate: "2023-01-02",
-    returnedDate: "2023-01-16",
-    status: "Returned",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-
-  {
-    employeeId: "EMP-003",
-    employeeName: "Michael Lee",
-    assetId: "AST-003",
-    assignedDate: "2023-01-03",
-    returnedDate: "_",
-    status: "Active",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-{
-    employeeId: "EMP-004",
-    employeeName: "Sarah Kim",
-    assetId: "AST-004",
-    assignedDate: "2023-01-04",
-    returnedDate: "2023-01-18",
-    status: "Returned",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
+    id: 1,
+    employee_id: "EMP-001",
+    asset_id: "AST-2026-001",
+    note: "Laptop is damaged",
+    status: "active",
+    assigned_date: "2026-01-01",
+    returned_date: null,
+    created_at: "2026-06-03T07:06:49.000000Z",
+    updated_at: "2026-06-03T07:06:49.000000Z",
+    asset: {
+      asset_id: "AST-2026-001",
+      name: "RedmiBook Pro 15",
+      serial_number: "SN62387801",
+      purchased_date: "2026-06-03",
+      warranty_period: 12,
+      model: "2026brand",
+      ram_capacity: "16 GB",
+      storage: "512 GB SSD",
+      category_id: 1,
+      status: "assigned",
+      condition: "used",
+      created_at: "2026-06-03T04:58:51.000000Z",
+      updated_at: "2026-06-03T07:06:49.000000Z",
+      deleted_at: null
+    }
   },
   {
-    employeeId: "EMP-005",
-    employeeName: "Jimin Park",
-    assetId: "AST-005",
-    assignedDate: "2023-01-05",
-    returnedDate: "2023-01-19",
-    status: "Returned",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
+    id: 2,
+    employee_id: "EMP-002",
+    asset_id: "AST-2026-002",
+    note: "Device checkup passed",
+    status: "returned",
+    assigned_date: "2026-01-02",
+    returned_date: "2026-01-16",
+    created_at: "2026-06-03T07:06:49.000000Z",
+    updated_at: "2026-06-03T07:06:49.000000Z",
+    asset: {
+      asset_id: "AST-2026-002",
+      name: "MacBook Air M2",
+      serial_number: "SN99283711",
+      purchased_date: "2026-02-10",
+      warranty_period: 24,
+      model: "Apple",
+      ram_capacity: "8 GB",
+      storage: "256 GB SSD",
+      category_id: 1,
+      status: "available",
+      condition: "good",
+      created_at: "2026-02-10T04:58:51.000000Z",
+      updated_at: "2026-06-03T07:06:49.000000Z",
+      deleted_at: null
+    }
   },
   {
-    employeeId: "EMP-006",
-    employeeName: "Employee 6",
-    assetId: "AST-006",
-    assignedDate: "2023-01-06",
-    returnedDate: "2023-01-20",
-    status: "Active",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
+    id: 3,
+    employee_id: "EMP-003",
+    asset_id: "AST-2026-003",
+    note: null,
+    status: "active",
+    assigned_date: "2026-01-03",
+    returned_date: null,
+    created_at: "2026-06-03T07:06:49.000000Z",
+    updated_at: "2026-06-03T07:06:49.000000Z",
+    asset: {
+      asset_id: "AST-2026-003",
+      name: "Dell XPS 13",
+      serial_number: "SN11223344",
+      purchased_date: "2026-05-12",
+      warranty_period: 12,
+      model: "Dell",
+      ram_capacity: "16 GB",
+      storage: "1 TB SSD",
+      category_id: 1,
+      status: "assigned",
+      condition: "new",
+      created_at: "2026-05-12T04:58:51.000000Z",
+      updated_at: "2026-06-03T07:06:49.000000Z",
+      deleted_at: null
+    }
   },
   {
-    employeeId: "EMP-007",
-    employeeName: "Employee 7",
-    assetId: "AST-007",
-    assignedDate: "2023-01-07",
-    returnedDate: "2023-01-21",
-    status: "Active",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
+    id: 4,
+    employee_id: "EMP-004",
+    asset_id: "AST-2026-004",
+    note: "Screen protector applied",
+    status: "returned",
+    assigned_date: "2026-01-04",
+    returned_date: "2026-01-18",
+    created_at: "2026-06-03T07:06:49.000000Z",
+    updated_at: "2026-06-03T07:06:49.000000Z",
+    asset: {
+      asset_id: "AST-2026-004",
+      name: "iPad Pro",
+      serial_number: "SN44556677",
+      purchased_date: "2026-01-01",
+      warranty_period: 12,
+      model: "Apple",
+      ram_capacity: "8 GB",
+      storage: "128 GB NVMe",
+      category_id: 2,
+      status: "available",
+      condition: "excellent",
+      created_at: "2026-01-01T04:58:51.000000Z",
+      updated_at: "2026-06-03T07:06:49.000000Z",
+      deleted_at: null
+    }
   },
   {
-    employeeId: "EMP-008",
-    employeeName: "Employee 8",
-    assetId: "AST-008",
-    assignedDate: "2023-01-08",
-    returnedDate: "2023-01-22",
-    status: "Returned",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-{
-    employeeId: "EMP-009",
-    employeeName: "Employee 9",
-    assetId: "AST-009",
-    assignedDate: "2023-01-09",
-    returnedDate: "2023-01-23",
-    status: "Active",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-
-{
-    employeeId: "EMP-010",
-    employeeName: "Employee 10",
-    assetId: "AST-010",
-    assignedDate: "2023-01-10",
-    returnedDate: "2023-01-24",
-    status: "Returned",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-    {
-    employeeId: "EMP-011",
-    employeeName: "Employee 11",
-    assetId: "AST-011",
-    assignedDate: "2023-01-11",
-    returnedDate: "2023-01-25",
-    status: "Returned",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-{
-    employeeId: "EMP-012",
-    employeeName: "Employee 12",
-    assetId: "AST-012",
-    assignedDate: "2023-01-12",
-    returnedDate: "2023-01-26",
-    status: "Active",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-  {
-    employeeId: "EMP-013",
-    employeeName: "Employee 13",
-    assetId: "AST-013",
-    assignedDate: "2023-01-13",
-    returnedDate: "2023-01-27",
-    status: "Returned",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-  {
-    employeeId: "EMP-014",
-    employeeName: "Employee 14",
-    assetId: "AST-014",
-    assignedDate: "2023-01-14",
-    returnedDate: "2023-01-28",
-    status: "Returned",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-{
-    employeeId: "EMP-015",
-    employeeName: "Employee 15",
-    assetId: "AST-015",
-    assignedDate: "2023-01-15",
-    returnedDate: "2023-01-29",
-    status: "Active",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-{
-    employeeId: "EMP-016",
-    employeeName: "Employee 16",
-    assetId: "AST-016",
-    assignedDate: "2023-01-16",
-    returnedDate: "2023-01-30",
-    status: "Active",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-  {
-    employeeId: "EMP-017",
-    employeeName: "Employee 17",
-    assetId: "AST-017",
-    assignedDate: "2023-01-17",
-    returnedDate: "2023-01-31",
-    status: "Returned",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-  {
-    employeeId: "EMP-018",
-    employeeName: "Employee 18",
-    assetId: "AST-018",
-    assignedDate: "2023-01-18",
-    returnedDate: "2023-01-25",
-    status: "Returned",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-{
-    employeeId: "EMP-019",
-    employeeName: "Employee 19",
-    assetId: "AST-019",
-    assignedDate: "2023-01-19",
-    returnedDate: "2023-01-26",
-    status: "Active",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-  {
-    employeeId: "EMP-020",
-    employeeName: "Employee 20",
-    assetId: "AST-020",
-    assignedDate: "2023-01-20",
-    returnedDate: "2023-01-25",
-    status: "Active",
-    actions: ["Edit", "Delete"],
-    notes: "Laptop is damaged"
-  },
-]
-
-
+    id: 5,
+    employee_id: "EMP-005",
+    asset_id: "AST-2026-005",
+    note: null,
+    status: "active",
+    assigned_date: "2026-01-05",
+    returned_date: null,
+    created_at: "2026-06-03T07:06:49.000000Z",
+    updated_at: "2026-06-03T07:06:49.000000Z",
+    asset: {
+      asset_id: "AST-2026-005",
+      name: "ThinkPad X1 Carbon",
+      serial_number: "SN88990011",
+      purchased_date: "2026-04-20",
+      warranty_period: 36,
+      model: "Lenovo",
+      ram_capacity: "32 GB",
+      storage: "1 TB SSD",
+      category_id: 1,
+      status: "assigned",
+      condition: "new",
+      created_at: "2026-04-20T04:58:51.000000Z",
+      updated_at: "2026-06-03T07:06:49.000000Z",
+      deleted_at: null
+    }
+  }
+  // You can extend additional objects down here duplicating this structural schema format
+];

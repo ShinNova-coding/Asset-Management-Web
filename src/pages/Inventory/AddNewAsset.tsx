@@ -7,27 +7,26 @@ import { ArrowLeft, Package, Settings, ImageIcon, Upload, X, Cpu } from 'lucide-
 const AddNewAsset = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id: routeId } = useParams<{ id: string }>(); // Capture dynamic :id from route parameters
+  const { id: routeId } = useParams<{ id: string }>(); 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Capture both potential variants from React Router state
   const stateId = location.state?.id;
   const stateEditItem = location.state?.editItem;
 
-  // Track if we are editing by checking route params or state variables
   const isEditMode = !!stateEditItem || !!stateId || !!routeId;
 
   const [formData, setFormData] = useState({
     assetId: '', 
     name: '',
-    category: 'Laptops', // Default to Laptops instead of empty string to prevent payload errors
+    category: 'Goods',
     model: '',
     ram: '',
     storage: '',
     serial_number: '', 
     purchased_date: '', 
     warranty: '',
-    action: 'available' // Default to available instead of blank
+    condition: 'fair', // Added condition state
+    action: 'available' 
   });
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -42,20 +41,19 @@ const AddNewAsset = () => {
     return ""; 
   };
 
-  // Resolve target asset data depending on what the table sent, or clear form if transitioning to "add" mode
   useEffect(() => {
     if (!isEditMode) {
-      // ✨ FIX: If we are not in edit mode, reset the form and preview states completely
       setFormData({
         assetId: '',
         name: '',
-        category: 'Laptops',
+        category: 'Goods',
         model: '',
         ram: '',
         storage: '',
         serial_number: '',
         purchased_date: '',
         warranty: '',
+        condition: 'fair',
         action: 'available'
       });
       setSelectedImage(null);
@@ -77,9 +75,8 @@ const AddNewAsset = () => {
       }
     }
 
-    // Populate data states if a matching asset item was discovered
     if (activeItem) {
-      let resolvedCategoryStr = "Laptops";
+      let resolvedCategoryStr = "Goods";
       if (activeItem.category) {
         resolvedCategoryStr = typeof activeItem.category === "object" 
           ? activeItem.category.name 
@@ -87,25 +84,36 @@ const AddNewAsset = () => {
       }
 
       setFormData({
-        assetId: activeItem.asset_id || activeItem.id || String(targetId || ''),
+        assetId: activeItem.asset_code || activeItem.asset_id || activeItem.id || String(targetId || ''),
         name: activeItem.name || '',
-        category: resolvedCategoryStr || 'Laptops',
+        category: resolvedCategoryStr || 'Goods',
         model: activeItem.model || '',
         ram: activeItem.ram_capacity || activeItem.ram || '',
         storage: activeItem.storage || '',
         serial_number: activeItem.serial_number || '',
         purchased_date: formatToInputDate(activeItem.purchased_date || activeItem.purchase_date || activeItem.purchase),
         warranty: activeItem.warranty_period || activeItem.warranty || '',
+        condition: activeItem.condition || 'fair', 
         action: activeItem.status || activeItem.action || 'available'
       });
+      
+      const API_REAL_IP = "http://192.168.100.186:1010";
+      let rawImageSource = activeItem.preview_url || activeItem.image_url || activeItem.image || "";
 
-      if (activeItem.image_url) {
-        setImagePreview(activeItem.image_url);
-      } else if (activeItem.image) {
-        setImagePreview(activeItem.image);
+      if (rawImageSource) {
+        if (rawImageSource.startsWith("data:image")) {
+          setImagePreview(rawImageSource);
+        } else if (rawImageSource.startsWith("http://localhost")) {
+          const correctedUrl = rawImageSource.replace("http://localhost", API_REAL_IP);
+          setImagePreview(correctedUrl);
+        } else if (rawImageSource.startsWith("http")) {
+          setImagePreview(rawImageSource);
+        } else {
+          const cleanPath = rawImageSource.startsWith("/") ? rawImageSource : `/${rawImageSource}`;
+          setImagePreview(`${API_REAL_IP}${cleanPath}`);
+        }
       }
     } else if (targetId) {
-      // If in edit mode via URL parameter but fallback cache hasn't loaded yet, preserve URL ID parameter inside form
       setFormData(prev => ({ ...prev, assetId: String(targetId) }));
     }
   }, [stateId, stateEditItem, routeId, isEditMode]);
@@ -200,53 +208,53 @@ const AddNewAsset = () => {
       if (selectedImage) {
         const base64WithHeader = await convertImageToBase64(selectedImage);
         finalizedImageString = stripBase64Header(base64WithHeader);
-      } else if (imagePreview && (imagePreview.startsWith("data:") || !imagePreview.startsWith("http"))) {
+      } else if (imagePreview && imagePreview.startsWith("data:")) {
         finalizedImageString = stripBase64Header(imagePreview);
-      } else if (isEditMode && imagePreview && imagePreview.startsWith("http")) {
-        finalizedImageString = ""; 
-      } else {
-        const dummyWithHeader = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
-        finalizedImageString = stripBase64Header(dummyWithHeader);
-      }
+      }  else {
+  finalizedImageString = ""; 
+}
 
       const updatedStatusText = formData.action.trim() || "available";
 
-      const categoryMap: Record<string, number> = {
-        "Desktops": 1,
-        "Laptops": 2,
-        "Printers": 3,
-        "Monitors": 4,
-        "Networking": 5,
-        "Accessories": 6
+      const categoryMap: Record<string, string> = {
+        "Goods": "a1f0d854-58b0-45b5-9541-448f080e1bbc", 
+        "Funitures": "a1f29511-0c11-47a3-91db-d90c44852afe"
       };
-      const resolvedCategoryId = categoryMap[formData.category] || 2;
+
+      const resolvedCategoryId = categoryMap[formData.category] || "a1f0d854-58b0-45b5-9541-448f080e1bbc";
+      const targetId = routeId || stateId || stateEditItem?.asset_id || stateEditItem?.id;
+
+      if (isEditMode && (!targetId || targetId === "undefined" || targetId === "id")) {
+        alert("Invalid Asset ID detected.");
+        return;
+      }
 
       const assetPayload: Record<string, any> = {
-        asset_id: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`,
-        name: formData.name.trim(),
-        serial_number: formData.serial_number.trim(),
-        purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
-        warranty_period: parseInt(formData.warranty) || 12, 
-        model: formData.model.trim() || "N/A",
-        ram_capacity: formData.ram.trim() || "N/A",
-        storage: formData.storage.trim() || "N/A",
-        category_id: resolvedCategoryId, 
-        status: updatedStatusText.toLowerCase(), 
-        condition: "new",
-      };
+  ...(isEditMode && { id: targetId }),
+  asset_code: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`, 
+  name: formData.name.trim(),
+  serial_number: formData.serial_number.trim(),
+  purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
+  warranty_period: formData.warranty || "12", 
+  model: formData.model.trim() || "N/A",
+  ram_capacity: formData.ram.trim() || "N/A",
+  storage: formData.storage.trim() || "N/A",
+  category_id: resolvedCategoryId, 
+  status: updatedStatusText.toLowerCase(), 
+  condition: formData.condition,
+};
 
-      if (finalizedImageString) {
-        assetPayload.image = finalizedImageString;
-      }
+
+if (finalizedImageString && finalizedImageString.trim() !== "") {
+  assetPayload.image = finalizedImageString;
+}
 
       console.log("🚀 Payload sending to backend server stream:", assetPayload);
 
       const API_URL = "http://192.168.100.186:1010/api/asset"; 
-      const targetId = stateEditItem?.asset_id || stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
-      
-      const method = isEditMode ? "PUT" : "POST";
-      const currentToken = localStorage.getItem("token") || "128|T7ZfI9NF6X0CnWSOpEIxdy4Xjka4mKtiYw4bllii6732bd8a";
+      const method = isEditMode ? "PATCH" : "POST";
+      const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
 
       const response = await fetch(url, {
         method: method,
@@ -288,10 +296,10 @@ const AddNewAsset = () => {
           <button 
             type="button"
             onClick={goBack}
-            className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+            className="flex items-center text-sm font-medium text-black hover:text-blue-700 transition-colors"
           >
             <ArrowLeft size={16} className="mr-2" />
-            Back to Inventory
+            Back
           </button>
           <h1 className="text-2xl font-bold text-slate-900">
             {isEditMode ? "Modify Asset Records" : "Register New IT Asset"}
@@ -303,7 +311,6 @@ const AddNewAsset = () => {
           <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
               
-              {/* Core Info */}
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Package size={18} className="text-blue-600" />
@@ -318,7 +325,7 @@ const AddNewAsset = () => {
                       name="assetId"
                       value={formData.assetId}
                       onChange={handleInputChange}
-                      disabled={isEditMode} // Usually recommended to disable editing IDs
+                      disabled={isEditMode} 
                       placeholder="e.g. AST-2026-03" 
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm disabled:bg-slate-100 disabled:text-slate-500" 
                     />
@@ -345,30 +352,48 @@ const AddNewAsset = () => {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
                     >
-                      <option value="Desktops">Desktops</option>
-                      <option value="Laptops">Laptops</option>
-                      <option value="Printers">Printers</option>
-                      <option value="Monitors">Monitors</option>
-                      <option value="Networking">Networking</option>
-                      <option value="Accessories">Accessories</option>
+                      <option value="Goods">Goods</option>
+                      <option value="Funitures">Funitures</option>
+                    </select>
+                  </div>
+
+                  {/* Added Condition Dropdown */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-600">Asset Condition</label>
+                    <select
+                      name="condition"
+                      value={formData.condition}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                    >
+                      <option value="new">New</option>
+                      <option value="good">Good</option>
+                      <option value="fair">Fair</option>
+                      <option value="bad">Bad</option>
                     </select>
                   </div>
 
                   <div className="space-y-1.5 md:col-span-2">
                     <label className="text-xs font-bold text-slate-600">Action Status</label>
-                    <input 
-                      type="text" 
+                    <select 
+                      
                       name="action"
                       value={formData.action}
                       onChange={handleInputChange}
-                      placeholder="e.g. Assigned, Available, Maintenance, Pending, Expired, Retired" 
+                     
                       className="w-full px-3.5 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-sm bg-slate-50/50 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400" 
-                    />
+                    >
+                      <option value="assigned">Assigned</option>
+                      <option value="available">Available</option>
+                      <option value="maintenance">Maintenance</option>
+                      <option value="pending">Pending</option>
+                      <option value="expired">Expired</option>
+                      <option value="retired">Retired</option>
+                    </select>
                   </div>
                 </div>
               </section>
-
-              {/* Hardware Specifications */}
+              
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Cpu size={18} className="text-blue-600" />
@@ -426,8 +451,7 @@ const AddNewAsset = () => {
                   </div>
                 </div>
               </section>
-
-              {/* Purchase Metadata */}
+            
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Settings size={18} className="text-blue-600" />
@@ -459,7 +483,6 @@ const AddNewAsset = () => {
                 </div>
               </section>
 
-              {/* Actions Footer */}
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                 <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
                 <button type="submit" className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
@@ -469,7 +492,6 @@ const AddNewAsset = () => {
             </form>
           </div>
 
-          {/* Photo Management Sidebar Block */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <ImageIcon size={18} className="text-blue-600" />

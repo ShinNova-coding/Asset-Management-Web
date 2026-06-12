@@ -7,7 +7,7 @@ export function InventorySearch({ value, onChange }: { value: string, onChange: 
     <div className="relative flex-1">
       <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
       <Input 
-        className="pl-10 text-gray-400" 
+        className="pl-10 w-full" 
         placeholder="Search products..." 
         value={value} 
         onChange={(e) => onChange(e.target.value)} 
@@ -15,3 +15,8 @@ export function InventorySearch({ value, onChange }: { value: string, onChange: 
     </div>
   )
 }
+
+
+
+     
+       

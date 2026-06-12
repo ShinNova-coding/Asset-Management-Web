@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { FaCirclePlus } from "react-icons/fa6"
 
-export function InventoryAddNewAsset() {
+export function AssignmentAssign() {
   const navigate = useNavigate()
 
   const goToNewPage = () => {
     
-    navigate("/inventory/add")
+    navigate("/assignment/add")
   }
 
   return (
@@ -17,7 +17,9 @@ export function InventoryAddNewAsset() {
       onClick={goToNewPage}
       className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
     >
-      <FaCirclePlus size={16} /> Add New Asset
+     <FaCirclePlus size={16} /> Assign
     </Button>
+    
   )
 }
+ 

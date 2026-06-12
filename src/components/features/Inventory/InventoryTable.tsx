@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { useNavigate } from "react-router-dom" 
-import { FiChevronLeft, FiChevronRight, FiAlertCircle, FiCheckCircle, FiX } from "react-icons/fi" 
+import { useNavigate } from "react-router-dom"
+import { FiChevronLeft, FiChevronRight, FiAlertCircle, FiCheckCircle, FiX } from "react-icons/fi"
+import { Search } from "lucide-react"
 import {
   flexRender,
   getCoreRowModel,
@@ -23,7 +24,6 @@ import {
 import { Button } from "@/components/ui/button"
 
 import { columns } from "./InventoryColumns"
-import { InventorySearch } from "./InventorySearchBox"
 import { InventoryFilter } from "./InventoryFilter"
 
 interface InventoryTableProps {
@@ -31,14 +31,13 @@ interface InventoryTableProps {
 }
 
 export function InventoryTable({ data: initialData }: InventoryTableProps) {
-  const navigate = useNavigate() 
-  
+  const navigate = useNavigate()
+
   const processExpiredWarranties = (items: any[]): any[] => {
     if (!Array.isArray(items)) return []
     return items.map((item) => {
       const warrantyValue = item.warranty_period || item.warranty || ""
       const warrantyText = String(warrantyValue).toLowerCase()
-      
       if (warrantyText.includes("expired")) {
         return { ...item, status: "retired" }
       }
@@ -50,7 +49,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     if (typeof window === "undefined") return baseItems
     const excludedTrack = localStorage.getItem("deleted_asset_ids")
     const deletedIds: string[] = excludedTrack ? JSON.parse(excludedTrack) : []
-    return baseItems.filter((item) => !deletedIds.includes(item.asset_id));
+    return baseItems.filter((item) => !deletedIds.includes(item.id))
   }
 
   const [data, setData] = React.useState<any[]>(() => {
@@ -58,33 +57,28 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
       const cachedData = localStorage.getItem("inventory_data")
       if (cachedData) {
         const parsed = JSON.parse(cachedData)
-        if (parsed.length > 0) {
-          return getExcludedDeletedItems(processExpiredWarranties(parsed))
-        }
+        if (parsed.length > 0) return getExcludedDeletedItems(processExpiredWarranties(parsed))
       }
     }
     return getExcludedDeletedItems(processExpiredWarranties(initialData || []))
-  }) 
+  })
 
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-
   const [deleteModal, setDeleteModal] = React.useState<{ isOpen: boolean; targetId: string | null }>({
     isOpen: false,
     targetId: null,
   })
   const [showToast, setShowToast] = React.useState(false)
 
-  React.useEffect(() => {
+   React.useEffect(() => {
     if (initialData) {
       setData(getExcludedDeletedItems(processExpiredWarranties(initialData)))
     }
   }, [initialData])
 
-  React.useEffect(() => {
-    if (data) {
-      localStorage.setItem("inventory_data", JSON.stringify(data))
-    }
+   React.useEffect(() => {
+    if (data) localStorage.setItem("inventory_data", JSON.stringify(data))
   }, [data])
 
   const handleDeleteTrigger = (id: string) => {
@@ -92,119 +86,100 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   }
 
   const handleConfirmDelete = async () => {
-    if (deleteModal.targetId) {
-      const targetId = deleteModal.targetId
-      
-      try {
-        const API_URL = `http://192.168.100.185:1010/api/asset/${targetId}`;
-        const currentToken = localStorage.getItem("token") || "128|T7ZfI9NF6X0CnWSOpEIxdy4Xjka4mKtiYw4bllii6732bd8a";
+    if (!deleteModal.targetId) return;
 
-        const response = await fetch(API_URL, {
-          method: "DELETE",
-          headers: {
-            "Accept": "application/json",
-            "Authorization": `Bearer ${currentToken}`
-          }
-        });
+    const targetId = deleteModal.targetId.trim();
+    const API_URL = `http://192.168.100.186:1010/api/asset/${targetId}`;
+    const token = localStorage.getItem("token") || "";
 
-        if (!response.ok) {
-          throw new Error(`Server returned status code: ${response.status}`);
-        }
+    try {
+      const response = await fetch(API_URL, {
+        method: "DELETE", 
+        headers: {
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id: targetId }) 
+      });
 
-        const updatedList = data.filter((item) => item.asset_id !== targetId)
-        setData(updatedList)
-        localStorage.removeItem("inventory_data")
+      const result = await response.json();
 
-        if (typeof window !== "undefined") {
-          const excludedTrack = localStorage.getItem("deleted_asset_ids")
-          const deletedIds: string[] = excludedTrack ? JSON.parse(excludedTrack) : []
-          if (!deletedIds.includes(targetId)) {
-            deletedIds.push(targetId)
-            localStorage.setItem("deleted_asset_ids", JSON.stringify(deletedIds))
-          }
-        }
-        
-        setShowToast(true)
-      } catch (error: any) {
-        console.error("❌ Failed to delete asset:", error);
-        alert(`Could not delete asset from server:\n${error.message}`);
-      } finally {
-        setDeleteModal({ isOpen: false, targetId: null })
+      if (!response.ok) {
+        throw new Error(result.message || "Delete failed");
       }
+
+      setData((prev) => prev.filter((item) => item.id !== targetId));
+      setShowToast(true);
+    } catch (error: any) {
+      console.error("❌ Delete failed:", error);
+      alert(`Delete failed: ${error.message}`);
+    } finally {
+      setDeleteModal({ isOpen: false, targetId: null });
     }
   }
 
-  React.useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => setShowToast(false), 3000)
-      return () => clearTimeout(timer)
-    }
-  }, [showToast])
-
-  // 🛠️ Triggers when clicking "Edit" action button specifically (goes to /inventory/add)
   const handleEdit = (item: any) => {
-    const targetId = item.asset_id || item.id;
-    navigate("/inventory/add", { 
-      state: { 
-        id: targetId,
-        editItem: item 
-      } 
-    })
+    navigate("/inventory/add", { state: { id: item.id, editItem: item } })
   }
 
-  // 🌟 NEW: Triggers when clicking a Table Row (goes to read-only details page /inventory/:id)
   const handleViewDetails = (item: any) => {
-    const targetId = item.asset_id || item.id;
-    navigate(`/inventory/${targetId}`, {
-      state: {
-        id: targetId,
-        detailsItem: item // Passes item details directly to your inventoryDetail.tsx view
-      }
-    })
+    navigate(`/inventory/${item.id}`, { state: { id: item.id, detailsItem: item } })
   }
 
   const table = useReactTable({
     data,
     columns,
-    state: { 
-      globalFilter,
-      columnFilters, 
-    },
+    state: { globalFilter, columnFilters },
     meta: {
       deleteRow: handleDeleteTrigger,
-      editRow: handleEdit, // Kept for your dropdown action menus or edit icon columns
+      editRow: handleEdit,
       updateRowAction: (targetId: string, newAction: string) => {
-        setData((prevData) =>
-          prevData.map((item) =>
-            item.asset_id === targetId ? { ...item, action: newAction } : item
-          )
-        )
+        setData((prevData) => prevData.map((item) => (item.id === targetId ? { ...item, action: newAction } : item)))
       },
     },
     onGlobalFilterChange: setGlobalFilter,
-    onColumnFiltersChange: setColumnFilters, 
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     initialState: { pagination: { pageSize: 5 } },
   })
 
+  const pageCount = table.getPageCount()
+  const currentPage = table.getState().pagination.pageIndex
+
   return (
     <div className="w-full space-y-4 p-3 relative">
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full">
-        <div className="flex-1">
-          <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400 overflow-hidden">
-            <InventorySearch value={globalFilter} onChange={setGlobalFilter} />
-          </div>
+      {/* SEARCH AND FILTERS */}
+      <div className="flex gap-4 rounded-t-xl bg-white p-4 border border-slate-100 shadow-sm">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
+          <input
+            type="text"
+            placeholder="Search..."
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm"
+          />
         </div>
-        <div className="w-full md:w-[180px]">
-          <div className="bg-transparent p-0">
-            <InventoryFilter table={table} />
-          </div>
+
+        <div className="relative w-48">
+          <select
+            value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
+            onChange={(e) => table.getColumn("status")?.setFilterValue(e.target.value)}
+            className="w-full rounded-md border border-slate-400 bg-slate-50 px-4 py-2 text-sm"
+          >
+            <option value="">All Status</option>
+            <option value="available">Available</option>
+            <option value="assigned">Assigned</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="retired">Retired</option>
+          </select>
         </div>
       </div>
 
-      <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
+      <div className="rounded-b-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-blue-400">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -217,81 +192,95 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
               </TableRow>
             ))}
           </TableHeader>
-          
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow 
-                  key={row.id} 
-                  className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer"
-                >
+                <TableRow key={row.id} className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer">
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                      key={cell.id} 
-                      className="py-3 text-slate-700 text-sm"
-                      onClick={(e) => {
-                        // 🌟 FIX: If the user clicks any standard column field, route them to Details. 
-                        // If they specifically hit the "actions" block (edit/delete buttons), block this route.
-                        if (cell.column.id !== "actions") {
-                          handleViewDetails(row.original);
-                        }
-                      }}
-                    >
+                    <TableCell key={cell.id} className="py-3 text-slate-700 text-sm" onClick={() => cell.column.id !== "actions" && handleViewDetails(row.original)}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-slate-400 text-sm">
-                  No assets available.
-                </TableCell>
-              </TableRow>
+              <TableRow><TableCell colSpan={columns.length} className="h-24 text-center text-slate-400 text-sm">No assets available.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>
       </div>
 
-      {/* Confirmation Delete Modal */}
+      {/* PAGINATION CONTROLS */}
+      <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
+        <div className="text-xs text-slate-500 font-medium">
+          Page {currentPage + 1} of {pageCount} ({table.getFilteredRowModel().rows.length} total assets)
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <FiChevronLeft size={16} />
+          </Button>
+
+          <div className="flex gap-1 items-center">
+            {Array.from({ length: pageCount }).map((_, index) => {
+              if (
+                index === 0 ||
+                index === pageCount - 1 ||
+                (index >= currentPage - 1 && index <= currentPage + 1)
+              ) {
+                return (
+                  <Button
+                    key={index}
+                    variant={currentPage === index ? "default" : "outline"}
+                    size="sm"
+                    className={currentPage === index ? "bg-blue-300 hover:bg-blue-400 text-white border-none" : "bg-slate-200"}
+                    onClick={() => table.setPageIndex(index)}
+                  >
+                    {index + 1}
+                  </Button>
+                )
+              }
+              if (index === currentPage - 2 || index === currentPage + 2) {
+                return <span key={index} className="px-2 text-gray-500">...</span>
+              }
+              return null
+            })}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <FiChevronRight size={16} />
+          </Button>
+        </div>
+      </div>
+
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
           <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
-            <div className="flex items-center gap-3 text-red-600">
-              <FiAlertCircle size={22} />
-              <h3 className="text-base font-bold text-slate-900">Confirm Permanent Removal</h3>
-            </div>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Are you sure you want to completely delete this asset? This action will permanently remove the record from the database server and Apidog history.
-            </p>
+            <h3 className="text-base font-bold text-slate-900">Confirm Delete</h3>
+            <p className="text-xs text-slate-500">Are you sure you want to delete this asset?</p>
             <div className="flex justify-end gap-2.5 pt-2">
-              <button
-                type="button"
-                onClick={() => setDeleteModal({ isOpen: false, targetId: null })}
-                className="px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmDelete}
-                className="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-xs transition-colors"
-              >
-                Delete Permanently
-              </button>
+              <button onClick={() => setDeleteModal({ isOpen: false, targetId: null })} className="px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold">Cancel</button>
+              <button onClick={handleConfirmDelete} className="px-4 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold">Delete</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* UI Action Notification Toast */}
       {showToast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-800">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg">
           <FiCheckCircle className="text-emerald-400" size={16} />
-          <span className="text-xs font-medium">Asset successfully deleted from database.</span>
-          <button onClick={() => setShowToast(false)} className="text-slate-400 hover:text-white ml-2 transition-colors">
-            <FiX size={14} />
-          </button>
+          <span className="text-xs font-medium">Asset successfully deleted.</span>
+          <button onClick={() => setShowToast(false)}><FiX size={14} /></button>
         </div>
       )}
     </div>
