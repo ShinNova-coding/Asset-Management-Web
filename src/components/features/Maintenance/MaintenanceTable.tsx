@@ -1,7 +1,17 @@
 "use client"
 
 import * as React from "react"
-import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiX } from "react-icons/fi"
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiCheckCircle,
+  FiCheck,
+  FiX,
+  FiArrowRight,
+} from "react-icons/fi"
+import { FaEdit } from "react-icons/fa"
+import { RiDeleteBin4Fill } from "react-icons/ri"
+import { LuEye } from "react-icons/lu"
 import {
   flexRender,
   getCoreRowModel,
@@ -24,86 +34,123 @@ import type { Maintenance } from "@/data/maintenance"
 import { columns as baseColumns } from "./MaintenanceColumns"
 import { MaintenanceSearch } from "./MaintenanceSearchBox"
 import { MaintenanceRemark } from "./MaintenanceRemark"
-import { MaintenanceDetailModal } from "./MaintenanceDetailModal"
 import { useNavigate } from "react-router-dom"
 
-const durationOptions = [
-  { value: "1-hour", label: "1 hour" },
-  { value: "2-hours", label: "2 hours" },
-  { value: "half-day", label: "Half day" },
-  { value: "full-day", label: "Full day" },
-]
+// ── Shared input style (consistent with Remark modal) ───────────────────────
+const inputCls =
+  "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
 
-interface MaintenanceTableProps {
-  data: Maintenance[]
-}
 
-export function MaintenanceTable({ data: initialData }: MaintenanceTableProps) {
-  const [data, setData] = React.useState<Maintenance[]>(initialData)
+export function MaintenanceTable() {
+  const [data, setData] = React.useState<Maintenance[]>([])
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+  const fetchMaintenance = async () => {
+    try {
+      const token = localStorage.getItem("token")
+
+      const response = await fetch(
+        "http://192.168.100.186:1010/api/maintenance",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const result = await response.json()
+
+      result.data.forEach((item: any) => {
+  console.log("ROW STATUS:", item.status)
+})
+
+      // ✅ IMPORTANT FIX HERE
+      const formatted = result.data.map((item: any) => ({
+        "employee name": item.user?.name ?? "-",
+        "asset Name": item.asset?.name ?? "-",
+        "asset ID": item.assets_id ?? "-",
+        category: item.category?.name ?? "-",
+        maintenanceDate: item.maintenance_date ?? "-",
+        returnedDate: item.completed_date ?? "-",
+        status: (item.status ?? "").trim().toLowerCase(),
+        remark: item.remark ?? "",
+      }))
+
+      setData(formatted)
+    } catch (error) {
+      console.error("Failed to fetch maintenance data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  fetchMaintenance()
+}, [])
+
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [toastMessage, setToastMessage] = React.useState<string | null>(null)
   const [selectedItem, setSelectedItem] = React.useState<Maintenance | null>(null)
-  const [dialogMode, setDialogMode] = React.useState<"remark" | "detail" | null>(null)
+
+  // "remark" = new request flow | "edit" = edit approved record | "view" = view complete record
+  const [dialogMode, setDialogMode] = React.useState<"remark" | "edit" | "view" | null>(null)
+
+  // Remark (new request) state
   const [remarkText, setRemarkText] = React.useState("")
-  const [vendorName, setVendorName] = React.useState("")
-  const [estimatedCost, setEstimatedCost] = React.useState("0.00")
-  const [duration, setDuration] = React.useState("")
-  const [laptopType, setLaptopType] = React.useState("")
 
-  const handleRowAction = (item: Maintenance) => {
-    setSelectedItem(item)
+  // Edit (approved → complete) state — all 5 fields
+  const [editEmployeeName, setEditEmployeeName] = React.useState("")
+  const [editAssetName, setEditAssetName] = React.useState("")
+  const [editAssetID, setEditAssetID] = React.useState("")
+  const [editCategory, setEditCategory] = React.useState("")
+  const [editMaintenanceDate, setEditMaintenanceDate] = React.useState("")
+  const [editReturnedDate, setEditReturnedDate] = React.useState("")
 
-    if (item.stage === "pending") {
-      setRemarkText(item.remark ?? "")
-      setDialogMode("remark")
-      return
-    }
+  const navigate = useNavigate()
 
-    if (item.stage === "approved") {
-      setVendorName(item.vendorName ?? "")
-      setEstimatedCost(item.estimatedCost ?? "0.00")
-      setDuration(item.duration ?? "")
-      setLaptopType(item.laptopType ?? item.category ?? "")
-      setDialogMode("detail")
-      return
-    }
-  }
-
+  // ── Close any dialog ────────────────────────────────────────────────────────
   const closeDialog = () => {
     setDialogMode(null)
     setSelectedItem(null)
     setRemarkText("")
-    setVendorName("")
-    setEstimatedCost("0.00")
-    setDuration("")
-    setLaptopType("")
+    setEditEmployeeName("")
+    setEditAssetName("")
+    setEditAssetID("")
+    setEditCategory("")
+    setEditMaintenanceDate("")
+    setEditReturnedDate("")
   }
 
-const submitRemark = () => {
-  if (!selectedItem) return
+  // ── Open REMARK dialog (Request row) ────────────────────────────────────────
+  const openRemarkDialog = (item: Maintenance) => {
+    setSelectedItem(item)
+    setRemarkText(item.remark ?? "")
+    setDialogMode("remark")
+  }
 
-  setData((prev) =>
-    prev.map((row) =>
-      row["employee name"] === selectedItem["employee name"]
-        ? {
-            ...row,
-            stage: "approved",
-            status: "In Progress",
-            remark: remarkText || "No remark provided",
-          }
-        : row
-    )
-  )
+  // ── Open EDIT dialog (Approved row) ─────────────────────────────────────────
+  const openEditDialog = (item: Maintenance) => {
+    setSelectedItem(item)
+    setEditEmployeeName(item["employee name"] ?? "")
+    setEditAssetName(item["asset Name"] ?? "")
+    setEditAssetID(item["asset ID"] ?? "")
+    setEditCategory(item.category ?? "")
+    setEditMaintenanceDate(item.maintenanceDate ?? "")
+    setEditReturnedDate(item.returnedDate ?? "")
+    setDialogMode("edit")
+  }
 
-  setToastMessage(
-    `${selectedItem["employee name"]} approved and moved to in progress.`
-  )
+  // ── Open VIEW dialog (Complete row) ─────────────────────────────────────────
+  const openViewDialog = (item: Maintenance) => {
+    setSelectedItem(item)
+    setDialogMode("view")
+  }
 
-  closeDialog()
-}
-
-const submitMaintenanceDetail = () => {
+  // ── Submit REMARK → status goes to "Approved" ────────────────────────────────
+ const submitRemark = () => {
   if (!selectedItem) return
 
   setData((prev) =>
@@ -111,23 +158,45 @@ const submitMaintenanceDetail = () => {
       row["asset ID"] === selectedItem["asset ID"]
         ? {
             ...row,
-            stage: "completed",
-            status: "Complete",
-            vendorName: vendorName || "Unknown vendor",
-            estimatedCost,
-            duration: duration || "Not specified",
-            laptopType: laptopType || row.category,
+            status: "approved", // IMPORTANT lowercase consistency
+            remark: remarkText || "No remark provided",
           }
         : row
     )
   )
 
-  setToastMessage(
-    `${selectedItem["employee name"]} maintenance completed.`
-  )
-
+  setToastMessage(`${selectedItem["employee name"]} approved successfully.`)
   closeDialog()
 }
+  // ── Submit EDIT → saves all fields and status goes to "Complete" ─────────────
+  const submitEdit = () => {
+    if (!selectedItem) return
+    setData((prev) =>
+      prev.map((row) =>
+        row["asset ID"] === selectedItem["asset ID"]
+          ? {
+              ...row,
+              "employee name": editEmployeeName || row["employee name"],
+              "asset Name": editAssetName || row["asset Name"],
+              "asset ID": editAssetID || row["asset ID"],
+              category: editCategory || row.category,
+              maintenanceDate: editMaintenanceDate || row.maintenanceDate,
+              returnedDate: editReturnedDate || row.returnedDate,
+              stage: "completed",
+              status: "Complete",
+            }
+          : row
+      )
+    )
+    setToastMessage(`${editEmployeeName || selectedItem["employee name"]} marked as Complete.`)
+    closeDialog()
+  }
+
+  // ── Delete a row ─────────────────────────────────────────────────────────────
+  const deleteRow = (item: Maintenance, label: string) => {
+    setData((prev) => prev.filter((r) => r["asset ID"] !== item["asset ID"]))
+    setToastMessage(`${item["employee name"]} ${label}`)
+  }
 
   React.useEffect(() => {
     if (toastMessage) {
@@ -136,10 +205,11 @@ const submitMaintenanceDetail = () => {
     }
   }, [toastMessage])
 
-  // Patch columns to update status column and actions for 'with request' state
+  // ── Column overrides ─────────────────────────────────────────────────────────
   const columns = React.useMemo(() => {
     return baseColumns.map((col) => {
-      // Use 'id' for matching status column
+
+      // Status badge
       if ((col as any).accessorKey === "status" || (col as any).id === "status") {
         return {
           ...col,
@@ -147,17 +217,16 @@ const submitMaintenanceDetail = () => {
           cell: ({ row }: { row: any }) => {
             const status = row.getValue("status") as string
             const statusStyles: Record<string, string> = {
-              Request: "bg-red-100 text-red-700 border border-red-200",
-              Pending: "bg-gray-200 text-gray-700 border border-gray-200",
-              "In Progress": "bg-amber-100 text-amber-700 border border-amber-200",
-              Complete: "bg-green-100 text-green-700 border border-green-200",
-              Cancelled: "bg-gray-200 text-gray-600 border border-gray-300",
-            }
+  requested: "bg-red-100 text-red-700 border border-red-200",
+  pending: "bg-gray-200 text-gray-700 border border-gray-200",
+  approved: "bg-green-100 text-green-700 border border-green-200",
+  "in progress": "bg-amber-100 text-amber-700 border border-amber-200",
+  returned: "bg-blue-100 text-blue-700 border border-blue-200",
+  canceled: "bg-gray-200 text-gray-600 border border-gray-300",
+}
             return (
               <div className="flex items-center">
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[status] ?? "bg-slate-100 text-slate-700 border border-slate-200"}`}
-                >
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[status] ?? "bg-slate-100 text-slate-700 border border-slate-200"}`}>
                   {status}
                 </span>
               </div>
@@ -165,90 +234,87 @@ const submitMaintenanceDetail = () => {
           },
         }
       }
+
+      // Actions column
       if ((col as any).id === "actions") {
         return {
           ...col,
-          cell: ({ row, table }: { row: any; table: any }) => {
-            const item = row.original as Maintenance & { status?: string }
-            // Show Approve/Cancel for 'with request' status
-            if (item.status === "Request") {
+          cell: ({ row }: { row: any }) => {
+            const item = row.original as Maintenance
+
+            // ── REQUEST: → + 🗑 ──────────────────────────────────────────────
+            if (item.status === "requested") {
               return (
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="default"
-                    onClick={e => {
-                      e.stopPropagation()
-                      setData(prev => prev.map(row =>
-                        row["asset ID"] === item["asset ID"]
-                          ? { ...row, status: "Pending", stage: "pending", _showMaintain: true } as Maintenance & { _showMaintain?: boolean }
-                          : row
-                      ))
-                      setToastMessage(`${item["employee name"]} request approved.`)
-                    }}
-                  >Approve</Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={e => {
-                      e.stopPropagation()
-                      setData(prev => prev.filter(row => row["asset ID"] !== item["asset ID"]))
-                      setToastMessage(`${item["employee name"]} request cancelled and removed.`)
-                    }}
-                  >Cancel</Button>
+                 <div className="flex items-center gap-3">
+      <button
+        title="Approve Request"
+        className="text-green-500 hover:text-green-700 transition p-1"
+        onClick={(e) => {
+          e.stopPropagation()
+          openRemarkDialog(item)
+        }}
+      >
+        <FiCheck size={20} />
+      </button>
+                  <button
+                    title="Cancel Request"
+                    className="text-red-500 hover:text-red-700 transition p-1"
+                    onClick={(e) => { e.stopPropagation(); deleteRow(item, "request cancelled.") }}
+                  >
+                    <RiDeleteBin4Fill size={20} />
+                  </button>
                 </div>
               )
             }
-            // After Approve, show Maintain button for this row only
-            if (item.status === "Pending" && (item as any)._showMaintain) {
+
+            // ── APPROVED: ✏️ + 🗑 ────────────────────────────────────────────
+            if (item.status === "approved") {
               return (
-                <Button
-                  size="sm"
-                  variant="default"
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleRowAction(item)
-                  }}
-                >Maintain</Button>
+                <div className="flex items-center gap-3">
+                  <button
+                    title="Edit"
+                    className="text-blue-300 hover:text-blue-700 transition p-1"
+                    onClick={(e) => { e.stopPropagation(); openEditDialog(item) }}
+                  >
+                    <FaEdit size={20} />
+                  </button>
+                  <button
+                    title="Delete"
+                    className="text-red-500 hover:text-red-700 transition p-1"
+                    onClick={(e) => { e.stopPropagation(); deleteRow(item, "record deleted.") }}
+                  >
+                    <RiDeleteBin4Fill size={20} />
+                  </button>
+                </div>
               )
             }
-            // Show Complete button when status is In Progress
-            if (item.status === "In Progress") {
+
+            // ── COMPLETE: 👁 View only ────────────────────────────────────────
+            if (item.status === "returned") {
               return (
-                <Button
-                  size="sm"
-                  variant="default"
-                  onClick={e => {
-                    e.stopPropagation()
-                    setSelectedItem(item)
-                    setVendorName(item.vendorName ?? "")
-                    setEstimatedCost(item.estimatedCost ?? "0.00")
-                    setDuration(item.duration ?? "")
-                    setLaptopType(item.laptopType ?? item.category ?? "")
-                    setDialogMode("detail")
-                  }}
-                >Complete</Button>
+                <button
+                  title="View Details"
+                  className="text-slate-400 hover:text-slate-700 transition p-1"
+                  onClick={(e) => { e.stopPropagation(); openViewDialog(item) }}
+                >
+                  <LuEye size={20} />
+                </button>
               )
             }
-            // Fallback to original action
+
             return null
           },
         }
       }
+
       return col
     })
-  }, [baseColumns, setData])
+  }, [baseColumns])
 
   const table = useReactTable({
     data,
     columns,
-    state: {
-      globalFilter,
-      columnFilters,
-    },
-    meta: {
-      handleRowAction,
-    },
+    state: { globalFilter, columnFilters },
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -257,13 +323,20 @@ const submitMaintenanceDetail = () => {
     initialState: { pagination: { pageSize: 5 } },
   })
 
-  const navigate = useNavigate()
+if (loading) {
+  return (
+    <div className="p-6 text-center">
+      Loading maintenance data...
+    </div>
+  )
+}
 
   const pageCount = table.getPageCount()
   const currentPage = table.getState().pagination.pageIndex
 
   return (
     <div className="w-full space-y-4 p-4 relative">
+
       <div className="flex w-full items-center justify-between gap-4">
         <MaintenanceSearch value={globalFilter} onChange={setGlobalFilter} />
       </div>
@@ -290,7 +363,6 @@ const submitMaintenanceDetail = () => {
                   className="transition-colors hover:bg-gray-100 border-slate-300 cursor-pointer"
                   onClick={() => {
                     const item = row.original as any
-                    // navigate to maintenance details using the asset ID
                     navigate(`/maintenance/${encodeURIComponent(item["asset ID"])}`)
                   }}
                 >
@@ -312,36 +384,18 @@ const submitMaintenanceDetail = () => {
         </Table>
       </div>
 
+      {/* Pagination */}
       <div className="flex justify-end items-center space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1 disabled:opacity-50"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
+        <Button variant="outline" size="sm" className="flex items-center gap-1 disabled:opacity-50" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
           <FiChevronLeft size={16} />
         </Button>
-
         <div className="flex gap-1 items-center">
           {Array.from({ length: pageCount }).map((_, index) => {
-            if (
-              index === 0 ||
-              index === pageCount - 1 ||
-              (index >= currentPage - 1 && index <= currentPage + 1)
-            ) {
+            if (index === 0 || index === pageCount - 1 || (index >= currentPage - 1 && index <= currentPage + 1)) {
               return (
-                <Button
-                  key={index}
-                  variant={currentPage === index ? "default" : "outline"}
-                  size="sm"
-                  className={`disabled:opacity-50 ${
-                    currentPage === index
-                      ? "bg-blue-300 hover:bg-blue-400 text-white border-none"
-                      : "bg-slate-200"
-                  }`}
-                  onClick={() => table.setPageIndex(index)}
-                >
+                <Button key={index} variant={currentPage === index ? "default" : "outline"} size="sm"
+                  className={`disabled:opacity-50 ${currentPage === index ? "bg-blue-300 hover:bg-blue-400 text-white border-none" : "bg-slate-200"}`}
+                  onClick={() => table.setPageIndex(index)}>
                   {index + 1}
                 </Button>
               )
@@ -352,35 +406,26 @@ const submitMaintenanceDetail = () => {
             return null
           })}
         </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1 disabled:opacity-50"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
+        <Button variant="outline" size="sm" className="flex items-center gap-1 disabled:opacity-50" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
           <FiChevronRight size={16} />
         </Button>
       </div>
 
+      {/* Toast */}
       {toastMessage && (
-        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-800 transition-all duration-300 transform translate-x-0 max-w-md animate-slide-in">
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-800 transition-all duration-300 max-w-md">
           <FiCheckCircle className="text-green-400 shrink-0" size={20} />
           <div className="flex-1">
             <p className="text-sm font-semibold">Action Updated</p>
             <p className="text-xs text-slate-400">{toastMessage}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => setToastMessage(null)}
-            className="text-slate-400 hover:text-white transition-colors p-1"
-          >
+          <button type="button" onClick={() => setToastMessage(null)} className="text-slate-400 hover:text-white transition-colors p-1">
             <FiX size={16} />
           </button>
         </div>
       )}
 
+      {/* ── REMARK DIALOG (Request → Approved) ─────────────────────────────── */}
       <MaintenanceRemark
         open={dialogMode === "remark"}
         item={selectedItem}
@@ -390,19 +435,103 @@ const submitMaintenanceDetail = () => {
         onSubmit={submitRemark}
       />
 
-      <MaintenanceDetailModal
-        open={dialogMode === "detail"}
-        item={selectedItem}
-        vendorName={vendorName}
-        onVendorChange={setVendorName}
-        estimatedCost={estimatedCost}
-        onEstimatedChange={setEstimatedCost}
-        duration={duration}
-        onDurationChange={setDuration}
-        durationOptions={durationOptions}
-        onClose={closeDialog}
-        onSubmit={submitMaintenanceDetail}
-      />
+      {/* ── EDIT DIALOG (Approved → Complete) ──────────────────────────────── */}
+      {dialogMode === "edit" && selectedItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">Edit Maintenance Record</h2>
+              <button onClick={closeDialog} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                <FiX size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Row 1: Employee Name + Asset ID */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-1">
+                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Employee Name</label>
+                  <input type="text" value={editEmployeeName} onChange={(e) => setEditEmployeeName(e.target.value)} className={inputCls} placeholder="Employee name" />
+                </div>
+                <div className="grid gap-1">
+                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Asset Name</label>
+                  <input type="text" value={editAssetName} onChange={(e) => setEditAssetName(e.target.value)} className={inputCls} placeholder="Asset Name" />
+                </div>
+              </div>
+              <div className="grid gap-1">
+                <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Asset ID</label>
+                <input type="text" value={editAssetID} onChange={(e) => setEditAssetID(e.target.value)} className={inputCls} placeholder="Asset ID" />
+              </div>
+
+              {/* Row 2: Category (full width) */}
+              <div className="grid gap-1">
+                <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Category</label>
+                <input type="text" value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className={inputCls} placeholder="Category" />
+              </div>
+
+              {/* Row 3: Assigned Date + Returned Date */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-1">
+                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Maintenance Date</label>
+                  <input type="date" value={editMaintenanceDate} onChange={(e) => setEditMaintenanceDate(e.target.value)} className={inputCls} />
+                </div>
+                <div className="grid gap-1">
+                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Returned Date</label>
+                  <input type="date" value={editReturnedDate} onChange={(e) => setEditReturnedDate(e.target.value)} className={inputCls} />
+                </div>
+              </div>
+
+              {/* Footer buttons */}
+              <div className="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:justify-end -mx-6 -mb-6">
+                <Button variant="outline" onClick={closeDialog}>Cancel</Button>
+                <Button onClick={submitEdit}>Save Changes</Button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ── VIEW DIALOG (Complete — read-only) ─────────────────────────────── */}
+      {dialogMode === "view" && selectedItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">Maintenance Details</h2>
+              <button onClick={closeDialog} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                <FiX size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  { label: "Employee Name", value: selectedItem["employee name"] },
+                  { label: "Asset Name",      value: selectedItem["asset Name"] },
+                  { label: "Category",      value: selectedItem.category },
+                  { label: "Maintenance Date", value: selectedItem.maintenanceDate || "—" },
+                  { label: "Returned Date", value: selectedItem.returnedDate || "—" },
+                ].map(({ label, value }) => (
+                  <div key={label}>
+                    <p className="text-sm text-slate-900 font-semibold uppercase tracking-wide">{label}</p>
+                    <p className="text-sm font-medium text-gray-500 mt-0.5">{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end border-t border-slate-200 bg-slate-50 p-4 -mx-6 -mb-6">
+                <Button variant="outline" onClick={closeDialog}>Close</Button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

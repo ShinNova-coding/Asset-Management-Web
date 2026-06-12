@@ -32,12 +32,16 @@ export function MaintenanceRemark({ open, item, remarkText, onChange, onClose, o
               <p className="text-sm font-medium text-gray-500">{item["employee name"]}</p>
             </div>
             <div>
+              <p className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Asset Name</p>
+              <p className="text-sm font-medium text-gray-500">{item["asset Name"]}</p>
+            </div>
+            <div>
               <p className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Asset ID</p>
               <p className="text-sm font-medium text-gray-500">{item["asset ID"]}</p>
             </div>
             <div>
-              <p className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Category</p>
-              <p className="text-sm font-medium text-gray-500">{item.category}</p>
+              <p className="text-sm font-semibold uppercase">Category</p>
+              <p className="text-gray-500">{item.category}</p>
             </div>
           </div>
 

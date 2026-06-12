@@ -227,12 +227,12 @@ const AddEmployeeForm: React.FC = () => {
 };
   return (
     <div className="min-h-screen bg-slate-50 p-8 font-sans text-slate-900">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-3xl center mx-auto">
 
         
         <Link
           to="/employees"
-          className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline"
+          className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline "
         >
           <ArrowLeft size={16} className="mr-2" />
           Back
@@ -242,8 +242,8 @@ const AddEmployeeForm: React.FC = () => {
           {isEditMode ? 'Edit Employee' : 'Add New Employee'}
         </h1>
 
-        <div className="bg-gray-100 rounded-lg border border-slate-200 shadow-sm p-10">
-          <form className="space-y-10" onSubmit={handleSubmit}>
+        <div className="bg-white rounded-lg border border-slate-100 shadow-sm p-10">
+          <form className="space-y-5" onSubmit={handleSubmit}>
 
             
             <div className="flex flex-col items-center justify-center">

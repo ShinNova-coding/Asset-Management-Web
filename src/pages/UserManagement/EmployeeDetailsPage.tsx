@@ -4,6 +4,7 @@ import ViewDetailsForm from "../../components/features/UserManagement/ViewDetail
 import { apiFetch } from "../../lib/api";
 import { normalizeImageSource } from "../../lib/utils";
 import type { Employee } from "../../types/employee";
+import { ArrowLeft } from "lucide-react";
 
 const formatStatus = (status: string) =>
   status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : "-";
@@ -99,9 +100,13 @@ export default function EmployeeDetailsPage() {
     <div>
       <button
         onClick={() => navigate(-1)}
-        className="m-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 font-medium rounded transition-colors"
-      >
-        Back
+        
+        className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline"
+        >
+          <ArrowLeft size={16} className="mr-2" />
+          Back
+      
+    
       </button>
 
       {loading && (
