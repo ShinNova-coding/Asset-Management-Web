@@ -1,5 +1,10 @@
 
+<<<<<<< HEAD
+
+import { createBrowserRouter, Route } from "react-router-dom"
+=======
 import { createBrowserRouter } from "react-router-dom"
+>>>>>>> cca06b79544e61ad788920573e833ef7316e763c
 
 import Login from "@/pages/Auth/Login"
 
@@ -126,6 +131,92 @@ export const router = createBrowserRouter([
           },
         ],
       },
+<<<<<<< HEAD
+       {
+  path: "assets",
+  element: <AssetListPage />,
+},
+        
+          
+  
+      {
+        path: "inventory",
+        element: <InventoryPage />,
+      },
+      {
+        path:"inventory/add",
+        element:<AddNewAsset />,
+      },
+      {
+        path:"inventory/:id",
+        element:<InventoryDetail/>
+      },
+
+      {
+        path: "usermanagement",
+        element: <UserManagementPage />,
+      },
+{
+        path: "assignment",
+        element: <AssignmentPage />,
+      },
+      {
+        path: "activity",
+        element: <ActivityPage />,
+      },
+      {
+        path:"maintenance",
+        element:<MaintenancePage/>
+      },
+      {
+        path:"activity/add",
+        element:<ActivityUpdate/>,
+      },
+      {
+        path:"activity/:id",
+        element:<ActivityDetail/>,
+      },
+      {
+        path:"activity/assignment-logs",
+        element:<AssignmentLogsPage/>
+      },
+      {
+        path:"activity/maintenance-logs",
+        element:<MaintenanceLogsPage/>
+      },
+      {
+        path:"activity/activity-logs",
+        element:<ActivityLogsPage/>
+      },
+    {
+    path: "/employees",
+    element: <UserManagement />,
+  },
+  {
+    path: "/add-employee",
+    element: <AddEmployeeForm />,
+  },
+  {
+    path: "employees",
+    element: <EmployeeListPage />,
+  },
+  {
+    path: "employee/:id",
+    element: <EmployeeDetailsPage />,
+  },
+       {
+        path: "maintenance/:id",
+        element: <MaintenanceDetailsForm />,
+  },
+
+ 
+
+
+    { path: "assignment/:id",
+        element: <AssignmentDetailPage />,
+        },
+=======
+>>>>>>> cca06b79544e61ad788920573e833ef7316e763c
     ],
   },
 ])

@@ -142,24 +142,23 @@ const UserManagement: React.FC = () => {
   };
 
   const handleConfirmDelete = async () => {
-  const targetId = deleteModal.targetId; // ဖျက်မယ့် User ရဲ့ UUID (ဥပမာ - "a1f103a9-...")
+  const targetId = deleteModal.targetId; 
   if (!targetId) return;
 
   setLoading(true);
   setError("");
 
   try {
-    // 💡 Backend ရဲ့ ပုံစံအတိုင်း Endpoint ကို /user/id လို့ပဲ ပေးရပါမယ် (URL ထဲ ID မထည့်ရပါ)
-    // 💡 ပြီးရင် ဖျက်မယ့် ID ကို body ထဲမှာ JSON ပုံစံနဲ့ ထည့်ပေးလိုက်ရပါမယ်
+
     const res = await apiFetch("/user/id", {
       method: 'DELETE',
-      body: JSON.stringify({ id: targetId }) // Backend က မျှော်လင့်ထားတဲ့ raw JSON body
+      body: JSON.stringify({ id: targetId }) 
     });
 
-    // အောင်မြင်ရင် UI စာရင်းထဲကနေပါ ဖယ်ထုတ်လိုက်မယ်
+    
     setData((prev) => prev.filter((item) => item.id !== targetId));
     
-    // Success Toast ပြမယ်
+    
     setShowToast(true);
   } catch (err: any) {
     console.error('Delete user error:', err);
@@ -417,7 +416,7 @@ const UserManagement: React.FC = () => {
     return null;
   })}
 
-  {/* NEXT */}
+  
   <button
     onClick={() =>
       setCurrentPage((p) =>

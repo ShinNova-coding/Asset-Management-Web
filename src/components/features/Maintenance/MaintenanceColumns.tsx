@@ -11,25 +11,43 @@ export const columns: ColumnDef<Maintenance>[] = [
   },
 
   {
-    accessorKey: "asset ID",
-    header: "Asset ID",
+    accessorKey: "asset Name",
+    header: "Asset Name",
   },
 
   {
     accessorKey: "category",
     header: "Category",
   },
+// NEW COLUMN
+  {
+    accessorKey: "maintenanceDate",
+    header: "Maintenance Date",
+    cell: ({ row }) => row.getValue("maintenanceDate") || "-",
+  },
+
+  // NEW COLUMN
+  {
+    accessorKey: "returnedDate",
+    header: "Returned Date",
+    cell: ({ row }) => row.getValue("returnedDate") || "-",
+  },
+
+
 
   {
     accessorKey: "status",
-    header: "Progress",
+    header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as string
 
       const statusStyles: Record<string, string> = {
-        Pending: "bg-red-100 text-red-700 border border-red-200",
+        Request:  "bg-red-100 text-red-700 border border-red-200",
+        Pending:  "bg-gray-200 text-gray-700 border border-gray-200",
+        Approved: "bg-green-100 text-green-700 border border-green-200",
         "In Progress": "bg-amber-100 text-amber-700 border border-amber-200",
-        Complete: "bg-green-100 text-green-700 border border-green-200",
+        Complete: "bg-blue-100 text-blue-700 border border-blue-200",
+        Cancelled:"bg-gray-200 text-gray-600 border border-gray-300",
       }
 
       return (
