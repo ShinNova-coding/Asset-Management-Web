@@ -25,11 +25,11 @@ const AddNewAsset = () => {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [assetsList, setAssetsList] = useState<any[]>([]);
 
-  // Custom dropdown open/close states
+ 
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isAssetOpen, setIsAssetOpen] = useState(false);
 
-  // Refs to handle clicks outside dropdowns
+ 
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const assetDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -42,14 +42,14 @@ const AddNewAsset = () => {
       };
 
       try {
-        // Fetch Users (handling Laravel pagination structure)
+        
         const usersResponse = await fetch("http://192.168.100.186:1010/api/user", { headers });
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
           setUsersList(usersData.data?.data || usersData.data || []);
         }
 
-        // Fetch Assets
+        
         const assetsResponse = await fetch("http://192.168.100.186:1010/api/asset", { headers });
         if (assetsResponse.ok) {
           const assetsData = await assetsResponse.json();
@@ -63,7 +63,7 @@ const AddNewAsset = () => {
     fetchDropdownData();
   }, []);
 
-  // Close dropdowns when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
@@ -236,7 +236,7 @@ const AddNewAsset = () => {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
             
-            {/* EMPLOYEE INFO (CUSTOM SCROLLABLE CUSTOM DROPDOWN ) */}
+           
             <div className="space-y-3">
               <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
                 <User size={18} className="text-blue-600" />
@@ -276,7 +276,7 @@ const AddNewAsset = () => {
               </div>
             </div>
 
-            {/* ASSET INFO ( SCROLLABLE CUSTOM DROPDOWN ) */}
+            
             <div className="space-y-3">
               <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
                 <Package size={18} className="text-blue-600" />
@@ -315,7 +315,7 @@ const AddNewAsset = () => {
               </div>
             </div>
 
-            {/* TIMELINE & STATUS */}
+            
             <div className="space-y-3">
               <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
                 <Calendar size={18} className="text-blue-600" />
@@ -347,7 +347,7 @@ const AddNewAsset = () => {
               </div>
             </div>
 
-            {/* NOTE FIELD */}
+           
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-600 block mb-1">Admin Remarks / Notes</label>
               <textarea 

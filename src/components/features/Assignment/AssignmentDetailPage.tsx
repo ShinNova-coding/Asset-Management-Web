@@ -117,7 +117,7 @@ const AssignmentDetailPage = () => {
     <div className="p-4 md:p-8 min-h-screen bg-slate-50/50 text-slate-900 antialiased">
       <div className="max-w-3xl mx-auto space-y-4">
         
-        {/* HEADER NAVIGATION & TITLE BLOCK */}
+        
         <div className="space-y-3 border-b border-slate-200 pb-4">
           <div className="flex items-center justify-between">
             <Button
@@ -165,7 +165,7 @@ const AssignmentDetailPage = () => {
             </CardContent>
           </Card>
 
-          {/* HARDWARE SPECIFICATION CARD */}
+          
           <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-lg">
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400">
@@ -191,7 +191,7 @@ const AssignmentDetailPage = () => {
           </Card>
         </div>
 
-        {/* LIFECYCLE CHRONOLOGY BAR */}
+       
         <Card className="border border-slate-200/80 shadow-sm bg-white rounded-lg">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400 mb-2">
@@ -207,7 +207,7 @@ const AssignmentDetailPage = () => {
           </CardContent>
         </Card>
 
-        {/* NARRATIVE INSIGHT/NOTE CARD */}
+       
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-slate-100 to-indigo-50/20 rounded-lg -m-1 opacity-60 blur-sm pointer-events-none" />
           <Card className="relative border border-slate-200 shadow-sm bg-white rounded-lg overflow-hidden">

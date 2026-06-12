@@ -80,13 +80,13 @@ export const columns: ColumnDef<any>[] = [
       const onEdit = meta?.editRow
       const onDelete = meta?.deleteRow
 
-      // Determine if status is active
+      
       const status = (item.status || "").toLowerCase()
       const isDeleteDisabled = status === "active"
 
       return (
         <div className="flex items-center gap-3">
-          {/* EDIT */}
+          
           <button
             className="text-blue-400 hover:text-blue-700 transition p-1"
             onClick={(e) => {
@@ -98,7 +98,7 @@ export const columns: ColumnDef<any>[] = [
             <FaEdit size={20} />
           </button>
 
-          {/* DELETE */}
+         
           <button
             className={`transition p-1 ${
               isDeleteDisabled 

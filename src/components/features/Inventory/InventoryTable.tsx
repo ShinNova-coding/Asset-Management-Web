@@ -151,8 +151,8 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
 
   return (
     <div className="w-full space-y-4 p-3 relative">
-      {/* SEARCH AND FILTERS */}
-      <div className="flex gap-4 rounded-t-xl bg-white p-4 border border-slate-100 shadow-sm">
+      
+      <div className="flex gap-4 rounded-md rounded-t-xl bg-white p-4 border border-slate-100 shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
           <input
@@ -179,7 +179,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </div>
       </div>
 
-      <div className="rounded-b-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+      <div className="rounded-md rounded-b-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-blue-400">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -210,7 +210,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </Table>
       </div>
 
-      {/* PAGINATION CONTROLS */}
+      
       <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
         <div className="text-xs text-slate-500 font-medium">
           Page {currentPage + 1} of {pageCount} ({table.getFilteredRowModel().rows.length} total assets)

@@ -120,9 +120,9 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
 
   return (
     <div className="w-full space-y-4 p-3 relative">
-      {/* SEARCH + FILTER AREA */}
+      
       <div className="flex gap-4 rounded-xl bg-white p-4 border border-slate-200 shadow-sm items-center">
-        {/* SEARCH */}
+        
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
           <input
@@ -134,7 +134,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
           />
         </div>
         
-        {/* FILTER */}
+       
         <div className="relative w-48">
           <select
             value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
@@ -148,7 +148,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
         </div>
       </div>
 
-      {/* MAIN DATA TABLE */}
+      
       <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-blue-400">
@@ -205,7 +205,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
         </Table>
       </div>
 
-      {/* PAGINATION CONTROLS */}
+      
       <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
         <div className="text-xs text-slate-500 font-medium">
           Page {currentPage + 1} of {pageCount} ({table.getFilteredRowModel().rows.length} total assignments)

@@ -9,7 +9,7 @@ import { FiTrash2, FiEdit2, FiX } from "react-icons/fi";
 import axios from "axios";
 import { AssignmentAssign } from "@/components/features/Assignment/AssignmentAssign";
 
-// Targeted Local Network Endpoint
+
 const API_URL = "http://192.168.100.186:1010/api/assignment";
 
 const AssignmentPage = () => {
@@ -25,7 +25,7 @@ const AssignmentPage = () => {
     targetId: null as string | number | null,
   });
 
-  // Helper function to dynamically generate authentication headers
+  
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token");
     return {
@@ -37,7 +37,7 @@ const AssignmentPage = () => {
     };
   };
 
-  // Fetch from live database URL with security tokens
+  
   const fetchAssignments = async () => {
     try {
       setLoading(true);
@@ -68,7 +68,7 @@ const AssignmentPage = () => {
     fetchAssignments();
   }, []);
 
-  // Synchronize incoming react router mutations (Deletions)
+  
   useEffect(() => {
     const state = location.state as { deleteItem?: string | number } | null;
     
@@ -79,7 +79,7 @@ const AssignmentPage = () => {
   }, [location.state, navigate, location.pathname]);
 
   const handleEdit = (row: Assignment) => {
-    // Navigate to dedicated edit page and pass row data via state
+    
     navigate(`/assignment/edit/${row.id}`, { state: { assignment: row } });
   };
 
@@ -87,7 +87,7 @@ const AssignmentPage = () => {
     setDeleteModal({ isOpen: true, targetId: id });
   };
 
-  // Perform operational DELETE network method with security tokens matching API endpoint
+ 
   const handleConfirmDelete = async () => {
     if (!deleteModal.targetId) return;
 
@@ -138,7 +138,7 @@ const AssignmentPage = () => {
         </div>
       )}
 
-      {/* DELETE CONFIRMATION MODAL */}
+      
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
