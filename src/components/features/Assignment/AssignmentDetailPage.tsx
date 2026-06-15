@@ -6,18 +6,19 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { 
-  FiChevronLeft, 
+  
   FiCalendar, 
   FiUser, 
   FiCpu, 
   FiHash, 
   FiFileText, 
-  FiClock 
+  FiClock ,
+  FiArrowLeft
 } from "react-icons/fi"
 import type { Assignment } from "@/data/assignmentdata"
 import axios from "axios"
 
-const API_URL = "http://192.168.100.186:1010/api/assignment"
+const API_URL = "http://192.168.100.179:1010/api/assignment"
 
 const AssignmentDetailPage = () => {
   const { id } = useParams<{ id: string }>()
@@ -114,18 +115,18 @@ const AssignmentDetailPage = () => {
   const displayAssetName = formData.asset?.name || formData.asset_name || "Unknown Asset Unit"
 
   return (
-    <div className="p-4 md:p-8 min-h-screen bg-slate-50/50 text-slate-900 antialiased">
-      <div className="max-w-3xl mx-auto space-y-4">
+    <div className="p-2 md:p-8 min-h-screen bg-slate-50/50 text-slate-900 antialiased">
+      <div className="max-w-6xl mx-auto space-y-4">
         
         
-        <div className="space-y-3 border-b border-slate-200 pb-4">
+        <div className="space-y-3   pb-4">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               onClick={() => navigate("/assignment")}
-              className="text-slate-600 hover:text-slate-900 -ml-3 gap-2 text-sm font-medium transition-colors h-8"
+              className="text-blue-500 hover:text-blue-700 -ml-3 gap-2 text-sm font-medium transition-colors h-8"
             >
-              <FiChevronLeft className="w-4 h-4" />
+              <FiArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
               Back 
             </Button>
           </div>
@@ -148,8 +149,8 @@ const AssignmentDetailPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-lg">
             <CardContent className="p-4 space-y-3">
-              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400">
-                <FiUser className="w-3.5 h-3.5 text-slate-400" />
+              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-blue-600">
+                <FiUser className="w-3.5 h-3.5 text-blue-600" />
                 User Detail
               </div>
               <div className="space-y-2">
@@ -168,8 +169,8 @@ const AssignmentDetailPage = () => {
           
           <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-lg">
             <CardContent className="p-4 space-y-3">
-              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400">
-                <FiCpu className="w-3.5 h-3.5 text-slate-400" />
+              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-blue-600">
+                <FiCpu className="w-3.5 h-3.5 text-blue-600" />
                 Hardware Allocation
               </div>
               <div className="space-y-2">
@@ -194,8 +195,8 @@ const AssignmentDetailPage = () => {
        
         <Card className="border border-slate-200/80 shadow-sm bg-white rounded-lg">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400 mb-2">
-              <FiCalendar className="w-3.5 h-3.5 text-slate-400" />
+            <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-blue-600 mb-2">
+              <FiCalendar className="w-3.5 h-3.5 text-blue-600" />
               Timeline
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
@@ -212,8 +213,8 @@ const AssignmentDetailPage = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-slate-100 to-indigo-50/20 rounded-lg -m-1 opacity-60 blur-sm pointer-events-none" />
           <Card className="relative border border-slate-200 shadow-sm bg-white rounded-lg overflow-hidden">
             <CardContent className="p-4 space-y-2">
-              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-slate-400">
-                <FiClock className="w-3.5 h-3.5 text-slate-400" />
+              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-blue-600">
+                <FiClock className="w-3.5 h-3.5 text-blue-600" />
                 Note
               </div>
               

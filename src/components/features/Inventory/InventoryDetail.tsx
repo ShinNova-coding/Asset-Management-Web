@@ -105,7 +105,7 @@ export function InventoryDetail() {
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto my-32 text-center text-slate-500 text-sm animate-pulse">
-        Synchronizing hardware records specifications...
+        Loading...
       </div>
     )
   }
@@ -128,7 +128,7 @@ export function InventoryDetail() {
   const displayCategory = assetItem.category?.name || assetItem.category || "Uncategorized"
 
   
-  const API_REAL_IP = "http://192.168.100.186:1010"
+  const API_REAL_IP = "http://192.168.100.179:1010"
   let rawImageSource = assetItem.preview_url || assetItem.image_url || assetItem.image || ""
   let displayImage = ""
 
@@ -150,7 +150,7 @@ export function InventoryDetail() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 md:p-10 space-y-6 text-slate-950 font-sans">
+    <div className="max-w-8xl mx-auto p-6 md:p-10 space-y-6 text-slate-950 font-sans">
       
      
       <div className="flex items-center justify-between">
@@ -158,7 +158,7 @@ export function InventoryDetail() {
           variant="ghost" 
           size="sm" 
           onClick={() => navigate("/inventory")} 
-          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 -ml-2 group transition-colors"
+          className="flex items-center gap-2 text-blue-500 hover:text-blue-700 -ml-2 group transition-colors"
         >
           <FiArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
           Back

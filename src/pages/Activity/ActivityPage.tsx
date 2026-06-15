@@ -26,7 +26,7 @@ export default function ActivityPage() {
 
         const token = localStorage.getItem("token")
 
-        const response = await fetch("http://192.168.100.186:1010/api/activitylogs", {
+        const response = await fetch("http://192.168.100.179:1010/api/activitylogs", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -128,7 +128,7 @@ function renderTableStructure(logs: SystemActivityLogItem[], getDescriptionBadge
         <tr className="border-b border-slate-200 bg-blue-400 text-sm font-semibold text-white">
           <th className="px-6 py-4">Log ID</th>
           <th className="px-6 py-4">Action Event</th>
-          <th className="px-6 py-4">Asset ID</th>
+          
           <th className="px-6 py-4">Asset Name</th>
           <th className="px-6 py-4">Operator Info</th>
           <th className="px-6 py-4">Date</th>
@@ -149,18 +149,18 @@ function renderTableStructure(logs: SystemActivityLogItem[], getDescriptionBadge
               <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
                 <td className="px-6 py-4 font-mono text-xs text-slate-400">#{row.id}</td>
                 <td className="px-6 py-4">
-                  <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${getDescriptionBadge(row.description)}`}>
+                  <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium  ${getDescriptionBadge(row.description)}`}>
                     {row.description}
                   </span>
                 </td>
-                <td className="px-6 py-4 font-mono font-medium text-xs text-slate-600">{row.asset_id}</td>
+                
                 <td className="px-6 py-4 text-slate-900 font-medium">
                   {row.asset_name === "N/A" ? <span className="text-slate-400 italic">No Modification</span> : row.asset_name}
                 </td>
                 <td className="px-6 py-4 text-slate-700">
                   <div className="flex flex-col">
                     <span className="font-medium">{row.causer_name}</span>
-                    <span className="text-xs text-slate-400 font-mono">{row.causer_id}</span>
+                    
                   </div>
                 </td>
                 <td className="px-6 py-4 text-slate-500 text-xs font-mono">

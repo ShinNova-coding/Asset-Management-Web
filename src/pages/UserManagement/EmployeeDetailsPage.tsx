@@ -122,7 +122,7 @@ export default function EmployeeDetailsPage() {
           <div className="text-xs text-gray-500 mt-2">
             <p>💡 Diagnostics & Tips:</p>
             <ul className="ml-4 mt-1 list-disc">
-              <li>Verify server is running at http://192.168.100.186:1010</li>
+              <li>Verify server is running at http://192.168.100.179:1010</li>
               <li>Check if your device is connected to the network segment (192.168.100.x)</li>
               <li>Ensure the route id matches: <code className="bg-gray-100 p-0.5 rounded">{id}</code></li>
             </ul>

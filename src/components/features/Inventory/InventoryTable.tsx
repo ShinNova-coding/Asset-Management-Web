@@ -2,15 +2,17 @@
 
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
-import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiX } from "react-icons/fi"
+import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiX, FiChevronDown, FiChevronUp } from "react-icons/fi"
 import { Search } from "lucide-react"
 import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
   type ColumnFiltersState,
+  type SortingState,
 } from "@tanstack/react-table"
 
 import {
@@ -64,19 +66,20 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
 
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([])
   const [deleteModal, setDeleteModal] = React.useState<{ isOpen: boolean; targetId: string | null }>({
     isOpen: false,
     targetId: null,
   })
   const [showToast, setShowToast] = React.useState(false)
 
-   React.useEffect(() => {
+  React.useEffect(() => {
     if (initialData) {
       setData(getExcludedDeletedItems(processExpiredWarranties(initialData)))
     }
   }, [initialData])
 
-   React.useEffect(() => {
+  React.useEffect(() => {
     if (data) localStorage.setItem("inventory_data", JSON.stringify(data))
   }, [data])
 
@@ -85,36 +88,36 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   }
 
   const handleConfirmDelete = async () => {
-    if (!deleteModal.targetId) return;
+    if (!deleteModal.targetId) return
 
-    const targetId = deleteModal.targetId.trim();
-    const API_URL = `http://192.168.100.186:1010/api/asset/${targetId}`;
-    const token = localStorage.getItem("token") || "";
+    const targetId = deleteModal.targetId.trim()
+    const API_URL = `http://192.168.100.179:1010/api/asset/${targetId}`
+    const token = localStorage.getItem("token") || ""
 
     try {
       const response = await fetch(API_URL, {
-        method: "DELETE", 
+        method: "DELETE",
         headers: {
           "Accept": "application/json",
           "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: targetId }) 
-      });
+        body: JSON.stringify({ id: targetId }),
+      })
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.message || "Delete failed");
+        throw new Error(result.message || "Delete failed")
       }
 
-      setData((prev) => prev.filter((item) => item.id !== targetId));
-      setShowToast(true);
+      setData((prev) => prev.filter((item) => item.id !== targetId))
+      setShowToast(true)
     } catch (error: any) {
-      console.error("❌ Delete failed:", error);
-      alert(`Delete failed: ${error.message}`);
+      console.error("❌ Delete failed:", error)
+      alert(`Delete failed: ${error.message}`)
     } finally {
-      setDeleteModal({ isOpen: false, targetId: null });
+      setDeleteModal({ isOpen: false, targetId: null })
     }
   }
 
@@ -126,22 +129,26 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     navigate(`/inventory/${item.id}`, { state: { id: item.id, detailsItem: item } })
   }
 
- 
   const columns = React.useMemo(() => {
     return [
       {
         id: "number",
         header: "No.",
         cell: ({ row }: any) => row.index + 1,
+        enableSorting: false,
       },
-      ...baseColumns,
+      ...baseColumns.map((col: any) => 
+        (col.accessorKey === "status" || col.id === "status") 
+          ? { ...col, enableSorting: false } 
+          : col
+      ),
     ]
   }, [])
 
   const table = useReactTable({
     data,
     columns,
-    state: { globalFilter, columnFilters },
+    state: { globalFilter, columnFilters, sorting },
     meta: {
       deleteRow: handleDeleteTrigger,
       editRow: handleEdit,
@@ -151,9 +158,11 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     },
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     initialState: { pagination: { pageSize: 5 } },
   })
 
@@ -162,7 +171,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
 
   return (
     <div className="w-full space-y-4 p-3 relative">
-      
       <div className="flex gap-4 rounded-md rounded-t-xl bg-white p-4 border border-slate-100 shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
@@ -171,7 +179,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
             placeholder="Search by name,date,warranty,status..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm"
+            className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -179,7 +187,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
           <select
             value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
             onChange={(e) => table.getColumn("status")?.setFilterValue(e.target.value)}
-            className="w-full rounded-md border border-slate-400 bg-slate-50 px-4 py-2 text-sm"
+            className="w-full rounded-md border border-slate-400 bg-slate-50 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Status</option>
             <option value="available">Available</option>
@@ -195,11 +203,32 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
           <TableHeader className="bg-blue-400">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-white font-semibold py-3 text-sm">
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  const canSort = header.column.getCanSort()
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className={`text-white font-semibold py-3 text-sm ${canSort ? "cursor-pointer select-none hover:bg-blue-500/50" : ""}`}
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      <div className="flex items-center gap-2">
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {canSort && (
+                          <div className="flex flex-col">
+                            <FiChevronUp 
+                              size={12} 
+                              className={header.column.getIsSorted() === "asc" ? "text-white" : "text-white/40"} 
+                            />
+                            <FiChevronDown 
+                              size={12} 
+                              className={header.column.getIsSorted() === "desc" ? "text-white" : "text-white/40"} 
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </TableHead>
+                  )
+                })}
               </TableRow>
             ))}
           </TableHeader>
@@ -221,7 +250,6 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
         </Table>
       </div>
 
-      
       <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
         <div className="text-xs text-slate-500 font-medium">
           Page {currentPage + 1} of {pageCount} ({table.getFilteredRowModel().rows.length} total assets)
@@ -280,15 +308,15 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
             <h3 className="text-base font-bold text-slate-900">Confirm Delete</h3>
             <p className="text-xs text-slate-500">Are you sure you want to delete this asset?</p>
             <div className="flex justify-end gap-2.5 pt-2">
-              <button onClick={() => setDeleteModal({ isOpen: false, targetId: null })} className="px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold">Cancel</button>
-              <button onClick={handleConfirmDelete} className="px-4 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold">Delete</button>
+              <button onClick={() => setDeleteModal({ isOpen: false, targetId: null })} className="px-4 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50">Cancel</button>
+              <button onClick={handleConfirmDelete} className="px-4 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700">Delete</button>
             </div>
           </div>
         </div>
       )}
 
       {showToast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg animate-fade-in">
           <FiCheckCircle className="text-emerald-400" size={16} />
           <span className="text-xs font-medium">Asset successfully deleted.</span>
           <button onClick={() => setShowToast(false)}><FiX size={14} /></button>

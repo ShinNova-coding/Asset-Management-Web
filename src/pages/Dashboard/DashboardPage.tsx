@@ -6,7 +6,7 @@ import AssetCategoriesCards from "../../components/features/Dashboard/AssetCateg
 import UserCards from "../../components/features/Dashboard/UserCards";
 import RecentActivities from "../../components/features/Dashboard/RecentActivities";
 
-const API_URL = "http://192.168.100.186:1010/api/dashboard";
+const API_URL = "http://192.168.100.179:1010/api/dashboard";
 
 const DashboardPage: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<any>(null);

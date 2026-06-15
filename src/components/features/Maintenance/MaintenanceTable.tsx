@@ -51,7 +51,7 @@ export function MaintenanceTable() {
       const token = localStorage.getItem("token")
 
       const response = await fetch(
-        "http://192.168.100.186:1010/api/maintenance",
+        "http://192.168.100.179:1010/api/maintenance",
         {
           method: "GET",
           headers: {

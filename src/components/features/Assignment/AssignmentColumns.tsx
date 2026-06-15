@@ -48,6 +48,7 @@ export const columns: ColumnDef<any>[] = [
     accessorKey: "status",
     header: "Status",
     enableGlobalFilter: true,
+    enableSorting:false,
     cell: ({ row }) => {
       const status = (row.getValue("status") as string || "").toLowerCase()
 

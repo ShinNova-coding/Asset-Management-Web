@@ -14,6 +14,8 @@ import {
   FiTrash2,
   FiX,
   FiCheckCircle,
+  FiChevronUp,
+  FiChevronDown,
 } from "react-icons/fi";
 import { RiDeleteBin4Fill } from "react-icons/ri";
 
@@ -76,7 +78,7 @@ const mapApiUserToEmployee = (user: ApiUser): Employee => ({
   phone: user.phone_number || "-",
 });
 
-const API_URL = "http://192.168.100.186:1010/api/user";
+const API_URL = "http://192.168.100.179:1010/api/user";
 
 const UserManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -89,6 +91,10 @@ const UserManagement: React.FC = () => {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  // Sorting states
+  const [sortColumn, setSortColumn] = useState<keyof Employee | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
@@ -186,6 +192,21 @@ const UserManagement: React.FC = () => {
     });
   };
 
+  const handleSort = (column: keyof Employee) => {
+    if (sortColumn === column) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else {
+        setSortColumn(null);
+        setSortDirection('asc');
+      }
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+    setCurrentPage(0);
+  };
+
   const filteredData = data.filter((emp) => {
     const searchTerm = search.toLowerCase();
     const matchesSearch =
@@ -199,10 +220,26 @@ const UserManagement: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const totalPages = Math.ceil(filteredData.length / pageSize);
+  // Apply sorting dynamically before pagination
+  const sortedData = React.useMemo(() => {
+    const sortableData = [...filteredData];
+    if (sortColumn) {
+      sortableData.sort((a, b) => {
+        const aValue = String(a[sortColumn] || "").toLowerCase();
+        const bValue = String(b[sortColumn] || "").toLowerCase();
+
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return sortableData;
+  }, [filteredData, sortColumn, sortDirection]);
+
+  const totalPages = Math.ceil(sortedData.length / pageSize);
   const startIndex = currentPage * pageSize;
   const endIndex = startIndex + pageSize;
-  const currentPaginatedData = filteredData.slice(startIndex, endIndex);
+  const currentPaginatedData = sortedData.slice(startIndex, endIndex);
 
   return (
     <div className="w-full space-y-6 p-6 relative bg-[#F8FAFC] min-h-screen font-sans text-slate-800">
@@ -258,11 +295,65 @@ const UserManagement: React.FC = () => {
             <TableHeader className="bg-blue-400">
               <TableRow className="hover:bg-transparent border-none">
                 <TableHead className="text-white font-semibold py-3.5 text-sm w-12">No</TableHead>
-                <TableHead className="text-white font-semibold py-3.5 text-sm">Employee ID</TableHead>
-                <TableHead className="text-white font-semibold py-3.5 text-sm">Name</TableHead>
-                <TableHead className="text-white font-semibold py-3.5 text-sm">Email</TableHead>
-                <TableHead className="text-white font-semibold py-3.5 text-sm">Position</TableHead>
-                <TableHead className="text-white font-semibold py-3.5 text-sm">Status</TableHead>
+                
+                <TableHead 
+                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none hover:bg-blue-500/50" 
+                  onClick={() => handleSort('employee_id')}
+                >
+                  <div className="flex items-center gap-2">
+                    Employee ID
+                    <div className="flex flex-col">
+                      <FiChevronUp size={12} className={sortColumn === 'employee_id' && sortDirection === 'asc' ? "text-white" : "text-white/40"} />
+                      <FiChevronDown size={12} className={sortColumn === 'employee_id' && sortDirection === 'desc' ? "text-white" : "text-white/40"} />
+                    </div>
+                  </div>
+                </TableHead>
+
+                <TableHead 
+                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none hover:bg-blue-500/50" 
+                  onClick={() => handleSort('name')}
+                >
+                  <div className="flex items-center gap-2">
+                    Name
+                    <div className="flex flex-col">
+                      <FiChevronUp size={12} className={sortColumn === 'name' && sortDirection === 'asc' ? "text-white" : "text-white/40"} />
+                      <FiChevronDown size={12} className={sortColumn === 'name' && sortDirection === 'desc' ? "text-white" : "text-white/40"} />
+                    </div>
+                  </div>
+                </TableHead>
+
+                <TableHead 
+                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none hover:bg-blue-500/50" 
+                  onClick={() => handleSort('email')}
+                >
+                  <div className="flex items-center gap-2">
+                    Email
+                    <div className="flex flex-col">
+                      <FiChevronUp size={12} className={sortColumn === 'email' && sortDirection === 'asc' ? "text-white" : "text-white/40"} />
+                      <FiChevronDown size={12} className={sortColumn === 'email' && sortDirection === 'desc' ? "text-white" : "text-white/40"} />
+                    </div>
+                  </div>
+                </TableHead>
+
+                <TableHead 
+                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none hover:bg-blue-500/50" 
+                  onClick={() => handleSort('position')}
+                >
+                  <div className="flex items-center gap-2">
+                    Position
+                    <div className="flex flex-col">
+                      <FiChevronUp size={12} className={sortColumn === 'position' && sortDirection === 'asc' ? "text-white" : "text-white/40"} />
+                      <FiChevronDown size={12} className={sortColumn === 'position' && sortDirection === 'desc' ? "text-white" : "text-white/40"} />
+                    </div>
+                  </div>
+                </TableHead>
+
+               <TableHead className="text-white font-semibold py-3.5 text-sm">
+                <div className="flex items-center gap-2">
+                  Status
+                </div>
+                </TableHead>
+
                 <TableHead className="text-white font-semibold py-3.5 text-sm text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
