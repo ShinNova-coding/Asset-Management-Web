@@ -1,10 +1,4 @@
-// src/routes/Router.tsx
-<<<<<<< HEAD
-
-import { createBrowserRouter, Route } from "react-router-dom"
-=======
 import { createBrowserRouter } from "react-router-dom"
->>>>>>> cca06b79544e61ad788920573e833ef7316e763c
 
 import Login from "@/pages/Auth/Login"
 
@@ -33,7 +27,7 @@ import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
 import AssetListPage from "@/components/features/Dashboard/AssetListPage"
 
 export const router = createBrowserRouter([
-  // Public Routes (Anyone can access these)
+  
   {
     path: "/",
     element: <Login />,
@@ -41,7 +35,7 @@ export const router = createBrowserRouter([
   
   
 
-  // Protected Routes (Wrapped inside ProtectedRoute)
+  
   {
     element: <ProtectedRoute />, 
     children: [
@@ -91,7 +85,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "assignment/edit/:id",
-            element: <AssignmentEditPage />, // Added route to match your edit navigation
+            element: <AssignmentEditPage />, 
           },
           {
             path: "activity",
@@ -118,85 +112,6 @@ export const router = createBrowserRouter([
             element: <AddEmployeeForm />,
           },
           {
-            path: "/",
-            element: <EmployeeListPage />,
-          },
-          {
-            path: "/employee/:employeeId",
-            element: <EmployeeDetailsPage />,
-          },
-          {
-            path: "maintenance/:id",
-            element: <MaintenanceDetailsForm />,
-          },
-        ],
-      },
-<<<<<<< HEAD
-       {
-  path: "assets",
-  element: <AssetListPage />,
-},
-        
-          
-  
-      {
-        path: "inventory",
-        element: <InventoryPage />,
-      },
-      {
-        path:"inventory/add",
-        element:<AddNewAsset />,
-      },
-      {
-        path:"inventory/:id",
-        element:<InventoryDetail/>
-      },
-
-      {
-        path: "usermanagement",
-        element: <UserManagementPage />,
-      },
-{
-        path: "assignment",
-        element: <AssignmentPage />,
-      },
-      {
-        path: "activity",
-        element: <ActivityPage />,
-      },
-      {
-        path:"maintenance",
-        element:<MaintenancePage/>
-      },
-      {
-        path:"activity/add",
-        element:<ActivityUpdate/>,
-      },
-      {
-        path:"activity/:id",
-        element:<ActivityDetail/>,
-      },
-      {
-        path:"activity/assignment-logs",
-        element:<AssignmentLogsPage/>
-      },
-      {
-        path:"activity/maintenance-logs",
-        element:<MaintenanceLogsPage/>
-      },
-      {
-        path:"activity/activity-logs",
-        element:<ActivityLogsPage/>
-      },
-    {
-    path: "/employees",
-    element: <UserManagement />,
-  },
-  {
-    path: "/add-employee",
-    element: <AddEmployeeForm />,
-  },
-  {
     path: "employees",
     element: <EmployeeListPage />,
   },
@@ -204,19 +119,14 @@ export const router = createBrowserRouter([
     path: "employee/:id",
     element: <EmployeeDetailsPage />,
   },
-       {
-        path: "maintenance/:id",
-        element: <MaintenanceDetailsForm />,
-  },
-
+          {
+            path: "maintenance/:id",
+            element: <MaintenanceDetailsForm />,
+          },
+        ],
+      },
+        
  
-
-
-    { path: "assignment/:id",
-        element: <AssignmentDetailPage />,
-        },
-=======
->>>>>>> cca06b79544e61ad788920573e833ef7316e763c
     ],
   },
 ])
