@@ -14,8 +14,8 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
-  getSortedRowModel,       // ✨ Sorting အတွက် ထည့်သွင်းထားပါသည်
-  type SortingState,       // ✨ Sorting အတွက် ထည့်သွင်းထားပါသည်
+  getSortedRowModel,       
+  type SortingState,       
   type ColumnFiltersState,
 } from "@tanstack/react-table"
 
@@ -43,7 +43,7 @@ interface MaintenanceTableProps {
 
 export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTableProps) {
   const [data, setData] = React.useState(initialData)
-  const [sorting, setSorting] = React.useState<SortingState>([]) // ✨ Sorting State သတ်မှတ်ခြင်း
+  const [sorting, setSorting] = React.useState<SortingState>([]) 
 
   React.useEffect(() => {
     setData(initialData)
@@ -53,11 +53,8 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [toastMessage, setToastMessage] = React.useState<string | null>(null)
   const [selectedItem, setSelectedItem] = React.useState<Maintenance | null>(null)
-
   const [dialogMode, setDialogMode] = React.useState<"remark" | "edit" | "view" | null>(null)
-
   const [remarkText, setRemarkText] = React.useState("")
-
   const [editEmployeeName, setEditEmployeeName] = React.useState("")
   const [editAssetCode, setEditAssetCode] = React.useState("")
   const [editCategory, setEditCategory] = React.useState("")
@@ -87,12 +84,11 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
 
   const openEditDialog = (item: Maintenance) => {
     setSelectedItem(item)
-    setEditEmployeeName(item.employee_name ?? "")        
-    setEditAssetCode(item.asset_code ?? "")      
-    setEditCategory(item.category ?? "")          
-    setEditApprover(typeof item.approver === 'object' && item.approver !== null ? (item.approver as any).name : (item.approver ?? "—")) 
+    setEditEmployeeName(item.user?.name ?? "")      
+    setEditAssetCode(item.asset?.asset_code ?? "")     
+    setEditCategory(item.category?.name ?? "")         
+    setEditApprover(typeof item.accepted_by === 'object' && item.accepted_by !== null ? (item.accepted_by as any).name : (item.accepted_by ?? "—"))
     setEditMaintenanceDate(item.maintenance_date ?? "") 
-    
     const today = new Date().toISOString().split('T')[0]
     setEditCompletedDate(item.completed_date ?? today) 
     
@@ -105,44 +101,53 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
   }
 
   // ── Submit REMARK ──────────────────────────────────────────────────
-  const submitRemark = async () => {
-    if (!selectedItem) {
-      alert("No maintenance record selected")
-      return
-    }
-    if (!remarkText.trim()) {
-      alert("Please enter a remark")
-      return
-    }
-
-    try {
-      await apiFetch(`/maintenance/${selectedItem.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          maintenance_id: selectedItem.id,
-          status: "approved",
-          remark: remarkText,
-          completed_date: null
-        }),
-      })
-
-      setData((prev) =>
-        prev.map((row) =>
-          row.id === selectedItem.id
-            ? { ...row, status: "Approved", remark: remarkText }
-            : row
-        )
-      )
-
-      setToastMessage("Approved successfully")
-      closeDialog()
-      onRefresh?.()  
-    } catch (error: any) {
-      console.error("Submit Remark Error:", error)
-      alert(error?.message || "Failed to submit remark.")
-    }
+const submitRemark = async () => {
+  if (!selectedItem) {
+    alert("No maintenance record selected")
+    return
   }
+  if (!remarkText.trim()) {
+    alert("Please enter a remark")
+    return
+  }
+
+  
+  const targetAssetId = selectedItem.asset?.id || (selectedItem as any).asset_id;
+
+  if (!targetAssetId) {
+    alert("Asset ID not found in the selected record.")
+    return
+  }
+
+  try {
+    
+    await apiFetch(`/admin/maintenance/status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        assets_id: targetAssetId, 
+        status: "approved",
+        remark: remarkText,
+      }),
+    })
+
+    
+    setData((prev) =>
+      prev.map((row) =>
+        row.id === selectedItem.id
+          ? { ...row, status: "Approved", remark: remarkText }
+          : row
+      )
+    )
+
+    setToastMessage("Approved successfully")
+    closeDialog()
+    onRefresh?.()  
+  } catch (error: any) {
+    console.error("Submit Remark Error:", error)
+    alert(error?.message || "Failed to submit remark.")
+  }
+}
 
   // ── Submit EDIT ────────────────────────────────────────────────────
   const submitEdit = async () => {
@@ -161,7 +166,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
         body: JSON.stringify({
           maintenance_id: selectedItem.id,
           completed_date: sanitizedCompletedDate, 
-          status: "completed"
+          
         }),
       })
 
@@ -182,28 +187,47 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     }
   }
 
-  // ── Delete a row ───────────────────────────────────────────────────
-  const deleteRow = async (item: Maintenance, label: string) => {
-    if (!confirm("Are you sure you want to delete this record?")) return
+ // ── Delete (Cancel) a row ───────────────────────────────────────────
+const deleteRow = async (item: Maintenance, label: string) => {
+  if (!confirm("Are you sure you want to delete this record?")) return
 
-    try {
-      await apiFetch(`/maintenance/${item.id}`, { method: "DELETE" })
+  try {
+    const targetAssetId = item.asset?.id || (item as any).asset_id;
+
+    if (!targetAssetId) {
+      alert("Asset ID not found in this record.")
+      return
+    }
+
+    
+    const response = await apiFetch(`/admin/maintenance/status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        assets_id: targetAssetId, 
+        status: "canceled",
+        issue_type: item.issue_type || "N/A",
+        problem_description: (item as any).problem_description || "Canceled from UI",
+        evidence_image: (item as any).evidence_image || "",
+      }),
+    })
+
+
+    if (response) {
       setData((prev) => prev.filter((r) => r.id !== item.id))
-      setToastMessage(`${item.employee_name ?? "Asset"} ${label}`)
-      onRefresh?.()
-    } catch (err: any) {
-      console.error("Delete Error:", err)
-      alert(err?.message || "Failed to delete record.")
+      
+      const clientName = (item as any).user?.name ?? "Asset" 
+      setToastMessage(`${clientName} ${label}`)
+    } else {
+      throw new Error("Failed to cancel record on server.")
     }
+
+  } catch (err: any) {
+    console.error("Delete (Cancel) Error:", err)
+    alert(err?.message || "Failed to cancel record.")
   }
-
-  React.useEffect(() => {
-    if (toastMessage) {
-      const timer = setTimeout(() => setToastMessage(null), 3000)
-      return () => clearTimeout(timer)
-    }
-  }, [toastMessage])
-
+}
+  
   // ── Column overrides & Prepend Numbering ───────────────────────────
   const columns = React.useMemo(() => {
     const indexColumn = {
@@ -291,19 +315,43 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
               )
             }
 
-            if (status === "complete" || status === "completed") {
-              return (
-                <button
-                  title="View Details"
-                  className="text-slate-500 hover:text-slate-700 transition p-1"
-                  onClick={(e) => { e.stopPropagation(); openViewDialog(item) }}
-                >
-                  <LuEye size={20} />
-                </button>
-              )
-            }
+            if (status === "complete" || status === "completed" || status === "returned") {
+  return (
+    <button
+      title="View Details"
+      className="text-slate-500 hover:text-slate-700 transition p-1"
+      onClick={(e) => { e.stopPropagation(); openViewDialog(item) }}
+    >
+      <LuEye size={20} />
+    </button>
+  )
+}
 
-            return <span className="text-red-500 text-xs">Unknown: {item.status}</span>
+
+if (status === "complete" || status === "completed") {
+  return (
+    <button
+      title="View Details"
+      className="text-slate-500 hover:text-slate-700 transition p-1"
+      onClick={(e) => { e.stopPropagation(); openViewDialog(item) }}
+    >
+      <LuEye size={20} />
+    </button>
+  )
+} else if (status === "returned") {
+  return (
+  
+    <button
+      title="View Details"
+      className="text-slate-500 hover:text-slate-700 transition p-1"
+      onClick={(e) => { e.stopPropagation(); openViewDialog(item) }}
+    >
+      <LuEye size={20} />
+    </button>
+  )
+}
+
+return <span className="text-red-500 text-xs">Unknown: {item.status}</span>
           },
         }
       }
@@ -314,6 +362,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     return [indexColumn, ...customizedColumns]
   }, [baseColumns])
 
+  
   // ── ⚙️ USE REACT TABLE CONFIGURATION ────────────────────────────────
   const table = useReactTable({
     data,
@@ -321,15 +370,15 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     state: { 
       globalFilter, 
       columnFilters,
-      sorting // ✨ Sorting state ချိတ်ဆက်ခြင်း
+      sorting 
     },
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
-    onSortingChange: setSorting,             // ✨ Sorting trigger ချိတ်ဆက်ခြင်း
+    onSortingChange: setSorting,           
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),  // ✨ Sorting logic ချိတ်ဆက်ခြင်း
+    getSortedRowModel: getSortedRowModel(),  
     initialState: { pagination: { pageSize: 5 } },
   })
 
@@ -360,12 +409,12 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => {
-                  const canSort = header.column.getCanSort() // Sorting လုပ်လို့ရတဲ့ ကော်လံလား စစ်ဆေးခြင်း
+                  const canSort = header.column.getCanSort() 
                   return (
                     <TableHead 
                       key={header.id} 
                       className={`text-white font-semibold py-3 text-sm ${canSort ? "cursor-pointer select-none hover:bg-blue-500/30" : ""}`}
-                      onClick={header.column.getToggleSortingHandler()} // ✨ နှိပ်လိုက်လျှင် Sort အပိတ်အဖွင့်လုပ်မည့် Handler
+                      onClick={header.column.getToggleSortingHandler()} 
                     >
                       <div className="flex items-center gap-2">
                         {flexRender(header.column.columnDef.header, header.getContext())}
@@ -565,32 +614,36 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  { label: "Employee Name", value: selectedItem.employee_name || "—" },
-                  { label: "Asset Code", value: selectedItem.asset_code || "—" },
-                  { label: "Category", value: selectedItem.category || "—" },
-                  { label: "Approver", value: typeof selectedItem.approver === 'object' && selectedItem.approver !== null ? (selectedItem.approver as any).name : (selectedItem.approver || "—") }, 
-                  { label: "Maintenance Date", value: selectedItem.maintenance_date || "—" },
-                  { label: "Completed Date", value: selectedItem.completed_date || "—" },
-                  { label: "Remark", value: selectedItem.remark || "No Remark" },
+           <div className="p-6 space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[
+                { label: "Employee Name", value: selectedItem?.user?.name || "—" },
+                { label: "Asset Code", value: selectedItem?.asset?.asset_code || "—" },
+                { label: "Category", value: selectedItem?.category?.name || "—" },
+                { 
+                  label: "Approver", 
+                  value: typeof selectedItem?.accepted_by === 'object' && selectedItem?.accepted_by !== null 
+                   ? (selectedItem.accepted_by as any).name 
+                    : (selectedItem?.accepted_by || "—") 
+                }, 
+                { label: "Maintenance Date", value: selectedItem?.maintenance_date || "—" },
+                { label: "Completed Date", value: selectedItem?.completed_date || "—" },
+                { label: "Remark", value: selectedItem?.remark || "No Remark" },
                 ].map(({ label, value }) => (
-                  <div key={label}>
-                    <p className="text-sm text-slate-900 font-semibold uppercase tracking-wide">{label}</p>
-                    <p className="text-sm font-medium text-gray-500 mt-0.5">{value}</p>
-                  </div>
-                ))}
-              </div>
+                <div key={label}>
+                  <p className="text-sm text-slate-900 font-semibold uppercase tracking-wide">{label}</p>
+                  <p className="text-sm font-medium text-gray-500 mt-0.5">{value}</p>
+                </div>
+            ))}
+          </div>
+      </div>
 
-              <div className="flex justify-end border-t border-slate-200 bg-slate-50 p-4 -mx-6 -mb-6 mt-4">
-                <Button variant="outline" onClick={closeDialog}>Close</Button>
+                  <div className="flex justify-end border-t border-slate-200 bg-slate-50 p-4 -mx-6 -mb-6 mt-4">
+                  <Button variant="outline" onClick={closeDialog}>Close</Button>
               </div>
             </div>
           </div>
-        </div>
-      )}
-
+        )}
     </div>
   )
 }

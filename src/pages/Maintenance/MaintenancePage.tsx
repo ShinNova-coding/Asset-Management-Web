@@ -15,7 +15,7 @@ export default function MaintenancePage() {
       const formatted = list.map((item: any) => {
         const rawStatus = (item.status ?? "").toLowerCase().trim();
         
-        let displayStatus = "Complete"; // default fallback
+        let displayStatus = "Complete"; 
         if (rawStatus === "requested" || rawStatus === "request") {
           displayStatus = "Request";
         } else if (rawStatus === "approved") {
@@ -23,17 +23,25 @@ export default function MaintenancePage() {
         } else if (rawStatus === "completed" || rawStatus === "complete") {
           displayStatus = "Complete";
         }
+        else if (rawStatus === "returned") {
+          displayStatus = "Returned";
+        }
 
         return {
           id: item.id,
           employee_name: item.user?.name ?? "-",
           asset_code: item.asset?.asset_code ?? "-",
           category: item.category?.name ?? "-",
-          approver: item.accepted_by?.name ?? "-",
+          approver: item.accepted_by?.name ?? "—",
           maintenance_date: item.maintenance_date ?? "",
           completed_date: item.completed_date ?? "",
           remark: item.remark ?? "",
           status: displayStatus, 
+
+          user: item.user,
+          asset: item.asset,
+          category_obj: item.category,
+          accepted_by: item.accepted_by
         };
       });
 
