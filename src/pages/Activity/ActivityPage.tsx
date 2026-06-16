@@ -26,7 +26,7 @@ export default function ActivityPage() {
 
         const token = localStorage.getItem("token")
 
-        const response = await fetch("http://192.168.100.179:1010/api/activitylogs", {
+        const response = await fetch("http://10.31.111.11:1010/api/activitylogs", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

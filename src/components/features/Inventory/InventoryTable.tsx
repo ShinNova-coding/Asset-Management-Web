@@ -91,7 +91,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     if (!deleteModal.targetId) return
 
     const targetId = deleteModal.targetId.trim()
-    const API_URL = `http://192.168.100.179:1010/api/asset/${targetId}`
+    const API_URL = `http://10.31.111.11:1010/api/asset/${targetId}`
     const token = localStorage.getItem("token") || ""
 
     try {

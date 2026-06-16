@@ -51,9 +51,9 @@ const StatCard: React.FC<StatCardProps> = ({
   );
 };
 
-// Accept the API data object as a prop
+
 const DashboardStats: React.FC<{ data?: any }> = ({ data }) => {
-  // Fallback to zeros if API data isn't loaded yet
+ 
   const assetData = data?.asset || {
     total_assets: 0,
     available_assets: 0,

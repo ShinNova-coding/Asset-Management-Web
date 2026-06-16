@@ -40,13 +40,13 @@ const AddNewAsset = () => {
       };
 
       try {
-        const usersResponse = await fetch("http://192.168.100.179:1010/api/user", { headers });
+        const usersResponse = await fetch("http://10.31.111.11:1010/api/user", { headers });
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
           setUsersList(usersData.data?.data || usersData.data || []);
         }
 
-        const assetsResponse = await fetch("http://192.168.100.179:1010/api/asset", { headers });
+        const assetsResponse = await fetch("http://10.31.111.11:1010/api/asset", { headers });
         if (assetsResponse.ok) {
           const assetsData = await assetsResponse.json();
           setAssetsList(assetsData.data?.data || assetsData.data || []);
@@ -170,7 +170,7 @@ const AddNewAsset = () => {
 
       console.log("🚀 Sending Payload to Assignment API:", assignmentPayload);
 
-      const API_URL = "http://192.168.100.179:1010/api/assignment"; 
+      const API_URL = "http://10.31.111.11:1010/api/assignment"; 
       
       const targetId = stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;

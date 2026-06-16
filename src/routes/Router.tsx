@@ -23,7 +23,7 @@ import EmployeeDetailsPage from "@/pages/UserManagement/EmployeeDetailsPage"
 import MaintenanceDetailsForm from "@/components/features/Maintenance/MaintenanceDetailsForm"
 import AssignmentDetailPage from "@/components/features/Assignment/AssignmentDetailPage"
 import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
-import AssetListPage from "@/components/features/Dashboard/AssetListPage"
+
 
 export const router = createBrowserRouter([
   
@@ -46,10 +46,7 @@ export const router = createBrowserRouter([
             path: "dashboard",
             element: <DashboardPage />,
           },
-          {
-            path: "assets",
-            element: <AssetListPage />,
-          },
+          
           {
             path: "inventory",
             element: <InventoryPage />,

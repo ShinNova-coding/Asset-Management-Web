@@ -61,7 +61,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
 
     const targetId = String(deleteModal.targetId).trim()
     
-    const API_URL = `http://192.168.100.179:1010/api/assignment/assignment_id`
+    const API_URL = `http://10.31.111.11:1010/api/assignment/assignment_id`
     const token = localStorage.getItem("token") || ""
 
     try {

@@ -75,8 +75,7 @@ export function InventoryDetail() {
       case "available": return "bg-green-50 text-green-700 border-green-200"
       case "assigned": return "bg-blue-50 text-blue-700 border-blue-200"
       case "maintenance": return "bg-amber-50 text-amber-700 border-amber-200"
-      case "pending": return "bg-yellow-50 text-yellow-700 border-yellow-200"
-      case "expired": return "bg-rose-50 text-rose-700 border-rose-200"
+     
       case "retired": return "bg-red-100 text-red-800 border-red-200 font-bold"
       default: return "bg-slate-50 text-slate-700 border-slate-200"
     }
@@ -128,7 +127,7 @@ export function InventoryDetail() {
   const displayCategory = assetItem.category?.name || assetItem.category || "Uncategorized"
 
   
-  const API_REAL_IP = "http://192.168.100.179:1010"
+  const API_REAL_IP = "http://10.31.111.11:1010"
   let rawImageSource = assetItem.preview_url || assetItem.image_url || assetItem.image || ""
   let displayImage = ""
 

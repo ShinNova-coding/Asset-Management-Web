@@ -18,7 +18,7 @@ import {
 import type { Assignment } from "@/data/assignmentdata"
 import axios from "axios"
 
-const API_URL = "http://192.168.100.179:1010/api/assignment"
+const API_URL = "http://10.31.111.11:1010/api/assignment"
 
 const AssignmentDetailPage = () => {
   const { id } = useParams<{ id: string }>()

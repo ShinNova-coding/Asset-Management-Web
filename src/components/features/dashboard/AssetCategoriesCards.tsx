@@ -1,4 +1,4 @@
-// src/components/features/dashboard/AssetCategoriesCards.tsx
+
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -44,10 +44,10 @@ const CategoryCard = ({
 const AssetCategoriesCards = ({ data }: { data?: any }) => {
   const navigate = useNavigate();
 
-  // Dynamically map API category object (e.g., Goods, Furnitures) to cards
+ 
   const categories = data?.category
     ? Object.entries(data.category).map(([key, value]) => {
-        // Assign distinct icons and styles based on category name
+       
         let Icon = CommandLineIcon;
         let colorClass = "bg-indigo-600";
         let borderColor = "border-indigo-200";

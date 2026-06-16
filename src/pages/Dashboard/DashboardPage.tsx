@@ -4,9 +4,9 @@ import React, { useState, useEffect } from "react";
 import DashboardCards from "../../components/features/Dashboard/DashboardCards";
 import AssetCategoriesCards from "../../components/features/Dashboard/AssetCategoriesCards";
 import UserCards from "../../components/features/Dashboard/UserCards";
-import RecentActivities from "../../components/features/Dashboard/RecentActivities";
 
-const API_URL = "http://192.168.100.179:1010/api/dashboard";
+
+const API_URL = "http://10.31.111.11:1010/api/dashboard";
 
 const DashboardPage: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<any>(null);
@@ -29,7 +29,7 @@ const DashboardPage: React.FC = () => {
 
         const result = await response.json();
 
-        // Check if the status is "success" and data exists
+       
         if (response.ok && result.status === "success" && result.data) {
           setDashboardData(result.data);
         } else {
@@ -70,13 +70,13 @@ const DashboardPage: React.FC = () => {
         Dashboard
       </h1>
 
-      {/* Dashboard Cards (passing the fetched data payload as a prop) */}
+     
       <DashboardCards data={dashboardData} />
 
-      {/* User Stats Cards */}
+     
       <UserCards data={dashboardData} />
 
-      {/* Combined Section */}
+     
       <div className="space-y-6">
         <AssetCategoriesCards data={dashboardData} />
       </div>
