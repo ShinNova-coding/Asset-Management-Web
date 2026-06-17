@@ -3,7 +3,7 @@
 import * as React from "react"
 import { InventoryAddNewAsset } from "@/components/features/Inventory/InventoryAddNewAsset"
 import { InventoryTable } from "@/components/features/Inventory/InventoryTable"
-
+import { apiRequest } from "@/lib/apiService";
 export default function InventoryPage() {
   const [inventoryData, setInventoryData] = React.useState<any[]>([])
   const [isLoading, setIsLoading] = React.useState<boolean>(true)
@@ -12,36 +12,25 @@ export default function InventoryPage() {
   React.useEffect(() => {
     async function fetchAssets() {
       try {
-        setIsLoading(true)
-        setError(null)
+        setIsLoading(true);
+        setError(null);
         
-        const response = await fetch("http://10.31.111.11:1010/api/asset", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("token")}`
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error(`Server returned status code: ${response.status}`)
-        }
-
-        const jsonPayload = await response.json()
-        const liveAssets = jsonPayload?.data?.data || jsonPayload?.data || []
+       
+        const response = await apiRequest("/asset", "GET");
         
-        setInventoryData(liveAssets)
+       
+        const liveAssets = response?.data?.data || response?.data || [];
+        setInventoryData(liveAssets);
       } catch (err: any) {
-        console.error("Failed to load inventory assets:", err)
-        setError(err.message || "An unexpected network connection issue occurred.")
+        console.error("Failed to load inventory assets:", err);
+        setError(err.message || "An unexpected network connection issue occurred.");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 
-    fetchAssets()
-  }, [])
+    fetchAssets();
+  }, []);
 
   return (
     <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-slate-50/30">

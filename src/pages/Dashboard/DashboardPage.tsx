@@ -4,9 +4,9 @@ import React, { useState, useEffect } from "react";
 import DashboardCards from "../../components/features/Dashboard/DashboardCards";
 import AssetCategoriesCards from "../../components/features/Dashboard/AssetCategoriesCards";
 import UserCards from "../../components/features/Dashboard/UserCards";
+import { apiRequest } from "@/lib/apiService"; // Adjust path accordingly
 
 
-const API_URL = "http://10.31.111.11:1010/api/dashboard";
 
 const DashboardPage: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<any>(null);
@@ -14,37 +14,28 @@ const DashboardPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      const token = localStorage.getItem("token");
-      
-      try {
-        const response = await fetch(API_URL, {
-          method: "GET",
-          headers: {
-            "User-Agent": "Apidog/1.0.0 (https://apidog.com)",
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-          },
-        });
+  const fetchDashboard = async () => {
+    try {
+      setLoading(true);
+      // apiRequest handles the token and base URL internally
+      const result = await apiRequest("/dashboard", "GET");
 
-        const result = await response.json();
-
-       
-        if (response.ok && result.status === "success" && result.data) {
-          setDashboardData(result.data);
-        } else {
-          setError(result.message || "Failed to load dashboard data.");
-        }
-      } catch (err: any) {
-        console.error("API error reading dashboard:", err);
-        setError(err.message || "Could not reach local server.");
-      } finally {
-        setLoading(false);
+      // Assuming your apiService returns the full response object
+      if (result.status === "success" && result.data) {
+        setDashboardData(result.data);
+      } else {
+        setError(result.message || "Failed to load dashboard data.");
       }
-    };
+    } catch (err: any) {
+      console.error("API error reading dashboard:", err);
+      setError(err.message || "Could not reach local server.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchDashboard();
-  }, []);
+  fetchDashboard();
+}, []);
 
   if (loading) {
     return (

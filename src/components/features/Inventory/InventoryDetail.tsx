@@ -127,7 +127,7 @@ export function InventoryDetail() {
   const displayCategory = assetItem.category?.name || assetItem.category || "Uncategorized"
 
   
-  const API_REAL_IP = "http://10.31.111.11:1010"
+  const API_REAL_IP = "http://192.168.18.9:1010"
   let rawImageSource = assetItem.preview_url || assetItem.image_url || assetItem.image || ""
   let displayImage = ""
 

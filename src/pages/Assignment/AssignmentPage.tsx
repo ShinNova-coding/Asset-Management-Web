@@ -5,12 +5,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AssignmentTable } from "@/components/features/Assignment/AssignmentTable";
 import { assignmentData as fallbackData } from "@/data/assignmentdata";
 import type { Assignment } from "@/data/assignmentdata";
-import { FiTrash2, FiEdit2, FiX } from "react-icons/fi";
-import axios from "axios";
+import { FiTrash2, FiX } from "react-icons/fi";
 import { AssignmentAssign } from "@/components/features/Assignment/AssignmentAssign";
 
-
-const API_URL = "http://10.31.111.11:1010/api/assignment";
+import { apiRequest } from "@/lib/apiService"; 
 
 const AssignmentPage = () => {
   const [data, setData] = useState<Assignment[]>([]);
@@ -25,39 +23,22 @@ const AssignmentPage = () => {
     targetId: null as string | number | null,
   });
 
- 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
-    return {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    };
-  };
-
- 
   const fetchAssignments = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await axios.get(API_URL, {
-        headers: {
-          Authorization: getAuthHeaders().headers.Authorization,
-          Accept: "application/json",
-        }
-      });
+      
+      const response = await apiRequest("/assignment", "GET");
 
-      if (response.data?.success) {
-        setData(response.data.data);
+      if (response?.success) {
+        setData(response.data);
       } else {
-        setError(response.data?.message || "Failed to parse system data structure.");
+        throw new Error(response?.message || "Failed to parse system data structure.");
       }
     } catch (err: any) {
       console.error("API error reading assignments:", err);
-      setError(`Network error: ${err.response?.data?.message || err.message || "Could not reach local server"}`);
+      setError(err.message || "Could not reach local server");
       setData(fallbackData);
     } finally {
       setLoading(false);
@@ -68,7 +49,6 @@ const AssignmentPage = () => {
     fetchAssignments();
   }, []);
 
-  
   useEffect(() => {
     const state = location.state as { deleteItem?: string | number } | null;
     
@@ -79,7 +59,6 @@ const AssignmentPage = () => {
   }, [location.state, navigate, location.pathname]);
 
   const handleEdit = (row: Assignment) => {
-    
     navigate(`/assignment/edit/${row.id}`, { state: { assignment: row } });
   };
 
@@ -91,13 +70,13 @@ const AssignmentPage = () => {
     if (!deleteModal.targetId) return;
 
     try {
-      
-      await axios.delete(`${API_URL}/${deleteModal.targetId}`, getAuthHeaders());
+     
+      await apiRequest(`/assignment/${deleteModal.targetId}`, "DELETE");
       
       setData((prev) => prev.filter((item) => item.id !== deleteModal.targetId));
     } catch (err: any) {
       console.error("Could not run delete execution:", err);
-      alert(`Delete operation failed: ${err.response?.data?.message || err.message}`);
+      alert(`Delete operation failed: ${err.message}`);
     } finally {
       setDeleteModal({ isOpen: false, targetId: null });
     }
@@ -134,7 +113,6 @@ const AssignmentPage = () => {
         </div>
       )}
 
-     
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">

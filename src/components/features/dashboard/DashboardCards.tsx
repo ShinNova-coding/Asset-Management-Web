@@ -76,7 +76,7 @@ const DashboardStats: React.FC<{ data?: any }> = ({ data }) => {
       Icon: CheckCircleIcon,
     },
     {
-      label: "Current Use",
+      label: "Assigned",
       value: assetData.assigned_assets,
       color: "text-black",
       Icon: UserIcon,

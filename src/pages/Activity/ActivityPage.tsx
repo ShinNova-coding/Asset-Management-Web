@@ -1,179 +1,134 @@
 "use client"
 
 import { useState, useEffect } from "react"
-
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi"
+import { Button } from "@/components/ui/button"
+import { apiRequest } from "@/lib/apiService";
 interface SystemActivityLogItem {
   id: number
-  causer_id: string
   causer_name: string
   description: string
-  asset_id: string
   asset_name: string
   created_at: string
 }
 
 export default function ActivityPage() {
   const [logs, setLogs] = useState<SystemActivityLogItem[]>([])
-  const [message, setMessage] = useState("Loading...")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  
+  const [currentPage, setCurrentPage] = useState(0)
+  const itemsPerPage = 10
+  const pageCount = Math.ceil(logs.length / itemsPerPage)
 
   useEffect(() => {
-    const fetchSystemLogs = async () => {
-      try {
-        setLoading(true)
-        setError(null)
+  const fetchSystemLogs = async () => {
+    try {
+      setLoading(true);
+      
+      const result = await apiRequest("/activitylogs", "GET");
 
-        const token = localStorage.getItem("token")
-
-        const response = await fetch("http://10.31.111.11:1010/api/activitylogs", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { "Authorization": `Bearer ${token}` })
-          }
-        })
-
-        if (!response.ok) {
-          throw new Error(`Server responded with status: ${response.status}`)
-        }
-
-        const result = await response.json()
-
-        if (result.success) {
-          const sortedLogs = (result.data || []).sort((a: SystemActivityLogItem, b: SystemActivityLogItem) => b.id - a.id)
-          setLogs(sortedLogs)
-          setMessage(result.message || "Activity logs retrieved successfully")
-        } else {
-          throw new Error(result.message || "Failed to parse system activity logs.")
-        }
-      } catch (err: any) {
-        setError(err.message || "An unexpected error occurred connecting to the API.")
-      } finally {
-        setLoading(false)
+      if (result && Array.isArray(result.data)) {
+       
+        const sortedLogs = result.data.sort((a: any, b: any) => b.id - a.id);
+        setLogs(sortedLogs);
       }
+    } catch (err: any) {
+      setError(err.message || "Failed to load activity logs.");
+    } finally {
+      setLoading(false);
     }
+  };
+  
+  fetchSystemLogs();
+}, []);
 
-    fetchSystemLogs()
-  }, [])
-
-  const getDescriptionBadge = (description: string) => {
-    const normalized = description.toLowerCase()
-    if (normalized === "created") return "bg-blue-50 text-blue-700 ring-blue-600/20"
-    if (normalized === "updated") return "bg-green-50 text-green-700 ring-green-600/20"
-    if (normalized === "deleted") return "bg-red-50 text-red-700 ring-red-600/20"
-    return "bg-slate-50 text-slate-700 ring-slate-600/10"
-  }
+  const currentLogs = logs.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
 
   return (
     <div className="pt-4 px-6 pb-6 space-y-6 min-h-screen bg-slate-50/30">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-blue-500">
-             Activity 
-          </h1>
-        </div>
-      </div>
+      <h1 className="text-2xl font-bold text-blue-500">Activity Logs</h1>
 
       {loading ? (
-        <div className="flex flex-col justify-center items-center h-48 space-y-2 text-slate-500">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
-          <p className="text-sm">Loading...</p>
-        </div>
+        <div className="text-center py-20">Loading data...</div>
       ) : error ? (
-        <div className="space-y-4">
-          <div className="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 text-sm flex items-center justify-between">
-            <div>
-              💡 <strong>Notice:</strong> Using offline view or server connection failure. (Reason: {error})
-            </div>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-md transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden opacity-75">
-            {renderTableStructure(logs, getDescriptionBadge)}
-          </div>
-        </div>
+        <div className="p-4 bg-amber-50 text-amber-800 rounded-lg">Error: {error}</div>
       ) : (
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          {renderTableStructure(logs, getDescriptionBadge)}
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-blue-400 text-white text-sm">
+              <tr>
+                <th className="px-6 py-4">ID</th>
+                <th className="px-6 py-4">Action</th>
+                <th className="px-6 py-4">Asset</th>
+                <th className="px-6 py-4">Operator</th>
+                <th className="px-6 py-4">Date & Time</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 text-sm">
+              {currentLogs.map((row) => (
+                <tr key={row.id} className="hover:bg-slate-50">
+                  <td className="px-6 py-4 font-mono text-slate-400">#{row.id}</td>
+                  <td className="px-6 py-4"><span className="px-2 py-1 bg-slate-100 rounded text-xs">{row.description}</span></td>
+                  <td className="px-6 py-4 font-medium">{row.asset_name}</td>
+                  <td className="px-6 py-4">{row.causer_name}</td>
+                  <td className="px-6 py-4 text-slate-500 text-xs">{new Date(row.created_at).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          
+          <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
+            <div className="text-xs text-slate-500 font-medium ml-2">
+              Page {currentPage + 1} of {pageCount || 1} ({logs.length} total activities)
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                disabled={currentPage === 0}
+              >
+                <FiChevronLeft size={16} />
+              </Button>
+
+              <div className="flex gap-1 items-center">
+                {Array.from({ length: pageCount }).map((_, index) => {
+                  if (index === 0 || index === pageCount - 1 || (index >= currentPage - 1 && index <= currentPage + 1)) {
+                    return (
+                      <Button
+                        key={index}
+                        variant={currentPage === index ? "default" : "outline"}
+                        size="sm"
+                        className={currentPage === index ? "bg-blue-500 hover:bg-blue-600 text-white border-none" : "bg-slate-200"}
+                        onClick={() => setCurrentPage(index)}
+                      >
+                        {index + 1}
+                      </Button>
+                    )
+                  }
+                  if (index === currentPage - 2 || index === currentPage + 2) {
+                    return <span key={index} className="px-2 text-gray-500">...</span>
+                  }
+                  return null
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(pageCount - 1, prev + 1))}
+                disabled={currentPage >= pageCount - 1}
+              >
+                <FiChevronRight size={16} />
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>
-  )
-}
-
-function renderTableStructure(logs: SystemActivityLogItem[], getDescriptionBadge: (desc: string) => string) {
-  const formatTimestamp = (dateString: string) => {
-    if (!dateString) return { date: "N/A", time: "" }
-    const dateObj = new Date(dateString)
-    
-    const date = dateObj.toLocaleDateString("en-GB", { timeZone: "Asia/Yangon" })
-    const time = dateObj.toLocaleTimeString("en-US", { 
-      timeZone: "Asia/Yangon", 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    })
-    
-    return { date, time }
-  }
-
-  return (
-    <table className="w-full text-left border-collapse">
-      <thead>
-        <tr className="border-b border-slate-200 bg-blue-400 text-sm font-semibold text-white">
-          <th className="px-6 py-4">Log ID</th>
-          <th className="px-6 py-4">Action Event</th>
-          
-          <th className="px-6 py-4">Asset Name</th>
-          <th className="px-6 py-4">Operator Info</th>
-          <th className="px-6 py-4">Date</th>
-          <th className="px-6 py-4">Time</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-slate-200 text-sm text-slate-700">
-        {logs.length === 0 ? (
-          <tr>
-            <td colSpan={7} className="px-6 py-8 text-center text-slate-400 font-medium">
-              No tracking logs returned from the server.
-            </td>
-          </tr>
-        ) : (
-          logs.map((row) => {
-            const { date, time } = formatTimestamp(row.created_at)
-            return (
-              <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
-                <td className="px-6 py-4 font-mono text-xs text-slate-400">#{row.id}</td>
-                <td className="px-6 py-4">
-                  <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium  ${getDescriptionBadge(row.description)}`}>
-                    {row.description}
-                  </span>
-                </td>
-                
-                <td className="px-6 py-4 text-slate-900 font-medium">
-                  {row.asset_name === "N/A" ? <span className="text-slate-400 italic">No Modification</span> : row.asset_name}
-                </td>
-                <td className="px-6 py-4 text-slate-700">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{row.causer_name}</span>
-                    
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-slate-500 text-xs font-mono">
-                  {date}
-                </td>
-                <td className="px-6 py-4 text-slate-500 text-xs font-mono font-semibold">
-                  {time}
-                </td>
-              </tr>
-            )
-          })
-        )}
-      </tbody>
-    </table>
   )
 }

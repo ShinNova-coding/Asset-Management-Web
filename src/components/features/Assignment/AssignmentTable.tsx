@@ -4,7 +4,7 @@ import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiX, FiChevronUp, FiChevronDown } from "react-icons/fi"
 import { Search } from "lucide-react"
-
+import { apiRequest } from "@/lib/apiService"; // Adjust the path as needed
 import {
   flexRender,
   getCoreRowModel,
@@ -56,45 +56,33 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
     setDeleteModal({ isOpen: true, targetId: id })
   }
 
-  const handleConfirmDelete = async () => {
-    if (!deleteModal.targetId) return
+ const handleConfirmDelete = async () => {
+  if (!deleteModal.targetId) return;
 
-    const targetId = String(deleteModal.targetId).trim()
+  const targetId = String(deleteModal.targetId).trim();
+  
+  try {
+   
+    await apiRequest(`/assignment/assignment_id`, "DELETE", {
+      assignment_id: targetId,
+    });
+
+   
+    setData((prev) => prev.filter((item) => String(item.id) !== targetId));
     
-    const API_URL = `http://10.31.111.11:1010/api/assignment/assignment_id`
-    const token = localStorage.getItem("token") || ""
-
-    try {
-      const response = await fetch(API_URL, {
-        method: "DELETE",
-        headers: {
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        
-        body: JSON.stringify({
-          assignment_id: targetId,
-        }),
-      })
-
-      if (!response.ok) {
-        const result = await response.json().catch(() => ({}))
-        throw new Error(result.message || "Delete failed")
-      }
-
-      setData((prev) => prev.filter((item) => String(item.id) !== targetId))
-      if (onDeleteSuccess) {
-        onDeleteSuccess(targetId)
-      }
-      setShowToast(true)
-    } catch (error: any) {
-      console.error("❌ Delete failed:", error)
-      alert(`Delete failed: ${error.message}`)
-    } finally {
-      setDeleteModal({ isOpen: false, targetId: null })
+    if (onDeleteSuccess) {
+      onDeleteSuccess(targetId);
     }
+    setShowToast(true);
+  } catch (error: any) {
+    console.error("❌ Delete failed:", error);
+    alert(`Delete failed: ${error.message}`);
+  } finally {
+    setDeleteModal({ isOpen: false, targetId: null });
   }
+};
+
+   
 
   const handleEdit = (item: any) => {
     navigate(`/assignment/edit/${item.id}`, { state: { assignment: item } })

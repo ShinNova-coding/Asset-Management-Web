@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { FiArrowLeft, FiEdit2 } from "react-icons/fi";
-
+import { apiRequest } from "@/lib/apiService"; 
 const EditAssignmentPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -24,46 +24,28 @@ const EditAssignmentPage = () => {
   }, [assignment]);
 
   const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
+
+  try {
     
-    const token = localStorage.getItem("token");
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("User-Agent", "Apidog/1.0.0 (https://apidog.com)");
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", `Bearer ${token}`);
-    myHeaders.append("Connection", "keep-alive");
-
-    const raw = JSON.stringify({
-      "assignment_id": id,
-      "assets_code": assetCode,
-      "note": note,
-      "assigned_date": assignedDate
+    const response = await apiRequest(`/assignment/${id}`, "PATCH", {
+      assignment_id: id,
+      assets_code: assetCode,
+      note: note,
+      assigned_date: assignedDate
     });
 
-    const requestOptions = {
-      method: 'PATCH',
-      headers: myHeaders,
-      body: raw,
-      redirect: 'follow' as RequestRedirect
-    };
-
-    try {
-      const response = await fetch(`http://10.31.111.11:1010/api/assignment/${id}`, requestOptions);
-      
-      if (response.ok) {
-        alert("Assignment updated successfully!");
-        navigate("/assignment"); 
-      } else {
-        const errorData = await response.json();
-        alert(`Failed to update: ${errorData.message || 'Unknown error'}`);
-      }
-    } catch (error) {
-      console.error('error', error);
-      alert("Network error occurred while updating.");
+    if (response?.success) {
+      alert("Assignment updated successfully!");
+      navigate("/assignment");
+    } else {
+      throw new Error(response?.message || "Failed to update.");
     }
-  };
+  } catch (err: any) {
+    console.error("Update error:", err);
+    alert(`Failed to update: ${err.message || "Unknown error"}`);
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-50 p-10 font-sans text-slate-900">

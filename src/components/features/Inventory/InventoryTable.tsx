@@ -26,7 +26,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 import { columns as baseColumns } from "./InventoryColumns"
-
+import { apiRequest } from "@/lib/apiService";
 interface InventoryTableProps {
   data: any[]
 }
@@ -86,40 +86,36 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   const handleDeleteTrigger = (id: string) => {
     setDeleteModal({ isOpen: true, targetId: id })
   }
-
-  const handleConfirmDelete = async () => {
+const handleConfirmDelete = async () => {
     if (!deleteModal.targetId) return
 
     const targetId = deleteModal.targetId.trim()
-    const API_URL = `http://10.31.111.11:1010/api/asset/${targetId}`
-    const token = localStorage.getItem("token") || ""
+    const targetItem = data.find(item => item.id === targetId)
+
+    
+    if (targetItem?.status === "maintenance") {
+      alert("Delete failed: Asset under maintenance")
+      setDeleteModal({ isOpen: false, targetId: null })
+      return
+    }
 
     try {
-      const response = await fetch(API_URL, {
-        method: "DELETE",
-        headers: {
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: targetId }),
-      })
+     
+      await apiRequest(`/asset/${targetId}`, "DELETE", { id: targetId });
 
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.message || "Delete failed")
-      }
-
+     
       setData((prev) => prev.filter((item) => item.id !== targetId))
       setShowToast(true)
     } catch (error: any) {
+     
       console.error("❌ Delete failed:", error)
       alert(`Delete failed: ${error.message}`)
     } finally {
       setDeleteModal({ isOpen: false, targetId: null })
     }
   }
+
+    
 
   const handleEdit = (item: any) => {
     navigate("/inventory/add", { state: { id: item.id, editItem: item } })
