@@ -199,7 +199,6 @@ const deleteRow = async (item: Maintenance, label: string) => {
       return
     }
 
-    
     const response = await apiFetch(`/admin/maintenance/status`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -212,9 +211,13 @@ const deleteRow = async (item: Maintenance, label: string) => {
       }),
     })
 
-
     if (response) {
-      setData((prev) => prev.filter((r) => r.id !== item.id))
+
+      setData((prev) => 
+        prev.map((r) => 
+          r.id === item.id ? { ...r, status: "canceled" } : r
+        )
+      )
       
       const clientName = (item as any).user?.name ?? "Asset" 
       setToastMessage(`${clientName} ${label}`)
@@ -253,7 +256,7 @@ const deleteRow = async (item: Maintenance, label: string) => {
               Approved: "bg-green-100 text-green-700 border border-green-200",
               "In Progress": "bg-amber-100 text-amber-700 border border-amber-200",
               Complete: "bg-blue-100 text-blue-700 border border-blue-200",
-              Cancelled: "bg-gray-200 text-gray-600 border border-gray-300",
+              Cancelled: "bg-red-200 text-red-600 border border-red-300",
             }
             return (
               <div className="flex items-center">
@@ -328,30 +331,36 @@ const deleteRow = async (item: Maintenance, label: string) => {
 }
 
 
-if (status === "complete" || status === "completed") {
-  return (
-    <button
-      title="View Details"
-      className="text-slate-500 hover:text-slate-700 transition p-1"
-      onClick={(e) => { e.stopPropagation(); openViewDialog(item) }}
-    >
-      <LuEye size={20} />
-    </button>
-  )
-} else if (status === "returned") {
-  return (
-  
-    <button
-      title="View Details"
-      className="text-slate-500 hover:text-slate-700 transition p-1"
-      onClick={(e) => { e.stopPropagation(); openViewDialog(item) }}
-    >
-      <LuEye size={20} />
-    </button>
-  )
-}
+            if (
+              status === "complete" || 
+              status === "completed" || 
+              status === "returned" || 
+              status === "cancelled" || 
+              status === "canceled" || 
+              status === "unknown" ||
+              !status
+            ) {
+              return (
+                <button
+                  title="View Details"
+                  className="text-slate-500 hover:text-slate-700 transition p-1"
+                  onClick={(e) => { e.stopPropagation(); openViewDialog(item) }}
+                >
+                  <LuEye size={20} />
+                </button>
+              )
+            }
 
-return <span className="text-red-500 text-xs">Unknown: {item.status}</span>
+      
+            return (
+              <button
+                title="View Details"
+                className="text-slate-500 hover:text-slate-700 transition p-1"
+                onClick={(e) => { e.stopPropagation(); openViewDialog(item) }}
+              >
+                <LuEye size={20} />
+              </button>
+            )
           },
         }
       }

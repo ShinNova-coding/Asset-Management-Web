@@ -10,7 +10,7 @@ import axios from "axios";
 import { AssignmentAssign } from "@/components/features/Assignment/AssignmentAssign";
 
 // Targeted Local Network Endpoint
-const API_URL = "http://192.168.100.179:1010/api/assignment";
+const API_URL = "http://192.168.100.185:1010/api/assignment";
 
 const AssignmentPage = () => {
   const [data, setData] = useState<Assignment[]>([]);

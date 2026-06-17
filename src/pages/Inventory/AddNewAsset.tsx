@@ -251,7 +251,7 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
 
       console.log("🚀 Payload sending to backend server stream:", assetPayload);
 
-      const API_URL = "http://192.168.100.186:1010/api/asset"; 
+      const API_URL = "http://192.168.100.185:1010/api/asset"; 
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       const method = isEditMode ? "PATCH" : "POST";
       const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";

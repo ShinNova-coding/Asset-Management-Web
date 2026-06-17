@@ -15,7 +15,7 @@ export default function InventoryPage() {
         setIsLoading(true)
         setError(null)
         
-        const response = await fetch("http://192.168.100.186:1010/api/asset", {
+        const response = await fetch("http://192.168.100.185:1010/api/asset", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

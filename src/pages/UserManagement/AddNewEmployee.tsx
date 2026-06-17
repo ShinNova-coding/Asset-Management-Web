@@ -10,7 +10,7 @@ import { apiFetch } from '../../lib/api';
 import { normalizeImageSource } from '../../lib/utils';
 import type { Employee } from '../../types/employee';
 
-const DEFAULT_TOKEN = '66|5TalCJ8YD62FDIoYKzJy0w7XosM72oLkVWdPFt4xf8ff92b9';
+const DEFAULT_TOKEN = '182|PkylZG8Lry4njO9zabQju1KwZxtaCHrgDD1S0CIY243be861';
 
 interface FormState {
   name: string;
@@ -24,6 +24,8 @@ interface FormState {
   role: string;
   password: string;
   password_confirmation: string;
+  image?: any;       
+  image_url?: any;   
 }
 
 const formatToInputDate = (dateString: string) => {
@@ -100,13 +102,12 @@ const AddEmployeeForm: React.FC = () => {
         password_confirmation: '',
       });
       setProfileImage(
-        editItem.profileImage === 'https://via.placeholder.com/120'
+        editItem.image === 'https://via.placeholder.com/120' || !editItem.image
           ? null
-          : normalizeImageSource(editItem.profileImage)
+          : normalizeImageSource(editItem.image)
       );
     }
   }, [editItem]);
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -154,19 +155,19 @@ const AddEmployeeForm: React.FC = () => {
     const method = isEditMode ? 'PATCH' : 'POST';
 
     
-    const payload: Record<string, string> = {
+    const payload: Record<string, any> = {
       name: formState.name.trim(),
       employee_id: formState.employee_id.trim(),
       email: formState.email.trim(),
-      position: formState.position.trim(),
-      joined_date: formState.joined_date, // Ensure format matches backend syntax 'YYYY-MM-DD'
-      left_date: formState.left_date,
-      phone_number: formState.phone_number.trim(),
+      position: formState.position.trim() || '-',
+      joined_date: formState.joined_date || null, 
+      left_date: formState.left_date || null,     
+      phone_number: formState.phone_number.trim() || '-',
       status: formState.status,
-      role: formState.role.trim(), // e.g., 'super-admin'
+      role: formState.role.trim(),
     };
 
-    
+  
     if (isEditMode) {
       if (!editItem?.id) {
         throw new Error('Could not update profile: Missing unique account identifier (UUID).');
@@ -182,24 +183,19 @@ const AddEmployeeForm: React.FC = () => {
     
     let finalizedImageString = '';
 
-    if (profileFile) {
-      
-      const base64WithHeader = await convertImageToBase64(profileFile);
-      finalizedImageString = stripBase64Header(base64WithHeader);
-    } else if (profileImage && profileImage.startsWith('data:image')) {
-      
-      finalizedImageString = stripBase64Header(profileImage);
-    } else if (isEditMode && editItem?.image) {
-      
-      finalizedImageString = stripBase64Header(editItem.image);
-    } else {
-      
-      const dummyWithHeader = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
-      finalizedImageString = stripBase64Header(dummyWithHeader);
-    }
-
-    
-    payload.image = finalizedImageString;
+      if (profileFile) {
+        
+        const base64WithHeader = await convertImageToBase64(profileFile);
+        finalizedImageString = stripBase64Header(base64WithHeader);
+        payload.image = finalizedImageString;
+      } else if (profileImage && profileImage.startsWith('data:image')) {
+        finalizedImageString = stripBase64Header(profileImage);
+        payload.image = finalizedImageString;
+      } else if (isEditMode && editItem?.image) {
+        
+      } else {
+        payload.image = null;
+      }
 
     
     const savedToken = localStorage.getItem('token') || DEFAULT_TOKEN;
