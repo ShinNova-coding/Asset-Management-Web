@@ -12,7 +12,7 @@ export type Inventory = {
   storage?: string
   purchased_date: string
   warranty_period: number | string
-  status: "assigned" | "available" | "maintenance" | "expired" | "pending" | "retired"
+  status: "assigned" | "available" | "maintenance"  | "retired"
   category?: { id: number; name: string }
 }
 
@@ -57,8 +57,7 @@ export const columns: ColumnDef<Inventory>[] = [
         "assigned": "bg-blue-100 text-blue-700 border-blue-200",
         "maintenance": "bg-amber-100 text-amber-700 border-amber-200",
         "available": "bg-green-100 text-green-700 border-green-200",
-        "pending": "bg-yellow-100 text-yellow-700 border-yellow-200",
-        "expired": "bg-rose-100 text-rose-700 border-rose-200",
+        
         "retired": "bg-red-100 text-red-700 border-red-200 font-bold", 
       }
       

@@ -54,8 +54,6 @@ const stripBase64Header = (base64String: string): string => {
   return base64String.includes(',') ? base64String.split(',')[1] : base64String;
 };
 
-
-
 const AddEmployeeForm: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -130,29 +128,27 @@ const AddEmployeeForm: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-  try {
-    
-    if (!formState.employee_id.trim()) throw new Error('Employee ID is required.');
-    if (!formState.name.trim()) throw new Error('Name is required.');
-    if (!formState.email.trim()) throw new Error('Email is required.');
-    if (!formState.role.trim()) throw new Error('Role is required.');
+    try {
+      if (!formState.employee_id.trim()) throw new Error('Employee ID is required.');
+      if (!formState.name.trim()) throw new Error('Name is required.');
+      if (!formState.email.trim()) throw new Error('Email is required.');
+      if (!formState.role.trim()) throw new Error('Role is required.');
 
-    if (!isEditMode) {
-      if (!formState.password) throw new Error('Password is required.');
-      if (formState.password !== formState.password_confirmation) {
+      if (!isEditMode) {
+        if (!formState.password) throw new Error('Password is required.');
+        if (formState.password !== formState.password_confirmation) {
+          throw new Error('Password and confirmation must match.');
+        }
+      } else if (formState.password && formState.password !== formState.password_confirmation) {
         throw new Error('Password and confirmation must match.');
       }
-    } else if (formState.password && formState.password !== formState.password_confirmation) {
-      throw new Error('Password and confirmation must match.');
-    }
 
-    
-    const endpointPath = isEditMode ? '/user/id' : '/user';
-    const method = isEditMode ? 'PATCH' : 'POST';
+      const endpointPath = isEditMode ? '/user/id' : '/user';
+      const method = isEditMode ? 'PATCH' : 'POST';
 
     
     const payload: Record<string, any> = {
@@ -172,8 +168,50 @@ const AddEmployeeForm: React.FC = () => {
       if (!editItem?.id) {
         throw new Error('Could not update profile: Missing unique account identifier (UUID).');
       }
-      payload.id = editItem.id;
+
+      if (formState.password) {
+        payload.password = formState.password;
+        payload.password_confirmation = formState.password_confirmation;
+      }
+
+      let finalizedImageString = '';
+
+      if (profileFile) {
+        const base64WithHeader = await convertImageToBase64(profileFile);
+        finalizedImageString = stripBase64Header(base64WithHeader);
+      } else if (profileImage && profileImage.startsWith('data:image')) {
+        finalizedImageString = stripBase64Header(profileImage);
+      } else if (isEditMode && editItem?.image) {
+        finalizedImageString = stripBase64Header(editItem.image);
+      } else {
+        const dummyWithHeader = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+        finalizedImageString = stripBase64Header(dummyWithHeader);
+      }
+
+      payload.image = finalizedImageString;
+
+      const savedToken = localStorage.getItem('token') || DEFAULT_TOKEN;
+      if (!localStorage.getItem('token')) {
+        localStorage.setItem('token', savedToken);
+      }
+
+      await apiFetch(endpointPath, {
+        method,
+        body: JSON.stringify(payload),
+      });
+
+      navigate('/employees', { state: { refresh: true }, replace: true });
+    } catch (err) {
+      console.error('AddNewEmployee submit error:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to save employee. Please try again.'
+      );
+    } finally {
+      setLoading(false);
     }
+  };
 
     if (formState.password) {
       payload.password = formState.password;
@@ -222,29 +260,25 @@ const AddEmployeeForm: React.FC = () => {
   }
 };
   return (
-    <div className="min-h-screen bg-slate-50 p-8 font-sans text-slate-900">
-      <div className="max-w-3xl center mx-auto">
-
-        
+    <div className=" bg-slate-50   font-sans text-slate-900 flex justify-center">
+      <div className="w-full max-w-6xl flex flex-col">
         <Link
           to="/employees"
-          className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline "
+          className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline self-start"
         >
           <ArrowLeft size={16} className="mr-2" />
           Back
         </Link>
 
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">
+        <h1 className="text-2xl font-bold text-slate-800 mb-4">
           {isEditMode ? 'Edit Employee' : 'Add New Employee'}
         </h1>
 
-        <div className="bg-white rounded-lg border border-slate-100 shadow-sm p-10">
-          <form className="space-y-5" onSubmit={handleSubmit}>
-
-            
-            <div className="flex flex-col items-center justify-center">
+        <div className="bg-white rounded-lg border border-slate-100 shadow-sm p-6 md:p-8 flex-1">
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="flex flex-col items-center justify-center mb-2">
               <div className="relative">
-                <div className="w-28 h-28 rounded-full border-4 border-white shadow-md overflow-hidden bg-slate-200 flex items-center justify-center">
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-slate-200 flex items-center justify-center">
                   {profileImage ? (
                     <img
                       src={profileImage}
@@ -252,15 +286,15 @@ const AddEmployeeForm: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <User size={40} className="text-slate-500" />
+                    <User size={32} className="text-slate-500" />
                   )}
                 </div>
 
                 <label
                   htmlFor="profile-upload"
-                  className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-md"
+                  className="absolute bottom-0 right-0 bg-blue-600 text-white p-1.5 rounded-full cursor-pointer shadow-md"
                 >
-                  <Camera size={16} />
+                  <Camera size={12} />
                 </label>
 
                 <input
@@ -272,31 +306,28 @@ const AddEmployeeForm: React.FC = () => {
                 />
               </div>
 
-              <p className="text-sm text-slate-500 mt-3">
+              <p className="text-xs text-slate-500 mt-2">
                 Upload Employee Profile
               </p>
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="rounded-md bg-red-50 px-4 py-2 text-sm text-red-700">
                 {error}
               </div>
             )}
 
-            
             <section>
-              <div className="flex items-center gap-3 mb-4 pb-2 border-b border-slate-200">
-                <User size={20} className="text-slate-400" />
-                <h2 className="text-lg font-semibold text-blue-600">
+              <div className="flex items-center gap-3 mb-3 pb-1 border-b border-slate-200">
+                <User size={16} className="text-slate-400" />
+                <h2 className="text-base font-semibold text-blue-600">
                   General Information
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-600">
                     Name
                   </label>
                   <input
@@ -304,14 +335,13 @@ const AddEmployeeForm: React.FC = () => {
                     value={formState.name}
                     onChange={handleInputChange}
                     placeholder="e.g. Aung Aung"
-                    className="w-full px-4 py-3 rounded-md border bg-white"
+                    className="w-full px-3 py-2 text-sm rounded-md border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                     required
                   />
                 </div>
 
-                
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-600">
                     Employee ID
                   </label>
                   <input
@@ -319,15 +349,14 @@ const AddEmployeeForm: React.FC = () => {
                     value={formState.employee_id}
                     onChange={handleInputChange}
                     placeholder="e.g. EMP-2026-001"
-                    className="w-full px-4 py-3 rounded-md border bg-white"
+                    className="w-full px-3 py-2 text-sm rounded-md border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                     required
                     disabled={isEditMode}
                   />
                 </div>
 
-                
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-600">
                     Email
                   </label>
                   <input
@@ -336,14 +365,13 @@ const AddEmployeeForm: React.FC = () => {
                     value={formState.email}
                     onChange={handleInputChange}
                     placeholder="e.g. aung.aung@example.com"
-                    className="w-full px-4 py-3 rounded-md border bg-white"
+                    className="w-full px-3 py-2 text-sm rounded-md border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                     required
                   />
                 </div>
 
-                
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-600">
                     Position
                   </label>
                   <input
@@ -351,51 +379,41 @@ const AddEmployeeForm: React.FC = () => {
                     value={formState.position}
                     onChange={handleInputChange}
                     placeholder="e.g. IT Support"
-                    className="w-full px-4 py-3 rounded-md border bg-white"
+                    className="w-full px-3 py-2 text-sm rounded-md border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
 
-                
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-600">
                     Joined Date
                   </label>
-                  <div className="relative">
-                    <input
-                      name="joined_date"
-                      type="date"
-                      value={formState.joined_date}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border rounded-md bg-white"
-                    />
-                  </div>
+                  <input
+                    name="joined_date"
+                    type="date"
+                    value={formState.joined_date}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
                 </div>
 
-                
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-600">
                     Left Date
                   </label>
-                  <div className="relative">
-                    <input
-                      name="left_date"
-                      type="date"
-                      value={formState.left_date}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border rounded-md bg-white"
-                    />
-                  </div>
+                  <input
+                    name="left_date"
+                    type="date"
+                    value={formState.left_date}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
                 </div>
-
               </div>
             </section>
 
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-              
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-slate-600">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase text-slate-600">
                   Phone Number
                 </label>
                 <input
@@ -404,67 +422,58 @@ const AddEmployeeForm: React.FC = () => {
                   value={formState.phone_number}
                   onChange={handleInputChange}
                   placeholder="e.g. 09123456789"
-                  className="w-full px-4 py-3 rounded-md border bg-white"
+                  className="w-full px-3 py-2 text-sm rounded-md border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
-              
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-slate-600">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase text-slate-600">
                   Status
                 </label>
-
                 <div className="relative">
                   <select
                     name="status"
                     value={formState.status}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border rounded-md bg-white appearance-none"
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md bg-white appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
                     <option value="active">Active</option>
                     <option value="suspended">Suspended</option>
                     <option value="resigned">Resigned</option>
                   </select>
-
                   <ChevronDown
-                    size={18}
+                    size={16}
                     className="absolute right-3 top-3 text-gray-400 pointer-events-none"
                   />
                 </div>
               </div>
 
-              
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-slate-600">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase text-slate-600">
                   Role
                 </label>
-
                 <div className="relative">
                   <select
                     name="role"
                     value={formState.role}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border rounded-md bg-white appearance-none"
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md bg-white appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
                     <option value="admin">Admin</option>
-                    
                     <option value="employee">Employee</option>
                     <option value="manager">Manager</option>
                   </select>
-
                   <ChevronDown
-                    size={18}
+                    size={16}
                     className="absolute right-3 top-3 text-gray-400 pointer-events-none"
                   />
                 </div>
               </div>
-
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-slate-600">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase text-slate-600">
                   Password
                 </label>
                 <input
@@ -473,15 +482,14 @@ const AddEmployeeForm: React.FC = () => {
                   value={formState.password}
                   onChange={handleInputChange}
                   placeholder="Enter password"
-                  className="w-full px-4 py-3 rounded-md border bg-white"
+                  className="w-full px-3 py-2 text-sm rounded-md border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                   autoComplete="new-password"
                   {...(!isEditMode ? { required: true } : {})}
                 />
               </div>
 
-              
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-slate-600">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase text-slate-600">
                   Confirm Password
                 </label>
                 <input
@@ -490,19 +498,18 @@ const AddEmployeeForm: React.FC = () => {
                   value={formState.password_confirmation}
                   onChange={handleInputChange}
                   placeholder="Confirm password"
-                  className="w-full px-4 py-3 rounded-md border bg-white"
+                  className="w-full px-3 py-2 text-sm rounded-md border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                   autoComplete="new-password"
                   {...(!isEditMode ? { required: true } : {})}
                 />
               </div>
             </div>
 
-            
-            <div className="flex justify-end gap-4 pt-6">
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-6">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-8 py-2 border rounded"
+                className="px-6 py-2 text-xs border border-slate-300 text-slate-600 rounded-md hover:bg-slate-50 transition-colors"
               >
                 Cancel
               </button>
@@ -510,12 +517,11 @@ const AddEmployeeForm: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+                className="px-6 py-2 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
                 {loading ? 'Saving...' : 'Save Employee'}
               </button>
             </div>
-
           </form>
         </div>
       </div>

@@ -12,8 +12,7 @@ import AssignmentPage from "@/pages/Assignment/AssignmentPage"
 import Assign from "@/pages/Assignment/Assign"
 import UserManagementPage from "@/pages/UserManagement/UserManagementPage"
 import ActivityPage from "@/pages/Activity/ActivityPage"
-import ActivityUpdate from "@/components/features/Activity/ActivityUpdate"
-import ActivityDetail from "@/components/features/Activity/ActivityDetail"
+
 import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
 import UserManagement from "@/pages/UserManagement/UserManagementPage"
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee"
@@ -24,7 +23,7 @@ import EmployeeDetailsPage from "@/pages/UserManagement/EmployeeDetailsPage"
 import MaintenanceDetailsForm from "@/components/features/Maintenance/MaintenanceDetailsForm"
 import AssignmentDetailPage from "@/components/features/Assignment/AssignmentDetailPage"
 import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
-import AssetListPage from "@/components/features/Dashboard/AssetListPage"
+
 
 export const router = createBrowserRouter([
   
@@ -47,10 +46,7 @@ export const router = createBrowserRouter([
             path: "dashboard",
             element: <DashboardPage />,
           },
-          {
-            path: "assets",
-            element: <AssetListPage />,
-          },
+          
           {
             path: "inventory",
             element: <InventoryPage />,
@@ -95,14 +91,7 @@ export const router = createBrowserRouter([
             path: "maintenance",
             element: <MaintenancePage />,
           },
-          {
-            path: "activity/add",
-            element: <ActivityUpdate />,
-          },
-          {
-            path: "activity/:id",
-            element: <ActivityDetail />,
-          },
+          
           {
             path: "/employees",
             element: <UserManagement />,

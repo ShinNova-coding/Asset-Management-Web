@@ -20,6 +20,7 @@ export default function Navigation() {
       {/* LEFT BLOCK */}
       <div className="flex items-center gap-4">
         <SidebarTrigger className="text-slate-500 hover:bg-slate-100" />
+       
       </div>
 
       {/* RIGHT BLOCK */}
@@ -29,7 +30,7 @@ export default function Navigation() {
         <div className="relative">
           <button
             onClick={() => setOpen(!open)}
-            className="flex items-center gap-3 rounded-full bg-[#2F6FED] px-3 py-1.5 text-white transition hover:bg-[#1F5FE0]"
+            className="flex items-center gap-3 rounded-full bg-[#2F6FED] px-2.5 py-1 text-white transition hover:bg-[#1F5FE0]"
           >
             <img
               src="https://img.magnific.com/free-psd/contact-icon-illustration-isolated_23-2151903337.jpg?semt=ais_hybrid&w=740&q=80"

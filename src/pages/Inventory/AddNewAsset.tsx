@@ -25,7 +25,7 @@ const AddNewAsset = () => {
     serial_number: '', 
     purchased_date: '', 
     warranty: '',
-    condition: 'fair', // Added condition state
+    condition: 'fair', 
     action: 'available' 
   });
 
@@ -97,7 +97,7 @@ const AddNewAsset = () => {
         action: activeItem.status || activeItem.action || 'available'
       });
       
-      const API_REAL_IP = "http://192.168.100.186:1010";
+      const API_REAL_IP = "http://192.168.100.185:1010";
       let rawImageSource = activeItem.preview_url || activeItem.image_url || activeItem.image || "";
 
       if (rawImageSource) {
@@ -296,7 +296,7 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
           <button 
             type="button"
             onClick={goBack}
-            className="flex items-center text-sm font-medium text-black hover:text-blue-700 transition-colors"
+            className="flex items-center text-sm font-medium text-blue-500 hover:text-blue-700 transition-colors"
           >
             <ArrowLeft size={16} className="mr-2" />
             Back
@@ -357,7 +357,7 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
                     </select>
                   </div>
 
-                  {/* Added Condition Dropdown */}
+                  
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset Condition</label>
                     <select
@@ -383,11 +383,11 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
                      
                       className="w-full px-3.5 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-sm bg-slate-50/50 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400" 
                     >
-                      <option value="assigned">Assigned</option>
+                     
                       <option value="available">Available</option>
-                      <option value="maintenance">Maintenance</option>
-                      <option value="pending">Pending</option>
-                      <option value="expired">Expired</option>
+                     
+                      
+                     
                       <option value="retired">Retired</option>
                     </select>
                   </div>

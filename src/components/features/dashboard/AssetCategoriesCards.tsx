@@ -1,13 +1,10 @@
-// src/components/features/dashboard/AssetCategoriesCards.tsx
+
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
 import {
   ComputerDesktopIcon,
-  DevicePhoneMobileIcon,
   TvIcon,
-  TicketIcon,
   CommandLineIcon,
 } from "@heroicons/react/24/outline";
 
@@ -44,71 +41,56 @@ const CategoryCard = ({
   );
 };
 
-const AssetCategoriesCards = () => {
+const AssetCategoriesCards = ({ data }: { data?: any }) => {
   const navigate = useNavigate();
 
-  const categories = [
-    {
-      title: "Laptop",
-      count: "482",
-      unit: "Units Active",
-      Icon: ComputerDesktopIcon,
-      colorClass: "bg-indigo-900",
-      borderColor: "border-indigo-900",
-      type: "laptop",
-    },
-    {
-      title: "Phone",
-      count: "156",
-      unit: "Units Active",
-      Icon: DevicePhoneMobileIcon,
-      colorClass: "bg-blue-500",
-      borderColor: "border-blue-200",
-      type: "phone",
-    },
-    {
-      title: "Monitor",
-      count: "312",
-      unit: "Units Active",
-      Icon: TvIcon,
-      colorClass: "bg-teal-500",
-      borderColor: "border-teal-100",
-      type: "monitor",
-    },
-    {
-      title: "Chair",
-      count: "210",
-      unit: "Units Active",
-      Icon: TicketIcon,
-      colorClass: "bg-orange-400",
-      borderColor: "border-orange-200",
-      type: "chair",
-    },
-    {
-      title: "Software",
-      count: "1.2k",
-      unit: "Active Seats",
-      Icon: CommandLineIcon,
-      colorClass: "bg-purple-400",
-      borderColor: "border-purple-200",
-      type: "software",
-    },
-  ];
+ 
+  const categories = data?.category
+    ? Object.entries(data.category).map(([key, value]) => {
+       
+        let Icon = CommandLineIcon;
+        let colorClass = "bg-indigo-600";
+        let borderColor = "border-indigo-200";
+
+        if (key.toLowerCase().includes("goods")) {
+          Icon = ComputerDesktopIcon;
+          colorClass = "bg-blue-600";
+          borderColor = "border-blue-200";
+        } else if (key.toLowerCase().includes("furnitur")) {
+          Icon = TvIcon;
+          colorClass = "bg-teal-500";
+          borderColor = "border-teal-200";
+        }
+
+        return {
+          title: key,
+          count: String(value),
+          unit: "Total Items",
+          Icon,
+          colorClass,
+          borderColor,
+          type: key.toLowerCase(),
+        };
+      })
+    : [];
 
   return (
     <div className="p-3 bg-slate-50 w-full">
-      <h2 className="text-xl font-bold mb-8">Asset Categories</h2>
+      <h2 className="text-md font-bold mb-8">Asset Categories</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {categories.map((item, index) => (
-          <CategoryCard
-            key={index}
-            {...item}
-            onClick={() => navigate(`/assets?type=${item.type}`)}
-          />
-        ))}
-      </div>
-
+      {categories.length === 0 ? (
+        <p className="text-sm text-slate-500">No categories found.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {categories.map((item, index) => (
+            <CategoryCard
+              key={index}
+              {...item}
+              onClick={() => navigate(`/assets?type=${item.type}`)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
