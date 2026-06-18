@@ -110,7 +110,7 @@ const UserManagement: React.FC = () => {
       setError("");
 
       try {
-        const token = localStorage.getItem('token') || '182|PkylZG8Lry4njO9zabQju1KwZxtaCHrgDD1S0CIY243be861';
+        const token = localStorage.getItem('token') || '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c';
         if (!localStorage.getItem('token')) {
           localStorage.setItem('token', token);
         }

@@ -24,7 +24,7 @@ export default function EmployeeDetailsPage() {
       if (import.meta.env.DEV && typeof window !== "undefined") {
         localStorage.setItem(
           "token",
-          "182|PkylZG8Lry4njO9zabQju1KwZxtaCHrgDD1S0CIY243be861"
+          "7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c"
         );
       }
     } catch (e) {
