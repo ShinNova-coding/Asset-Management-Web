@@ -414,7 +414,7 @@ const AddEmployeeForm: React.FC = () => {
                   >
                     <option value="admin">Admin</option>
                     <option value="employee">Employee</option>
-                    <option value="manager">Manager</option>
+                    <option value="hr">HR</option>
                   </select>
                   <ChevronDown
                     size={16}

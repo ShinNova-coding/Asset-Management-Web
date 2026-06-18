@@ -12,7 +12,7 @@ import AssignmentPage from "@/pages/Assignment/AssignmentPage"
 import Assign from "@/pages/Assignment/Assign"
 import UserManagementPage from "@/pages/UserManagement/UserManagementPage"
 import ActivityPage from "@/pages/Activity/ActivityPage"
-
+import RolePage from "@/pages/Roles/RolePage" // Adjust path as needed
 import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
 import UserManagement from "@/pages/UserManagement/UserManagementPage"
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee"
@@ -31,9 +31,6 @@ export const router = createBrowserRouter([
     path: "/",
     element: <Login />,
   },
-  
-  
-
   
   {
     element: <ProtectedRoute />, 
@@ -111,6 +108,10 @@ export const router = createBrowserRouter([
           {
             path: "maintenance/:id",
             element: <MaintenanceDetailsForm />,
+          },
+          {
+            path:"roles",
+            element:<RolePage/>
           },
         ],
       },
