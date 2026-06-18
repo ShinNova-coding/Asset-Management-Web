@@ -16,6 +16,7 @@ import {
   FileEdit,
   ClipboardList,
   Wrench,
+  UserCog, // Added UserCog icon
 } from "lucide-react"
 
 import {
@@ -25,7 +26,6 @@ import {
 } from "react-router-dom"
 import Navigation from "@/components/ui/navigation"
 import { BsFillBoxFill } from "react-icons/bs"
-
 
 const menuItems = [
   {
@@ -38,7 +38,6 @@ const menuItems = [
     icon: Boxes,
     path: "/inventory",
   },
-  
   {
     title: "Assignment",
     icon: FileEdit,
@@ -49,14 +48,22 @@ const menuItems = [
     icon: Wrench,
     path: "/maintenance",
   },
+<<<<<<< HEAD
   
   
 {
+=======
+  {
+>>>>>>> 565d5370255e5c0ef95d15cd1bd4405c2d8a9193
     title: "UserManagement",
     icon: Users,
     path: "/usermanagement",
   },
-  
+  {
+    title: "Roles",
+    icon: UserCog, // Updated to UserCog for better visual distinction
+    path: "/roles",
+  },
   {
     title: "Activity",
     icon: ClipboardList,
@@ -72,7 +79,7 @@ export default function Layout() {
     <SidebarProvider style={{ "--sidebar-width": "220px" } as any}>
       <div className="flex min-h-screen w-full bg-[#F8FAFC]">
 
-        {/* SIDEBAR (Completely Untouched Left Side) */}
+        {/* SIDEBAR */}
         <Sidebar className="border-r border-slate-400 bg-white-100">
           <SidebarContent className="bg-blue-50 px-4 py-6">
 
@@ -90,7 +97,7 @@ export default function Layout() {
             {/* MENU */}
             <SidebarMenu className="space-y-3 mt-6">
               {menuItems.map((item) => {
-               
+                
                 const isActive = location.pathname.startsWith(item.path) || 
                   (item.path === "/dashboard" && location.pathname === "/")
 
