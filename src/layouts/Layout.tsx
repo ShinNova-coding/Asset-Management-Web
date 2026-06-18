@@ -48,13 +48,7 @@ const menuItems = [
     icon: Wrench,
     path: "/maintenance",
   },
-<<<<<<< HEAD
-  
-  
-{
-=======
   {
->>>>>>> 565d5370255e5c0ef95d15cd1bd4405c2d8a9193
     title: "UserManagement",
     icon: Users,
     path: "/usermanagement",
