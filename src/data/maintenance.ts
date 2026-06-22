@@ -52,4 +52,12 @@ export type Maintenance = {
     updated_at: string
   } | null
   media: any[]
+
+  // ✨ ဒီနေရာမှာ အသစ်ထည့်လိုက်တာဖြစ်ပါတယ်
+  vendor?: string
+  vendor_phno?: string
+  vendor_address?: string
+  cost?: string | number
+  payment?: string
+  duration?: string
 }
