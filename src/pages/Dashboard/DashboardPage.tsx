@@ -56,8 +56,8 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen px-4 pt-4 pb-6 space-y-5 bg-slate-50">
-      <h1 className="text-2xl font-bold text-blue-500">
+    <div className="min-h-screen px-4 pt-4 pb-6 space-y-5 bg-[#F3F0F7]">
+      <h1 className="text-2xl font-bold text-blue-800">
         Dashboard
       </h1>
 
@@ -65,7 +65,7 @@ const DashboardPage: React.FC = () => {
       <DashboardCards data={dashboardData} />
 
      
-      <UserCards data={dashboardData} />
+      <UserCards apiData={dashboardData} />
 
      
       <div className="space-y-6">

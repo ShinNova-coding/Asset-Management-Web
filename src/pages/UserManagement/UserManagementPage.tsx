@@ -78,7 +78,7 @@ const mapApiUserToEmployee = (user: ApiUser): Employee => ({
   phone: user.phone_number || "-",
 });
 
-const API_URL = "http://192.168.100.185:1010/api/user";
+const API_URL = "http://192.168.100.183:1010/api/user";
 
 const UserManagement: React.FC = () => {
   const navigate = useNavigate();

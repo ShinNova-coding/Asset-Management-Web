@@ -15,7 +15,7 @@ export function InventoryAddNewAsset() {
   return (
     <Button 
       onClick={goToNewPage}
-      className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+      className="flex items-center gap-2 rounded-md bg-blue-800 px-4 py-2 text-sm text-white hover:bg-blue-700"
     >
       <FaCirclePlus size={16} /> Add New Asset
     </Button>

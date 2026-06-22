@@ -1,6 +1,6 @@
 
 
-const BASE_URL = "http://192.168.100.185:1010/api";
+const BASE_URL = "http://192.168.100.183:1010/api";
 
 export const apiRequest = async (
   endpoint: string,
@@ -27,4 +27,5 @@ export const apiRequest = async (
   }
 
   return result;
+  
 };

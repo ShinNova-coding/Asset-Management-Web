@@ -75,7 +75,7 @@ const AssetCategoriesCards = ({ data }: { data?: any }) => {
     : [];
 
   return (
-    <div className="p-3 bg-slate-50 w-full">
+    <div className="p-3 bg-[#F3F0F7] w-full">
       <h2 className="text-md font-bold mb-8">Asset Categories</h2>
 
       {categories.length === 0 ? (

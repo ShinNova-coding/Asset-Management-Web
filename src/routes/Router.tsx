@@ -12,7 +12,7 @@ import AssignmentPage from "@/pages/Assignment/AssignmentPage"
 import Assign from "@/pages/Assignment/Assign"
 import UserManagementPage from "@/pages/UserManagement/UserManagementPage"
 import ActivityPage from "@/pages/Activity/ActivityPage"
-import RolePage from "@/pages/Roles/RolePage" // Adjust path as needed
+import RolePage from "@/pages/Roles/RolePage" 
 import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
 import UserManagement from "@/pages/UserManagement/UserManagementPage"
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee"
@@ -23,7 +23,7 @@ import EmployeeDetailsPage from "@/pages/UserManagement/EmployeeDetailsPage"
 import MaintenanceDetailsForm from "@/components/features/Maintenance/MaintenanceDetailsForm"
 import AssignmentDetailPage from "@/components/features/Assignment/AssignmentDetailPage"
 import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
-
+import CreateRolePage from "@/pages/Roles/CreateRolePage"
 
 export const router = createBrowserRouter([
   
@@ -97,6 +97,15 @@ export const router = createBrowserRouter([
             path: "/add-employee",
             element: <AddEmployeeForm />,
           },
+          {
+  path: "roles",
+  element: <RolePage />,
+},
+{
+  // 2. Add the path for the creation page
+  path: "roles/create", 
+  element: <CreateRolePage />,
+},
           {
     path: "employees",
     element: <EmployeeListPage />,

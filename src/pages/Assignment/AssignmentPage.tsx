@@ -83,10 +83,10 @@ const AssignmentPage = () => {
   };
 
   return (
-    <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-slate-50/30">
+    <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-[#F3F0F7]">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-blue-500">
+          <h1 className="text-2xl font-bold tracking-tight text-blue-800">
             Assignment
           </h1>
         </div>

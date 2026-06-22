@@ -47,8 +47,8 @@ export default function ActivityPage() {
   const currentLogs = logs.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
 
   return (
-    <div className="pt-4 px-6 pb-6 space-y-6 min-h-screen bg-slate-50/30">
-      <h1 className="text-2xl font-bold text-blue-500">Activity Logs</h1>
+    <div className="pt-4 px-6 pb-6 space-y-6 min-h-screen  bg-[#F3F0F7]">
+      <h1 className="text-2xl font-bold text-blue-800">Activity Logs</h1>
 
       {loading ? (
         <div className="text-center py-20">Loading data...</div>
@@ -57,7 +57,7 @@ export default function ActivityPage() {
       ) : (
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-blue-400 text-white text-sm">
+            <thead className="bg-blue-800 text-white text-sm">
               <tr>
                 <th className="px-6 py-4">ID</th>
                 <th className="px-6 py-4">Action</th>

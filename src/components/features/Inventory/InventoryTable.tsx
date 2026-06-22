@@ -196,7 +196,7 @@ const handleConfirmDelete = async () => {
 
       <div className="rounded-md rounded-b-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
-          <TableHeader className="bg-blue-400">
+          <TableHeader className="bg-blue-800">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => {
