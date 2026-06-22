@@ -191,7 +191,7 @@ export default function CreateRolePage() {
               className={`px-4 py-2 text-xs font-bold rounded-xl transition duration-200 ${
                 isEverythingChecked 
                   ? 'text-red-600 bg-red-50 hover:bg-red-100/70' 
-                  : 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100/70'
+                  : 'text-blue-600 bg-blue-50 hover:bg-blue-100/70'
               }`}
             >
               {isEverythingChecked ? 'Unselect All Permissions' : 'Select All Permissions'}
@@ -204,26 +204,26 @@ export default function CreateRolePage() {
             {/* CARD 1: MANAGE (CREATE) */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-800 flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-amber-500 rounded-full"></span>
-                  MANAGE (Create)
+                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
+                  MANAGE (CREATE)
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('create')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[10px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100/80 border border-amber-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[10px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {managePermissions.filter(p => p.id.startsWith('create-')).every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
               </div>
               <div className="space-y-2.5">
                 {managePermissions.filter(p => p.id.startsWith('create-')).map((permission) => (
-                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-amber-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
-                    <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900">
+                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
+                    <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
                       {permission.label.replace(' (Create)', '')}
                     </span>
-                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-amber-600 border-slate-300 rounded accent-amber-500" />
+                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-blue-600 border-slate-300 rounded accent-blue-500" />
                   </label>
                 ))}
               </div>
@@ -232,26 +232,26 @@ export default function CreateRolePage() {
             {/* CARD 2: MANAGE (UPDATE) */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-800 flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-orange-500 rounded-full"></span>
-                  MANAGE (Update)
+                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
+                  MANAGE (UPDATE)
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('update')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[10px] font-bold text-orange-700 bg-orange-50 hover:bg-orange-100/80 border border-orange-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[10px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {managePermissions.filter(p => p.id.startsWith('update-')).every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
               </div>
               <div className="space-y-2.5">
                 {managePermissions.filter(p => p.id.startsWith('update-')).map((permission) => (
-                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-orange-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
-                    <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900">
+                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
+                    <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
                       {permission.label.replace(' (Update)', '')}
                     </span>
-                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-orange-600 border-slate-300 rounded accent-orange-500" />
+                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-blue-600 border-slate-300 rounded accent-blue-500" />
                   </label>
                 ))}
               </div>
@@ -260,26 +260,26 @@ export default function CreateRolePage() {
             {/* CARD 3: MANAGE (DELETE) */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-800 flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-red-500 rounded-full"></span>
-                  MANAGE (Delete)
+                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
+                  MANAGE (DELETE)
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('delete')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[10px] font-bold text-red-700 bg-red-50 hover:bg-red-100/80 border border-red-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[10px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {managePermissions.filter(p => p.id.startsWith('delete-')).every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
               </div>
               <div className="space-y-2.5">
                 {managePermissions.filter(p => p.id.startsWith('delete-')).map((permission) => (
-                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-red-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
-                    <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900">
+                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
+                    <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
                       {permission.label.replace(' (Delete)', '')}
                     </span>
-                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-red-600 border-slate-300 rounded accent-red-500" />
+                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-blue-600 border-slate-300 rounded accent-blue-500" />
                   </label>
                 ))}
               </div>
@@ -288,15 +288,15 @@ export default function CreateRolePage() {
             {/* CARD 4: MANAGE (APPROVE) */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-800 flex items-center gap-2">
+                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
                   <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
-                  MANAGE (Approve)
+                  MANAGE(APPROVE)
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('approve')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[10px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[9px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {managePermissions.filter(p => p.id.startsWith('approve-')).every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
@@ -304,7 +304,7 @@ export default function CreateRolePage() {
               <div className="space-y-2.5">
                 {managePermissions.filter(p => p.id.startsWith('approve-')).map((permission) => (
                   <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
-                    <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900">
+                    <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
                       {permission.label.replace(' (Approve)', '')}
                     </span>
                     <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-blue-600 border-slate-300 rounded accent-blue-500" />
@@ -316,26 +316,26 @@ export default function CreateRolePage() {
             {/* CARD 5: MANAGE (CANCEL) */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-800 flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-slate-500 rounded-full"></span>
-                  MANAGE (Cancel)
+                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
+                  MANAGE (CANCEL)
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('cancel')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[10px] font-bold text-slate-700 bg-slate-50 hover:bg-slate-100/80 border border-slate-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[9px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {managePermissions.filter(p => p.id.startsWith('cancel-')).every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
               </div>
               <div className="space-y-2.5">
                 {managePermissions.filter(p => p.id.startsWith('cancel-')).map((permission) => (
-                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-slate-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
-                    <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900">
+                  <label key={permission.id} className="group flex items-center justify-between bg-blue-50/50 border border-blue-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-blue-200 transition">
+                    <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
                       {permission.label.replace(' (Cancel)', '')}
                     </span>
-                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-slate-600 border-slate-300 rounded accent-slate-500" />
+                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-blue-600 border-blue-300 rounded accent-blue-500" />
                   </label>
                 ))}
               </div>
@@ -344,26 +344,26 @@ export default function CreateRolePage() {
             {/* CARD 6: VIEW / READ ONLY */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-800 flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-teal-500 rounded-full"></span>
+                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
                   VIEW / READ ONLY
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('view')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[10px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100/80 border border-teal-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[9px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {viewPermissions.every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
               </div>
               <div className="space-y-2.5">
                 {viewPermissions.map((permission) => (
-                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-teal-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
-                    <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900">
+                  <label key={permission.id} className="group flex items-center justify-between bg-blue-50/50 border border-blue-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-blue-200 transition">
+                    <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
                       {permission.label}
                     </span>
-                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'view')} disabled={loading} className="w-4 h-4 text-teal-600 border-slate-300 rounded accent-teal-500" />
+                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'view')} disabled={loading} className="w-4 h-4 text-blue-600 border-blue-300 rounded accent-blue-500" />
                   </label>
                 ))}
               </div>
@@ -385,7 +385,7 @@ export default function CreateRolePage() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500/20 shadow-sm shadow-indigo-500/10 transition duration-200 disabled:bg-indigo-400"
+              className="px-6 py-3 bg-blue-500 text-white font-semibold text-sm rounded-xl hover:bg-blue-700 focus:ring-4 focus:ring-indigo-500/20 shadow-sm shadow-indigo-500/10 transition duration-200 disabled:bg-blue-400"
             >
               {loading ? 'Creating...' : 'Create Permissions'}
             </button>

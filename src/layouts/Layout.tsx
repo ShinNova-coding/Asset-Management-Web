@@ -10,7 +10,14 @@ import {
 } from "@/components/ui/sidebar"
 
 import {
-  LayoutDashboard, Boxes, Users, FileEdit, ClipboardList, Wrench, UserCog,
+  LayoutDashboard,
+  Boxes,
+  Users,
+  FileEdit,
+  ClipboardList,
+  Wrench,
+  UserCog,
+  ReceiptText // Added UserCog icon
 } from "lucide-react"
 
 import { useNavigate, Outlet, useLocation } from "react-router-dom"
@@ -18,13 +25,47 @@ import Navigation from "@/components/ui/navigation"
 import { BsFillBoxFill } from "react-icons/bs"
 
 const menuItems = [
-  { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-  { title: "Inventory", icon: Boxes, path: "/inventory" },
-  { title: "Assignment", icon: FileEdit, path: "/assignment" },
-  { title: "Maintenance", icon: Wrench, path: "/maintenance" },
-  { title: "Users", icon: Users, path: "/usermanagement" },
-  { title: "Roles", icon: UserCog, path: "/roles" },
-  { title: "Activity", icon: ClipboardList, path: "/activity" },
+  {
+    title: "Dashboard",
+    icon: LayoutDashboard,
+    path: "/dashboard",
+  },
+  {
+    title: "Inventory",
+    icon: Boxes,
+    path: "/inventory",
+  },
+  {
+    title: "Assignment",
+    icon: FileEdit,
+    path: "/assignment",
+  },
+  {
+    title: "Maintenance",
+    icon: Wrench,
+    path: "/maintenance",
+  },
+  {
+    title: "Expense",
+    icon: ReceiptText,
+    path: "/expense",
+  },
+
+{
+    title: "UserManagement",
+    icon: Users,
+    path: "/usermanagement",
+  },
+  {
+    title: "Roles",
+    icon: UserCog, // Updated to UserCog for better visual distinction
+    path: "/roles",
+  },
+  {
+    title: "Activity",
+    icon: ClipboardList,
+    path: "/activity",
+  },
 ]
 
 export default function Layout() {

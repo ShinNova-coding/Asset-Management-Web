@@ -15,18 +15,23 @@ export default function MaintenancePage() {
       const formatted = list.map((item: any) => {
         const rawStatus = (item.status ?? "").toLowerCase().trim();
         
-        let displayStatus = "Complete"; 
+       let displayStatus = "Cancel"; 
+        
         if (rawStatus === "requested" || rawStatus === "request") {
           displayStatus = "Request";
         } else if (rawStatus === "approved") {
           displayStatus = "Approved";
-        } else if (rawStatus === "completed" || rawStatus === "complete") {
+        } 
+        
+        else if (rawStatus === "cancel" || rawStatus === "cancelled" || rawStatus === "reject" || rawStatus === "rejected") {
+          displayStatus = "Cancelled";
+        } else if (rawStatus === "returned") {
+          displayStatus = "Returned";
+        } 
+        
+        else if (rawStatus === "complete" || rawStatus === "completed") {
           displayStatus = "Complete";
         }
-        else if (rawStatus === "returned") {
-          displayStatus = "Returned";
-        }
-
         return {
           id: item.id,
           employee_name: item.user?.name ?? "-",

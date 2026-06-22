@@ -78,7 +78,8 @@ const mapApiUserToEmployee = (user: ApiUser): Employee => ({
   phone: user.phone_number || "-",
 });
 
-const API_URL = "http://192.168.100.183:1010/api/user";
+
+const USER_ENDPOINT = "/user"; 
 
 const UserManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -92,7 +93,6 @@ const UserManagement: React.FC = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  // Sorting states
   const [sortColumn, setSortColumn] = useState<keyof Employee | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -103,40 +103,41 @@ const UserManagement: React.FC = () => {
 
   const [showToast, setShowToast] = useState(false);
 
+  
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       setError("");
 
       try {
-        const token = localStorage.getItem('token') || '66|5TalCJ8YD62FDIoYKzJy0w7XosM72oLkVWdPFt4xf8ff92b9';
+        const token = localStorage.getItem('token') || '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c';
         if (!localStorage.getItem('token')) {
           localStorage.setItem('token', token);
         }
 
-        const response = await fetch(API_URL, {
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
+        
+        const response = await apiFetch(USER_ENDPOINT, {
+          method: 'GET',
         });
 
-        if (!response.ok) {
-          if (response.status === 401) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            navigate('/', { replace: true });
-            return;
-          }
-
-          throw new Error(`API Error: ${response.status}`);
+        
+        const payload = response.data ? response : await response.json?.().catch(() => response);
+        const users = payload?.data?.data || payload?.data || payload || [];
+        
+        if (Array.isArray(users)) {
+          setData(users.map(mapApiUserToEmployee));
+        } else {
+          console.error("Unexpected data format:", payload);
+          setData([]);
         }
-
-        const payload = await response.json();
-        const users = payload?.data?.data || payload?.data || [];
-        setData(users.map(mapApiUserToEmployee));
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
+        if (err?.status === 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          navigate('/', { replace: true });
+          return;
+        }
         setError("Cannot load users from server.");
       } finally {
         setLoading(false);
@@ -144,7 +145,9 @@ const UserManagement: React.FC = () => {
     };
 
     fetchUsers();
-  }, [location.key, navigate]);
+    
+    
+  }, [location.key, location.state, navigate]); 
 
   const handleDeleteTrigger = (id: string) => {
     setDeleteModal({
@@ -161,11 +164,16 @@ const UserManagement: React.FC = () => {
     setError("");
 
     try {
-      await apiFetch(`/user/${targetId}`, {
+    
+      await apiFetch(`/user/id`, {
         method: 'DELETE',
+        body: JSON.stringify({
+          id: targetId 
+        })
       });
 
-      setData((prev) => prev.filter((item) => item.id !== targetId));
+      
+      setData((prev) => prev.filter((item) => String(item.id) !== String(targetId)));
       setShowToast(true);
     } catch (err: any) {
       console.error('Delete user error:', err);
@@ -175,20 +183,27 @@ const UserManagement: React.FC = () => {
       setDeleteModal({ isOpen: false, targetId: null });
     }
   };
-
-  React.useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => {
-        setShowToast(false);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [showToast]);
-
   const handleEdit = (item: Employee) => {
+    
+    const imageValue = (item.profileImage === "-" || !item.profileImage) ? "" : item.profileImage;
+
+    const apiUserFormat = {
+      id: item.id,
+      employee_id: item.employee_id || "",
+      name: item.name || "",
+      role: item.role?.toLowerCase() || "staff", 
+      email: item.email || "",
+      position: item.position === "-" ? "" : item.position,
+      phone_number: item.phone === "-" ? "" : item.phone,
+      joined_date: (item.joinedDate === "-" || !item.joinedDate) ? "" : item.joinedDate,
+      left_date: (item.leftDate === "-" || !item.leftDate) ? "" : item.leftDate,
+      status: item.status?.toLowerCase() || "active",
+      image: imageValue,
+      image_url: imageValue
+    };
+
     navigate("/add-employee", {
-      state: { editItem: item },
+      state: { editItem: apiUserFormat },
     });
   };
 
@@ -210,17 +225,16 @@ const UserManagement: React.FC = () => {
   const filteredData = data.filter((emp) => {
     const searchTerm = search.toLowerCase();
     const matchesSearch =
-      emp.name.toLowerCase().includes(searchTerm) ||
-      emp.email.toLowerCase().includes(searchTerm) ||
-      emp.employee_id.toLowerCase().includes(searchTerm);
+      (emp.name || "").toLowerCase().includes(searchTerm) ||
+      (emp.email || "").toLowerCase().includes(searchTerm) ||
+      (emp.employee_id || "").toLowerCase().includes(searchTerm);
 
     const matchesStatus =
-      !statusFilter || emp.status.toLowerCase() === statusFilter.toLowerCase();
+      !statusFilter || (emp.status || "").toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
   });
 
-  // Apply sorting dynamically before pagination
   const sortedData = React.useMemo(() => {
     const sortableData = [...filteredData];
     if (sortColumn) {
@@ -254,9 +268,7 @@ const UserManagement: React.FC = () => {
         </Link>
       </div>
 
-      {/* CARD CONTAINER FOR FILTERS AND TABLE */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
-        {/* FILTERS */}
         <div className="flex gap-4 items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
@@ -289,7 +301,6 @@ const UserManagement: React.FC = () => {
           </div>
         </div>
 
-        {/* TABLE */}
         <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <Table>
             <TableHeader className="bg-blue-400">
@@ -348,12 +359,7 @@ const UserManagement: React.FC = () => {
                   </div>
                 </TableHead>
 
-               <TableHead className="text-white font-semibold py-3.5 text-sm">
-                <div className="flex items-center gap-2">
-                  Status
-                </div>
-                </TableHead>
-
+                <TableHead className="text-white font-semibold py-3.5 text-sm">Status</TableHead>
                 <TableHead className="text-white font-semibold py-3.5 text-sm text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -361,25 +367,19 @@ const UserManagement: React.FC = () => {
             <TableBody>
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center text-slate-500 text-sm">
-                    Loading ...
-                  </TableCell>
+                  <TableCell colSpan={7} className="h-24 text-center text-slate-500 text-sm">Loading ...</TableCell>
                 </TableRow>
               )}
 
               {!loading && error && (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center text-red-600 text-sm">
-                    {error}
-                  </TableCell>
+                  <TableCell colSpan={7} className="h-24 text-center text-red-600 text-sm">{error}</TableCell>
                 </TableRow>
               )}
 
               {!loading && !error && currentPaginatedData.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center text-slate-400 text-sm">
-                    No users found.
-                  </TableCell>
+                  <TableCell colSpan={7} className="h-24 text-center text-slate-400 text-sm">No users found.</TableCell>
                 </TableRow>
               )}
 
@@ -393,25 +393,20 @@ const UserManagement: React.FC = () => {
                   <TableCell className="py-3.5 text-slate-700 text-sm">{emp.employee_id}</TableCell>
                   <TableCell className="py-3.5 text-slate-700 text-sm font-medium">{emp.name}</TableCell>
                   <TableCell className="py-3.5 text-slate-700 text-sm">{emp.email}</TableCell>
-
                   <TableCell className="py-3.5 text-slate-700 text-sm">
-                    <span className="text-xs bg-slate-100 px-3 py-1 rounded">
-                      {emp.position}
-                    </span>
+                    <span className="text-xs bg-slate-100 px-3 py-1 rounded">{emp.position}</span>
                   </TableCell>
-
                   <TableCell className="py-3.5 text-slate-700 text-sm">
                     <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                      emp.status.toLowerCase() === 'active'
+                      (emp.status || "").toLowerCase() === 'active'
                         ? 'bg-green-100 text-green-700'
-                        : emp.status.toLowerCase() === 'suspended'
+                        : (emp.status || "").toLowerCase() === 'suspended'
                         ? 'bg-blue-100 text-blue-700'
                         : 'bg-yellow-100 text-yellow-700'
                     }`}>
                       {emp.status}
                     </span>
                   </TableCell>
-
                   <TableCell className="py-3.5 text-slate-700 text-sm text-right" data-actions-cell="true">
                     <div className="flex justify-end gap-2 items-center" onClick={(e) => e.stopPropagation()}>
                       <UserManagementEdit onEdit={() => handleEdit(emp)} />

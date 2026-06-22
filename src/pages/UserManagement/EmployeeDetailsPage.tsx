@@ -24,7 +24,7 @@ export default function EmployeeDetailsPage() {
       if (import.meta.env.DEV && typeof window !== "undefined") {
         localStorage.setItem(
           "token",
-          "65|ngcbHpjyD7aLqln8X6RIHtccpsEOW19eyH4BqIcv554555c1"
+          "7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c"
         );
       }
     } catch (e) {
@@ -57,9 +57,10 @@ export default function EmployeeDetailsPage() {
           profileImage: normalizeImageSource(
             user.preview_url ||
             user.image_url ||
+            user.image ||
             user.media?.[0]?.preview_url ||
             user.media?.[0]?.original_url ||
-            ""
+            null
           ),
           employee_id: user.employee_id || "-",
           name: user.name || "Unknown",
@@ -122,7 +123,7 @@ export default function EmployeeDetailsPage() {
           <div className="text-xs text-gray-500 mt-2">
             <p>💡 Diagnostics & Tips:</p>
             <ul className="ml-4 mt-1 list-disc">
-              <li>Verify server is running at http://10.31.111.11:1010</li>
+              <li>Verify server is running at http://192.168.100.183:1010</li>
               <li>Check if your device is connected to the network segment (192.168.100.x)</li>
               <li>Ensure the route id matches: <code className="bg-gray-100 p-0.5 rounded">{id}</code></li>
             </ul>

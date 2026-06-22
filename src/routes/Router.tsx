@@ -1,8 +1,6 @@
 import { createBrowserRouter } from "react-router-dom"
 
 import Login from "@/pages/Auth/Login"
-
-
 import Layout from "@/layouts/Layout"
 import ProtectedRoute from "./ProtectedRoute"
 
@@ -13,8 +11,8 @@ import Assign from "@/pages/Assignment/Assign"
 import UserManagementPage from "@/pages/UserManagement/UserManagementPage"
 import ActivityPage from "@/pages/Activity/ActivityPage"
 import RolePage from "@/pages/Roles/RolePage" 
+import CreateRolePage from "@/pages/Roles/CreateRolePage"
 import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
-import UserManagement from "@/pages/UserManagement/UserManagementPage"
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee"
 import AddNewAsset from "@/pages/Inventory/AddNewAsset"
 import { InventoryDetail } from "@/components/features/Inventory/InventoryDetail"
@@ -23,15 +21,15 @@ import EmployeeDetailsPage from "@/pages/UserManagement/EmployeeDetailsPage"
 import MaintenanceDetailsForm from "@/components/features/Maintenance/MaintenanceDetailsForm"
 import AssignmentDetailPage from "@/components/features/Assignment/AssignmentDetailPage"
 import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
-import CreateRolePage from "@/pages/Roles/CreateRolePage"
 
+// 1. Import your new Expense components (Adjust the path matching your folder structure)
+import ExpensePage from "@/pages/Expense/ExpensePage" 
+import ExpenseTable from "@/pages/Expense/ExpenseTable" 
 export const router = createBrowserRouter([
-  
   {
     path: "/",
     element: <Login />,
   },
-  
   {
     element: <ProtectedRoute />, 
     children: [
@@ -60,10 +58,12 @@ export const router = createBrowserRouter([
             path: "inventory/:id",
             element: <InventoryDetail />,
           },
+          
           {
             path: "usermanagement",
             element: <UserManagementPage />,
           },
+          
           {
             path: "assignment",
             element: <AssignmentPage />,
@@ -80,52 +80,49 @@ export const router = createBrowserRouter([
             path: "assignment/edit/:id",
             element: <AssignmentEditPage />, 
           },
+          
           {
             path: "activity",
             element: <ActivityPage />,
           },
+          
           {
             path: "maintenance",
             element: <MaintenancePage />,
           },
-          
-          {
-            path: "/employees",
-            element: <UserManagement />,
-          },
-          {
-            path: "/add-employee",
-            element: <AddEmployeeForm />,
-          },
-          {
-  path: "roles",
-  element: <RolePage />,
-},
-{
-  // 2. Add the path for the creation page
-  path: "roles/create", 
-  element: <CreateRolePage />,
-},
-          {
-    path: "employees",
-    element: <EmployeeListPage />,
-  },
-  {
-    path: "employee/:id",
-    element: <EmployeeDetailsPage />,
-  },
           {
             path: "maintenance/:id",
             element: <MaintenanceDetailsForm />,
           },
+
           {
-            path:"roles",
-            element:<RolePage/>
+            path: "employees",
+            element: <EmployeeListPage />,
+          },
+          {
+            path: "add-employee",
+            element: <AddEmployeeForm />,
+          },
+          {
+            path: "employee/:id",
+            element: <EmployeeDetailsPage />,
+          },
+
+          {
+            path: "roles",
+            element: <RolePage />
+          },
+          {
+            path: "roles/create",
+            element: <CreateRolePage />
+          },
+
+          {
+            path: "expense",
+            element: <ExpensePage />
           },
         ],
       },
-        
- 
     ],
   },
 ])
