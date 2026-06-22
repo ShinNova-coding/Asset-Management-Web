@@ -90,39 +90,40 @@ export default function CreateRolePage() {
     setViewPermissions(prev => prev.map(p => ({ ...p, checked: targetState })));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  // Replace your existing handleSubmit function
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
 
-    const selectedPermissions = [
-      ...managePermissions.filter(p => p.checked).map(p => p.id),
-      ...viewPermissions.filter(p => p.checked).map(p => p.id),
-    ];
+  const selectedPermissions = [
+    ...managePermissions.filter(p => p.checked).map(p => p.id),
+    ...viewPermissions.filter(p => p.checked).map(p => p.id),
+  ];
 
-    try {
-      const response = await axios.get('http://192.168.100.183:1010/api/role', {
-        params: {
-          name: roleName,
-          guard_name: "sanctum",
-          permissions: selectedPermissions.join(',')
-        },
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        }
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        navigate("/roles");
+  try {
+    // Changed to axios.post
+    const response = await axios.post('http://192.168.100.183:1010/api/role', {
+      name: roleName,
+      guard_name: "sanctum",
+      permissions: selectedPermissions // Send as an array if the API expects it
+    }, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Something went wrong.");
-    } finally {
-      setLoading(false);
+    });
+
+    if (response.status === 200 || response.status === 201) {
+      navigate("/roles");
     }
-  };
+  } catch (err: any) {
+    setError(err.response?.data?.message || "Something went wrong.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-8 flex justify-center items-start">

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { fetchRoles, deleteRole } from "@/lib/axios"; 
 
 export default function RolesPage() {
   const [roles, setRoles] = useState<any[]>([]);
@@ -16,57 +16,41 @@ export default function RolesPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchRoles = async () => {
+    const loadRoles = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://192.168.100.183:1010/api/role', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = Array.isArray(response.data) ? response.data : (response.data.data || []);
-        setRoles(data);
+        const data = await fetchRoles();
+        setRoles(Array.isArray(data) ? data : (data.data || []));
       } catch (error) {
         console.error("Failed to fetch roles", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchRoles();
+    loadRoles();
   }, []);
-const handleDelete = async () => {
-  const roleToDelete = roles[roleIndex];
-  const id = roleToDelete.role_id || roleToDelete.id;
 
-  if (!id) return;
-  if (!confirm(`Are you sure you want to delete: ${roleToDelete.name}?`)) return;
+  const handleDelete = async () => {
+    const roleToDelete = roles[roleIndex];
+    const id = roleToDelete.role_id || roleToDelete.id;
 
-  try {
-    setIsDeleting(true);
-    
-    // Explicitly using a config object with 'data'
-    await axios.delete(`http://192.168.100.183:1010/api/role`, {
-      headers: { 
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        "Accept": "application/json",
-        "Content-Type": "application/json" 
-      },
-      data: { role_id: id } 
-    });
-    
-    // UI Update
-    setRoles(roles.filter((r) => (r.role_id || r.id) !== id));
-    setRoleIndex(0);
-  } catch (error: any) {
-    // This logs the full error from the server
-    console.error("Delete failed:", error.response?.data || error.message);
-    alert("Server Error: " + (error.response?.data?.message || "Check server logs"));
-  } finally {
-    setIsDeleting(false);
-  }
-};
-       
+    if (!id) return;
+    if (!confirm(`Are you sure you want to delete: ${roleToDelete.name}?`)) return;
 
-  
+    try {
+      setIsDeleting(true);
+      await deleteRole(id);
       
+      setRoles(roles.filter((r) => (r.role_id || r.id) !== id));
+      setRoleIndex(0);
+      alert("Role deleted successfully!");
+    } catch (error: any) {
+      console.error("Delete failed:", error);
+      alert(error.response?.data?.message || "Delete failed. Please check permissions.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const groupPermissions = (permissions: any[]) => {
     if (!permissions) return {};
