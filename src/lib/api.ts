@@ -3,7 +3,7 @@
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem("token");
 
-  const res = await fetch(`http://192.168.100.185:1010/api${endpoint}`, {
+  const res = await fetch(`http://192.168.100.183:1010/api${endpoint}`, {
     ...options,
     headers: {
       Accept: "application/json",

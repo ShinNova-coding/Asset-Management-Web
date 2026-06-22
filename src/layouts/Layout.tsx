@@ -16,7 +16,8 @@ import {
   FileEdit,
   ClipboardList,
   Wrench,
-  UserCog, // Added UserCog icon
+  UserCog,
+  ReceiptText // Added UserCog icon
 } from "lucide-react"
 
 import {
@@ -49,6 +50,12 @@ const menuItems = [
     path: "/maintenance",
   },
   {
+    title: "Expense",
+    icon: ReceiptText,
+    path: "/expense",
+  },
+
+{
     title: "UserManagement",
     icon: Users,
     path: "/usermanagement",
