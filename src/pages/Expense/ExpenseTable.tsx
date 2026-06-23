@@ -1,9 +1,10 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Loader2, X, Save, Search, ChevronDown } from 'lucide-react';
 import { FaEdit } from "react-icons/fa";
 import { RiDeleteBin4Fill } from "react-icons/ri";
+import { FiChevronUp, FiChevronDown } from "react-icons/fi"; // Sorting Icons ထည့်သွင်းခြင်း
 import { apiFetch } from "@/lib/api";
 
 // Detail Modal ကို Import ခေါ်ယူခြင်း
@@ -16,6 +17,9 @@ interface ExpenseWithUser extends ExpenseDetailData {
   } | null;
 }
 
+// Sort ဖြစ်နိုင်မယ့် Column Column Keys သတ်မှတ်ခြင်း
+type SortableColumns = 'employee' | 'title' | 'expense_date' | 'cost';
+
 export const ExpenseTable: React.FC = () => {
   // ── STATES ──────────────────────────────────────────────────────
   const [expenses, setExpenses] = useState<ExpenseWithUser[]>([]);
@@ -26,6 +30,10 @@ export const ExpenseTable: React.FC = () => {
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
+
+  // Sorting States
+  const [sortColumn, setSortColumn] = useState<SortableColumns | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Pagination States
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -162,6 +170,22 @@ export const ExpenseTable: React.FC = () => {
     }
   };
 
+  // ── SORT HANDLER LOGIC ─────────────────────────────────────────
+  const handleSort = (column: SortableColumns) => {
+    if (sortColumn === column) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else {
+        setSortColumn(null);
+        setSortDirection('asc');
+      }
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+    setCurrentPage(1);
+  };
+
   // ── SEARCH & FILTER LOGIC ──────────────────────────────────────
   const filteredExpenses = expenses.filter(item => {
     const employeeName = (item.user?.name || currentUserName || "").toLowerCase();
@@ -177,82 +201,158 @@ export const ExpenseTable: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // ── SORTING EXECUTION LOGIC ────────────────────────────────────
+  const sortedExpenses = useMemo(() => {
+    const sortableData = [...filteredExpenses];
+    if (sortColumn) {
+      sortableData.sort((a, b) => {
+        let aValue: string | number = "";
+        let bValue: string | number = "";
+
+        if (sortColumn === 'employee') {
+          aValue = (a.user?.name || currentUserName || "").toLowerCase();
+          bValue = (b.user?.name || currentUserName || "").toLowerCase();
+        } else if (sortColumn === 'title') {
+          aValue = (a.title || "").toLowerCase();
+          bValue = (b.title || "").toLowerCase();
+        } else if (sortColumn === 'expense_date') {
+          aValue = (a.expense_date || "").toLowerCase();
+          bValue = (b.expense_date || "").toLowerCase();
+        } else if (sortColumn === 'cost') {
+          aValue = Number(a.cost || 0);
+          bValue = Number(b.cost || 0);
+        }
+
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return sortableData;
+  }, [filteredExpenses, sortColumn, sortDirection, currentUserName]);
+
   // ── PAGINATION LOGIC ──────────────────────────────────────────
-  const totalItems = filteredExpenses.length;
+  const totalItems = sortedExpenses.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredExpenses.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = sortedExpenses.slice(indexOfFirstItem, indexOfLastItem);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, statusFilter]);
 
-  // Status Styles mapping based on Screenshot 2026-06-22 164232.png
+  // UI Status Badges matching from the reference image
   const getStatusStyles = (status: string) => {
     const s = status?.toLowerCase();
     if (s === 'canceled' || s === 'cancelled') {
-      return 'bg-red-50 text-red-500 px-4 py-1.5 text-xs font-semibold rounded-full inline-block min-w-[85px] text-center capitalize';
+      return 'bg-red-50 text-red-500 px-3 py-1 text-xs font-medium rounded-full inline-block border border-red-200 text-center min-w-[80px] capitalize';
     }
     if (s === 'requested' || s === 'pending') {
-      return 'bg-[#fef3c7] text-[#d97706] px-4 py-1.5 text-xs font-semibold rounded-full inline-block min-w-[85px] text-center capitalize';
+      return 'bg-blue-50 text-blue-500 px-3 py-1 text-xs font-medium rounded-full inline-block border border-blue-200 text-center min-w-[80px] capitalize';
     }
-    return 'bg-[#e6f9f0] text-[#22c55e] px-4 py-1.5 text-xs font-semibold rounded-full inline-block min-w-[85px] text-center capitalize';
+    return 'bg-emerald-50 text-emerald-600 px-3 py-1 text-xs font-medium rounded-full inline-block border border-emerald-200 text-center min-w-[80px] capitalize';
   };
 
-  return (
-    <div className="w-full max-w-5xl mx-auto p-3 bg-[#f8fafc] border border-slate-200/60 rounded-[24px] shadow-xs font-sans antialiased text-slate-700 space-y-5">
-      
-      {/* ── 🔍 SEARCH & FILTER CONTROLS ────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-        <div className="relative w-full sm:max-w-xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2  text-slate-400" size={18} />
-          <input
-            type="text"
-            placeholder="Search by name, email, or ID..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-[#fafafa] border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 transition-all placeholder:text-slate-400 text-slate-600"
-          />
-        </div>
+ return (
+    <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
+      {/* ── 🔍 SEARCH & FILTER CONTROLS (Maintenance Header UI ပုံစံအတိုင်း ပြင်ဆင်ထားသည်) ────────────────────────────── */}
+<div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
+  <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
+    
+    {/* Search Input Box */}
+    <div className="relative flex-1 w-full">
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+      <input
+        type="text"
+        placeholder="Search by name, date, title..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full rounded-md border border-slate-300 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400 text-slate-700 shadow-3xs"
+      />
+    </div>
 
-        <div className="relative w-full sm:w-52">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full pl-4 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 transition-all cursor-pointer"
-          >
-            <option value="All">All Status</option>
-            <option value="requested">Requested</option>
-            <option value="approved">Approved</option>
-            <option value="canceled">Canceled</option>
-          </select>
-          <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-        </div>
-      </div>
+    {/* Status Filter Dropdown */}
+    <div className="relative w-full sm:w-48">
+      <select
+        value={statusFilter}
+        onChange={(e) => setStatusFilter(e.target.value)}
+        className="w-full pl-3 pr-10 py-2 bg-slate-55 border border-slate-300 rounded-md text-sm font-normal text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer shadow-3xs"
+      >
+        <option value="All">All Status</option>
+        <option value="requested">Requested</option>
+        <option value="approved">Approved</option>
+        <option value="canceled">Canceled</option>
+      </select>
+      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+    </div>
 
-      {/* ── 📊 TABLE CARD CONTAINER ────────────────────────────────── */}
-      <div className="bg-white border border-slate-200/70 rounded-2xl overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[80px]">
+  </div>
+</div>
+      {/* ── 📊 CARD 1: MAIN TABLE CONTAINER ────────────────────── */}
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs flex flex-col mt-2">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left border-collapse table-auto">
             <thead>
-              <tr className="bg-[#4da1ff] text-white text-[14px] font-semibold tracking-wide">
-                <th className="py-2.5 px-3.5 w-16">No</th>
-                <th className="py-2.5 px-3.5">Employee</th>
-                <th className="py-2.5 px-3.5">Expense Title</th>
-                <th className="py-2.5 px-3.5">Date</th>
-                <th className="py-2.5 px-3.5 text-center">Type</th>
-                <th className="py-2.5 px-3.5">Cost (MMK)</th>
-                <th className="py-2.5 px-3.5 text-center">Status</th>
-                <th className="py-2.5 px-3.5 w-24 text-center">Actions</th>
+              <tr className="bg-[#3b82f6] text-white text-[13px] font-semibold border-b border-blue-600 select-none">
+                <th className="py-3 px-4 w-16">No.</th>
+                
+                {/* Employee Header (Sortable) */}
+                <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('employee')}>
+                  <div className="flex items-center gap-1.5">
+                    Employee
+                    <div className="flex flex-col">
+                      <FiChevronUp size={12} className={sortColumn === 'employee' && sortDirection === 'asc' ? "text-white" : "text-white/40"} />
+                      <FiChevronDown size={12} className={sortColumn === 'employee' && sortDirection === 'desc' ? "text-white" : "text-white/40"} />
+                    </div>
+                  </div>
+                </th>
+
+                {/* Expense Title Header (Sortable) */}
+                <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('title')}>
+                  <div className="flex items-center gap-1.5">
+                    Expense Title
+                    <div className="flex flex-col">
+                      <FiChevronUp size={12} className={sortColumn === 'title' && sortDirection === 'asc' ? "text-white" : "text-white/40"} />
+                      <FiChevronDown size={12} className={sortColumn === 'title' && sortDirection === 'desc' ? "text-white" : "text-white/40"} />
+                    </div>
+                  </div>
+                </th>
+
+                {/* Date Header (Sortable) */}
+                <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('expense_date')}>
+                  <div className="flex items-center gap-1.5">
+                    Date
+                    <div className="flex flex-col">
+                      <FiChevronUp size={12} className={sortColumn === 'expense_date' && sortDirection === 'asc' ? "text-white" : "text-white/40"} />
+                      <FiChevronDown size={12} className={sortColumn === 'expense_date' && sortDirection === 'desc' ? "text-white" : "text-white/40"} />
+                    </div>
+                  </div>
+                </th>
+
+                <th className="py-3 px-4 text-center">Type</th>
+
+                {/* Cost Header (Sortable) */}
+                <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('cost')}>
+                  <div className="flex items-center gap-1.5">
+                    Cost (MMK)
+                    <div className="flex flex-col">
+                      <FiChevronUp size={12} className={sortColumn === 'cost' && sortDirection === 'asc' ? "text-white" : "text-white/40"} />
+                      <FiChevronDown size={12} className={sortColumn === 'cost' && sortDirection === 'desc' ? "text-white" : "text-white/40"} />
+                    </div>
+                  </div>
+                </th>
+
+                <th className="py-3 px-4 text-center">Status</th>
+                <th className="py-3 px-4 w-24 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-[14px]">
+            <tbody className="divide-y divide-slate-100 text-[13px] text-slate-600">
               {loading && (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center text-slate-400">
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
                     <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="animate-spin text-[#4da1ff]" size={22} />
+                      <Loader2 className="animate-spin text-[#3b82f6]" size={18} />
                       <span className="font-medium text-slate-500">Loading expenses...</span>
                     </div>
                   </td>
@@ -261,7 +361,7 @@ export const ExpenseTable: React.FC = () => {
 
               {!loading && error && (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center text-red-500 font-medium">
+                  <td colSpan={8} className="py-12 text-center text-red-500 font-medium">
                     {error}
                   </td>
                 </tr>
@@ -269,7 +369,7 @@ export const ExpenseTable: React.FC = () => {
 
               {!loading && !error && totalItems === 0 && (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center text-slate-400 font-medium">
+                  <td colSpan={8} className="py-12 text-center text-slate-400 font-medium">
                     No expense records found.
                   </td>
                 </tr>
@@ -281,40 +381,37 @@ export const ExpenseTable: React.FC = () => {
                   onClick={() => handleRowClick(expense)} 
                   className="hover:bg-slate-50/80 cursor-pointer transition-colors"
                 >
-                  <td className="py-4.5 px-6 text-slate-600 font-medium">
+                  <td className="py-3.5 px-4 font-normal text-slate-400">
                     {indexOfFirstItem + index + 1}
                   </td>
-                  <td className="py-4.5 px-6 font-semibold text-slate-700">
+                  <td className="py-3.5 px-4 font-medium text-slate-700">
                     {expense.user?.name || currentUserName || "Unknown Employee"}
                   </td>
-                  <td className="py-4.5 px-6 font-medium text-slate-600">
+                  <td className="py-3.5 px-4 font-medium text-slate-700">
                     {expense.title}
                   </td>
-                  <td className="py-4.5 px-6 text-slate-500">
+                  <td className="py-3.5 px-4 text-slate-500">
                     {expense.expense_date}
                   </td>
-                  <td className="py-4.5 px-6 text-center">
-                    <span className="bg-[#f1f5f9] text-slate-500 text-[12px] font-medium px-3 py-1.5 rounded-md capitalize">
+                  <td className="py-3.5 px-4 text-center">
+                    <span className="text-slate-600 capitalize">
                       {expense.expense_type}
                     </span>
                   </td>
-                  <td className="py-4.5 px-6 font-bold text-slate-700">
+                  <td className="py-3.5 px-4 font-normal text-slate-700">
                     {Number(expense.cost).toLocaleString()}
                   </td>
-                  <td className="py-4.5 px-6 text-center">
+                  <td className="py-3.5 px-4 text-center">
                     <span className={getStatusStyles(expense.status)}>
-                      {expense.status}
+                      {expense.status === 'approved' ? 'Approved' : expense.status}
                     </span>
                   </td>
-                  <td className="py-4.5 px-6 text-center">
-                    <div className="flex items-center justify-center gap-3">
+                  <td className="py-3.5 px-4 text-center">
+                    <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <button 
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation(); 
-                          handleEditClick(expense);
-                        }} 
-                        className="text-[#4da1ff] hover:text-blue-600 active:scale-95 transition-all p-1"
+                        onClick={() => handleEditClick(expense)} 
+                        className="text-[#3b82f6] hover:text-blue-700 active:scale-95 transition-all p-2"
                         title="Edit Expense"
                       >
                         <FaEdit size={18} />
@@ -322,12 +419,11 @@ export const ExpenseTable: React.FC = () => {
 
                       <button 
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                        onClick={() => {
                           const deleteId = expense.id || (expense as any).expense_id;
                           handleDelete(deleteId);
                         }} 
-                        className="text-red-500 hover:text-red-600 active:scale-95 transition-all p-1"
+                        className="text-red-500 hover:text-red-600 active:scale-95 transition-all p-2"
                         title="Delete Expense"
                       >
                         <RiDeleteBin4Fill size={18} />
@@ -339,104 +435,108 @@ export const ExpenseTable: React.FC = () => {
             </tbody>
           </table>
         </div>
+      </div>
 
-        {/* ── 📄 FOOTER PAGINATION ─────────────────────────────────── */}
-        <div className="flex items-center justify-between px-6 py-4 bg-[#f8fafc] border-t border-slate-200/70">
-          <div className="text-sm font-medium text-slate-500">
-            Page {currentPage} of {totalPages} ({totalItems} total expenses)
-          </div>
-          <div className="flex items-center gap-1">
-            <button 
-              type="button"
-              disabled={currentPage === 1 || loading}
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              className="p-1.5 border border-slate-200 rounded-lg text-slate-400 bg-white hover:bg-slate-50 disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+      {/* ── 📄 CARD 2: SEPARATED PAGINATION ────────────────── */}
+      <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm mt-2">
+        <div className="text-xs text-slate-500 font-medium pl-2">
+          Page {currentPage} of {totalPages} ({totalItems} total records)
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            type="button"
+            disabled={currentPage === 1 || loading}
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-3 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-slate-600"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          
+          {[...Array(totalPages)].map((_, i) => {
+            const page = i + 1;
+            return (
               <button
                 key={page}
                 type="button"
                 onClick={() => setCurrentPage(page)}
-                className={`w-7 h-7 text-xs font-bold rounded-lg transition-all ${
+                className={`w-6 h-6 text-xs font-medium rounded-md transition-all cursor-pointer ${
                   currentPage === page 
-                    ? 'bg-[#4da1ff] text-white shadow-xs' 
-                    : 'text-slate-500 bg-white border border-slate-200 hover:bg-slate-50'
+                    ? 'bg-[#3b82f6] text-white shadow-3xs' 
+                    : 'text-slate-600 bg-white border border-slate-300 hover:bg-slate-50'
                 }`}
               >
                 {page}
               </button>
-            ))}
+            );
+          })}
 
-            <button 
-              type="button"
-              disabled={currentPage === totalPages || loading}
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              className="p-1.5 border border-slate-200 rounded-lg text-slate-400 bg-white hover:bg-slate-50 disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
+          <button 
+            type="button"
+            disabled={currentPage === totalPages || loading}
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-3 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-slate-600"
+          >
+            <ChevronRight size={16} />
+          </button>
         </div>
       </div>
 
       {/* ── 📝 EDIT MODAL OVERLAY ─────────────────────────────────── */}
       {isEditModalOpen && editingExpense && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden transform transition-all">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h3 className="text-base font-bold text-slate-800">Edit Expense Record</h3>
-              <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-50">
-                <X size={18} />
+          <div className="bg-white rounded-xl max-w-md w-full shadow-xl border border-slate-200 overflow-hidden transform transition-all">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200">
+              <h3 className="text-sm font-bold text-slate-800">Edit Expense Record</h3>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100">
+                <X size={16} />
               </button>
             </div>
             
-            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleEditSubmit} className="p-5 space-y-3.5">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Expense Title</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Expense Title</label>
                 <input 
                   type="text" 
                   required
                   value={editingExpense.title || ''} 
                   onChange={(e) => setEditingExpense({...editingExpense, title: e.target.value})}
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cost (MMK)</label>
+                  <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Cost (MMK)</label>
                   <input 
                     type="number" 
                     required
                     value={editingExpense.cost ?? ''} 
                     onChange={(e) => setEditingExpense({...editingExpense, cost: Number(e.target.value)})}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 font-semibold"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 font-medium"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Expense Date</label>
+                  <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Expense Date</label>
                   <input 
                     type="text" 
                     placeholder="YYYY-MM-DD"
                     required
                     value={editingExpense.expense_date || ''} 
                     onChange={(e) => setEditingExpense({...editingExpense, expense_date: e.target.value})}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Expense Type</label>
+                  <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Expense Type</label>
                   <select 
                     value={editingExpense.expense_type || 'claim'} 
                     onChange={(e) => setEditingExpense({...editingExpense, expense_type: e.target.value})}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 bg-white"
                   >
                     <option value="claim">Claim</option>
                     <option value="maintenance">Maintenance</option>
@@ -444,11 +544,11 @@ export const ExpenseTable: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Status</label>
+                  <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Status</label>
                   <select 
                     value={editingExpense.status || 'requested'} 
                     onChange={(e) => setEditingExpense({...editingExpense, status: e.target.value})}
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white"
+                    className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 bg-white"
                   >
                     <option value="requested">Requested</option>
                     <option value="approved">Approved</option>
@@ -457,20 +557,20 @@ export const ExpenseTable: React.FC = () => {
                 </div>
               </div>
               
-              <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
+              <div className="pt-3.5 flex justify-end gap-2 border-t border-slate-200">
                 <button 
                   type="button" 
                   onClick={() => setIsEditModalOpen(false)} 
-                  className="px-4 py-2 border border-slate-200 text-slate-500 text-sm font-semibold rounded-xl hover:bg-slate-50"
+                  className="px-3 py-1.5 border border-slate-300 text-slate-600 text-xs font-medium rounded-lg hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
                   disabled={editSubmitting}
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-xl flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  {editSubmitting ? <Loader2 className="animate-spin" size={16}/> : <Save size={16}/>}
+                  {editSubmitting ? <Loader2 className="animate-spin" size={14}/> : <Save size={14}/>}
                   Save Changes
                 </button>
               </div>
@@ -482,6 +582,7 @@ export const ExpenseTable: React.FC = () => {
       {/* VIEW DETAIL COMPONENT DRAWER OVERLAY */}
       <ExpenseDetailModal 
         isOpen={isModalOpen} 
+        close={false}
         onClose={() => setIsModalOpen(false)} 
         expense={selectedExpense} 
       />

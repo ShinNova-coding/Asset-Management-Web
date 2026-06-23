@@ -62,7 +62,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
       case 'approved':
         return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
       case 'requested':
-        return 'bg-amber-50 text-amber-700 border border-amber-200';
+        return 'bg-blue-50 text-blue-700 border border-blue-200';
       case 'canceled':
         return 'bg-rose-50 text-rose-700 border border-rose-200';
       default:
@@ -235,7 +235,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
 
         {/* Footer actions */}
         <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
-          <button onClick={onClose} className="w-full sm:w-auto px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm rounded-xl shadow-xs transition">
+          <button onClick={onClose} className="w-full sm:w-auto px-5 py-2 bg-slate-400 hover:bg-slate-800 text-white font-semibold text-sm rounded-xl shadow-xs transition">
             Close Detail
           </button>
         </div>
