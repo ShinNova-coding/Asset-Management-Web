@@ -7,7 +7,7 @@ import { normalizeImageSource } from '../../lib/utils';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
 import { apiFetch } from '../../lib/api';
 
-import { Search, UserPlus } from 'lucide-react';
+import { Search, UserPlus, ChevronDown } from 'lucide-react';
 import {
   FiChevronLeft,
   FiChevronRight,
@@ -78,7 +78,6 @@ const mapApiUserToEmployee = (user: ApiUser): Employee => ({
   phone: user.phone_number || "-",
 });
 
-
 const USER_ENDPOINT = "/user"; 
 
 const UserManagement: React.FC = () => {
@@ -103,7 +102,6 @@ const UserManagement: React.FC = () => {
 
   const [showToast, setShowToast] = useState(false);
 
-  
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
@@ -115,12 +113,10 @@ const UserManagement: React.FC = () => {
           localStorage.setItem('token', token);
         }
 
-        
         const response = await apiFetch(USER_ENDPOINT, {
           method: 'GET',
         });
 
-        
         const payload = response.data ? response : await response.json?.().catch(() => response);
         const users = payload?.data?.data || payload?.data || payload || [];
         
@@ -145,8 +141,6 @@ const UserManagement: React.FC = () => {
     };
 
     fetchUsers();
-    
-    
   }, [location.key, location.state, navigate]); 
 
   const handleDeleteTrigger = (id: string) => {
@@ -164,7 +158,6 @@ const UserManagement: React.FC = () => {
     setError("");
 
     try {
-    
       await apiFetch(`/user/id`, {
         method: 'DELETE',
         body: JSON.stringify({
@@ -172,7 +165,6 @@ const UserManagement: React.FC = () => {
         })
       });
 
-      
       setData((prev) => prev.filter((item) => String(item.id) !== String(targetId)));
       setShowToast(true);
     } catch (err: any) {
@@ -183,8 +175,8 @@ const UserManagement: React.FC = () => {
       setDeleteModal({ isOpen: false, targetId: null });
     }
   };
+
   const handleEdit = (item: Employee) => {
-    
     const imageValue = (item.profileImage === "-" || !item.profileImage) ? "" : item.profileImage;
 
     const apiUserFormat = {
@@ -268,39 +260,44 @@ const UserManagement: React.FC = () => {
         </Link>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
-        <div className="flex gap-4 items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
-            <input
-              type="text"
-              placeholder="Search by name, email, or ID..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(0);
-              }}
-              className="w-full rounded-md border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+      
 
-          <div className="relative w-48">
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(0);
-              }}
-              className="w-full rounded-md border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="suspended">Suspended</option>
-              <option value="resigned">Resigned</option>
-            </select>
-          </div>
+      <div className="bg-white rounded-2xl border border-slate-300 p-4 shadow-sm space-y-4">
+
+        {/* Screenshot အတိုင်း ပြင်ဆင်ထားသော Header Wrapper Card */}
+     <div className="flex gap-4 rounded-xl bg-white p-3 border border-slate-200 shadow-sm items-center">
+             <div className="relative flex-1">
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
+          <input
+            type="text"
+            placeholder="Search by name, date, title..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(0);
+            }}
+            className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          />
         </div>
 
+        {/* Status Dropdown Box */}
+        <div className="relative w-48">
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(0);
+            }}
+            className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-[#334155] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer"
+          >
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+            <option value="resigned">Resigned</option>
+          </select>
+          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#64748B] pointer-events-none" size={16} />
+        </div>
+      </div>
         <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <Table>
             <TableHeader className="bg-blue-800">

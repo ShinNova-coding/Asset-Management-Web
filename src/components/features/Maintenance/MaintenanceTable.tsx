@@ -61,7 +61,14 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
   const [editApprover, setEditApprover] = React.useState("")
   const [editMaintenanceDate, setEditMaintenanceDate] = React.useState("")
   const [editCompletedDate, setEditCompletedDate] = React.useState("")
-
+  const [editVendor, setEditVendor] = React.useState("")
+  const [editVendorPhno, setEditVendorPhno] = React.useState("")
+  const [editVendorAddress, setEditVendorAddress] = React.useState("")
+  const [editCost, setEditCost] = React.useState("")
+  const [editPayment, setEditPayment] = React.useState("")
+  const [editDuration, setEditDuration] = React.useState("")
+  
+  
   const navigate = useNavigate()
 
   const closeDialog = () => {
@@ -74,6 +81,12 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     setEditApprover("")
     setEditMaintenanceDate("")
     setEditCompletedDate("")
+    setEditVendor("")
+    setEditVendorPhno("")
+    setEditVendorAddress("")
+    setEditCost("")
+    setEditPayment("")
+    setEditDuration("")
   }
 
   const openRemarkDialog = (item: Maintenance) => {
@@ -91,7 +104,13 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     setEditMaintenanceDate(item.maintenance_date ?? "") 
     const today = new Date().toISOString().split('T')[0]
     setEditCompletedDate(item.completed_date ?? today) 
-    
+    setEditVendor(item.vendor ?? "")
+    setEditVendorPhno(item.vendor_phno ?? "")
+    setEditVendorAddress(item.vendor_address ?? "")
+    setEditCost(item.cost?.toString() ?? "")
+    setEditPayment(item.payment ?? "")
+    setEditDuration(item.duration ?? "")
+
     setDialogMode("edit")
   }
 
@@ -149,7 +168,8 @@ const submitRemark = async () => {
   }
 }
 
-  // ── Submit EDIT ────────────────────────────────────────────────────
+  
+  // ── Submit EDIT (BACKEND INTEGRATION FIXED) ────────────────────────
   const submitEdit = async () => {
     if (!selectedItem) return
     
@@ -160,30 +180,49 @@ const submitRemark = async () => {
     }
 
     try {
-      await apiFetch(`/maintenance/${selectedItem.id}`, {
+      // ⚠️ FIX 1: Backend Endpoint ပုံစံအရ URL Parameter အစား သီးသန့် Route သုံးရင် 
+      // `/admin/maintenance/edit` သို့မဟုတ် Payload အလုပ်လုပ်မည့် နေရာကို သတ်မှတ်ပေးပါ
+      // လက်ရှိ ပေးထားချက်အရ တိုက်ရိုက် API Join ရန် အောက်ပါအတိုင်း ပို့ပေးရပါမယ် -
+      await apiFetch(`/maintenance/edit`, { // 👈 Endpoint လမ်းကြောင်း သေချာစစ်ဆေးပါ (e.g. `/maintenance/edit` သို့မဟုတ် `/maintenance`)
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          maintenance_id: selectedItem.id,
+          maintenance_id: selectedItem.id,            // Backend တောင်းထားသည့် UUID
           completed_date: sanitizedCompletedDate, 
-          
+          vendor: editVendor || null,
+          vendor_phno: editVendorPhno || null,
+          vendor_address: editVendorAddress || null,
+          cost: editCost ? Number(editCost) : 0,     // 👈 FIX 2: String မှ Number Type သို့ ပြောင်းလဲခြင်း
+          payment: editPayment || "unpaid",
+          duration: editDuration || "0",
         }),
       })
 
+      // Frontend State ကို Live Update လုပ်ပေးခြင်း
       setData((prev) =>
-        prev.map((row) =>
+        prev.map((row: any) =>
           row.id === selectedItem.id
-            ? { ...row, completed_date: sanitizedCompletedDate, status: "Complete" }
+            ? { 
+                ...row, 
+                completed_date: sanitizedCompletedDate, 
+                status: "Complete", // သို့မဟုတ် "Completed" (Backend တန်ဖိုးအတိုင်း စာလုံးကြီးသေး စစ်ပါ)
+                vendor: editVendor,
+                vendor_phno: editVendorPhno,
+                vendor_address: editVendorAddress,
+                cost: editCost ? Number(editCost) : 0,
+                payment: editPayment,
+                duration: editDuration,
+              }
             : row
         )
       )
 
-      setToastMessage("Marked as Complete")
+      setToastMessage("Marked as Complete Successfully!")
       closeDialog()
       onRefresh?.() 
     } catch (err: any) {
       console.error("Submit Edit Error:", err)
-      alert(err?.message || "Failed to submit edit.")
+      alert(err?.message || "Failed to submit edit. Please check your network or inputs.")
     }
   }
 
@@ -603,6 +642,39 @@ const deleteRow = async (item: Maintenance, label: string) => {
                   <input type="date" value={editCompletedDate} onChange={(e) => setEditCompletedDate(e.target.value)} className={`${inputCls} !bg-white cursor-pointer`} />
                 </div>
               </div>
+{/* ── ဖြည့်စွက်ရမည့် Input Fields များ ── */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-1">
+                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Vendor Name</label>
+                  <input type="text" value={editVendor} onChange={(e) => setEditVendor(e.target.value)} className={`${inputCls} !bg-white`} />
+                </div>
+                <div className="grid gap-1">
+                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Vendor Phone</label>
+                  <input type="text" value={editVendorPhno} onChange={(e) => setEditVendorPhno(e.target.value)} className={`${inputCls} !bg-white`} />
+                </div>
+              </div>
+
+              <div className="grid gap-1">
+                <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Vendor Address</label>
+                <input type="text" value={editVendorAddress} onChange={(e) => setEditVendorAddress(e.target.value)} className={`${inputCls} !bg-white`} />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-1">
+                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Cost</label>
+                  <input type="number" value={editCost} onChange={(e) => setEditCost(e.target.value)} className={`${inputCls} !bg-white`} />
+                </div>
+                <div className="grid gap-1">
+                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Payment Method</label>
+                  <input type="text" value={editPayment} onChange={(e) => setEditPayment(e.target.value)} className={`${inputCls} !bg-white`} />
+                </div>
+                <div className="grid gap-1">
+                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Duration</label>
+                  <input type="text" value={editDuration} onChange={(e) => setEditDuration(e.target.value)} className={`${inputCls} !bg-white`} />
+                </div>
+              </div>
+
+
 
               <div className="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:justify-end -mx-6 -mb-6 mt-4">
                 <Button variant="outline" onClick={closeDialog}>Cancel</Button>

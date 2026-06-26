@@ -25,6 +25,7 @@ import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
 // 1. Import your new Expense components (Adjust the path matching your folder structure)
 import ExpensePage from "@/pages/Expense/ExpensePage" 
 import ExpenseTable from "@/pages/Expense/ExpenseTable" 
+import { CreateExpenseForm } from "@/pages/Expense/CreateExpenseForm"
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -97,7 +98,7 @@ export const router = createBrowserRouter([
 
           {
             path: "employees",
-            element: <EmployeeListPage />,
+  element: <UserManagementPage />,
           },
           {
             path: "add-employee",
@@ -120,6 +121,11 @@ export const router = createBrowserRouter([
           {
             path: "expense",
             element: <ExpensePage />
+          },
+
+          {
+            path: "expense/createexpenseform",
+            element: <CreateExpenseForm />
           },
         ],
       },
