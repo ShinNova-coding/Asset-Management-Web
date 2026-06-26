@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ShieldCheck, Plus, Loader2, Database, Trash2 } from "lucide-react";
+import { RiDeleteBin4Fill } from "react-icons/ri"
+import { ChevronLeft, ChevronRight, ShieldCheck, Plus, Loader2, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FaEdit } from "react-icons/fa"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +14,7 @@ export default function RolesPage() {
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [roleIndex, setRoleIndex] = useState(0);
   const navigate = useNavigate();
 
@@ -51,7 +54,33 @@ export default function RolesPage() {
       setIsDeleting(false);
     }
   };
-
+// Add this function after handleDelete
+  const updateRolePermissions = async (roleId: number, name: string, permissionNames: string[]) => {
+    try {
+      setIsUpdating(true);
+      // Using your provided structure
+      const response = await fetch(`http://192.168.100.183:1011/api/role/${roleId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem("token")}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ role_id: roleId, name, permissions: permissionNames })
+      });
+      
+      if (!response.ok) throw new Error("Update failed");
+      
+      // Refresh the list
+      const data = await fetchRoles();
+      setRoles(Array.isArray(data) ? data : (data.data || []));
+    } catch (error) {
+      console.error("Update error:", error);
+      alert("Failed to update role.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
   const groupPermissions = (permissions: any[]) => {
     if (!permissions) return {};
     const groups: Record<string, any[]> = {};
@@ -71,7 +100,7 @@ export default function RolesPage() {
   const groupedPermissions = groupPermissions(currentRole.permissions || []);
 
   return (
-    <div className="p-6 min-h-screen bg-[#F3F0F7]">
+    <div className="p-4 min-h-screen bg-[#F3F0F7]">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-start mb-8">
           <h1 className="text-2xl font-bold text-blue-800">Permissions List</h1>
@@ -91,21 +120,33 @@ export default function RolesPage() {
                 </p>
               </div>
             </div>
-            
-            <div className="flex items-center gap-4">
+           
+           
+              <div className="flex items-center gap-2">
+    {/* ဒီနေရာမှာ currentRole.id ကို သုံးလိုက်ပါတယ် */}
+    <Button 
+      variant="outline" 
+      
+      className="text-blue-600 border-blue-600 hover:bg-blue-50"
+      onClick={() => navigate(`/roles/${currentRole.id}`)} 
+    >
+     <FaEdit/>
+    </Button>
               <Button 
                 variant="ghost" 
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="text-red-600 hover:text-red-700 border-red-400 hover:bg-red-50"
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
-                <Trash2 className="w-4 h-4 mr-2" /> {isDeleting ? "Deleting..." : "Delete"}
+                <RiDeleteBin4Fill /> {isDeleting ? "Deleting..." : ""}
               </Button>
-              <div className="flex items-center bg-slate-100 rounded-lg p-1">
-                <Button variant="ghost" size="icon" onClick={() => setRoleIndex((p) => (p - 1 + roles.length) % roles.length)}><ChevronLeft /></Button>
-                <span className="text-xs font-bold w-12 text-center">{roleIndex + 1}/{roles.length}</span>
-                <Button variant="ghost" size="icon" onClick={() => setRoleIndex((p) => (p + 1) % roles.length)}><ChevronRight /></Button>
-              </div>
+             <div className="flex items-center gap-2">
+  
+  <div className="flex border rounded-lg overflow-hidden">
+    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none border-r" onClick={() => setRoleIndex((p) => (p - 1 + roles.length) % roles.length)}><ChevronLeft className="w-4 h-4"/></Button>
+    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none" onClick={() => setRoleIndex((p) => (p + 1) % roles.length)}><ChevronRight className="w-4 h-4"/></Button>
+  </div>
+</div>
             </div>
           </CardContent>
         </Card>

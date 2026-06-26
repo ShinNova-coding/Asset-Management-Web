@@ -46,7 +46,7 @@ const AssetCategoriesCards = ({ data }: { data?: any }) => {
 
       {/* List/Legend Section */}
       <div className="w-full md:w-1/2 space-y-3">
-        <h2 className="text-lg font-bold text-slate-800 mb-4">Category Breakdown</h2>
+        <h2 className="text-lg font-bold text-blue-800 mb-4">Category</h2>
         {chartData.map((item, index) => (
           <button
             key={item.name}

@@ -33,7 +33,7 @@ const UserCards: React.FC = () => {
   return (
     <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm w-full max-w-xl">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-slate-800">User Distribution</h2>
+        <h2 className="text-lg font-bold text-blue-800">Users</h2>
         <div className="flex gap-2">
           <select value={year} onChange={(e) => setYear(e.target.value)} className="text-sm border rounded-lg px-3 py-1.5 outline-none bg-slate-50">
             <option>2026</option>

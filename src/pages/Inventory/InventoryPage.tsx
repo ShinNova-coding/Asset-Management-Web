@@ -4,7 +4,9 @@ import * as React from "react"
 import { InventoryAddNewAsset } from "@/components/features/Inventory/InventoryAddNewAsset"
 import { InventoryTable } from "@/components/features/Inventory/InventoryTable"
 import { apiRequest } from "@/lib/apiService";
-
+import { IoCloudDownloadOutline } from "react-icons/io5";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 export default function InventoryPage() {
   const [inventoryData, setInventoryData] = React.useState<any[]>([])
   const [isLoading, setIsLoading] = React.useState<boolean>(true)
@@ -31,9 +33,33 @@ export default function InventoryPage() {
   }, []);
 
   const handleExportPDF = () => {
-    // PDF generation logic goes here
-    console.log("Exporting PDF with data:", inventoryData);
-  };
+  const doc = new jsPDF();
+  
+  // Add a Title
+  doc.setFontSize(18);
+  doc.text("Inventory Report", 14, 20);
+  
+  // Prepare Table Data mapping to your API structure
+  const tableData = inventoryData.map((item, index) => [
+    index + 1,
+    item.name || "N/A",
+    item.asset_code || "N/A",
+    item.purchased_date || "N/A", // Corrected key from your JSON
+    item.warranty_period ? `${item.warranty_period} months` : "N/A", // Handle nulls
+    item.status || "N/A"
+  ]);
+
+  // Generate Table
+  autoTable(doc, {
+    startY: 30,
+    head: [['No', 'Name', 'Asset Code', 'Purchased Date', 'Warranty', 'Status']],
+    body: tableData,
+    headStyles: { fillColor: [30, 64, 175] }, // Matches your blue theme
+    theme: 'striped'
+  });
+
+  doc.save("Inventory_Report.pdf");
+};
 
   return (
     <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-[#F3F0F7]">
@@ -49,9 +75,9 @@ export default function InventoryPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportPDF}
-            className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium shadow-sm flex items-center gap-2"
-          >
-            Export PDF
+            className="px-4 py-2 bg-blue-800 border border-slate-300 text-white rounded-lg  transition-colors text-lg font-medium shadow-sm flex items-center gap-2"
+          ><IoCloudDownloadOutline size={16} />
+           
           </button>
           
           <InventoryAddNewAsset />

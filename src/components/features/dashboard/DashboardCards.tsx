@@ -97,7 +97,7 @@ const DashboardStats: React.FC<{ data?: any }> = ({ data }) => {
 
   return (
     <div className="w-full py-6 bg-[#F3F0F7]">
-       <h2 className="text-base font-bold text-slate-800">Assets</h2>
+       <h2 className="text-base font-bold text-blue-800">Assets</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 w-full">
         {stats.map((stat, index) => (
           <StatCard

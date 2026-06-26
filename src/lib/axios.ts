@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://192.168.100.183:1010/api";
+const API_BASE_URL = "http://192.168.100.183:1011/api";
 
 const getAuthHeaders = () => ({
   headers: {
@@ -26,6 +26,17 @@ export const deleteRole = async (id: number) => {
       "Content-Type": "application/json",
     },
     data: { role_id: id } 
+  });
+  return response.data;
+};
+// Add this to lib/axios.ts
+export const updateRole = async (id: number, data: { name: string, permissions: string[] }) => {
+  const response = await axios.patch(`${API_BASE_URL}/role/${id}`, data, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    },
   });
   return response.data;
 };

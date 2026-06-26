@@ -294,7 +294,7 @@ export const ExpenseTable: React.FC = () => {
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse table-auto">
             <thead>
-              <tr className="bg-[#3b82f6] text-white text-[13px] font-semibold border-b border-blue-600 select-none">
+              <tr className="bg-blue-800 text-white text-[13px] font-semibold border-b border-blue-600 select-none">
                 <th className="py-3 px-4 w-16">No.</th>
                 
                 {/* Employee Header (Sortable) */}
