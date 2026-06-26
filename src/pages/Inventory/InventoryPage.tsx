@@ -4,6 +4,7 @@ import * as React from "react"
 import { InventoryAddNewAsset } from "@/components/features/Inventory/InventoryAddNewAsset"
 import { InventoryTable } from "@/components/features/Inventory/InventoryTable"
 import { apiRequest } from "@/lib/apiService";
+
 export default function InventoryPage() {
   const [inventoryData, setInventoryData] = React.useState<any[]>([])
   const [isLoading, setIsLoading] = React.useState<boolean>(true)
@@ -15,10 +16,7 @@ export default function InventoryPage() {
         setIsLoading(true);
         setError(null);
         
-       
         const response = await apiRequest("/asset", "GET");
-        
-       
         const liveAssets = response?.data?.data || response?.data || [];
         setInventoryData(liveAssets);
       } catch (err: any) {
@@ -32,16 +30,32 @@ export default function InventoryPage() {
     fetchAssets();
   }, []);
 
+  const handleExportPDF = () => {
+    // PDF generation logic goes here
+    console.log("Exporting PDF with data:", inventoryData);
+  };
+
   return (
     <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-[#F3F0F7]">
       
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight  text-blue-800">
+          <h1 className="text-2xl font-bold tracking-tight text-blue-800">
             Inventory
           </h1>
         </div>
-        <InventoryAddNewAsset />
+        
+        {/* Header Actions Container */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportPDF}
+            className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium shadow-sm flex items-center gap-2"
+          >
+            Export PDF
+          </button>
+          
+          <InventoryAddNewAsset />
+        </div>
       </div>
 
       {isLoading ? (
@@ -52,7 +66,7 @@ export default function InventoryPage() {
       ) : error ? (
         <div className="space-y-4">
           <div className="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 text-sm">
-            💡 <strong>Notice:</strong> Temporary connection issue. (Reason: {error})
+              <strong>Notice:</strong> Temporary connection issue. (Reason: {error})
           </div>
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden opacity-75">
             <InventoryTable data={inventoryData} />

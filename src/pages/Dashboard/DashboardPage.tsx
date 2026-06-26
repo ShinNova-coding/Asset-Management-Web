@@ -61,15 +61,18 @@ const DashboardPage: React.FC = () => {
         Dashboard
       </h1>
 
-     
+      {/* Stats Overview */}
       <DashboardCards data={dashboardData} />
 
-     
-      <UserCards apiData={dashboardData} />
+      {/* Grid container for side-by-side layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        
+        {/* User Distribution */}
+        <UserCards apiData={dashboardData} />
 
-     
-      <div className="space-y-6">
+        {/* Asset Categories */}
         <AssetCategoriesCards data={dashboardData} />
+        
       </div>
     </div>
   );

@@ -258,10 +258,10 @@ const UserManagement: React.FC = () => {
   return (
     <div className="w-full space-y-6 p-6 relative bg-[#F8FAFC] min-h-screen font-sans text-slate-800">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-blue-500">User Management</h1>
+        <h1 className="text-2xl font-bold text-blue-800">User Management</h1>
 
         <Link to="/add-employee">
-          <button className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition-colors">
+          <button className="flex items-center gap-2 rounded-md bg-blue-800 px-4 py-2 text-sm text-white hover:bg-blue-700 transition-colors">
             <UserPlus size={18} />
             Add Employee
           </button>
@@ -303,7 +303,7 @@ const UserManagement: React.FC = () => {
 
         <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <Table>
-            <TableHeader className="bg-blue-400">
+            <TableHeader className="bg-blue-800">
               <TableRow className="hover:bg-transparent border-none">
                 <TableHead className="text-white font-semibold py-3.5 text-sm w-12">No</TableHead>
                 

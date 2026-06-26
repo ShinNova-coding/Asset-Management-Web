@@ -23,7 +23,7 @@ import {
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import Navigation from "@/components/ui/navigation";
 import { BsFillBoxFill } from "react-icons/bs";
-import { useAuth } from "@/hooks/useAuth"; 
+import { useAuth } from "@/hooks/useAuth";
 
 const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard", permission: "view-dashboard" },
@@ -40,27 +40,35 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Access permission objects from the Auth context
-  const { permissions } = useAuth(); 
+  const { permissions } = useAuth();
 
-  // 1. Guard Clause for loading state
-  if (!permissions) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  // Array ဖြစ်မဖြစ်နဲ့ Data ရှိမရှိ စစ်ဆေးခြင်း
+  if (!permissions || !Array.isArray(permissions)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F0F4F8] text-[#1E3A8A] font-medium">
+        Loading Auth Data...
+      </div>
+    );
   }
 
-  // 2. Map permission objects to an array of strings (names) for easy comparison
-  const permissionNames = permissions.map((p) => p.name);
-
-  // 3. Filter menu items based on the extracted permission strings
+  // API မှလာသော Permission များသည် Object (ဥပမာ - {name: 'view-assets'}) သို့မဟုတ် String ဖြစ်နေနိုင်သဖြင့် Name များကိုသာ စစ်ထုတ်ခြင်း
+  const permissionNames = permissions.map((p: any) => {
+    return typeof p === "string" ? p : p.name;
+  });
+console.log("3. Data inside Layout:", permissions);
+  console.log("4. Extracted Names:", permissionNames);
+  // လက်ရှိ User တွင်ရှိသော Permission များနှင့် ကိုက်ညီမည့် Menu များကိုသာ ရွေးချယ်ခြင်း
   const filteredMenuItems = menuItems.filter((item) =>
     permissionNames.includes(item.permission)
   );
 
   return (
-    <SidebarProvider style={{ "--sidebar-width": "240px" } as any}>
+    <SidebarProvider style={{ "--sidebar-width": "240px" } as React.CSSProperties}>
       <div className="flex min-h-screen w-full bg-[#F0F4F8]">
+        {/* Sidebar Section */}
         <Sidebar className="border-r border-blue-100 bg-[#1E3A8A]">
           <SidebarContent className="bg-[#1E3A8A] px-4 py-8">
+            {/* Logo and Title */}
             <div className="flex items-center gap-3 px-2 mb-8">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-900/20">
                 <BsFillBoxFill className="text-white h-6 w-6" />
@@ -68,10 +76,12 @@ export default function Layout() {
               <h1 className="text-xl font-bold tracking-tight text-white">ITAMS</h1>
             </div>
 
+            {/* Navigation Menu */}
             <SidebarMenu className="space-y-1">
               {filteredMenuItems.length > 0 ? (
                 filteredMenuItems.map((item) => {
-                  const isActive = location.pathname.startsWith(item.path) || 
+                  const isActive =
+                    location.pathname.startsWith(item.path) ||
                     (item.path === "/dashboard" && location.pathname === "/");
 
                   return (
@@ -91,17 +101,20 @@ export default function Layout() {
                   );
                 })
               ) : (
-                <div className="px-4 text-blue-300 text-xs italic">No menu access</div>
+                <div className="px-4 text-blue-300 text-xs italic">
+                  No menu access available.
+                </div>
               )}
             </SidebarMenu>
           </SidebarContent>
         </Sidebar>
 
+        {/* Main Content Area */}
         <div className="flex flex-1 flex-col">
           <div className="w-full bg-white/80 backdrop-blur-sm border-b border-blue-100 z-20">
             <Navigation />
           </div>
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto">
             <Outlet />
           </main>
         </div>
