@@ -84,7 +84,7 @@ const MaintenanceDetailsForm: React.FC = () => {
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-6 transition-colors"
+        className="flex items-center gap-2 text-sm text-blue-800 hover:text-slate-900 mb-6 transition-colors"
       >
         <ArrowLeft size={16} />
         Back
@@ -93,7 +93,7 @@ const MaintenanceDetailsForm: React.FC = () => {
       {/* Header Section with Status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Maintenance Details</h1>
+          <h1 className="text-2xl font-bold text-blue-800">Maintenance Details</h1>
         </div>
         <div>
           <span className={`px-3 py-1.5 rounded-full text-sm font-semibold border ${getStatusClass(record.status)}`}>

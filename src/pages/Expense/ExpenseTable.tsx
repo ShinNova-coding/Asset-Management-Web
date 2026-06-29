@@ -7,7 +7,6 @@ import { RiDeleteBin4Fill } from "react-icons/ri";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi"; 
 import { apiFetch } from "@/lib/api";
 
-// Detail Modal ကို Import ခေါ်ယူခြင်း
 import { ExpenseDetailModal } from './ExpenseDetailModal';
 import type { ExpenseDetailData } from './ExpenseDetailModal';
 
@@ -17,38 +16,31 @@ interface ExpenseWithUser extends ExpenseDetailData {
   } | null;
 }
 
-// Sort ဖြစ်နိုင်မယ့် Column Column Keys သတ်မှတ်ခြင်း
 type SortableColumns = 'employee' | 'title' | 'expense_date' | 'cost';
 
 export const ExpenseTable: React.FC = () => {
-  // ── STATES ──────────────────────────────────────────────────────
+  
   const [expenses, setExpenses] = useState<ExpenseWithUser[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUserName, setCurrentUserName] = useState<string>('');
 
-  // Search & Filter States
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
 
-  // Sorting States
   const [sortColumn, setSortColumn] = useState<SortableColumns | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  // Pagination States
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5;
 
-  // View Detail Modal States
   const [selectedExpense, setSelectedExpense] = useState<ExpenseDetailData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  // Edit Inline Modal States
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editingExpense, setEditingExpense] = useState<Partial<ExpenseWithUser> | null>(null);
   const [editSubmitting, setEditSubmitting] = useState<boolean>(false);
 
-  // ── FETCH EXPENSES FROM API ─────────────────────────────────────
   const fetchExpenses = async () => {
     setLoading(true);
     setError(null);
@@ -81,13 +73,11 @@ export const ExpenseTable: React.FC = () => {
     fetchExpenses();
   }, []);
 
-  // ── ROW & VIEW HANDLERS ───────────────────────────────────────
   const handleRowClick = (expense: ExpenseDetailData) => {
     setSelectedExpense(expense);
     setIsModalOpen(true);
   };
 
-  // ── 📝 EDIT HANDLERS ──────────────────────────────────────────
   const handleEditClick = (expense: ExpenseWithUser) => {
     setEditingExpense({
       expense_id: expense.id || (expense as any).expense_id, 
@@ -142,7 +132,6 @@ export const ExpenseTable: React.FC = () => {
     }
   };
 
-  // ── 🗑️ DELETE HANDLER ──────────────────────────────────────────
   const handleDelete = async (id: string) => {
     if (!id || id === "undefined") {
       alert("Error: Expense ID is missing or undefined.");
@@ -170,7 +159,6 @@ export const ExpenseTable: React.FC = () => {
     }
   };
 
-  // ── SORT HANDLER LOGIC ─────────────────────────────────────────
   const handleSort = (column: SortableColumns) => {
     if (sortColumn === column) {
       if (sortDirection === 'asc') {
@@ -186,7 +174,6 @@ export const ExpenseTable: React.FC = () => {
     setCurrentPage(1);
   };
 
-  // ── SEARCH & FILTER LOGIC ──────────────────────────────────────
   const filteredExpenses = expenses.filter(item => {
     const employeeName = (item.user?.name || currentUserName || "").toLowerCase();
     const title = (item.title || "").toLowerCase();
@@ -201,7 +188,6 @@ export const ExpenseTable: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // ── SORTING EXECUTION LOGIC ────────────────────────────────────
   const sortedExpenses = useMemo(() => {
     const sortableData = [...filteredExpenses];
     if (sortColumn) {
@@ -231,7 +217,6 @@ export const ExpenseTable: React.FC = () => {
     return sortableData;
   }, [filteredExpenses, sortColumn, sortDirection, currentUserName]);
 
-  // ── PAGINATION LOGIC ──────────────────────────────────────────
   const totalItems = sortedExpenses.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -242,7 +227,6 @@ export const ExpenseTable: React.FC = () => {
     setCurrentPage(1);
   }, [searchQuery, statusFilter]);
 
-  // UI Status Badges matching from the reference image
   const getStatusStyles = (status: string) => {
     const s = status?.toLowerCase();
     if (s === 'canceled' || s === 'cancelled') {
@@ -254,43 +238,48 @@ export const ExpenseTable: React.FC = () => {
     return 'bg-emerald-50 text-emerald-600 px-3 py-1 text-xs font-medium rounded-full inline-block border border-emerald-200 text-center min-w-[80px] capitalize';
   };
 
-   return (
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+      </div>
+    );
+  }
+
+  return (
     <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
       
-      {/* ── 🔍 SEARCH & FILTER CONTROLS (Maintenance Header UI ပုံစံအတိုင်း ပြင်ဆင်ထားသည်) ────────────────────────────── */}
-           <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
-           <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
-    
-      {/* Search Input Box */}
-           <div className="relative flex-1 w-full">
-           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-           <input
+      <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
+        <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
+          
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
               type="text"
               placeholder="Search by name, date, title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full rounded-md border border-slate-300 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400 text-slate-700 shadow-3xs"
-           />
-       </div>
+            />
+          </div>
 
-    {/* Status Filter Dropdown */}
-    <div className="relative w-full sm:w-48">
-      <select
-        value={statusFilter}
-        onChange={(e) => setStatusFilter(e.target.value)}
-        className="w-full pl-3 pr-10 py-2 bg-slate-55 border border-slate-300 rounded-md text-sm font-normal text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer shadow-3xs"
-      >
-        <option value="All">All Status</option>
-        <option value="requested">Requested</option>
-        <option value="approved">Approved</option>
-        <option value="canceled">Canceled</option>
-      </select>
-      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-    </div>
+          <div className="relative w-full sm:w-48">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full pl-3 pr-10 py-2 bg-slate-55 border border-slate-300 rounded-md text-sm font-normal text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer shadow-3xs"
+            >
+              <option value="All">All Status</option>
+              <option value="requested">Requested</option>
+              <option value="approved">Approved</option>
+              <option value="canceled">Canceled</option>
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+          </div>
 
-  </div>
-</div>
-      {/* ── 📊 CARD 1: MAIN TABLE CONTAINER ────────────────────── */}
+        </div>
+      </div>
+      
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs flex flex-col mt-2">
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse table-auto">
@@ -298,7 +287,6 @@ export const ExpenseTable: React.FC = () => {
               <tr className="bg-blue-800 text-white text-[13px] font-semibold border-b border-blue-600 select-none">
                 <th className="py-3 px-4 w-16">No.</th>
                 
-                {/* Employee Header (Sortable) */}
                 <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('employee')}>
                   <div className="flex items-center gap-1.5">
                     Employee
@@ -307,9 +295,8 @@ export const ExpenseTable: React.FC = () => {
                       <FiChevronDown size={12} className={sortColumn === 'employee' && sortDirection === 'desc' ? "text-white" : "text-white/40"} />
                     </div>
                   </div>
-                </th>
+                </th >
 
-                {/* Expense Title Header (Sortable) */}
                 <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('title')}>
                   <div className="flex items-center gap-1.5">
                     Expense Title
@@ -320,7 +307,6 @@ export const ExpenseTable: React.FC = () => {
                   </div>
                 </th>
 
-                {/* Date Header (Sortable) */}
                 <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('expense_date')}>
                   <div className="flex items-center gap-1.5">
                     Date
@@ -333,7 +319,6 @@ export const ExpenseTable: React.FC = () => {
 
                 <th className="py-3 px-4 text-center">Type</th>
 
-                {/* Cost Header (Sortable) */}
                 <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('cost')}>
                   <div className="flex items-center gap-1.5">
                     Cost (MMK)
@@ -349,16 +334,7 @@ export const ExpenseTable: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-[13px] text-slate-600">
-              {loading && (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400">
-                     <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
-      </div>
-                  </td>
-                </tr>
-              )}
-
+              
               {!loading && error && (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-red-500 font-medium">
@@ -437,62 +413,58 @@ export const ExpenseTable: React.FC = () => {
         </div>
       </div>
 
-      {/* ── 📄 CARD 2: SEPARATED PAGINATION (ဒီဇိုင်းပုံစံအတိုင်း ပြင်ဆင်ထားသော နေရာ) ────────────────── */}
-<div className="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-xs mt-3 select-none">
-  <div className="text-xs text-slate-500 font-medium">
-    Page {currentPage} of {totalPages} ({totalItems} total records)
-  </div>
+      {/* ── 🔢 FIXED PAGINATION DESIGN ─────────────────────────────────── */}
+      <div className="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-xs mt-3 select-none">
+        <div className="text-xs text-slate-500 font-medium">
+          Page {currentPage} of {totalPages} ({totalItems} total records)
+        </div>
 
-  <div className="flex items-center space-x-2">
-    {/* Previous Button */}
-    <button
-      type="button"
-      disabled={currentPage === 1 || loading}
-      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-      className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white shadow-3xs text-slate-500 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
-    >
-      <ChevronLeft size={16} />
-    </button>
-    
-    {/* Page Numbers */}
-    {[...Array(totalPages)].map((_, i) => {
-      const page = i + 1;
-      
-      // UI ကောင်းမွန်စေရန် Page များလွန်းပါက Ellipsis (...) ပြသပေးမည့် Logic
-      if (totalPages > 4 && Math.abs(currentPage - page) > 1 && page !== 1 && page !== totalPages) {
-        if (page === 2 || page === totalPages - 1) {
-          return <span key={page} className="px-2 text-slate-400 font-bold tracking-widest text-xs select-none">...</span>;
-        }
-        return null;
-      }
+        <div className="flex items-center space-x-1.5">
+          <button
+            type="button"
+            disabled={currentPage === 1 || loading}
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-slate-300 bg-white text-slate-500 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          
+          {[...Array(totalPages)].map((_, i) => {
+            const page = i + 1;
+            
+            if (totalPages > 4 && Math.abs(currentPage - page) > 1 && page !== 1 && page !== totalPages) {
+              if (page === 2 || page === totalPages - 1) {
+                return <span key={page} className="px-1 text-slate-600 font-medium tracking-normal text-sm select-none">...</span>;
+              }
+              return null;
+            }
 
-      return (
-        <button
-          key={page}
-          type="button"
-          onClick={() => setCurrentPage(page)}
-          className={`w-10 h-10 text-sm font-semibold rounded-xl transition-all cursor-pointer ${
-            currentPage === page 
-              ? 'bg-[#93c5fd] text-white shadow-2xs font-bold' 
-              : 'text-slate-800 bg-[#eef2f6] border border-slate-300 hover:bg-slate-200'
-          }`}
-        >
-          {page}
-        </button>
-      );
-    })}
+            return (
+              <button
+                key={page}
+                type="button"
+                onClick={() => setCurrentPage(page)}
+                className={`w-9 h-9 text-sm font-semibold rounded-md transition-all cursor-pointer border ${
+                  currentPage === page 
+                    ? 'bg-[#1e40af] text-white border-[#1e40af]' 
+                    : 'text-slate-900 bg-[#eef2f6] border border-slate-300 hover:bg-slate-200/80'
+                }`}
+              >
+                {page}
+              </button>
+            );
+          })}
 
-    {/* Next Button */}
-    <button 
-      type="button"
-      disabled={currentPage === totalPages || loading}
-      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-      className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white shadow-3xs text-slate-500 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
-    >
-      <ChevronRight size={16} />
-    </button>
-  </div>
-</div>
+          <button 
+            type="button"
+            disabled={currentPage === totalPages || loading}
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            className="w-9 h-9 inline-flex items-center justify-center rounded-md border border-slate-300 bg-white text-slate-500 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
 
       {/* ── 📝 EDIT MODAL OVERLAY ─────────────────────────────────── */}
       {isEditModalOpen && editingExpense && (

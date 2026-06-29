@@ -99,20 +99,21 @@ export default function EmployeeDetailsPage() {
 
   return (
     <div>
+      
       <button
         onClick={() => navigate(-1)}
         
-        className="mb-4 flex items-center text-sm font-medium text-blue-600 hover:underline"
+        className="mb-4 flex items-center text-sm font-medium text-blue-800 hover:underline"
         >
           <ArrowLeft size={16} className="mr-2" />
-          Back
+          Back 
       
     
       </button>
 
       {loading && (
         <div className="p-6 text-gray-500 font-medium animate-pulse">
-          Loading employee profile...
+          Loading 
         </div>
       )}
       
@@ -123,7 +124,7 @@ export default function EmployeeDetailsPage() {
           <div className="text-xs text-gray-500 mt-2">
             <p>💡 Diagnostics & Tips:</p>
             <ul className="ml-4 mt-1 list-disc">
-              <li>Verify server is running at http://192.168.100.185:1010</li>
+              <li>Verify server is running at http://192.168.100.185:1011</li>
               <li>Check if your device is connected to the network segment (192.168.100.x)</li>
               <li>Ensure the route id matches: <code className="bg-gray-100 p-0.5 rounded">{id}</code></li>
             </ul>

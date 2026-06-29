@@ -51,7 +51,7 @@ const EditAssignmentPage = () => {
     <div className="min-h-screen bg-slate-50 p-10 font-sans text-slate-900">
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors mb-2"
+        className="flex items-center gap-2 text-sm font-medium text-blue-800 hover:text-blue-700 transition-colors mb-2"
       >
         <FiArrowLeft size={16} /> Back
       </button>
@@ -115,7 +115,7 @@ const EditAssignmentPage = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-sm text-xs transition-colors"
+              className="px-5 py-2 rounded-md bg-blue-800 text-white font-medium hover:bg-blue-700 shadow-sm text-xs transition-colors"
             >
               Save Changes
             </button>

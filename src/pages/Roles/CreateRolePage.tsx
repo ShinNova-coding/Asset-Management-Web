@@ -139,14 +139,14 @@ const handleSubmit = async (e: React.FormEvent) => {
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-blue-500">Add New Role</h1>
+              <h1 className="text-2xl font-bold text-blue-800">Add New Role</h1>
             </div>
           </div>
           
           <button 
             type="button"
             onClick={() => navigate("/roles")} 
-            className="px-4 py-2 text-sm  text-blue-500  text-shadow-violet-400 flex items-center gap-2"
+            className="px-4 py-2 text-sm  text-blue-800  text-shadow-violet-400 flex items-center gap-2"
           >
               <ArrowLeft size={16} className="mr-2" />
               
@@ -183,7 +183,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           {/* Permissions Section Header */}
           <div className="pt-6 border-t border-slate-100 flex justify-between items-center">
             <div>
-              <h2 className="text-sm font-bold text-blue-500">Assign Permissions</h2>
+              <h2 className="text-sm font-bold text-blue-800">Assign Permissions</h2>
             </div>
           
             <button
@@ -193,7 +193,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               className={`px-4 py-2 text-xs font-bold rounded-xl transition duration-200 ${
                 isEverythingChecked 
                   ? 'text-red-600 bg-red-50 hover:bg-red-100/70' 
-                  : 'text-blue-600 bg-blue-50 hover:bg-blue-100/70'
+                  : 'text-blue-800 bg-blue-50 hover:bg-blue-100/70'
               }`}
             >
               {isEverythingChecked ? 'Unselect All Permissions' : 'Select All Permissions'}
@@ -387,7 +387,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-blue-500 text-white font-semibold text-sm rounded-xl hover:bg-blue-700 focus:ring-4 focus:ring-indigo-500/20 shadow-sm shadow-indigo-500/10 transition duration-200 disabled:bg-blue-400"
+              className="px-6 py-3 bg-blue-800 text-white font-semibold text-sm rounded-xl hover:bg-blue-700 focus:ring-4 focus:ring-indigo-500/20 shadow-sm shadow-indigo-500/10 transition duration-200 disabled:bg-blue-400"
             >
               {loading ? 'Creating...' : 'Create Permissions'}
             </button>

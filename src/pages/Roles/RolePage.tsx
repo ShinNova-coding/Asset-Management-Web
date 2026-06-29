@@ -54,11 +54,11 @@ export default function RolesPage() {
       setIsDeleting(false);
     }
   };
-// Add this function after handleDelete
+
   const updateRolePermissions = async (roleId: number, name: string, permissionNames: string[]) => {
     try {
       setIsUpdating(true);
-      // Using your provided structure
+      
       const response = await fetch(`http://192.168.100.185:1011/api/role/${roleId}`, {
         method: 'PATCH',
         headers: {
@@ -71,7 +71,7 @@ export default function RolesPage() {
       
       if (!response.ok) throw new Error("Update failed");
       
-      // Refresh the list
+      
       const data = await fetchRoles();
       setRoles(Array.isArray(data) ? data : (data.data || []));
     } catch (error) {
@@ -120,10 +120,10 @@ export default function RolesPage() {
           </Button>
         </div>
 
-        <Card className="border-l-4 border-l-blue-600 shadow-md">
+        <Card className="border-l-4 border-blue-800 shadow-md">
           <CardContent className="pt-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="bg-blue-100 p-3 rounded-xl"><ShieldCheck className="w-8 h-8 text-blue-600" /></div>
+              <div className="bg-blue-100 p-3 rounded-xl"><ShieldCheck className="w-8 h-8 text-blue-800" /></div>
               <div>
                 <h2 className="text-xl font-bold">{currentRole.name} Role</h2>
                 <p className="text-xs text-slate-500 uppercase tracking-wide">
@@ -134,11 +134,11 @@ export default function RolesPage() {
            
            
               <div className="flex items-center gap-2">
-    {/* ဒီနေရာမှာ currentRole.id ကို သုံးလိုက်ပါတယ် */}
+   
     <Button 
       variant="outline" 
       
-      className="text-blue-600 border-blue-600 hover:bg-blue-50"
+      className="text-blue-800 border-blue-600 hover:bg-blue-50"
       onClick={() => navigate(`/roles/${currentRole.id}`)} 
     >
      <FaEdit/>
@@ -164,16 +164,17 @@ export default function RolesPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Object.entries(groupedPermissions).map(([module, perms]) => (
-            <Card key={module} className="hover:shadow-lg transition-all duration-300 border-t-2 border-t-blue-500">
+            <Card key={module} className="hover:shadow-lg transition-all duration-300 border-t-2 border-blue-800">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm capitalize flex items-center gap-2 text-slate-700">
-                    <Database className="w-4 h-4 text-blue-400" />
+                    <Database className="w-4 h-4 text-blue-800" />
                     {module} Control
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {perms.map((p: any, i: number) => (
-                  <div key={i} className="flex justify-between items-center text-xs font-medium text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                  <div key={i} className="flex justify-between items-center text-xs font-medium text-slate-900
+                   bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                     <span className="capitalize">{p.name.replace('-', ' ')}</span>
                     <Switch checked={true} disabled className="scale-75" />
                   </div>

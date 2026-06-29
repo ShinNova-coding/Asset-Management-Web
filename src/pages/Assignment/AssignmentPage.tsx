@@ -89,33 +89,33 @@ const AssignmentPage = () => {
 
   return (
     <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-[#F3F0F7]">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold tracking-tight text-blue-800">Assignment</h1>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleExportPDF}
-            className="px-4 py-2 bg-blue-800 text-white rounded-lg transition-colors font-medium shadow-sm flex items-center gap-2"
-          >
-            <IoCloudDownloadOutline size={16} /> 
-          </button>
-          <AssignmentAssign />
-        </div>
-      </div>
-
       {loading ? (
-        <div className="flex items-center justify-center min-h-screen bg-slate-50">
+       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
-      </div>
-        
-      ) : (
-        <div className="rounded-xl bg-white shadow-sm overflow-hidden">
-          <AssignmentTable data={data} meta={{ editRow: handleEdit, deleteRow: handleDelete }} />
         </div>
+      ) : (
+        <>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold tracking-tight text-blue-800">Assignment</h1>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleExportPDF}
+                className="px-4 py-2 bg-blue-800 text-white rounded-lg transition-colors font-medium shadow-sm flex items-center gap-2"
+              >
+                <IoCloudDownloadOutline size={16} /> 
+              </button>
+              <AssignmentAssign />
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-white shadow-sm overflow-hidden">
+            <AssignmentTable data={data} meta={{ editRow: handleEdit, deleteRow: handleDelete }} />
+          </div>
+        </>
       )}
 
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          {/* Modal content here */}
           <button onClick={handleConfirmDelete}>Confirm Delete</button>
         </div>
       )}

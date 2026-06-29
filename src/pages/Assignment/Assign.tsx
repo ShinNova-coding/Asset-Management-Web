@@ -218,7 +218,7 @@ const AddNewAsset = () => {
           <button 
             type="button" 
             onClick={goBack} 
-            className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+            className="flex items-center text-sm font-medium text-blue-800 hover:text-blue-700 transition-colors"
           >
             <ArrowLeft size={16} className="mr-2" />
             Back   
@@ -358,7 +358,7 @@ const AddNewAsset = () => {
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
               <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
-              <button type="submit" className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
+              <button type="submit" className="px-5 py-2 rounded-md bg-blue-800 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
                 {isEditMode ? "Update Record" : "Assign"}
               </button>
             </div>

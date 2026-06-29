@@ -367,7 +367,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
   })
 
   return (
-    <div className="max-w-6xl mx-auto space-y-4 p-3 bg-white rounded-xl border border-slate-200 shadow-sm  relative">
+    <div className="max-w-6xl mx-auto space-y-4 p-3 bg-white rounded-xl border border-slate-200 shadow-sm relative">
       
       {/* ── SEARCH BOX ── */}
       <div className=" flex gap-4 rounded-xl bg-white p-4 border border-slate-200 shadow-sm items-center">
@@ -448,75 +448,104 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
       </div>
 
       {/* ── PAGINATION ── */}
-      <div className="flex items-center justify-end gap-1.5 px-2 py-3 bg-white">
-        {/* Previous Button */}
-        <button
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-          className="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-300 text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          <FiChevronLeft size={16} />
-        </button>
+      <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+        {/* Left Status Text */}
+        <div className="text-sm text-slate-500 font-medium">
+          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({table.getFilteredRowModel().rows.length} total maintenance)
+        </div>
 
-        {/* Page Numbers */}
-        {(() => {
-          const currentPage = table.getState().pagination.pageIndex + 1
-          const pageCount = table.getPageCount()
-          const pages = []
+        {/* Right Controls */}
+        <div className="flex items-center gap-1">
+          {/* Previous Button */}
+          <button
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <FiChevronLeft size={16} />
+          </button>
 
-          if (pageCount <= 4) {
-            for (let i = 1; i <= pageCount; i++) pages.push(i)
-          } else {
-            // Always show page 1 and 2
+          {/* Page Numbers */}
+          {(() => {
+            const currentPage = table.getState().pagination.pageIndex + 1
+            const pageCount = table.getPageCount()
+            const pages: (number | string)[] = []
+
+            
+            const siblingCount = 1 
+
+            
             pages.push(1)
-            pages.push(2)
 
-            // Show ellipsis if total pages is greater than 4
-            if (pageCount > 4) {
+      
+            if (currentPage > siblingCount + 3) {
               pages.push("...")
+            } else if (pageCount > 2) {
+              
+              for (let i = 2; i < Math.min(currentPage - siblingCount, pageCount); i++) {
+                if (!pages.includes(i)) pages.push(i)
+              }
             }
 
-            // Always show the last page
-            if (pageCount > 2 && !pages.includes(pageCount)) {
+           
+            const startRange = Math.max(2, currentPage - siblingCount)
+            const endRange = Math.min(pageCount - 1, currentPage + siblingCount)
+
+            for (let i = startRange; i <= endRange; i++) {
+              if (!pages.includes(i)) pages.push(i)
+            }
+
+            
+            if (currentPage < pageCount - siblingCount - 2) {
+              pages.push("...")
+            } else if (pageCount > 1) {
+              
+              for (let i = Math.max(currentPage + siblingCount + 1, 2); i < pageCount; i++) {
+                if (!pages.includes(i)) pages.push(i)
+              }
+            }
+
+            
+            if (pageCount > 1 && !pages.includes(pageCount)) {
               pages.push(pageCount)
             }
-          }
 
-          return pages.map((page, index) => {
-            if (page === "...") {
+            return pages.map((page, index) => {
+              if (page === "...") {
+                return (
+                  <span key={`ellipsis-${index}`} className="px-2 text-slate-400 text-sm tracking-widest">
+                    ...
+                  </span>
+                )
+              }
+
+              const isPageActive = currentPage === page
+
               return (
-                <span key={`ellipsis-${index}`} className="px-1.5 text-slate-600 font-bold tracking-wider">
-                  ...
-                </span>
+                <button
+                  key={`page-${page}`}
+                  onClick={() => table.setPageIndex((page as number) - 1)}
+                  className={`w-8 h-8 text-sm font-semibold rounded-lg border transition-all flex items-center justify-center ${
+                    isPageActive
+                      ? "bg-[#0a46b4] border-[#0a46b4] text-white shadow-sm"
+                      : "bg-[#e9edf5] border-transparent text-slate-700 hover:bg-slate-200"
+                  }`}
+                >
+                  {page}
+                </button>
               )
-            }
+            })
+          })()}
 
-            const isPageActive = currentPage === page
-
-            return (
-              <button
-                key={`page-${page}`}
-                onClick={() => table.setPageIndex((page as number) - 1)}
-                className={`w-9 h-9 text-sm font-semibold rounded-xl border transition-all flex items-center justify-center ${
-                  isPageActive
-                    ? "bg-[#82baff] border-[#82baff] text-white shadow-sm"
-                    : "bg-[#e9edf5] border-slate-300 text-slate-900 hover:bg-slate-200"
-                }`}
-              >
-                {page}
-              </button>
-            )
-          })
-        })()}
-
-        {/* Next Button */}
-        <button
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-          className="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-800 text-slate-900 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          <FiChevronRight size={16} />
-        </button>
+          {/* Next Button */}
+          <button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <FiChevronRight size={16} />
+          </button>
+        </div>
       </div>
 
       {/* ── TOAST MESSAGE ── */}
