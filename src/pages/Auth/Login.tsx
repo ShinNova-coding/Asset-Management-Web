@@ -31,7 +31,7 @@ const Login = () => {
 
     try {
       
-      const API_URL = "http://192.168.100.186:1010/api/login"; 
+      const API_URL = "http://192.168.100.185:1011/api/login"; 
 
       const response = await fetch(API_URL, {
         method: "POST",
@@ -47,18 +47,65 @@ const Login = () => {
 
       const data = await response.json();
 
-      if (data.success) {
-        
+  if (data.success) {
         localStorage.setItem("token", data.token);
-        
-       
         localStorage.setItem("user", JSON.stringify(data.user));
 
-       
-        navigate("/dashboard");
-      } else {
+        let exactRoleName = "Employee"; 
+        let exactPermissions = []; 
+
+        if (data.user && data.user.roles && data.user.roles.length > 0) {
+          exactRoleName = data.user.roles[0].name; 
+          
+         
+          if (data.user.roles[0].permissions && data.user.roles[0].permissions.length > 0) {
+             exactPermissions = data.user.roles[0].permissions;
+          } 
+         
+          else {
+            if (exactRoleName === "super-admin") {
+               exactPermissions = [
+                 { id: 7, name: "view-assets" }, { id: 12, name: "view-users" },
+                 { id: 26, name: "view-dashboard" }, { id: 28, name: "view-assignments" },
+                 { id: 33, name: "view-maintenances" }, { id: 17, name: "view-roles" },
+                 { id: 49, name: "view-expenses" }, { id: 58, name: "view-activitylogs" }
+               ];
+            } 
+            else if (exactRoleName === "Admin") {
+               exactPermissions = [
+                 { id: 7, name: "view-assets" }, { id: 12, name: "view-users" },
+                 { id: 26, name: "view-dashboard" }, { id: 28, name: "view-assignments" },
+                 { id: 33, name: "view-maintenances" }
+               ];
+            } 
+            else if (exactRoleName === "HR") {
+               exactPermissions = [
+                
+                 { id: 2, name: "view-categories" }, { id: 3, name: "create-categories" }, { id: 4, name: "update-categories" }, { id: 5, name: "delete-categories" },
+                 { id: 7, name: "view-assets" }, { id: 8, name: "create-assets" }, { id: 9, name: "update-assets" }, { id: 10, name: "delete-assets" },
+                 { id: 26, name: "view-dashboard" },
+                 { id: 28, name: "view-assignments" }, { id: 29, name: "create-assignments" }, { id: 30, name: "update-assignments" }, { id: 31, name: "delete-assignments" },
+                 { id: 33, name: "view-maintenances" }, { id: 34, name: "create-maintenances" }, { id: 35, name: "update-maintenances" }, { id: 36, name: "delete-maintenances" },
+                 { id: 37, name: "get-notifications" }, { id: 38, name: "create-asset-requests" }, { id: 43, name: "create-maintenance-requests" }
+               ];
+            } 
+            else if (exactRoleName === "Employee") {
+               exactPermissions = [
+                 { id: 2, name: "view-categories" }, { id: 7, name: "view-assets" },
+                 { id: 29, name: "view-assignments" }
+               ];
+            }
+          }
+        }
+
+      
+        localStorage.setItem("user_role", exactRoleName);
+        localStorage.setItem("user_permissions", JSON.stringify(exactPermissions)); 
+
         
-        setError(data.message || "Login failed. Please check your credentials.");
+        window.location.href = "/dashboard";
+      } else {
+        setError(data.message || "Login failed.");
       }
     } catch (err) {
       setError("Something went wrong. Cannot connect to server.");

@@ -1,37 +1,23 @@
 // src/lib/api.ts
 
-const BASE_URL = "http://192.168.100.186:1010/api";
+export async function apiFetch(endpoint: string, options: RequestInit = {}) {
+  const token = localStorage.getItem("token");
 
-export async function apiFetch(
-  endpoint: string,
-  options: RequestInit = {}
-) {
-  const token = localStorage.getItem("token") || DEFAULT_TOKEN;
-
-  const isFormData = options.body instanceof FormData;
-
-  const headers: HeadersInit = {
-    Accept: "application/json",
-
-    Authorization: `Bearer ${token}`,
-
-    ...(!isFormData && {
-      "Content-Type": "application/json",
-    }),
-
-    ...options.headers,
-  };
-
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
+  const res = await fetch(`http://192.168.100.185:1011/api${endpoint}`, {
     ...options,
-    headers,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...(options.headers || {}),
+    },
   });
 
-  const responseData = await parseJsonResponse(response);
+  const data = await res.json();
 
-  if (!response.ok) {
-    throw new Error(getErrorMessage(responseData, `API Error: ${response.status}`));
+  if (!res.ok) {
+    throw new Error(data?.message || "API Error");
   }
 
-  return responseData;
+  return data;
 }

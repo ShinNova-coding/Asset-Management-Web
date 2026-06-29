@@ -2,16 +2,18 @@
 
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
-import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiX } from "react-icons/fi"
+import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiX, FiChevronUp, FiChevronDown } from "react-icons/fi"
 import { Search } from "lucide-react"
-
+import { apiRequest } from "@/lib/apiService"; // Adjust the path as needed
 import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
   type ColumnFiltersState,
+  type SortingState,
 } from "@tanstack/react-table"
 
 import {
@@ -35,6 +37,7 @@ interface AssignmentTableProps {
 export function AssignmentTable({ data: initialData, onDeleteSuccess }: AssignmentTableProps) {
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([])
   const [data, setData] = React.useState<Assignment[]>(initialData)
 
   const [deleteModal, setDeleteModal] = React.useState<{ isOpen: boolean; targetId: string | number | null }>({
@@ -53,48 +56,52 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
     setDeleteModal({ isOpen: true, targetId: id })
   }
 
-  const handleConfirmDelete = async () => {
-    if (!deleteModal.targetId) return
+ const handleConfirmDelete = async () => {
+  if (!deleteModal.targetId) return;
 
-    const targetId = String(deleteModal.targetId).trim()
-    const API_URL = `http://192.168.100.186:1010/api/assignment/${targetId}`
-    const token = localStorage.getItem("token") || ""
+  const targetId = String(deleteModal.targetId).trim();
+  
+  try {
+   
+    await apiRequest(`/assignment/assignment_id`, "DELETE", {
+      assignment_id: targetId,
+    });
 
-    try {
-      const response = await fetch(API_URL, {
-        method: "DELETE",
-        headers: {
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
-
-      if (!response.ok) {
-        const result = await response.json().catch(() => ({}))
-        throw new Error(result.message || "Delete failed")
-      }
-
-      setData((prev) => prev.filter((item) => String(item.id) !== targetId))
-      if (onDeleteSuccess) {
-        onDeleteSuccess(targetId)
-      }
-      setShowToast(true)
-    } catch (error: any) {
-      console.error("❌ Delete failed:", error)
-      alert(`Delete failed: ${error.message}`)
-    } finally {
-      setDeleteModal({ isOpen: false, targetId: null })
+   
+    setData((prev) => prev.filter((item) => String(item.id) !== targetId));
+    
+    if (onDeleteSuccess) {
+      onDeleteSuccess(targetId);
     }
+    setShowToast(true);
+  } catch (error: any) {
+    console.error("❌ Delete failed:", error);
+    alert(`Delete failed: ${error.message}`);
+  } finally {
+    setDeleteModal({ isOpen: false, targetId: null });
   }
+};
+
+   
 
   const handleEdit = (item: any) => {
     navigate(`/assignment/edit/${item.id}`, { state: { assignment: item } })
   }
 
+  const columns = React.useMemo(() => {
+    return [
+      {
+        id: "number",
+        header: "No.",
+        cell: ({ row }: any) => row.index + 1, 
+      },
+      ...baseColumns, 
+    ]
+  }, [])
+
   const table = useReactTable({
     data,
-    columns: baseColumns,
+    columns,
     meta: {
       deleteRow: handleDeleteTrigger,
       editRow: handleEdit,
@@ -102,12 +109,15 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
     state: {
       globalFilter,
       columnFilters,
+      sorting,
     },
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     initialState: {
       pagination: {
         pageSize: 5,
@@ -120,21 +130,18 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
 
   return (
     <div className="w-full space-y-4 p-3 relative">
-      
       <div className="flex gap-4 rounded-xl bg-white p-4 border border-slate-200 shadow-sm items-center">
-        
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search by ID,name,asset code,date,status..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         
-       
         <div className="relative w-48">
           <select
             value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
@@ -148,17 +155,37 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
         </div>
       </div>
 
-      
       <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
-          <TableHeader className="bg-blue-400">
+          <TableHeader className="bg-blue-800">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-white font-semibold py-3 text-sm">
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  const canSort = header.column.getCanSort()
+                  return (
+                    <TableHead 
+                      key={header.id} 
+                      className={`text-white font-semibold py-3 text-sm ${canSort ? "cursor-pointer select-none hover:bg-blue-500/50" : ""}`}
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      <div className="flex items-center gap-2">
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {canSort && (
+                          <div className="flex flex-col">
+                            <FiChevronUp 
+                              size={12} 
+                              className={header.column.getIsSorted() === "asc" ? "text-white" : "text-white/40"} 
+                            />
+                            <FiChevronDown 
+                              size={12} 
+                              className={header.column.getIsSorted() === "desc" ? "text-white" : "text-white/40"} 
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </TableHead>
+                  )
+                })}
               </TableRow>
             ))}
           </TableHeader>
@@ -205,7 +232,6 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
         </Table>
       </div>
 
-      
       <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
         <div className="text-xs text-slate-500 font-medium">
           Page {currentPage + 1} of {pageCount} ({table.getFilteredRowModel().rows.length} total assignments)
@@ -233,7 +259,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
                     key={index}
                     variant={currentPage === index ? "default" : "outline"}
                     size="sm"
-                    className={currentPage === index ? "bg-blue-300 hover:bg-blue-400 text-white border-none" : "bg-slate-200"}
+                    className={currentPage === index ? "bg-blue-800 hover:bg-blue-700 text-white border-none" : "bg-slate-200"}
                     onClick={() => table.setPageIndex(index)}
                   >
                     {index + 1}

@@ -1,170 +1,147 @@
+"use client";
 
-"use client"
-
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { Button } from "@/components/ui/button";
+import { apiRequest } from "@/lib/apiService";
 
 interface SystemActivityLogItem {
-  id: number
-  causer_id: string
-  causer_name: string
-  description: string
-  asset_id: string
-  asset_name: string
-  created_at: string
+  id: number;
+  causer_name: string;
+  description: string;
+  asset_name: string;
+  created_at: string;
 }
 
 export default function ActivityPage() {
-  const [logs, setLogs] = useState<SystemActivityLogItem[]>([])
-  const [message, setMessage] = useState("Loading...")
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [logs, setLogs] = useState<SystemActivityLogItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 10;
+  const pageCount = Math.ceil(logs.length / itemsPerPage);
 
   useEffect(() => {
     const fetchSystemLogs = async () => {
       try {
-        setLoading(true)
-        setError(null)
+        setLoading(true);
+        const result = await apiRequest("/activitylogs", "GET");
 
-        const token = localStorage.getItem("token")
-
-       
-        const response = await fetch("http://192.168.18.19:1010/api/activitylogs", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { "Authorization": `Bearer ${token}` })
-          }
-        })
-
-        if (!response.ok) {
-          throw new Error(`Server responded with status: ${response.status}`)
-        }
-
-        const result = await response.json()
-
-        if (result.success) {
-          // Sort descending by ID so latest database actions show at the top
-          const sortedLogs = (result.data || []).sort((a: SystemActivityLogItem, b: SystemActivityLogItem) => b.id - a.id)
-          setLogs(sortedLogs)
-          setMessage(result.message || "Activity logs retrieved successfully")
-        } else {
-          throw new Error(result.message || "Failed to parse system activity logs.")
+        if (result && Array.isArray(result.data)) {
+          const sortedLogs = result.data.sort((a: any, b: any) => b.id - a.id);
+          setLogs(sortedLogs);
         }
       } catch (err: any) {
-        setError(err.message || "An unexpected error occurred connecting to the API.")
+        setError(err.message || "Failed to load activity logs.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
+    
+    fetchSystemLogs();
+  }, []);
 
-    fetchSystemLogs()
-  }, [])
-
-  // Action styling highlights based on data operation descriptions
-  const getDescriptionBadge = (description: string) => {
-    const normalized = description.toLowerCase()
-    if (normalized === "created") return "bg-green-50 text-green-700 ring-green-600/20"
-    if (normalized === "updated") return "bg-blue-50 text-blue-700 ring-blue-600/20"
-    if (normalized === "deleted") return "bg-red-50 text-red-700 ring-red-600/20"
-    return "bg-slate-50 text-slate-700 ring-slate-600/10"
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+      </div>
+    );
   }
 
-  return (
-    <div className="p-10 space-y-6 min-h-screen bg-slate-50/30">
-      
-     
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-             Activity Logs
-          </h1>
-          {!loading && !error && <p className="text-sm text-slate-500">{message}</p>}
+ 
+  if (error) {
+    return (
+      <div className="p-8 min-h-screen bg-slate-50">
+        <div className="bg-red-50 text-red-800 p-4 rounded-xl border border-red-200">
+          <strong>Error loading activity logs:</strong> {error}
         </div>
       </div>
+    );
+  }
 
-      {/* UI STATE HANDLING (Assignment Page Dynamic Loading & Error Styles) */}
-      {loading ? (
-        /* Spinner Loading View */
-        <div className="flex flex-col justify-center items-center h-48 space-y-2 text-slate-500">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
-          <p className="text-sm">Loading...</p>
-        </div>
-      ) : error ? (
-        /* Amber Notice Alert + Table Fallback Frame */
-        <div className="space-y-4">
-          <div className="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 text-sm flex items-center justify-between">
-            <div>
-              💡 <strong>Notice:</strong> Using offline view or server connection failure. (Reason: {error})
-            </div>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-md transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden opacity-75">
-            {renderTableStructure(logs, getDescriptionBadge)}
-          </div>
-        </div>
-      ) : (
-        /* Active Data Found View */
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          {renderTableStructure(logs, getDescriptionBadge)}
-        </div>
-      )}
+  const currentLogs = logs.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
 
-    </div>
-  )
-}
-
-// Reusable Pure Function to render Table presentation to clear clutter above
-function renderTableStructure(logs: SystemActivityLogItem[], getDescriptionBadge: (desc: string) => string) {
   return (
-    <table className="w-full text-left border-collapse">
-      <thead>
-        <tr className="border-b border-slate-200 bg-slate-50 text-sm font-semibold text-slate-600">
-          <th className="px-6 py-4">Log ID</th>
-          <th className="px-6 py-4">Action Event</th>
-          <th className="px-6 py-4">Asset ID</th>
-          <th className="px-6 py-4">Asset Name</th>
-          <th className="px-6 py-4">Operator Info</th>
-          <th className="px-6 py-4">Timestamp</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-slate-200 text-sm text-slate-700">
-        {logs.length === 0 ? (
-          <tr>
-            <td colSpan={6} className="px-6 py-8 text-center text-slate-400 font-medium">
-              No tracking logs returned from the server.
-            </td>
-          </tr>
-        ) : (
-          logs.map((row) => (
-            <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
-              <td className="px-6 py-4 font-mono text-xs text-slate-400">#{row.id}</td>
-              <td className="px-6 py-4">
-                <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${getDescriptionBadge(row.description)}`}>
-                  {row.description}
-                </span>
-              </td>
-              <td className="px-6 py-4 font-mono font-medium text-xs text-slate-600">{row.asset_id}</td>
-              <td className="px-6 py-4 text-slate-900 font-medium">
-                {row.asset_name === "N/A" ? <span className="text-slate-400 italic">No Modification</span> : row.asset_name}
-              </td>
-              <td className="px-6 py-4 text-slate-700">
-                <div className="flex flex-col">
-                  <span className="font-medium">{row.causer_name}</span>
-                  <span className="text-xs text-slate-400 font-mono">{row.causer_id}</span>
-                </div>
-              </td>
-              <td className="px-6 py-4 text-slate-500 text-xs font-mono">
-                {row.created_at ? new Date(row.created_at).toLocaleString() : "N/A"}
-              </td>
+    <div className="pt-4 px-6 pb-6 space-y-6 min-h-screen bg-[#F3F0F7]">
+      <h1 className="text-2xl font-bold text-blue-800">Activity Logs</h1>
+
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-blue-800 text-white text-sm">
+            <tr>
+              <th className="px-6 py-4">ID</th>
+              <th className="px-6 py-4">Action</th>
+              <th className="px-6 py-4">Asset</th>
+              <th className="px-6 py-4">Operator</th>
+              <th className="px-6 py-4">Date & Time</th>
             </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  )
+          </thead>
+          <tbody className="divide-y divide-slate-200 text-sm">
+            {currentLogs.map((row) => (
+              <tr key={row.id} className="hover:bg-slate-50">
+                <td className="px-6 py-4 font-mono text-slate-400">#{row.id}</td>
+                <td className="px-6 py-4">
+                  <span className="px-2 py-1 bg-slate-100 rounded text-xs">{row.description}</span>
+                </td>
+                <td className="px-6 py-4 font-medium">{row.asset_name}</td>
+                <td className="px-6 py-4">{row.causer_name}</td>
+                <td className="px-6 py-4 text-slate-500 text-xs">{new Date(row.created_at).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
+          <div className="text-xs text-slate-500 font-medium ml-2">
+            Page {currentPage + 1} of {pageCount || 1} ({logs.length} total activities)
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+              disabled={currentPage === 0}
+            >
+              <FiChevronLeft size={16} />
+            </Button>
+
+            <div className="flex gap-1 items-center">
+              {Array.from({ length: pageCount }).map((_, index) => {
+                if (index === 0 || index === pageCount - 1 || (index >= currentPage - 1 && index <= currentPage + 1)) {
+                  return (
+                    <Button
+                      key={index}
+                      variant={currentPage === index ? "default" : "outline"}
+                      size="sm"
+                      className={currentPage === index ? "bg-blue-800 hover:bg-blue-700 text-white border-none" : "bg-slate-200"}
+                      onClick={() => setCurrentPage(index)}
+                    >
+                      {index + 1}
+                    </Button>
+                  );
+                }
+                if (index === currentPage - 2 || index === currentPage + 2) {
+                  return <span key={index} className="px-2 text-gray-500">...</span>;
+                }
+                return null;
+              })}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.min(pageCount - 1, prev + 1))}
+              disabled={currentPage >= pageCount - 1}
+            >
+              <FiChevronRight size={16} />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

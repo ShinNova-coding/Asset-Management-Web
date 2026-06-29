@@ -15,7 +15,7 @@ export default function Edit({ onEdit }: EditProps) {
         
         if (onEdit) onEdit()
       }} 
-      className="text-blue-300 hover:text-blue-700 transition p-1"
+      className="text-blue-400 hover:text-blue-600 transition p-1"
       title="Edit Asset"
     >
       <FaEdit size={20} />
