@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Loader2, X, Save, Search, ChevronDown } from 'lucide-react';
 import { FaEdit } from "react-icons/fa";
 import { RiDeleteBin4Fill } from "react-icons/ri";
-import { FiChevronUp, FiChevronDown } from "react-icons/fi"; // Sorting Icons ထည့်သွင်းခြင်း
+import { FiChevronUp, FiChevronDown } from "react-icons/fi"; 
 import { apiFetch } from "@/lib/api";
 
 // Detail Modal ကို Import ခေါ်ယူခြင်း
@@ -254,23 +254,24 @@ export const ExpenseTable: React.FC = () => {
     return 'bg-emerald-50 text-emerald-600 px-3 py-1 text-xs font-medium rounded-full inline-block border border-emerald-200 text-center min-w-[80px] capitalize';
   };
 
- return (
+   return (
     <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
+      
       {/* ── 🔍 SEARCH & FILTER CONTROLS (Maintenance Header UI ပုံစံအတိုင်း ပြင်ဆင်ထားသည်) ────────────────────────────── */}
-<div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
-  <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
+           <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
+           <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
     
-    {/* Search Input Box */}
-    <div className="relative flex-1 w-full">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-      <input
-        type="text"
-        placeholder="Search by name, date, title..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full rounded-md border border-slate-300 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400 text-slate-700 shadow-3xs"
-      />
-    </div>
+      {/* Search Input Box */}
+           <div className="relative flex-1 w-full">
+           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+           <input
+              type="text"
+              placeholder="Search by name, date, title..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-md border border-slate-300 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400 text-slate-700 shadow-3xs"
+           />
+       </div>
 
     {/* Status Filter Dropdown */}
     <div className="relative w-full sm:w-48">
@@ -437,50 +438,62 @@ export const ExpenseTable: React.FC = () => {
         </div>
       </div>
 
-      {/* ── 📄 CARD 2: SEPARATED PAGINATION ────────────────── */}
-      <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm mt-2">
-        <div className="text-xs text-slate-500 font-medium pl-2">
-          Page {currentPage} of {totalPages} ({totalItems} total records)
-        </div>
+      {/* ── 📄 CARD 2: SEPARATED PAGINATION (ဒီဇိုင်းပုံစံအတိုင်း ပြင်ဆင်ထားသော နေရာ) ────────────────── */}
+<div className="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-xs mt-3 select-none">
+  <div className="text-xs text-slate-500 font-medium">
+    Page {currentPage} of {totalPages} ({totalItems} total records)
+  </div>
 
-        <div className="flex items-center space-x-2">
-          <button
-            type="button"
-            disabled={currentPage === 1 || loading}
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-3 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-slate-600"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          
-          {[...Array(totalPages)].map((_, i) => {
-            const page = i + 1;
-            return (
-              <button
-                key={page}
-                type="button"
-                onClick={() => setCurrentPage(page)}
-                className={`w-6 h-6 text-xs font-medium rounded-md transition-all cursor-pointer ${
-                  currentPage === page 
-                    ? 'bg-[#3b82f6] text-white shadow-3xs' 
-                    : 'text-slate-600 bg-white border border-slate-300 hover:bg-slate-50'
-                }`}
-              >
-                {page}
-              </button>
-            );
-          })}
+  <div className="flex items-center space-x-2">
+    {/* Previous Button */}
+    <button
+      type="button"
+      disabled={currentPage === 1 || loading}
+      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+      className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white shadow-3xs text-slate-500 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+    >
+      <ChevronLeft size={16} />
+    </button>
+    
+    {/* Page Numbers */}
+    {[...Array(totalPages)].map((_, i) => {
+      const page = i + 1;
+      
+      // UI ကောင်းမွန်စေရန် Page များလွန်းပါက Ellipsis (...) ပြသပေးမည့် Logic
+      if (totalPages > 4 && Math.abs(currentPage - page) > 1 && page !== 1 && page !== totalPages) {
+        if (page === 2 || page === totalPages - 1) {
+          return <span key={page} className="px-2 text-slate-400 font-bold tracking-widest text-xs select-none">...</span>;
+        }
+        return null;
+      }
 
-          <button 
-            type="button"
-            disabled={currentPage === totalPages || loading}
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-3 disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-slate-600"
-          >
-            <ChevronRight size={16} />
-          </button>
-        </div>
-      </div>
+      return (
+        <button
+          key={page}
+          type="button"
+          onClick={() => setCurrentPage(page)}
+          className={`w-10 h-10 text-sm font-semibold rounded-xl transition-all cursor-pointer ${
+            currentPage === page 
+              ? 'bg-[#93c5fd] text-white shadow-2xs font-bold' 
+              : 'text-slate-800 bg-[#eef2f6] border border-slate-300 hover:bg-slate-200'
+          }`}
+        >
+          {page}
+        </button>
+      );
+    })}
+
+    {/* Next Button */}
+    <button 
+      type="button"
+      disabled={currentPage === totalPages || loading}
+      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+      className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white shadow-3xs text-slate-500 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+    >
+      <ChevronRight size={16} />
+    </button>
+  </div>
+</div>
 
       {/* ── 📝 EDIT MODAL OVERLAY ─────────────────────────────────── */}
       {isEditModalOpen && editingExpense && (

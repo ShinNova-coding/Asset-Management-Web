@@ -140,7 +140,7 @@ const MaintenanceDetailsForm: React.FC = () => {
             )}
           </div>
 
-          {/* ❌ Accepted / Approved By ID block ကို ဤနေရာမှ ဖယ်ရှားလိုက်ပါသည် */}
+        
         </div>
 
         {/* SECTION 3: Issue Details */}
