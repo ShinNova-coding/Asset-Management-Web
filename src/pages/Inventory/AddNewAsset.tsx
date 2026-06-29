@@ -91,7 +91,7 @@ const AddNewAsset = () => {
         action: activeItem.status || activeItem.action || 'available'
       });
       
-      const API_REAL_IP = "http://192.168.100.183:1011";
+      const API_REAL_IP = "http://192.168.100.185:1011";
       let rawImageSource = activeItem.preview_url || activeItem.image_url || activeItem.image || "";
 
       if (rawImageSource) {
@@ -115,7 +115,7 @@ const AddNewAsset = () => {
   useEffect(() => {
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://192.168.100.183:1011/api/category", {
+      const response = await fetch("http://192.168.100.185:1011/api/category", {
         headers: { 
           "Authorization": `Bearer ${localStorage.getItem("token") || ""}`,
           "Accept": "application/json" 
@@ -267,7 +267,7 @@ const AddNewAsset = () => {
         assetPayload.image = finalizedImageString;
       }
 
-      const API_URL = "http://192.168.100.183:1011/api/asset"; 
+      const API_URL = "http://192.168.100.185:1011/api/asset"; 
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       const method = isEditMode ? "PATCH" : "POST";
       const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
@@ -302,7 +302,7 @@ const AddNewAsset = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-10 font-sans text-slate-900">
+    <div className="min-h-screen bg-[#F3F0F7] p-10 font-sans text-slate-900">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="space-y-2">
           <button type="button" onClick={goBack} className="flex items-center text-sm font-medium text-blue-500 hover:text-blue-700 transition-colors">

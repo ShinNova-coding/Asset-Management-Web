@@ -35,26 +35,26 @@ export default function InventoryPage() {
   const handleExportPDF = () => {
   const doc = new jsPDF();
   
-  // Add a Title
+ 
   doc.setFontSize(18);
   doc.text("Inventory Report", 14, 20);
   
-  // Prepare Table Data mapping to your API structure
+  
   const tableData = inventoryData.map((item, index) => [
     index + 1,
     item.name || "N/A",
     item.asset_code || "N/A",
-    item.purchased_date || "N/A", // Corrected key from your JSON
-    item.warranty_period ? `${item.warranty_period} months` : "N/A", // Handle nulls
+    item.purchased_date || "N/A", 
+    item.warranty_period ? `${item.warranty_period} months` : "N/A", 
     item.status || "N/A"
   ]);
 
-  // Generate Table
+  
   autoTable(doc, {
     startY: 30,
     head: [['No', 'Name', 'Asset Code', 'Purchased Date', 'Warranty', 'Status']],
     body: tableData,
-    headStyles: { fillColor: [30, 64, 175] }, // Matches your blue theme
+    headStyles: { fillColor: [30, 64, 175] }, 
     theme: 'striped'
   });
 
@@ -71,7 +71,7 @@ export default function InventoryPage() {
           </h1>
         </div>
         
-        {/* Header Actions Container */}
+       
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportPDF}
@@ -85,9 +85,9 @@ export default function InventoryPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex flex-col justify-center items-center h-48 space-y-2 text-slate-500">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
-          <p className="text-sm">Loading...</p>
+        <div className="flex items-center justify-center min-h-screen bg-slate-50">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+         
         </div>
       ) : error ? (
         <div className="space-y-4">

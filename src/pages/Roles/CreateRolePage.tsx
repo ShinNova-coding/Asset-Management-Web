@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 
 interface PermissionItem {
@@ -103,7 +104,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
     // Changed to axios.post
-    const response = await axios.post('http://192.168.100.183:1011/api/role', {
+    const response = await axios.post('http://192.168.100.185:1011/api/role', {
       name: roleName,
       guard_name: "sanctum",
       permissions: selectedPermissions // Send as an array if the API expects it
@@ -126,7 +127,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-8 flex justify-center items-start">
+    <div className="min-h-screen bg-[#F3F0F7] p-8 flex justify-center items-start">
       <div className="w-full max-w-5xl bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
         
         {/* Header Section */}
@@ -145,12 +146,12 @@ const handleSubmit = async (e: React.FormEvent) => {
           <button 
             type="button"
             onClick={() => navigate("/roles")} 
-            className="px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition duration-200 flex items-center gap-2"
+            className="px-4 py-2 text-sm  text-blue-500  text-shadow-violet-400 flex items-center gap-2"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-            Back to Roles
+              <ArrowLeft size={16} className="mr-2" />
+              
+            
+            Back
           </button>
         </div>
 

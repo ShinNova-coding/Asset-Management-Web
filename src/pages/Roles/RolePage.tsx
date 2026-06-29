@@ -59,7 +59,7 @@ export default function RolesPage() {
     try {
       setIsUpdating(true);
       // Using your provided structure
-      const response = await fetch(`http://192.168.100.183:1011/api/role/${roleId}`, {
+      const response = await fetch(`http://192.168.100.185:1011/api/role/${roleId}`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem("token")}`,
@@ -93,7 +93,18 @@ export default function RolesPage() {
     return groups;
   };
 
-  if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin w-8 h-8 text-blue-500" /></div>;
+ 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+      </div>
+    );
+  }
+
+  
+
+ 
   if (roles.length === 0) return <div className="p-8 text-center text-slate-500">No roles found.</div>;
 
   const currentRole = roles[roleIndex];

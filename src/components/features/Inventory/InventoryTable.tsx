@@ -273,7 +273,7 @@ const handleConfirmDelete = async () => {
                     key={index}
                     variant={currentPage === index ? "default" : "outline"}
                     size="sm"
-                    className={currentPage === index ? "bg-blue-300 hover:bg-blue-400 text-white border-none" : "bg-slate-200"}
+                    className={currentPage === index ? "bg-blue-800 hover:bg-blue-700 text-white border-none" : "bg-slate-200"}
                     onClick={() => table.setPageIndex(index)}
                   >
                     {index + 1}

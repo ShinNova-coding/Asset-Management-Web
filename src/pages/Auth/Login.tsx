@@ -31,7 +31,7 @@ const Login = () => {
 
     try {
       
-      const API_URL = "http://192.168.100.183:1011/api/login"; 
+      const API_URL = "http://192.168.100.185:1011/api/login"; 
 
       const response = await fetch(API_URL, {
         method: "POST",
@@ -51,17 +51,17 @@ const Login = () => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        let exactRoleName = "Employee"; // Default role
+        let exactRoleName = "Employee"; 
         let exactPermissions = []; 
 
         if (data.user && data.user.roles && data.user.roles.length > 0) {
           exactRoleName = data.user.roles[0].name; 
           
-          // ၁။ Backend ကနေ permissions တကယ်တွဲပါလာခဲ့ရင် အဲ့ဒါကို တိုက်ရိုက်ယူမယ်
+         
           if (data.user.roles[0].permissions && data.user.roles[0].permissions.length > 0) {
              exactPermissions = data.user.roles[0].permissions;
           } 
-          // ၂။ Backend က permissions မပို့ပေးခဲ့ရင် (Frontend ကနေ Role အလိုက် သတ်မှတ်ပေးမယ်)
+         
           else {
             if (exactRoleName === "super-admin") {
                exactPermissions = [
@@ -80,7 +80,7 @@ const Login = () => {
             } 
             else if (exactRoleName === "HR") {
                exactPermissions = [
-                 // မိတ်ဆွေ ပို့ပေးထားတဲ့ HR လုပ်ပိုင်ခွင့် အပြည့်အစုံ
+                
                  { id: 2, name: "view-categories" }, { id: 3, name: "create-categories" }, { id: 4, name: "update-categories" }, { id: 5, name: "delete-categories" },
                  { id: 7, name: "view-assets" }, { id: 8, name: "create-assets" }, { id: 9, name: "update-assets" }, { id: 10, name: "delete-assets" },
                  { id: 26, name: "view-dashboard" },
@@ -98,11 +98,11 @@ const Login = () => {
           }
         }
 
-        // ရလာတဲ့ Role နဲ့ Permissions ကို Local Storage ထဲ သိမ်းမယ်
+      
         localStorage.setItem("user_role", exactRoleName);
         localStorage.setItem("user_permissions", JSON.stringify(exactPermissions)); 
 
-        // Dashboard ကို သွားမယ်
+        
         window.location.href = "/dashboard";
       } else {
         setError(data.message || "Login failed.");

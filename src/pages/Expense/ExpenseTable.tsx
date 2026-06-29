@@ -351,10 +351,9 @@ export const ExpenseTable: React.FC = () => {
               {loading && (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-slate-400">
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="animate-spin text-[#3b82f6]" size={18} />
-                      <span className="font-medium text-slate-500">Loading expenses...</span>
-                    </div>
+                     <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+      </div>
                   </td>
                 </tr>
               )}
@@ -462,7 +461,7 @@ export const ExpenseTable: React.FC = () => {
                 onClick={() => setCurrentPage(page)}
                 className={`w-6 h-6 text-xs font-medium rounded-md transition-all cursor-pointer ${
                   currentPage === page 
-                    ? 'bg-[#3b82f6] text-white shadow-3xs' 
+                    ? 'bg-blue-800 text-white shadow-3xs' 
                     : 'text-slate-600 bg-white border border-slate-300 hover:bg-slate-50'
                 }`}
               >

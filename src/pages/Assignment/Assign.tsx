@@ -40,13 +40,13 @@ const AddNewAsset = () => {
       };
 
       try {
-        const usersResponse = await fetch("http://192.168.100.183:1011/api/user", { headers });
+        const usersResponse = await fetch("http://192.168.100.185:1011/api/user", { headers });
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
           setUsersList(usersData.data?.data || usersData.data || []);
         }
 
-        const assetsResponse = await fetch("http://192.168.100.183:1011/api/asset", { headers });
+        const assetsResponse = await fetch("http://192.168.100.185:1011/api/asset", { headers });
         if (assetsResponse.ok) {
           const assetsData = await assetsResponse.json();
           setAssetsList(assetsData.data?.data || assetsData.data || []);
@@ -170,7 +170,7 @@ const AddNewAsset = () => {
 
       console.log("🚀 Sending Payload to Assignment API:", assignmentPayload);
 
-      const API_URL = "http://192.168.100.183:1011/api/assignment"; 
+      const API_URL = "http://192.168.100.185:1011/api/assignment"; 
       
       const targetId = stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
@@ -211,7 +211,7 @@ const AddNewAsset = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-10 font-sans text-slate-900">
+    <div className="min-h-screen bg-[#F3F0F7] p-10 font-sans text-slate-900">
       
         
         <div className="space-y-2">

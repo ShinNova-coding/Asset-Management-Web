@@ -248,7 +248,7 @@ const UserManagement: React.FC = () => {
   const currentPaginatedData = sortedData.slice(startIndex, endIndex);
 
   return (
-    <div className="w-full space-y-6 p-6 relative bg-[#F8FAFC] min-h-screen font-sans text-slate-800">
+    <div className="w-full space-y-6 p-6 relative bg-[#F3F0F7] min-h-screen font-sans text-slate-800">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-blue-800">User Management</h1>
 
@@ -452,7 +452,7 @@ const UserManagement: React.FC = () => {
                       key={index}
                       variant={currentPage === index ? "default" : "outline"}
                       size="sm"
-                      className={currentPage === index ? "bg-blue-500 hover:bg-blue-600 text-white border-none" : "bg-white border-slate-200"}
+                      className={currentPage === index ? "bg-blue-800 hover:bg-blue-700 text-white border-none" : "bg-white border-slate-200"}
                       onClick={() => setCurrentPage(index)}
                     >
                       {index + 1}
