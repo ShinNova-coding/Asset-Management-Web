@@ -18,7 +18,7 @@ const AddNewAsset = () => {
   const [formData, setFormData] = useState({
     assetId: '', 
     name: '',
-    category: 'Goods',
+    category: '', // Changed to empty string to store ID
     model: '',
     ram: '',
     storage: '',
@@ -31,6 +31,7 @@ const AddNewAsset = () => {
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
 
   const formatToInputDate = (dateString: string) => {
     if (!dateString) return "";
@@ -46,7 +47,7 @@ const AddNewAsset = () => {
       setFormData({
         assetId: '',
         name: '',
-        category: 'Goods',
+        category: '',
         model: '',
         ram: '',
         storage: '',
@@ -76,17 +77,10 @@ const AddNewAsset = () => {
     }
 
     if (activeItem) {
-      let resolvedCategoryStr = "Goods";
-      if (activeItem.category) {
-        resolvedCategoryStr = typeof activeItem.category === "object" 
-          ? activeItem.category.name 
-          : activeItem.category;
-      }
-
       setFormData({
         assetId: activeItem.asset_code || activeItem.asset_id || activeItem.id || String(targetId || ''),
         name: activeItem.name || '',
-        category: resolvedCategoryStr || 'Goods',
+        category: activeItem.category?.id || activeItem.category_id || '', // Set to ID
         model: activeItem.model || '',
         ram: activeItem.ram_capacity || activeItem.ram || '',
         storage: activeItem.storage || '',
@@ -97,7 +91,7 @@ const AddNewAsset = () => {
         action: activeItem.status || activeItem.action || 'available'
       });
       
-      const API_REAL_IP = "http://192.168.100.185:1010";
+      const API_REAL_IP = "http://192.168.100.185:1011";
       let rawImageSource = activeItem.preview_url || activeItem.image_url || activeItem.image || "";
 
       if (rawImageSource) {
@@ -117,6 +111,40 @@ const AddNewAsset = () => {
       setFormData(prev => ({ ...prev, assetId: String(targetId) }));
     }
   }, [stateId, stateEditItem, routeId, isEditMode]);
+
+  useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("http://192.168.100.185:1011/api/category", {
+        headers: { 
+          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`,
+          "Accept": "application/json" 
+        }
+      });
+      
+      const res = await response.json();
+      console.log("DEBUG - API Response:", res); // Check this in Console!
+
+      if (response.ok) {
+        // If your API returns the array directly, use 'res'.
+        // If it returns an object with a 'data' property, use 'res.data'.
+        const categoryArray = res.data || res; 
+        
+        if (Array.isArray(categoryArray)) {
+          setCategories(categoryArray);
+        } else {
+          console.error("DEBUG - Data is not an array:", categoryArray);
+        }
+      } else {
+        console.error("DEBUG - Server error:", res);
+      }
+    } catch (err) {
+      console.error("DEBUG - Fetch failed:", err);
+    }
+  };
+
+  fetchCategories();
+}, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -210,18 +238,9 @@ const AddNewAsset = () => {
         finalizedImageString = stripBase64Header(base64WithHeader);
       } else if (imagePreview && imagePreview.startsWith("data:")) {
         finalizedImageString = stripBase64Header(imagePreview);
-      }  else {
-  finalizedImageString = ""; 
-}
+      }
 
       const updatedStatusText = formData.action.trim() || "available";
-
-      const categoryMap: Record<string, string> = {
-        "Goods": "a1f0d854-58b0-45b5-9541-448f080e1bbc", 
-        "Funitures": "a1f29511-0c11-47a3-91db-d90c44852afe"
-      };
-
-      const resolvedCategoryId = categoryMap[formData.category] || "a1f0d854-58b0-45b5-9541-448f080e1bbc";
       const targetId = routeId || stateId || stateEditItem?.asset_id || stateEditItem?.id;
 
       if (isEditMode && (!targetId || targetId === "undefined" || targetId === "id")) {
@@ -230,28 +249,25 @@ const AddNewAsset = () => {
       }
 
       const assetPayload: Record<string, any> = {
-  ...(isEditMode && { id: targetId }),
-  asset_code: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`, 
-  name: formData.name.trim(),
-  serial_number: formData.serial_number.trim(),
-  purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
-  warranty_period: formData.warranty || "12", 
-  model: formData.model.trim() || "N/A",
-  ram_capacity: formData.ram.trim() || "N/A",
-  storage: formData.storage.trim() || "N/A",
-  category_id: resolvedCategoryId, 
-  status: updatedStatusText.toLowerCase(), 
-  condition: formData.condition,
-};
+        ...(isEditMode && { id: targetId }),
+        asset_code: formData.assetId.trim() || `AST-${Math.floor(1000 + Math.random() * 9000)}`, 
+        name: formData.name.trim(),
+        serial_number: formData.serial_number.trim(),
+        purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
+        warranty_period: formData.warranty || "12", 
+        model: formData.model.trim() || "N/A",
+        ram_capacity: formData.ram.trim() || "N/A",
+        storage: formData.storage.trim() || "N/A",
+        category_id: formData.category, // Directly use the ID
+        status: updatedStatusText.toLowerCase(), 
+        condition: formData.condition,
+      };
 
+      if (finalizedImageString && finalizedImageString.trim() !== "") {
+        assetPayload.image = finalizedImageString;
+      }
 
-if (finalizedImageString && finalizedImageString.trim() !== "") {
-  assetPayload.image = finalizedImageString;
-}
-
-      console.log("🚀 Payload sending to backend server stream:", assetPayload);
-
-      const API_URL = "http://192.168.100.185:1010/api/asset"; 
+      const API_URL = "http://192.168.100.185:1011/api/asset"; 
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       const method = isEditMode ? "PATCH" : "POST";
       const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
@@ -268,8 +284,6 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("❌ Backend Validation Errors:", errorData);
-        
         if (errorData.errors) {
           const validationErrors = Object.values(errorData.errors).flat().join("\n");
           throw new Error(validationErrors);
@@ -278,7 +292,6 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
       }
 
       alert(isEditMode ? "Asset entry altered successfully!" : "New asset entry saved!");
-      
       localStorage.removeItem("inventory_data");
       navigate("/inventory");
 
@@ -289,112 +302,60 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-10 font-sans text-slate-900">
+    <div className="min-h-screen bg-[#F3F0F7] p-10 font-sans text-slate-900">
       <div className="max-w-6xl mx-auto space-y-6">
-        
         <div className="space-y-2">
-          <button 
-            type="button"
-            onClick={goBack}
-            className="flex items-center text-sm font-medium text-blue-500 hover:text-blue-700 transition-colors"
-          >
-            <ArrowLeft size={16} className="mr-2" />
-            Back
+          <button type="button" onClick={goBack} className="flex items-center text-sm font-medium text-blue-500 hover:text-blue-700 transition-colors">
+            <ArrowLeft size={16} className="mr-2" /> Back
           </button>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {isEditMode ? "Modify Asset Records" : "Register New IT Asset"}
-          </h1>
+          <h1 className="text-2xl font-bold text-slate-900">{isEditMode ? "Modify Asset Records" : "Register New IT Asset"}</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          
           <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
-              
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Package size={18} className="text-blue-600" />
                   <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Asset Information</h2>
                 </div>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset ID</label>
-                    <input 
-                      type="text" 
-                      name="assetId"
-                      value={formData.assetId}
-                      onChange={handleInputChange}
-                      disabled={isEditMode} 
-                      placeholder="e.g. AST-2026-03" 
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm disabled:bg-slate-100 disabled:text-slate-500" 
-                    />
+                    <input type="text" name="assetId" value={formData.assetId} onChange={handleInputChange} placeholder ="eg:AST-2026-001" disabled={isEditMode} className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm disabled:bg-slate-100 disabled:text-slate-500" />
                   </div>
-                  
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset Name</label>
-                    <input 
-                      type="text" 
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="e.g. MacBook Pro M3" 
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                      required
-                    />
+                    <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="e.g. MacBook Pro M3" className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" required />
                   </div>
-                  
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset Category</label>
-                    <select
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
-                    >
-                      <option value="Goods">Goods</option>
-                      <option value="Funitures">Funitures</option>
+                    <select name="category" value={formData.category} onChange={handleInputChange} className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white" required>
+                      <option value="">Select a Category</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
                     </select>
                   </div>
-
-                  
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset Condition</label>
-                    <select
-                      name="condition"
-                      value={formData.condition}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
-                    >
+                    <select name="condition" value={formData.condition} onChange={handleInputChange} className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white">
                       <option value="new">New</option>
                       <option value="good">Good</option>
                       <option value="fair">Fair</option>
                       <option value="bad">Bad</option>
                     </select>
                   </div>
-
                   <div className="space-y-1.5 md:col-span-2">
                     <label className="text-xs font-bold text-slate-600">Action Status</label>
-                    <select 
-                      
-                      name="action"
-                      value={formData.action}
-                      onChange={handleInputChange}
-                     
-                      className="w-full px-3.5 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-sm bg-slate-50/50 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400" 
-                    >
-                     
+                    <select name="action" value={formData.action} onChange={handleInputChange} className="w-full px-3.5 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-sm bg-slate-50/50 focus:bg-white transition-all text-slate-800">
                       <option value="available">Available</option>
-                     
-                      
-                     
                       <option value="retired">Retired</option>
                     </select>
                   </div>
                 </div>
               </section>
-              
-              <section className="space-y-4">
+ <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                   <Cpu size={18} className="text-blue-600" />
                   <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Hardware Specifications</h2>
@@ -483,6 +444,11 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
                 </div>
               </section>
 
+             
+             
+
+             
+              
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                 <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
                 <button type="submit" className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
@@ -491,8 +457,7 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
               </div>
             </form>
           </div>
-
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <ImageIcon size={18} className="text-blue-600" />
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Asset Photo</h2>
@@ -546,6 +511,9 @@ if (finalizedImageString && finalizedImageString.trim() !== "") {
             </div>
           </div>
 
+       
+
+         
         </div>
       </div>
     </div>

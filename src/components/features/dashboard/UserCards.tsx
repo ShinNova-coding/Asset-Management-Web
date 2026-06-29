@@ -1,99 +1,63 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
-  UsersIcon,
-  UserPlusIcon,
-  UserMinusIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
+import { apiRequest } from "@/lib/apiService";
 
-interface UserCardProps {
-  label: string;
-  value: string | number;
-  Icon?: React.ElementType;
-  colorClass?: string;
-  bgColorClass?: string;
-}
+const UserCards: React.FC = () => {
+  const [data, setData] = useState<any>(null);
+  const [year, setYear] = useState("2026");
+  const [month, setMonth] = useState("June");
 
-const UserCard: React.FC<UserCardProps> = ({
-  label,
-  value,
-  Icon,
-  colorClass = "text-blue-600",
-  bgColorClass = "bg-blue-50",
-}) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await apiRequest(`/dashboard?year=${year}&month=${month}`, "GET");
+        if (result.status === "success") setData(result.data.user);
+      } catch (err) { console.error(err); }
+    };
+    fetchData();
+  }, [year, month]);
+
+  const chartData = data ? [
+    { name: "Stats", Total: data.total_users, Active: data.active_user, Suspended: data.suspended_user, Resigned: data.resigned_user }
+  ] : [];
+
   return (
-    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center justify-between w-full">
-      <div>
-        <p className="text-[10px] font-bold text-slate-400 tracking-wider uppercase mb-0.5">
-          {label}
-        </p>
-        <span className={`text-2xl font-bold ${colorClass}`}>
-          {value}
-        </span>
+    <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm w-full max-w-xl">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-bold text-blue-800">Users</h2>
+        <div className="flex gap-2">
+          <select value={year} onChange={(e) => setYear(e.target.value)} className="text-sm border rounded-lg px-3 py-1.5 outline-none bg-slate-50">
+            <option>2026</option>
+          </select>
+          <select value={month} onChange={(e) => setMonth(e.target.value)} className="text-sm border rounded-lg px-3 py-1.5 outline-none bg-slate-50">
+            <option>June</option>
+          </select>
+        </div>
       </div>
 
-      {Icon && (
-        <div className={`p-2.5 rounded-xl ${bgColorClass}`}>
-          <Icon className={`w-5 h-5 ${colorClass}`} />
-        </div>
-      )}
-    </div>
-  );
-};
-
-const UserCards: React.FC<{ data?: any }> = ({ data }) => {
-  const userData = data?.user || {
-    total_users: 0,
-    active_user: 0,
-    suspended_user: 0,
-    resigned_user: 0,
-  };
-
-  const userStats = [
-    {
-      label: "Total Users",
-      value: userData.total_users,
-      Icon: UsersIcon,
-      colorClass: "text-blue-500",
-      bgColorClass: "bg-blue-100",
-    },
-    {
-      label: "Active Users",
-      value: userData.active_user,
-      Icon: UserPlusIcon,
-      colorClass: "text-emerald-600",
-      bgColorClass: "bg-emerald-50",
-    },
-    {
-      label: "Suspended Users",
-      value: userData.suspended_user,
-      Icon: UserMinusIcon,
-      colorClass: "text-amber-600",
-      bgColorClass: "bg-amber-50",
-    },
-    {
-      label: "Resigned Users",
-      value: userData.resigned_user,
-      Icon: XMarkIcon,
-      colorClass: "text-rose-600",
-      bgColorClass: "bg-rose-50",
-    },
-  ];
-
-  return (
-    <div className="w-full space-y-3 py-4">
-      <h2 className="text-base font-bold text-slate-800">Users</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
-        {userStats.map((stat, index) => (
-          <UserCard
-            key={index}
-            label={stat.label}
-            value={stat.value}
-            Icon={stat.Icon}
-            colorClass={stat.colorClass}
-            bgColorClass={stat.bgColorClass}
-          />
-        ))}
+      <div className="h-64 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+            <XAxis dataKey="name" hide />
+            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#64748b" }} />
+            <Tooltip cursor={{ fill: "#f8fafc" }} contentStyle={{ borderRadius: '10px' }} />
+            <Legend wrapperStyle={{ paddingTop: '20px' }} />
+            <Bar dataKey="Total" fill="#3b82f6" barSize={35} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Active" fill="#059669" barSize={35} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Suspended" fill="#d97706" barSize={35} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Resigned" fill="#e11d48" barSize={35} radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

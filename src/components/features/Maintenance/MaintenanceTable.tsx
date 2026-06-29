@@ -367,10 +367,10 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
   })
 
   return (
-    <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
+    <div className="max-w-6xl mx-auto space-y-4 p-3 bg-white rounded-xl border border-slate-200 shadow-sm  relative">
       
       {/* ── SEARCH BOX ── */}
-      <div className="flex gap-4 rounded-xl bg-white p-4 border border-slate-200 shadow-sm items-center">
+      <div className=" flex gap-4 rounded-xl bg-white p-4 border border-slate-200 shadow-sm items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
           <input
@@ -386,7 +386,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
       {/* ── TABLE VIEW ── */}
       <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
-          <TableHeader className="bg-blue-400">
+          <TableHeader className="bg-blue-800">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => {

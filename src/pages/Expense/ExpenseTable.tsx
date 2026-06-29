@@ -295,7 +295,7 @@ export const ExpenseTable: React.FC = () => {
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse table-auto">
             <thead>
-              <tr className="bg-[#3b82f6] text-white text-[13px] font-semibold border-b border-blue-600 select-none">
+              <tr className="bg-blue-800 text-white text-[13px] font-semibold border-b border-blue-600 select-none">
                 <th className="py-3 px-4 w-16">No.</th>
                 
                 {/* Employee Header (Sortable) */}
@@ -352,10 +352,9 @@ export const ExpenseTable: React.FC = () => {
               {loading && (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-slate-400">
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="animate-spin text-[#3b82f6]" size={18} />
-                      <span className="font-medium text-slate-500">Loading expenses...</span>
-                    </div>
+                     <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+      </div>
                   </td>
                 </tr>
               )}

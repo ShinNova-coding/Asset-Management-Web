@@ -196,7 +196,7 @@ const handleConfirmDelete = async () => {
 
       <div className="rounded-md rounded-b-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
-          <TableHeader className="bg-blue-400">
+          <TableHeader className="bg-blue-800">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => {
@@ -273,7 +273,7 @@ const handleConfirmDelete = async () => {
                     key={index}
                     variant={currentPage === index ? "default" : "outline"}
                     size="sm"
-                    className={currentPage === index ? "bg-blue-300 hover:bg-blue-400 text-white border-none" : "bg-slate-200"}
+                    className={currentPage === index ? "bg-blue-800 hover:bg-blue-700 text-white border-none" : "bg-slate-200"}
                     onClick={() => table.setPageIndex(index)}
                   >
                     {index + 1}

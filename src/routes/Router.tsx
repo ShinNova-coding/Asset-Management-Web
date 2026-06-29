@@ -21,11 +21,12 @@ import EmployeeDetailsPage from "@/pages/UserManagement/EmployeeDetailsPage"
 import MaintenanceDetailsForm from "@/components/features/Maintenance/MaintenanceDetailsForm"
 import AssignmentDetailPage from "@/components/features/Assignment/AssignmentDetailPage"
 import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
-
+import EditRolePage from "@/pages/Roles/EditRolePage"
 // 1. Import your new Expense components (Adjust the path matching your folder structure)
 import ExpensePage from "@/pages/Expense/ExpensePage" 
 import ExpenseTable from "@/pages/Expense/ExpenseTable" 
 import { CreateExpenseForm } from "@/pages/Expense/CreateExpenseForm"
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -112,6 +113,10 @@ export const router = createBrowserRouter([
           {
             path: "roles",
             element: <RolePage />
+          },
+          {
+            path:"roles/:id",
+            element:<EditRolePage/>,
           },
           {
             path: "roles/create",

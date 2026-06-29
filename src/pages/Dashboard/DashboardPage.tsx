@@ -40,7 +40,7 @@ const DashboardPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
       </div>
     );
   }
@@ -56,20 +56,23 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen px-4 pt-4 pb-6 space-y-5 bg-slate-50">
-      <h1 className="text-2xl font-bold text-blue-500">
+    <div className="min-h-screen px-4 pt-4 pb-6 space-y-5 bg-[#F3F0F7]">
+      <h1 className="text-2xl font-bold text-blue-800">
         Dashboard
       </h1>
 
-     
+      {/* Stats Overview */}
       <DashboardCards data={dashboardData} />
 
-     
-      <UserCards data={dashboardData} />
+      {/* Grid container for side-by-side layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        
+        {/* User Distribution */}
+        <UserCards apiData={dashboardData} />
 
-     
-      <div className="space-y-6">
+        {/* Asset Categories */}
         <AssetCategoriesCards data={dashboardData} />
+        
       </div>
     </div>
   );
