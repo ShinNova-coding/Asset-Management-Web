@@ -13,7 +13,7 @@ interface CreateExpenseFormProps {
 export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProps) {
   const navigate = useNavigate()
 
-  // ── FORM STATES ──────────────────────────────────────────────────
+  
   const [cost, setCost] = React.useState<number>(0)
   const [expenseDate, setExpenseDate] = React.useState<string>("")
   const [title, setTitle] = React.useState<string>("")
@@ -21,11 +21,11 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
   const [voucherBase64, setVoucherBase64] = React.useState<string>("")
   const [fileName, setFileName] = React.useState<string>("")
   
-  // Preview States for Uploaded Images
+  
   const [voucherPreview, setVoucherPreview] = React.useState<string>("")
   const [assetImagePreview, setAssetImagePreview] = React.useState<string>("")
   
-  // Asset Purchase Specific States
+  
   const [assetCode, setAssetCode] = React.useState<string>("")
   const [assetName, setAssetName] = React.useState<string>("")
   const [serialNumber, setSerialNumber] = React.useState<string>("")
@@ -39,7 +39,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
   
   const [employeeName, setEmployeeName] = React.useState<string>("Unknown Employee")
 
-  // ── INITIAL EFFECT ──────────────────────────────────────────────
+  
   React.useEffect(() => {
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
@@ -54,7 +54,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
     }
   }, [])
 
-  // ── FILE TO BASE64 & PREVIEW HANDLER ────────────────────────────
+  
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "voucher" | "asset_image") => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -100,7 +100,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
     }
   }, [voucherPreview, assetImagePreview])
 
-  // ── SUBMIT HANDLER ───────────────────────────────────────────────
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -197,32 +197,32 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
   return (
     <div className="w-full max-w-3xl mx-auto my-6">
       
-      {/* ── BACK LINK (CARD UPPER) ────────────────────────────────── */}
+      
       <div className="mb-4">
         <Link 
           to="/expense" 
-          className="inline-flex items-center text-sm font-medium text-blue-600 hover:underline"
+          className="inline-flex items-center text-sm font-medium text-blue-800 hover:underline"
         >
           <FiArrowLeft size={16} className="mr-2" />
           Back
         </Link>
       </div>
 
-      {/* ── MAIN CARD ─────────────────────────────────────────────── */}
+      
       <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden p-8 relative">
         
-        {/* HEADER */}
+        
         <div className="border-b border-slate-100 pb-5 mb-6">
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Create New Expense</h2>
+          <h2 className="text-2xl font-bold text-blue-800 tracking-tight">Create New Expense</h2>
           <p className="text-xs text-slate-400 mt-1.5">
             Creating as: <span className="font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md ml-1">{employeeName}</span>
           </p>
         </div>
 
-        {/* FORM */}
+        
         <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* Title Field */}
+          
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Expense Title *</label>
             <div className="relative">
@@ -256,7 +256,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
               </div>
             </div>
 
-            {/* Expense Date Field */}
+            
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Expense Date *</label>
               <div className="relative">
@@ -272,7 +272,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
             </div>
           </div>
 
-          {/* Expense Type Select */}
+          
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Expense Type</label>
             <select
@@ -288,7 +288,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
             </select>
           </div>
 
-          {/* ── DYNAMIC ASSET PURCHASE FIELDS ────────────────────────────── */}
+          
           {expenseType === "asset_purchase" && (
             <div className="p-6 rounded-2xl border border-blue-100 bg-blue-50/20 space-y-5 animate-fade-in">
               <h3 className="text-xs font-bold text-blue-700 uppercase tracking-widest border-b border-blue-100 pb-3">
@@ -312,7 +312,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                   </div>
                 </div>
 
-                {/* Asset Code */}
+                
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-slate-700">Asset Code *</label>
                   <div className="relative">
@@ -330,7 +330,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
-                {/* Serial Number */}
+                
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-slate-700">Serial Number *</label>
                   <div className="relative">
@@ -346,7 +346,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                   </div>
                 </div>
 
-                {/* Category */}
+              
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-slate-700">Asset Category</label>
                   <div className="relative">
@@ -365,7 +365,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                 </div>
               </div>
 
-              {/* Description */}
+              
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-semibold text-slate-700">Description</label>
                 <textarea
@@ -377,7 +377,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                 />
               </div>
 
-              {/* Asset Image Upload & Preview */}
+              
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-semibold text-slate-700">Asset Image</label>
                 {!assetImageName ? (
@@ -414,7 +414,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
             </div>
           )}
 
-          {/* Voucher Upload Field & Preview */}
+        
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Voucher / Receipt Attachment</label>
             {!fileName ? (
@@ -450,7 +450,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
             )}
           </div>
 
-          {/* Form Action Buttons */}
+          
           <div className="flex gap-3 justify-end pt-4 border-t border-slate-100">
             <button
               type="button"
@@ -462,7 +462,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md disabled:bg-blue-400 transition cursor-pointer"
+              className="px-6 py-2.5 text-sm font-bold text-white bg-blue-800 hover:bg-blue-700 rounded-xl shadow-md disabled:bg-blue-400 transition cursor-pointer"
             >
               {loading ? "Submitting..." : "Save Expense"}
             </button>
@@ -471,7 +471,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
 
       </div>
 
-      {/* Toast Feedback */}
+      
       {toastMessage && (
         <div className="absolute bottom-5 right-5 z-50 flex items-center gap-2 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl animate-fade-in">
           <FiCheckCircle className="text-emerald-400" size={18} />

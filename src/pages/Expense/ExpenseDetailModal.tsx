@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Calendar, Tag, Clock, User, Phone, MapPin, HardDrive } from 'lucide-react';
 
-// nested objects များအတွက် Interface သတ်မှတ်ခြင်း
+
 interface UserData {
   id: string;
   employee_id: string;
@@ -25,7 +25,7 @@ interface AssetData {
   name: string;
 }
 
-// Backend Response Interface ကို nested data များထည့်သွင်း၍ update လုပ်ခြင်း
+
 export interface ExpenseDetailData {
   id: string;
   users_id: string;
@@ -41,7 +41,7 @@ export interface ExpenseDetailData {
   expense_date: string;
   created_at: string;
   updated_at: string;
-  // API က ပါလာတဲ့ nested object data များ
+  
   user?: UserData | null;
   maintenance?: MaintenanceData | null;
   asset?: AssetData | null;
@@ -56,7 +56,7 @@ interface ExpenseDetailModalProps {
 export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, onClose, expense }) => {
   if (!isOpen || !expense) return null;
 
-  // Status Style သတ်မှတ်ချက်
+  
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
@@ -70,7 +70,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
     }
   };
 
-  // Maintenance Data ရှိရင် API က data ယူမယ်၊ မရှိရင် fallback သုံးမယ်
+ 
   const maintenanceDetails = {
     maintenance_id: expense.maintenance?.id || expense.maintenances_id || "N/A",
     completed_date: expense.maintenance?.completed_date || expense.expense_date,
@@ -83,13 +83,13 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
 
   return (
     <>
-      {/* Background Overlay Backdrop */}
+     
       <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 transition-opacity" onClick={onClose} />
 
-      {/* Slide-over Right Panel */}
+     
       <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-white shadow-2xl z-50 flex flex-col font-sans animate-slide-in">
         
-        {/* Modal Header */}
+       
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <div>
             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${getStatusBadge(expense.status)}`}>
@@ -102,10 +102,10 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
           </button>
         </div>
 
-        {/* Modal Content Box */}
+        
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           
-          {/* General Expense Cost Section */}
+          
           <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 text-center">
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Cost</p>
             <p className="text-3xl font-black text-slate-900 mt-1">
@@ -113,7 +113,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
             </p>
           </div>
 
-          {/* Primary Metadata List */}
+          
           <div className="space-y-4">
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Expense Information</h4>
             
@@ -135,7 +135,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
               </div>
             </div>
 
-            {/* 📋 IDs နေရာမှာ Name တွေနဲ့ လှလှပပ အစားထိုးပြသတဲ့ နေရာ */}
+            
             <div className="bg-slate-50/50 rounded-xl p-4 border border-slate-100 space-y-3 text-xs">
               <div className="flex justify-between items-center pb-2 border-b border-slate-200/60">
                 <span className="text-slate-400">Requested By:</span>
@@ -145,7 +145,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
                 </span>
               </div>
 
-              {/* Asset Type ဖြစ်ခဲ့ရင် Asset Name ပြမယ် */}
+              
               {expense.asset && (
                 <div className="flex justify-between items-center pb-2 border-b border-slate-200/60">
                   <span className="text-slate-400 flex items-center gap-1"><HardDrive size={13}/> Target Asset:</span>
@@ -155,7 +155,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
                 </div>
               )}
 
-              {/* Approved status ဖြစ်ပြီး approved_by ရှိရင် သက်ဆိုင်ရာ လူနာမည်ပြမယ် (လက်ရှိ API မှာ users_id နဲ့တူနေလို့ အသုံးချထားပါတယ်) */}
+              
               {expense.approved_by && (
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400">Approved By:</span>
@@ -167,13 +167,13 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
             </div>
           </div>
 
-          {/* 🛠️ Dynamic Maintenance Additional View Card */}
+          
           {expense.expense_type === 'maintenance' && (
             <div className="space-y-3 animate-fade-in">
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Maintenance Summary</h4>
               <div className="bg-indigo-50/40 border border-indigo-100 rounded-2xl p-4 space-y-4">
                 
-                {/* Vendor Metadata */}
+                
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-white rounded-lg border border-indigo-100 text-indigo-600"><User size={16} /></div>
                   <div>
@@ -207,7 +207,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
                   </div>
                 </div>
 
-                {/* Maintenance ID & Payment Tag */}
+                
                 <div className="flex items-center justify-between bg-white border border-indigo-100/60 px-3 py-2 rounded-xl text-xs">
                   <div className="flex items-center gap-1 text-slate-500">
                     <span className="font-medium">Payment:</span>
@@ -222,7 +222,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
             </div>
           )}
 
-          {/* Remark section */}
+          
           {expense.remark && (
             <div className="space-y-2">
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Admin Remarks</h4>
@@ -233,7 +233,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
           )}
         </div>
 
-        {/* Footer actions */}
+        
         <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
           <button onClick={onClose} className="w-full sm:w-auto px-5 py-2 bg-slate-400 hover:bg-slate-800 text-white font-semibold text-sm rounded-xl shadow-xs transition">
             Close Detail

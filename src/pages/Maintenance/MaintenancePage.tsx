@@ -9,9 +9,10 @@ import autoTable from "jspdf-autotable";
 
 export default function MaintenancePage() {
   const [maintenanceData, setMaintenanceData] = useState([]);
-
+  const [loading, setLoading] = useState(true);
   const fetchMaintenance = async () => {
     try {
+      setLoading(true); 
       const result = await apiFetch("/maintenance");
       const list = result?.data ?? [];
 
@@ -36,14 +37,11 @@ export default function MaintenancePage() {
           employee_name: item.user?.name ?? "-",
           asset_code: item.asset?.asset_code ?? "-",
           category: item.category?.name ?? "-",
-          // Fixed path: item.accepted_by is null in your example, 
-          // ensure it handles the object structure if it exists
           approver: item.accepted_by?.name ?? "—",
           maintenance_date: item.maintenance_date ?? "",
           completed_date: item.completed_date ?? "",
           remark: item.remark ?? "",
           status: displayStatus,
-          // Storing full objects for the table to use if needed
           user: item.user,
           asset: item.asset,
           category_obj: item.category,
@@ -54,6 +52,8 @@ export default function MaintenancePage() {
     } catch (err) {
       console.error("API Error:", err);
       setMaintenanceData([]);
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -86,6 +86,15 @@ export default function MaintenancePage() {
     doc.save("Maintenance_Report.pdf");
   };
 
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="pt-6 px-8 pb-8 min-h-screen space-y-4 bg-[#F3F0F7]"> 
       {/* Header Container */}
@@ -98,7 +107,6 @@ export default function MaintenancePage() {
           className="px-4 py-2 bg-blue-800 border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-blue-900"
         >
           <IoCloudDownloadOutline size={20} />
-          
         </button>
       </div>
 

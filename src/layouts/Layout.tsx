@@ -90,7 +90,7 @@ console.log("3. Data inside Layout:", permissions);
                         onClick={() => navigate(item.path)}
                         className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
                           isActive
-                            ? "bg-blue-500 text-white shadow-md"
+                            ? "bg-blue-300 "
                             : "text-blue-200 hover:bg-blue-800/50 hover:text-white"
                         }`}
                       >

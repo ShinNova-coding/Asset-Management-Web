@@ -1,4 +1,6 @@
-"use client"
+"use client"; 
+
+import { IoCloudDownloadOutline } from "react-icons/io5"; 
 
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -7,7 +9,10 @@ import { normalizeImageSource } from '../../lib/utils';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
 import { apiFetch } from '../../lib/api';
 
-import { Search, UserPlus, ChevronDown } from 'lucide-react';
+
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { Search, UserPlus, ChevronDown } from 'lucide-react'; 
 import {
   FiChevronLeft,
   FiChevronRight,
@@ -242,62 +247,106 @@ const UserManagement: React.FC = () => {
     return sortableData;
   }, [filteredData, sortColumn, sortDirection]);
 
+  // PDF Export Function
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Employee Report", 14, 20);
+    
+    const tableData = sortedData.map((item: Employee, index) => [
+      index + 1,
+      item.employee_id,
+      item.name,
+      item.email,
+      item.position,
+      item.status
+    ]);
+
+    autoTable(doc, {
+      startY: 30,
+      head: [['No', 'Employee ID', 'Name', 'Email', 'Position', 'Status']],
+      body: tableData,
+      headStyles: { fillColor: [30, 64, 175] }, 
+      theme: 'striped'
+    });
+
+    doc.save("Employee_Management_Report.pdf");
+  };
+
   const totalPages = Math.ceil(sortedData.length / pageSize);
   const startIndex = currentPage * pageSize;
-  const endIndex = startIndex + pageSize;
-  const currentPaginatedData = sortedData.slice(startIndex, endIndex);
+  const currentPaginatedData = sortedData.slice(startIndex, startIndex + pageSize);
+
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-6 p-6 relative bg-[#F3F0F7] min-h-screen font-sans text-slate-800">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-blue-800">User Management</h1>
 
-        <Link to="/add-employee">
-          <button className="flex items-center gap-2 rounded-md bg-blue-800 px-4 py-2 text-sm text-white hover:bg-blue-700 transition-colors">
-            <UserPlus size={18} />
-            Add Employee
-          </button>
-        </Link>
-      </div>
+        {/* Right Buttons Container */}
+        <div className="flex items-center gap-3">
+          {/* PDF Download Button */}
+          <button
+          onClick={handleExportPDF}
+          className="px-4 py-2 bg-blue-800 border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-blue-900"
+        >
+          <IoCloudDownloadOutline size={20} />
+          
+        </button>
 
-      
+          <Link to="/add-employee">
+            <button className="flex items-center gap-2 rounded-md bg-blue-800 px-4 py-2 text-sm text-white hover:bg-blue-700 transition-colors">
+              <UserPlus size={18} />
+              Add Employee
+            </button>
+          </Link>
+        </div>
+      </div>
 
       <div className="bg-white rounded-2xl border border-slate-300 p-4 shadow-sm space-y-4">
+        {/* Header Wrapper Card */}
+        <div className="flex gap-4 rounded-xl bg-white p-3 border border-slate-200 shadow-sm items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
+            <input
+              type="text"
+              placeholder="Search by name, date, title..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(0);
+              }}
+              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            />
+          </div>
 
-        {/* Screenshot အတိုင်း ပြင်ဆင်ထားသော Header Wrapper Card */}
-     <div className="flex gap-4 rounded-xl bg-white p-3 border border-slate-200 shadow-sm items-center">
-             <div className="relative flex-1">
-               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
-          <input
-            type="text"
-            placeholder="Search by name, date, title..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(0);
-            }}
-            className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-          />
+          {/* Status Dropdown Box */}
+          <div className="relative w-48">
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(0);
+              }}
+              className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-[#334155] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer"
+            >
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+              <option value="resigned">Resigned</option>
+            </select>
+            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#64748B] pointer-events-none" size={16} />
+          </div>
         </div>
 
-        {/* Status Dropdown Box */}
-        <div className="relative w-48">
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setCurrentPage(0);
-            }}
-            className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-[#334155] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer"
-          >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="suspended">Suspended</option>
-            <option value="resigned">Resigned</option>
-          </select>
-          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#64748B] pointer-events-none" size={16} />
-        </div>
-      </div>
         <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <Table>
             <TableHeader className="bg-blue-800">
@@ -362,25 +411,20 @@ const UserManagement: React.FC = () => {
             </TableHeader>
 
             <TableBody>
-              {loading && (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center text-slate-500 text-sm">Loading ...</TableCell>
-                </TableRow>
-              )}
-
-              {!loading && error && (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center text-red-600 text-sm">{error}</TableCell>
-                </TableRow>
-              )}
-
-              {!loading && !error && currentPaginatedData.length === 0 && (
+              {/* 💡 Table Row Loading ကို ဖြုတ်လိုက်ပြီး Error handling နဲ့ Data ရလဒ်တွေကိုပဲ ထားရှိပါမယ် */}
+              {!error && currentPaginatedData.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center text-slate-400 text-sm">No users found.</TableCell>
                 </TableRow>
               )}
 
-              {!loading && !error && currentPaginatedData.map((emp, index) => (
+              {error && (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-24 text-center text-red-600 text-sm">{error}</TableCell>
+                </TableRow>
+              )}
+
+              {currentPaginatedData.map((emp, index) => (
                 <TableRow
                   key={emp.id ?? emp.employee_id}
                   className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer"

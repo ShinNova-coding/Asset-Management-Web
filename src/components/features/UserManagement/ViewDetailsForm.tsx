@@ -18,7 +18,7 @@ export default function ViewDetailsForm({ data }: Props) {
   if (!data) {
     return (
       <div className="p-6 text-center text-gray-500">
-        Loading employee details...
+        Loading 
       </div>
     );
   }
@@ -26,7 +26,7 @@ export default function ViewDetailsForm({ data }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-4">
       <div className="bg-white shadow-sm border border-slate-200 rounded-2xl p-6 space-y-6">
-        <h2 className="text-2xl font-bold text-slate-800">Employee Details</h2>
+        <h2 className="text-2xl font-bold text-blue-800">Employee Details</h2>
 
         <div className="flex items-center gap-4 border-b border-slate-100 pb-5">
           <img

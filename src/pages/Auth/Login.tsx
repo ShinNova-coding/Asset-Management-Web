@@ -111,7 +111,7 @@ const Login = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-12 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-white transition-all" disabled={loading}>
+            <Button type="submit" className="w-full h-12 bg-blue-800 hover:bg-blue-500 rounded-xl font-bold text-white transition-all" disabled={loading}>
               {loading ? "Logging in..." : "LogIn"}
             </Button>
           </form>
@@ -125,7 +125,7 @@ const Login = () => {
             </div>
             <h3 className="text-2xl font-bold mb-2 tracking-wider">ITAMS</h3>
             <p className="text-slate-400 text-sm max-w-xs mx-auto">
-              IT asset management.
+              IT asset management system
             </p>
           </div>
         </div>
