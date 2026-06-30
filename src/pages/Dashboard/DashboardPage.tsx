@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import DashboardCards from "../../components/features/Dashboard/DashboardCards";
 import AssetCategoriesCards from "../../components/features/Dashboard/AssetCategoriesCards";
 import UserCards from "../../components/features/Dashboard/UserCards";
-import { apiRequest } from "@/lib/apiService"; // Adjust path accordingly
+import { apiRequest } from "@/lib/apiService"; 
 
 
 
@@ -17,10 +17,10 @@ const DashboardPage: React.FC = () => {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      // apiRequest handles the token and base URL internally
+      
       const result = await apiRequest("/dashboard", "GET");
 
-      // Assuming your apiService returns the full response object
+      
       if (result.status === "success" && result.data) {
         setDashboardData(result.data);
       } else {
@@ -61,16 +61,16 @@ const DashboardPage: React.FC = () => {
         Dashboard
       </h1>
 
-      {/* Stats Overview */}
+     
       <DashboardCards data={dashboardData} />
 
-      {/* Grid container for side-by-side layout */}
+     
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         
-        {/* User Distribution */}
+        
         <UserCards apiData={dashboardData} />
 
-        {/* Asset Categories */}
+        
         <AssetCategoriesCards data={dashboardData} />
         
       </div>

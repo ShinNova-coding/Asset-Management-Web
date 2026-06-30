@@ -17,7 +17,7 @@ const AssetCategoriesCards = ({ data }: { data?: any }) => {
 
   return (
     <div className="p-6 bg-white rounded-2xl shadow-sm border border-slate-200 w-full flex flex-col md:flex-row items-center gap-8">
-      {/* Chart Section */}
+     
       <div className="h-[200px] w-full md:w-1/2 relative">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -35,7 +35,7 @@ const AssetCategoriesCards = ({ data }: { data?: any }) => {
             <Tooltip />
           </PieChart>
         </ResponsiveContainer>
-        {/* Center Label */}
+        
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
           <span className="text-2xl font-bold text-slate-800">
             {chartData.reduce((acc, curr) => acc + curr.value, 0)}
@@ -44,7 +44,7 @@ const AssetCategoriesCards = ({ data }: { data?: any }) => {
         </div>
       </div>
 
-      {/* List/Legend Section */}
+      
       <div className="w-full md:w-1/2 space-y-3">
         <h2 className="text-lg font-bold text-blue-800 mb-4">Category</h2>
         {chartData.map((item, index) => (

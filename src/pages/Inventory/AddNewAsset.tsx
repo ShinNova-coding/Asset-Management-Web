@@ -18,7 +18,7 @@ const AddNewAsset = () => {
   const [formData, setFormData] = useState({
     assetId: '', 
     name: '',
-    category: '', // Changed to empty string to store ID
+    category: '', 
     model: '',
     ram: '',
     storage: '',
@@ -80,7 +80,7 @@ const AddNewAsset = () => {
       setFormData({
         assetId: activeItem.asset_code || activeItem.asset_id || activeItem.id || String(targetId || ''),
         name: activeItem.name || '',
-        category: activeItem.category?.id || activeItem.category_id || '', // Set to ID
+        category: activeItem.category?.id || activeItem.category_id || '', 
         model: activeItem.model || '',
         ram: activeItem.ram_capacity || activeItem.ram || '',
         storage: activeItem.storage || '',
@@ -123,11 +123,10 @@ const AddNewAsset = () => {
       });
       
       const res = await response.json();
-      console.log("DEBUG - API Response:", res); // Check this in Console!
+      console.log("DEBUG - API Response:", res); 
 
       if (response.ok) {
-        // If your API returns the array directly, use 'res'.
-        // If it returns an object with a 'data' property, use 'res.data'.
+        
         const categoryArray = res.data || res; 
         
         if (Array.isArray(categoryArray)) {
@@ -254,12 +253,18 @@ const AddNewAsset = () => {
         name: formData.name.trim(),
         serial_number: formData.serial_number.trim(),
         purchased_date: formData.purchased_date || new Date().toISOString().split('T')[0],
-        warranty_period: formData.warranty || "12", 
+      
         model: formData.model.trim() || "N/A",
         ram_capacity: formData.ram.trim() || "N/A",
         storage: formData.storage.trim() || "N/A",
-        category_id: formData.category, // Directly use the ID
-        status: updatedStatusText.toLowerCase(), 
+        category_id: formData.category, 
+       
+        status: formData.action.toLowerCase(),
+  
+  warranty_period: formData.action === 'retired' 
+    ? 0 
+    : parseInt(formData.warranty) || 0,
+ 
         condition: formData.condition,
       };
 
@@ -430,17 +435,28 @@ const AddNewAsset = () => {
                       className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Warranty Expiration (Months)</label>
-                    <input 
-                      type="text" 
-                      name="warranty"
-                      value={formData.warranty}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 12" 
-                      className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                    />
-                  </div>
+                 <div className="space-y-1">
+                 <label className="text-xs font-semibold text-slate-600">
+                 Warranty Expiration (Months)
+                 </label>
+                <input 
+          type="number" 
+    name="warranty"
+    
+    value={formData.action === 'retired' ? 0 : formData.warranty}
+   
+    disabled={formData.action === 'retired'}
+    onChange={handleInputChange}
+    placeholder="e.g. 12" 
+    className={`w-full px-3 py-2 rounded-md border border-slate-300 outline-none text-sm 
+      ${formData.action === 'retired' ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'focus:ring-2 focus:ring-blue-500'}`}
+  />
+  {formData.action === 'retired' && (
+    <p className="text-[10px] text-amber-600 font-medium mt-1">
+     Warranty expired due to Retired status
+    </p>
+  )}
+</div>
                 </div>
               </section>
 

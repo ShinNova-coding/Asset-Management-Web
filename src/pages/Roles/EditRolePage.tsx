@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { fetchRoles } from "@/lib/axios";
 
-// Helper to fetch all permissions from your API
+
 const fetchAllPermissions = async () => {
   const token = localStorage.getItem("token");
   const response = await fetch("http://192.168.100.185:1011/api/permission", {
@@ -19,7 +19,7 @@ const fetchAllPermissions = async () => {
   });
   if (!response.ok) throw new Error("Failed to fetch permissions");
   const json = await response.json();
-  return json.data; // Accessing the 'data' key from your API response
+  return json.data; 
 };
 
 export default function EditRolePage() {
@@ -37,7 +37,7 @@ export default function EditRolePage() {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Fetch both roles and the master permission list in parallel
+       
         const [rolesData, permsData] = await Promise.all([
           fetchRoles(),
           fetchAllPermissions()
@@ -48,7 +48,7 @@ export default function EditRolePage() {
         
         if (foundRole) {
           setRole(foundRole);
-          // Set currently assigned permissions
+          
           setSelectedPermissions(foundRole.permissions.map((p: any) => p.name));
         }
         
@@ -75,7 +75,7 @@ export default function EditRolePage() {
         body: JSON.stringify({
           role_id: id,
           name: role.name,
-          permissions: selectedPermissions // Sends the array of names
+          permissions: selectedPermissions 
         })
       });
 

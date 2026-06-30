@@ -4,7 +4,7 @@ import { router } from "./routes/Router";
 import { AuthContext } from "@/hooks/useAuth";
 
 const App = () => {
-  // ၁။ API ခေါ်နေမယ့်အစား Local Storage ထဲက data ကိုပဲ တိုက်ရိုက်ယူပါမယ်
+  
   const [permissions, setPermissions] = useState(() => {
     const saved = localStorage.getItem("user_permissions");
     return saved ? JSON.parse(saved) : [];

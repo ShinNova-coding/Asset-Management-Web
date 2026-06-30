@@ -22,7 +22,7 @@ import MaintenanceDetailsForm from "@/components/features/Maintenance/Maintenanc
 import AssignmentDetailPage from "@/components/features/Assignment/AssignmentDetailPage"
 import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
 import EditRolePage from "@/pages/Roles/EditRolePage"
-// 1. Import your new Expense components (Adjust the path matching your folder structure)
+
 import ExpensePage from "@/pages/Expense/ExpensePage" 
 import ExpenseTable from "@/pages/Expense/ExpenseTable" 
 import { CreateExpenseForm } from "@/pages/Expense/CreateExpenseForm"
