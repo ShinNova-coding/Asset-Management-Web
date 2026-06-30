@@ -223,7 +223,7 @@ const AddNewAsset = () => {
             <ArrowLeft size={16} className="mr-2" />
             Back   
           </button>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-blue-800">
             {isEditMode ? "Edit Handover Record" : "New Assignment"}
           </h1>
         </div>
