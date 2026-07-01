@@ -3,7 +3,14 @@
 import * as React from "react"
 import { FiDollarSign, FiCalendar, FiFileText, FiUpload, FiX, FiCheckCircle, FiArrowLeft, FiTag, FiHash, FiGrid, FiImage } from "react-icons/fi"
 import { useNavigate, Link } from "react-router-dom"
-import { createExpense } from "@/lib/apiService"
+// 💡 getCategories ကိုပါ import တွဲလုပ်လိုက်ပါမယ်
+import { createExpense, getCategories } from "@/lib/apiService"
+
+// 💡 Category data ရဲ့ structure အတွက် interface သတ်မှတ်ခြင်း
+interface CategoryItem {
+  id: string;
+  name: string;
+}
 
 interface CreateExpenseFormProps {
   onSuccess?: () => void
@@ -26,7 +33,11 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
   const [assetCode, setAssetCode] = React.useState<string>("")
   const [assetName, setAssetName] = React.useState<string>("")
   const [serialNumber, setSerialNumber] = React.useState<string>("")
-  const [category, setCategory] = React.useState<string>("Goods")
+  
+  // 💡 State ပြင်ဆင်မှုများ
+  const [category, setCategory] = React.useState<string>("") 
+  const [categoriesList, setCategoriesList] = React.useState<CategoryItem[]>([]) // API ကလာမယ့် data သိမ်းရန်
+
   const [description, setDescription] = React.useState<string>("")
   const [assetImageBase64, setAssetImageBase64] = React.useState<string>("")
   const [assetImageName, setAssetImageName] = React.useState<string>("")
@@ -49,6 +60,23 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
       }
     }
   }, [])
+
+  // 💡 Component စတက်ချိန်မှာ Backend API ကနေ Categories တွေလှမ်းဆွဲမည့် useEffect
+  React.useEffect(() => {
+    const fetchCategoriesData = async () => {
+      try {
+        const res = await getCategories();
+        if (res.success && res.data && res.data.length > 0) {
+          setCategoriesList(res.data);
+          setCategory(res.data[0].name); // ပထမဆုံးရလာတဲ့ category name ကို default အဖြစ်ပေးထားခြင်း
+        }
+      } catch (error) {
+        console.error("Failed to load categories from backend:", error);
+      }
+    };
+
+    fetchCategoriesData();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "voucher" | "asset_image") => {
     const file = e.target.files?.[0]
@@ -114,13 +142,11 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
       return
     }
 
-    // Common required fields validation - Description is ALWAYS required
     if (cost <= 0 || !expenseDate || !title.trim() || !description.trim()) {
       alert("Please fill all required fields correctly (Cost, Date, Title, and Description are required).")
       return
     }
 
-    // Asset purchase specific validation
     if (expenseType === "asset_purchase") {
       if (!assetName.trim() || !assetCode.trim() || !serialNumber.trim()) {
         alert("Asset Name, Asset Code, and Serial Number are all required for asset purchases.")
@@ -141,7 +167,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
       status: "approved",
       voucher: voucherBase64 || null,
       description: description.trim(),
-      // Always include asset fields - send empty strings/null for non-asset types
       asset_code: expenseType === "asset_purchase" ? (assetCode?.trim() || "") : "",
       name: expenseType === "asset_purchase" ? (assetName?.trim() || "") : "",
       category: expenseType === "asset_purchase" ? (category || "") : "",
@@ -252,7 +277,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
               onChange={(e) => setExpenseType(e.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer"
             >
-              <option value="claim">Claim</option>
+              
               <option value="maintenance">Maintenance</option>
               <option value="asset_purchase">Asset_Purchase</option>
               <option value="office_supply">Office_Supply</option>
@@ -325,6 +350,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                   </div>
                 </div>
 
+                {/* 💡 ပြင်ဆင်လိုက်သော Asset Category Select Option နေရာ */}
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-slate-700">Asset Category</label>
                   <div className="relative">
@@ -334,10 +360,11 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                       onChange={(e) => setCategory(e.target.value)}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer"
                     >
-                      <option value="Goods">Goods</option>
-                      <option value="Electronics">Electronics</option>
-                      <option value="Furniture">Furniture</option>
-                      <option value="Machinery">Machinery</option>
+                      {categoriesList.map((cat) => (
+                        <option key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

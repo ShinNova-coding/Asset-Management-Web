@@ -98,7 +98,25 @@ export interface UserUpdatePayload {
   phone_number?: string;
   left_date?: string | null;
 }
+// @/lib/apiService ဖိုင်ထဲမှာ သွားထည့်ပေးရန်
 
+export async function getCategories() {
+  const myHeaders = new Headers();
+  myHeaders.append("Accept", "application/json");
+  myHeaders.append("Authorization", "Bearer 261|UKYS7uARyAxUtGBmPZJVTmphmMp8EQOGCcHo9Qsi8993df01");
+
+  const requestOptions: RequestInit = {
+    method: 'GET',
+    headers: myHeaders,
+    redirect: 'follow'
+  };
+
+  const response = await fetch("http://192.168.100.185:1011/api/category", requestOptions);
+  if (!response.ok) {
+    throw new Error("Failed to fetch categories");
+  }
+  return response.json();
+}
 export const updateUserProfile = async (payload: UserUpdatePayload) => {
   // Build update payload for /user/id endpoint
   const updatePayload: any = {
