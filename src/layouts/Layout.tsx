@@ -21,6 +21,7 @@ import {
   UserCog,
   ReceiptText,
   ChevronDown,
+  Tag,
 } from "lucide-react";
 
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
@@ -30,6 +31,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard", permission: "view-dashboard" },
+  {title:"Categories",icon:Tag,path:"/categories",permission:"view-categories"},
   { title: "Inventory", icon: Boxes, path: "/inventory", permission: "view-assets" },
   { title: "Assignment", icon: FileEdit, path: "/assignment", permission: "view-assignments" },
   { title: "Maintenance", icon: Wrench, path: "/maintenance", permission: "view-maintenances" },

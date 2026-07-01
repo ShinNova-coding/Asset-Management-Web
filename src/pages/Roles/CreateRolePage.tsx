@@ -91,7 +91,7 @@ export default function CreateRolePage() {
     setViewPermissions(prev => prev.map(p => ({ ...p, checked: targetState })));
   };
 
-  // Replace your existing handleSubmit function
+  
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setLoading(true);
@@ -103,11 +103,11 @@ const handleSubmit = async (e: React.FormEvent) => {
   ];
 
   try {
-    // Changed to axios.post
+    
     const response = await axios.post('http://192.168.100.185:1011/api/role', {
       name: roleName,
       guard_name: "sanctum",
-      permissions: selectedPermissions // Send as an array if the API expects it
+      permissions: selectedPermissions 
     }, {
       headers: {
         'Accept': 'application/json',
@@ -130,7 +130,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     <div className="min-h-screen bg-[#F3F0F7] p-8 flex justify-center items-start">
       <div className="w-full max-w-5xl bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
         
-        {/* Header Section */}
+       
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100/50">
@@ -155,7 +155,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </button>
         </div>
 
-        {/* Form Content */}
+       
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
           
           {error && (
@@ -164,7 +164,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           )}
 
-          {/* Role Name Input */}
+         
           <div className="space-y-2">
             <label className="text-xs font-bold tracking-wider text-slate-400 uppercase">
               Role Name <span className="text-red-500">*</span>
@@ -180,7 +180,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             />
           </div>
 
-          {/* Permissions Section Header */}
+          
           <div className="pt-6 border-t border-slate-100 flex justify-between items-center">
             <div>
               <h2 className="text-sm font-bold text-blue-800">Assign Permissions</h2>
@@ -200,10 +200,10 @@ const handleSubmit = async (e: React.FormEvent) => {
             </button>
           </div>
 
-          {/* Grid Layout (Cards 1 to 6) */}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
-            {/* CARD 1: MANAGE (CREATE) */}
+            
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
                 <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">

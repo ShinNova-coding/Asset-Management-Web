@@ -45,13 +45,13 @@ const Login = () => {
           if (exactPermissions.length === 0) {
           
             if (exactRoleName === "super-admin") {
-               exactPermissions = [{ id: 7, name: "view-assets" }, { id: 12, name: "view-users" }, { id: 26, name: "view-dashboard" }, { id: 28, name: "view-assignments" }, { id: 33, name: "view-maintenances" }, { id: 17, name: "view-roles" }, { id: 49, name: "view-expenses" }, { id: 58, name: "view-activitylogs" }];
+               exactPermissions = [{ id: 7, name: "view-assets" }, { id: 12, name: "view-users" }, { id: 26, name: "view-dashboard" }, { id: 28, name: "view-assignments" }, { id: 33, name: "view-maintenances" },{ id: 2, name: "view-categories" }, { id: 17, name: "view-roles" }, { id: 49, name: "view-expenses" }, { id: 58, name: "view-activitylogs" }];
             } else if (exactRoleName === "Admin") {
-               exactPermissions = [{ id: 7, name: "view-assets" }, { id: 12, name: "view-users" }, { id: 26, name: "view-dashboard" }, { id: 28, name: "view-assignments" }, { id: 33, name: "view-maintenances" }];
+               exactPermissions = [{ id: 7, name: "view-assets" }, { id: 12, name: "view-users" }, { id: 26, name: "view-dashboard" }, { id: 28, name: "view-assignments" }, { id: 2, name: "view-categories" }, { id: 33, name: "view-maintenances" }];
             } else if (exactRoleName === "HR") {
                exactPermissions = [{ id: 2, name: "view-categories" }, { id: 7, name: "view-assets" }, { id: 26, name: "view-dashboard" }, { id: 28, name: "view-assignments" }, { id: 33, name: "view-maintenances" }, { id: 37, name: "get-notifications" }];
             } else if (exactRoleName === "Employee") {
-               exactPermissions = [{ id: 2, name: "view-categories" }, { id: 7, name: "view-assets" }, { id: 29, name: "view-assignments" }];
+               exactPermissions = [{ id: 2, name: "view-categories" }, { id: 2, name: "view-categories" },{ id: 33, name: "view-maintenances" }, { id: 7, name: "view-assets" }, { id: 29, name: "view-assignments" }];
             }
           }
         }

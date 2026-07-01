@@ -4,7 +4,7 @@ import { router } from "./routes/Router";
 import { AuthContext } from "@/hooks/useAuth";
 
 const App = () => {
- 
+  
   const [permissions, setPermissions] = useState(() => {
     const saved = localStorage.getItem("user_permissions");
     return saved ? JSON.parse(saved) : [];

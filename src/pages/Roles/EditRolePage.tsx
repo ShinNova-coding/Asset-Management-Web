@@ -7,20 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { fetchRoles } from "@/lib/axios";
-
-// Helper to fetch all permissions from your API
-const fetchAllPermissions = async () => {
-  const token = localStorage.getItem("token");
-  const response = await fetch("http://192.168.100.185:1011/api/permission", {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Accept': 'application/json',
-    },
-  });
-  if (!response.ok) throw new Error("Failed to fetch permissions");
-  const json = await response.json();
-  return json.data; // Accessing the 'data' key from your API response
-};
+import { apiRequest } from "@/lib/apiService"; // apiRequest ကို import လုပ်ပါ
 
 export default function EditRolePage() {
   const { id } = useParams<{ id: string }>();
@@ -37,18 +24,19 @@ export default function EditRolePage() {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Fetch both roles and the master permission list in parallel
-        const [rolesData, permsData] = await Promise.all([
+        // apiRequest ကိုသုံးပြီး permission များရယူခြင်း
+        const [rolesData, permsResponse] = await Promise.all([
           fetchRoles(),
-          fetchAllPermissions()
+          apiRequest("/permission", "GET")
         ]);
 
         const allRoles = Array.isArray(rolesData) ? rolesData : (rolesData.data || []);
+        const permsData = permsResponse.data || permsResponse;
+
         const foundRole = allRoles.find((r: any) => (r.role_id || r.id).toString() === id);
         
         if (foundRole) {
           setRole(foundRole);
-          // Set currently assigned permissions
           setSelectedPermissions(foundRole.permissions.map((p: any) => p.name));
         }
         
@@ -65,31 +53,24 @@ export default function EditRolePage() {
   const handleUpdate = async () => {
     setIsSaving(true);
     try {
-      const response = await fetch(`http://192.168.100.185:1011/api/role/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem("token")}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          role_id: id,
-          name: role.name,
-          permissions: selectedPermissions // Sends the array of names
-        })
+      // apiRequest ကိုသုံးပြီး PATCH request ပို့ခြင်း
+      await apiRequest(`/role/${id}`, "PATCH", {
+        role_id: id,
+        name: role.name,
+        permissions: selectedPermissions 
       });
 
-      if (!response.ok) throw new Error("Failed to update");
       alert("Role updated successfully!");
       navigate("/roles");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Update failed.");
+      alert(error.message || "Update failed.");
     } finally {
       setIsSaving(false);
     }
   };
 
+  // ... (togglePermission နှင့် return JSX အပိုင်းများကိုမူလအတိုင်းထားပါ)
   const togglePermission = (permName: string) => {
     setSelectedPermissions(prev => 
       prev.includes(permName) 
