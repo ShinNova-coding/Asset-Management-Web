@@ -10,50 +10,29 @@ import {
 interface StatCardProps {
   label: string;
   value: string | number;
-  percentage?: string;
   Icon?: React.ElementType;
-  color: string;
+  gradient: string;
 }
 
-const StatCard: React.FC<StatCardProps> = ({
-  label,
-  value,
-  percentage,
-  Icon,
-  color,
-}) => {
+const StatCard: React.FC<StatCardProps> = ({ label, value, Icon, gradient }) => {
   return (
-    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-400 flex flex-col justify-between min-h-[110px] w-full">
-      <div>
-        <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-1">
-          {label}
-        </p>
-
-        <div className="flex items-center gap-2">
-          <span className={`text-2xl font-bold ${color}`}>
-            {value}
-          </span>
-
-          {percentage && (
-            <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
-              {percentage}
-            </span>
-          )}
+    <div className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-lg transition-transform hover:-translate-y-1 ${gradient}`}>
+      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/20 blur-2xl" />
+      
+      <div className="relative z-10">
+        <div className="mb-4 flex justify-between items-start">
+          <div className="rounded-lg bg-white/20 p-2 backdrop-blur-sm">
+            {Icon && <Icon className="h-6 w-6 text-white" />}
+          </div>
+          <span className="text-xs font-bold opacity-80 uppercase tracking-widest">{label}</span>
         </div>
+        <h3 className="text-xl font-bold">{value}</h3>
       </div>
-
-      {Icon && (
-        <div className="self-end mt-auto">
-          <Icon className={`w-5 h-5 ${color}`} />
-        </div>
-      )}
     </div>
   );
 };
 
-
 const DashboardStats: React.FC<{ data?: any }> = ({ data }) => {
- 
   const assetData = data?.asset || {
     total_assets: 0,
     available_assets: 0,
@@ -63,49 +42,23 @@ const DashboardStats: React.FC<{ data?: any }> = ({ data }) => {
   };
 
   const stats = [
-    {
-      label: "Total Assets",
-      value: assetData.total_assets,
-      color: "text-blue-500",
-      Icon: CubeIcon,
-    },
-    {
-      label: "Available",
-      value: assetData.available_assets,
-      color: "text-green-500",
-      Icon: CheckCircleIcon,
-    },
-    {
-      label: "Assigned",
-      value: assetData.assigned_assets,
-      color: "text-black",
-      Icon: UserIcon,
-    },
-    {
-      label: "In Repair",
-      value: assetData.maintenance_assets,
-      color: "text-red-500",
-      Icon: WrenchIcon,
-    },
-    {
-      label: "Retired",
-      value: assetData.retired_assets,
-      color: "text-yellow-500",
-      Icon: TrashIcon,
-    },
+    { label: "Total", value: assetData.total_assets, gradient: "bg-gradient-to-br from-blue-500 to-blue-700", Icon: CubeIcon },
+    { label: "Available", value: assetData.available_assets, gradient: "bg-gradient-to-br from-emerald-500 to-emerald-700", Icon: CheckCircleIcon },
+    { label: "Assigned", value: assetData.assigned_assets, gradient: "bg-gradient-to-br from-violet-500 to-violet-700", Icon: UserIcon },
+    { label: "Repair", value: assetData.maintenance_assets, gradient: "bg-gradient-to-br from-rose-500 to-rose-700", Icon: WrenchIcon },
+    { label: "Retired", value: assetData.retired_assets, gradient: "bg-gradient-to-br from-amber-500 to-amber-700", Icon: TrashIcon },
   ];
 
   return (
-    <div className="w-full py-6 bg-[#F3F0F7]">
-       <h2 className="text-base font-bold text-blue-800">Assets</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 w-full">
+    <div className="w-full py-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map((stat, index) => (
           <StatCard
             key={index}
             label={stat.label}
             value={stat.value}
             Icon={stat.Icon}
-            color={stat.color}
+            gradient={stat.gradient}
           />
         ))}
       </div>

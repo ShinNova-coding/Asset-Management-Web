@@ -3,7 +3,7 @@
 import * as React from "react"
 import { FiDollarSign, FiCalendar, FiFileText, FiUpload, FiX, FiCheckCircle, FiArrowLeft, FiTag, FiHash, FiGrid, FiImage } from "react-icons/fi"
 import { useNavigate, Link } from "react-router-dom"
-import { apiFetch } from "@/lib/api"
+import { createExpense } from "@/lib/apiService"
 
 interface CreateExpenseFormProps {
   onSuccess?: () => void
@@ -13,7 +13,6 @@ interface CreateExpenseFormProps {
 export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProps) {
   const navigate = useNavigate()
 
-  
   const [cost, setCost] = React.useState<number>(0)
   const [expenseDate, setExpenseDate] = React.useState<string>("")
   const [title, setTitle] = React.useState<string>("")
@@ -21,10 +20,8 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
   const [voucherBase64, setVoucherBase64] = React.useState<string>("")
   const [fileName, setFileName] = React.useState<string>("")
   
-  
   const [voucherPreview, setVoucherPreview] = React.useState<string>("")
   const [assetImagePreview, setAssetImagePreview] = React.useState<string>("")
-  
   
   const [assetCode, setAssetCode] = React.useState<string>("")
   const [assetName, setAssetName] = React.useState<string>("")
@@ -39,7 +36,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
   
   const [employeeName, setEmployeeName] = React.useState<string>("Unknown Employee")
 
-  
   React.useEffect(() => {
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
@@ -54,13 +50,11 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
     }
   }, [])
 
-  
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "voucher" | "asset_image") => {
     const file = e.target.files?.[0]
     if (!file) return
 
     const localPreviewUrl = URL.createObjectURL(file)
-
     const reader = new FileReader()
     reader.onloadend = () => {
       const result = reader.result as string
@@ -100,7 +94,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
     }
   }, [voucherPreview, assetImagePreview])
 
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -121,14 +114,18 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
       return
     }
 
-    if (cost <= 0 || !expenseDate || !title.trim()) {
-      alert("Please fill all required fields correctly.")
+    // Common required fields validation - Description is ALWAYS required
+    if (cost <= 0 || !expenseDate || !title.trim() || !description.trim()) {
+      alert("Please fill all required fields correctly (Cost, Date, Title, and Description are required).")
       return
     }
 
-    if (expenseType === "asset_purchase" && (!assetName.trim() || !assetCode.trim() || !serialNumber.trim())) {
-      alert("Asset Name, Asset Code, and Serial Number are all required.")
-      return
+    // Asset purchase specific validation
+    if (expenseType === "asset_purchase") {
+      if (!assetName.trim() || !assetCode.trim() || !serialNumber.trim()) {
+        alert("Asset Name, Asset Code, and Serial Number are all required for asset purchases.")
+        return
+      }
     }
 
     setLoading(true)
@@ -143,27 +140,17 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
       expense_type: expenseType,
       status: "approved",
       voucher: voucherBase64 || null,
-    }
-
-    if (expenseType === "asset_purchase") {
-      payload.asset_code = assetCode.trim()
-      payload.name = assetName.trim()
-      payload.category = category
-      payload.serial_number = serialNumber.trim()
-      payload.description = description.trim() === "" ? null : description.trim()
-      payload.image = assetImageBase64 === "" ? null : assetImageBase64
+      description: description.trim(),
+      // Always include asset fields - send empty strings/null for non-asset types
+      asset_code: expenseType === "asset_purchase" ? (assetCode?.trim() || "") : "",
+      name: expenseType === "asset_purchase" ? (assetName?.trim() || "") : "",
+      category: expenseType === "asset_purchase" ? (category || "") : "",
+      serial_number: expenseType === "asset_purchase" ? (serialNumber?.trim() || "") : "",
+      image: expenseType === "asset_purchase" && assetImageBase64?.trim() ? assetImageBase64 : null,
     }
 
     try {
-      await apiFetch("/expense", { 
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "*/*",
-          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
-        },
-        body: JSON.stringify(payload),
-      })
+      await createExpense(payload)
 
       setToastMessage("Expense created successfully!")
       
@@ -173,11 +160,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
       }, 1500)
     } catch (err: any) {
       console.error("Create Expense Error:", err)
-      if (err?.message?.includes("Duplicate entry") || err?.message?.includes("23000")) {
-        alert(`The Asset Code "${assetCode}" is already taken. Please enter a different code.`)
-      } else {
-        alert(err?.message || "Failed to create expense record.")
-      }
+      alert(err?.message || "Failed to create expense record. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -196,8 +179,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
 
   return (
     <div className="w-full max-w-3xl mx-auto my-6">
-      
-      
       <div className="mb-4">
         <Link 
           to="/expense" 
@@ -208,10 +189,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
         </Link>
       </div>
 
-      
       <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden p-8 relative">
-        
-        
         <div className="border-b border-slate-100 pb-5 mb-6">
           <h2 className="text-2xl font-bold text-blue-800 tracking-tight">Create New Expense</h2>
           <p className="text-xs text-slate-400 mt-1.5">
@@ -219,10 +197,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
           </p>
         </div>
 
-        
         <form onSubmit={handleSubmit} className="space-y-6">
-          
-          
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Expense Title *</label>
             <div className="relative">
@@ -239,7 +214,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            {/* Cost Field */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Cost (Amount) *</label>
               <div className="relative">
@@ -256,7 +230,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
               </div>
             </div>
 
-            
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Expense Date *</label>
               <div className="relative">
@@ -272,7 +245,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
             </div>
           </div>
 
-          
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Expense Type</label>
             <select
@@ -288,7 +260,17 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
             </select>
           </div>
 
-          
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Description *</label>
+            <textarea
+              placeholder="Provide a detailed description of this expense..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 resize-none"
+            />
+          </div>
+
           {expenseType === "asset_purchase" && (
             <div className="p-6 rounded-2xl border border-blue-100 bg-blue-50/20 space-y-5 animate-fade-in">
               <h3 className="text-xs font-bold text-blue-700 uppercase tracking-widest border-b border-blue-100 pb-3">
@@ -296,7 +278,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
               </h3>
               
               <div className="grid gap-5 sm:grid-cols-2">
-                {/* Asset Name */}
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-slate-700">Asset Name *</label>
                   <div className="relative">
@@ -312,7 +293,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                   </div>
                 </div>
 
-                
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-slate-700">Asset Code *</label>
                   <div className="relative">
@@ -330,7 +310,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
-                
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-slate-700">Serial Number *</label>
                   <div className="relative">
@@ -346,7 +325,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                   </div>
                 </div>
 
-              
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-slate-700">Asset Category</label>
                   <div className="relative">
@@ -365,19 +343,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                 </div>
               </div>
 
-              
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-slate-700">Description</label>
-                <textarea
-                  placeholder="New laptop for the design department..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 resize-none"
-                />
-              </div>
-
-              
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-semibold text-slate-700">Asset Image</label>
                 {!assetImageName ? (
@@ -414,7 +379,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
             </div>
           )}
 
-        
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Voucher / Receipt Attachment</label>
             {!fileName ? (
@@ -450,7 +414,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
             )}
           </div>
 
-          
           <div className="flex gap-3 justify-end pt-4 border-t border-slate-100">
             <button
               type="button"
@@ -468,10 +431,8 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
             </button>
           </div>
         </form>
-
       </div>
 
-      
       {toastMessage && (
         <div className="absolute bottom-5 right-5 z-50 flex items-center gap-2 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl animate-fade-in">
           <FiCheckCircle className="text-emerald-400" size={18} />

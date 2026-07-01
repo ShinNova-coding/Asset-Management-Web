@@ -29,3 +29,112 @@ export const apiRequest = async (
   return result;
   
 };
+
+// Expense API functions
+export interface ExpensePayload {
+  users_id: string;
+  maintenances_id: null | string;
+  assets_id: null | string;
+  cost: number;
+  expense_date: string;
+  title: string;
+  expense_type: "claim" | "asset_purchase" | string;
+  status: "approved" | "pending" | "rejected" | string;
+  voucher: string | null;
+  description: string;
+  asset_code: string;
+  name: string;
+  category: string;
+  serial_number: string;
+  image: string | null;
+}
+
+export const createExpense = async (payload: ExpensePayload) => {
+  return apiRequest("/expense", "POST", payload);
+};
+
+export const fetchExpenses = async () => {
+  return apiRequest("/expense", "GET");
+};
+
+export const getExpenseById = async (id: string) => {
+  return apiRequest(`/expense/${id}`, "GET");
+};
+
+export const updateExpense = async (id: string, payload: Partial<ExpensePayload>) => {
+  return apiRequest(`/expense/${id}`, "PUT", payload);
+};
+
+export const deleteExpense = async (id: string) => {
+  return apiRequest("/expense/expense_id", "DELETE", { expense_id: id });
+};
+
+export const updateExpenseStatus = async (expenseId: string, status: "approved" | "canceled" | string, remark?: string) => {
+  const payload: any = {
+    expense_id: expenseId,
+    status: status,
+  };
+  
+  if (remark) {
+    payload.remark = remark;
+  }
+  
+  return apiRequest("/expense/status", "POST", payload);
+};
+
+// User API functions
+export interface UserUpdatePayload {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+  joined_date: string | null;
+  status: string;
+  image?: string | null;
+  password?: string;
+  password_confirmation?: string;
+  employee_id?: string;
+  position?: string;
+  phone_number?: string;
+  left_date?: string | null;
+}
+
+export const updateUserProfile = async (payload: UserUpdatePayload) => {
+  // Build update payload for /user/id endpoint
+  const updatePayload: any = {
+    id: payload.id,
+    name: payload.name,
+    role: payload.role,
+    email: payload.email,
+    joined_date: payload.joined_date,
+    status: payload.status,
+  };
+
+  // Always include image
+  updatePayload.image = payload.image || null;
+
+  // Only include password if being changed
+  if (payload.password) {
+    updatePayload.password = payload.password;
+    updatePayload.password_confirmation = payload.password_confirmation;
+  }
+
+  // Include additional fields if they exist
+  if (payload.employee_id !== undefined && payload.employee_id !== '') {
+    updatePayload.employee_id = payload.employee_id;
+  }
+
+  if (payload.position !== undefined && payload.position !== '') {
+    updatePayload.position = payload.position;
+  }
+
+  if (payload.phone_number !== undefined && payload.phone_number !== '') {
+    updatePayload.phone_number = payload.phone_number;
+  }
+
+  if (payload.left_date !== undefined) {
+    updatePayload.left_date = payload.left_date;
+  }
+
+  return apiRequest("/user/id", "PATCH", updatePayload);
+};
