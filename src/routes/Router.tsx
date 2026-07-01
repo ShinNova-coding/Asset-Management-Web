@@ -22,11 +22,11 @@ import MaintenanceDetailsForm from "@/components/features/Maintenance/Maintenanc
 import AssignmentDetailPage from "@/components/features/Assignment/AssignmentDetailPage"
 import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
 import EditRolePage from "@/pages/Roles/EditRolePage"
-
+import CategoriesPage from "@/pages/Categories/CategoriesPage"
 import ExpensePage from "@/pages/Expense/ExpensePage" 
 import ExpenseTable from "@/pages/Expense/ExpenseTable" 
 import { CreateExpenseForm } from "@/pages/Expense/CreateExpenseForm"
-
+import AddNewCategories from "@/pages/Categories/AddNewCategories"
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -42,6 +42,14 @@ export const router = createBrowserRouter([
           {
             path: "dashboard",
             element: <DashboardPage />,
+          },
+          {
+            path:"categories",
+            element:<CategoriesPage/>
+          },
+          {
+            path:"categories/add",
+          element:<AddNewCategories/>,
           },
           
           {

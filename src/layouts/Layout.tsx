@@ -21,6 +21,7 @@ import {
   UserCog,
   ReceiptText,
   ChevronDown,
+  Tag,
 } from "lucide-react";
 
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
@@ -30,6 +31,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard", permission: "view-dashboard" },
+  {title:"Categories",icon:Tag,path:"/categories",permission:"view-categories"},
   { title: "Inventory", icon: Boxes, path: "/inventory", permission: "view-assets" },
   { title: "Assignment", icon: FileEdit, path: "/assignment", permission: "view-assignments" },
   { title: "Maintenance", icon: Wrench, path: "/maintenance", permission: "view-maintenances" },
@@ -46,16 +48,25 @@ export default function Layout() {
   
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
- 
+
+  useEffect(() => {
+    if (
+      location.pathname.startsWith("/usermanagement") ||
+      location.pathname.startsWith("/roles")
+    ) {
+      setIsUserMenuOpen(true);
+    }
+  }, [location.pathname]);
+
+  
   if (!permissions || !Array.isArray(permissions)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F0F4F8] text-[#1E3A8A] font-medium">
-        Loading...
+        Loading Auth Data...
       </div>
     );
   }
 
-  
 
   const permissionNames = permissions.map((p: any) => {
     return typeof p === "string" ? p : p.name;
@@ -76,10 +87,10 @@ export default function Layout() {
   return (
     <SidebarProvider style={{ "--sidebar-width": "240px" } as React.CSSProperties}>
       <div className="flex min-h-screen w-full bg-[#F0F4F8]">
-       
+        {/* Sidebar Section */}
         <Sidebar className="border-r border-blue-100 bg-[#1E3A8A]">
           <SidebarContent className="bg-[#1E3A8A] px-4 py-8">
-           
+            {/* Logo and Title */}
             <div className="flex items-center gap-3 px-2 mb-8">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-900/20">
                 <BsFillBoxFill className="text-white h-6 w-6" />
@@ -87,7 +98,7 @@ export default function Layout() {
               <h1 className="text-xl font-bold tracking-tight text-white">ITAMS</h1>
             </div>
 
-            
+            {/* Navigation Menu */}
             <SidebarMenu className="space-y-1">
               {/* Regular Filtered Menu Items */}
               {filteredMenuItems.map((item) => {
@@ -182,7 +193,7 @@ export default function Layout() {
           </SidebarContent>
         </Sidebar>
 
-       
+        {/* Main Content Area */}
         <div className="flex flex-1 flex-col">
           <div className="w-full bg-white/80 backdrop-blur-sm border-b border-blue-100 z-20">
             <Navigation />
