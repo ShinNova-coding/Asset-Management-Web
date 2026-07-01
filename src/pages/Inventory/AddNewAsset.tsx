@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from "react-router-dom"; 
 import { ArrowLeft, Package, Settings, ImageIcon, Upload, X, Cpu } from 'lucide-react';
-
+import { apiRequest } from '@/lib/apiService';
 const AddNewAsset = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -111,34 +111,23 @@ const AddNewAsset = () => {
       setFormData(prev => ({ ...prev, assetId: String(targetId) }));
     }
   }, [stateId, stateEditItem, routeId, isEditMode]);
-
-  useEffect(() => {
+useEffect(() => {
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://192.168.100.185:1011/api/category", {
-        headers: { 
-          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`,
-          "Accept": "application/json" 
-        }
-      });
+     
+      const res = await apiRequest("/category", "GET");
       
-      const res = await response.json();
       console.log("DEBUG - API Response:", res); 
 
-      if (response.ok) {
-        
-        const categoryArray = res.data || res; 
-        
-        if (Array.isArray(categoryArray)) {
-          setCategories(categoryArray);
-        } else {
-          console.error("DEBUG - Data is not an array:", categoryArray);
-        }
+      const categoryArray = res.data || res; 
+      
+      if (Array.isArray(categoryArray)) {
+        setCategories(categoryArray);
       } else {
-        console.error("DEBUG - Server error:", res);
+        console.error("DEBUG - Data is not an array:", categoryArray);
       }
-    } catch (err) {
-      console.error("DEBUG - Fetch failed:", err);
+    } catch (err: any) {
+      console.error("DEBUG - Fetch failed:", err.message);
     }
   };
 
@@ -272,38 +261,23 @@ const AddNewAsset = () => {
         assetPayload.image = finalizedImageString;
       }
 
-      const API_URL = "http://192.168.100.185:1011/api/asset"; 
-      const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
-      const method = isEditMode ? "PATCH" : "POST";
-      const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
+     let response;
+  if (isEditMode) {
+    // PATCH request အတွက်
+    response = await apiRequest(`/asset/${targetId}`, "PATCH", assetPayload);
+  } else {
+    // POST request အတွက်
+    response = await apiRequest("/asset", "POST", assetPayload);
+  }
 
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": `Bearer ${currentToken}`
-        },
-        body: JSON.stringify(assetPayload),
-      });
+  alert(isEditMode ? "Asset entry altered successfully!" : "New asset entry saved!");
+  localStorage.removeItem("inventory_data");
+  navigate("/inventory");
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (errorData.errors) {
-          const validationErrors = Object.values(errorData.errors).flat().join("\n");
-          throw new Error(validationErrors);
-        }
-        throw new Error(errorData.message || `Server responded with status ${response.status}`);
-      }
-
-      alert(isEditMode ? "Asset entry altered successfully!" : "New asset entry saved!");
-      localStorage.removeItem("inventory_data");
-      navigate("/inventory");
-
-    } catch (err: any) {
-      console.error("Transmission Error details:", err);
-      alert(`Could not save item to backend server:\n${err.message}`);
-    }
+} catch (err: any) {
+  console.error("Transmission Error details:", err);
+  alert(`Could not save item to backend server:\n${err.message}`);
+}
   };
 
   return (
@@ -459,12 +433,6 @@ const AddNewAsset = () => {
 </div>
                 </div>
               </section>
-
-             
-             
-
-             
-              
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                 <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
                 <button type="submit" className="px-5 py-2 rounded-md bg-blue-800 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
@@ -526,10 +494,6 @@ const AddNewAsset = () => {
               )}
             </div>
           </div>
-
-       
-
-         
         </div>
       </div>
     </div>

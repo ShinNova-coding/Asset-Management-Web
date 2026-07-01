@@ -6,8 +6,8 @@ import {
   User,
   ChevronDown,
   Camera,
-  Eye,     // ✅ Eye icon အသစ်ထည့်ထားပါတယ်
-  EyeOff,  // ✅ EyeOff icon အသစ်ထည့်ထားပါတယ်
+  Eye,     
+  EyeOff,  
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../lib/api';

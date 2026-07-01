@@ -105,6 +105,7 @@ export const router = createBrowserRouter([
             path: "add-employee",
             element: <AddEmployeeForm />,
           },
+          
           {
             path: "employee/:id",
             element: <EmployeeDetailsPage />,

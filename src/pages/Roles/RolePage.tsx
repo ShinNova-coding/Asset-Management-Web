@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { fetchRoles, deleteRole } from "@/lib/axios"; 
-
+import { apiRequest } from "@/lib/apiService";
 export default function RolesPage() {
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,31 +56,27 @@ export default function RolesPage() {
   };
 
   const updateRolePermissions = async (roleId: number, name: string, permissionNames: string[]) => {
-    try {
-      setIsUpdating(true);
-      
-      const response = await fetch(`http://192.168.100.185:1011/api/role/${roleId}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem("token")}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role_id: roleId, name, permissions: permissionNames })
-      });
-      
-      if (!response.ok) throw new Error("Update failed");
-      
-      
-      const data = await fetchRoles();
-      setRoles(Array.isArray(data) ? data : (data.data || []));
-    } catch (error) {
-      console.error("Update error:", error);
-      alert("Failed to update role.");
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  try {
+    setIsUpdating(true);
+    
+   
+    await apiRequest(`/role/${roleId}`, "PATCH", { 
+      role_id: roleId, 
+      name, 
+      permissions: permissionNames 
+    });
+    
+   
+    const data = await fetchRoles();
+    setRoles(Array.isArray(data) ? data : (data.data || []));
+    alert("Role updated successfully!");
+  } catch (error: any) {
+    console.error("Update error:", error);
+    alert(error.message || "Failed to update role.");
+  } finally {
+    setIsUpdating(false);
+  }
+};
   const groupPermissions = (permissions: any[]) => {
     if (!permissions) return {};
     const groups: Record<string, any[]> = {};

@@ -168,7 +168,7 @@ const AddNewAsset = () => {
         status: formData.status || 'active'
       };
 
-      console.log("🚀 Sending Payload to Assignment API:", assignmentPayload);
+      console.log(" Sending Payload to Assignment API:", assignmentPayload);
 
       const API_URL = "http://192.168.100.185:1011/api/assignment"; 
       
@@ -291,22 +291,27 @@ const AddNewAsset = () => {
                     <ChevronDown size={16} className={`text-slate-500 transition-transform ${isAssetOpen ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {isAssetOpen && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                      {assetsList.map((asset: any, index: number) => (
-                        <div
-                          key={asset.id}
-                          onClick={() => handleAssetSelect(asset)}
-                          className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-slate-50 last:border-b-0"
-                        >
-                          <span>{String(index + 1).padStart(2, '0')} {asset.name}</span>
-                        </div>
-                      ))}
-                      {assetsList.length === 0 && (
-                        <div className="px-3 py-4 text-center text-sm text-slate-400">No assets found</div>
-                      )}
-                    </div>
-                  )}
+                 {isAssetOpen && (
+  <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+  
+    {assetsList
+      .filter((asset: any) => asset.status === "available") 
+      .map((asset: any, index: number) => (
+        <div
+          key={asset.id}
+          onClick={() => handleAssetSelect(asset)}
+          className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-slate-50 last:border-b-0"
+        >
+          <span>{String(index + 1).padStart(2, '0')} {asset.name}</span>
+        </div>
+      ))}
+      
+   
+    {assetsList.filter((asset: any) => asset.status === "available").length === 0 && (
+      <div className="px-3 py-4 text-center text-sm text-slate-400">No available assets found</div>
+    )}
+  </div>
+)}
                 </div>
               </div>
             </div>
