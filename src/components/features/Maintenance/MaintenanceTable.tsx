@@ -448,7 +448,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
       </div>
 
       {/* ── PAGINATION ── */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+      <div className="flex items-center justify-between px-2 py-1 bg-white border border-slate-200 rounded-xl shadow-sm">
         {/* Left Status Text */}
         <div className="text-sm text-slate-500 font-medium">
           Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({table.getFilteredRowModel().rows.length} total maintenance)
@@ -460,7 +460,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
           <button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-400 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <FiChevronLeft size={16} />
           </button>
@@ -527,8 +527,8 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
                   onClick={() => table.setPageIndex((page as number) - 1)}
                   className={`w-8 h-8 text-sm font-semibold rounded-lg border transition-all flex items-center justify-center ${
                     isPageActive
-                      ? "bg-[#0a46b4] border-[#0a46b4] text-white shadow-sm"
-                      : "bg-[#e9edf5] border-transparent text-slate-700 hover:bg-slate-200"
+                      ? "bg-blue-800 border-[#0a46b4] text-white shadow-sm"
+                      : "bg-slate-300 border-slate-500 text-slate-700 hover:bg-slate-300"
                   }`}
                 >
                   {page}
@@ -541,7 +541,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
           <button
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-500 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <FiChevronRight size={16} />
           </button>

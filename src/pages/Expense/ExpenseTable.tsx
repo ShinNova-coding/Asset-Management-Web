@@ -1,11 +1,9 @@
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Loader2, X, Save, Search, ChevronDown } from 'lucide-react';
-import { FaEdit } from "react-icons/fa";
-import { RiDeleteBin4Fill } from "react-icons/ri";
-import { FiChevronUp, FiChevronDown } from "react-icons/fi"; 
-import { apiFetch } from "@/lib/api";
+import { Loader2, ChevronDown, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi"; 
+import { fetchExpenses as fetchExpensesAPI, updateExpenseStatus, deleteExpense } from "@/lib/apiService";
 
 import { ExpenseDetailModal } from './ExpenseDetailModal';
 import type { ExpenseDetailData } from './ExpenseDetailModal';
@@ -36,10 +34,7 @@ export const ExpenseTable: React.FC = () => {
 
   const [selectedExpense, setSelectedExpense] = useState<ExpenseDetailData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-  const [editingExpense, setEditingExpense] = useState<Partial<ExpenseWithUser> | null>(null);
-  const [editSubmitting, setEditSubmitting] = useState<boolean>(false);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   const fetchExpenses = async () => {
     setLoading(true);
@@ -48,13 +43,7 @@ export const ExpenseTable: React.FC = () => {
       const storedUser = localStorage.getItem("user_name") || localStorage.getItem("user");
       if (storedUser) setCurrentUserName(storedUser);
 
-      const response = await apiFetch("/expense", {
-        method: "GET",
-        headers: {
-          "Accept": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
-        }
-      });
+      const response = await fetchExpensesAPI();
 
       if (response && response.success) {
         setExpenses(response.data);
@@ -78,84 +67,48 @@ export const ExpenseTable: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleEditClick = (expense: ExpenseWithUser) => {
-    setEditingExpense({
-      expense_id: expense.id || (expense as any).expense_id, 
-      id: expense.id || (expense as any).expense_id,
-      title: expense.title,
-      cost: expense.cost,
-      expense_date: expense.expense_date,
-      expense_type: expense.expense_type,
-      status: expense.status,
-      users_id: expense.users_id,
-      voucher: (expense as any).voucher || ""
-    });
-    setIsEditModalOpen(true);
-  };
+  const handleUpdateStatus = async (expense: ExpenseWithUser, newStatus: 'approved' | 'canceled') => {
+    const targetId = expense.id || (expense as any).expense_id;
+    if (!targetId) return;
 
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingExpense || !editingExpense.id) return;
+    if (!window.confirm(`Are you sure you want to change this expense status to ${newStatus}?`)) return;
 
-    setEditSubmitting(true);
+    let remark = "";
+    if (newStatus === 'approved') {
+      const userRemark = window.prompt("Enter a remark for approval (Optional):", "");
+      if (userRemark === null) return; 
+      remark = userRemark;
+    }
+
+    setActionLoadingId(targetId);
     try {
-      const payload = {
-        expense_id: editingExpense.id,
-        users_id: editingExpense.users_id,
-        cost: Number(editingExpense.cost),
-        expense_date: editingExpense.expense_date,
-        title: editingExpense.title,
-        expense_type: editingExpense.expense_type,
-        status: editingExpense.status,
-        voucher: editingExpense.voucher || "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
-      };
-
-      await apiFetch(`/expense/${editingExpense.id}`, {
-        method: "PUT", 
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      alert("Expense updated successfully!");
-      setIsEditModalOpen(false);
-      setEditingExpense(null);
-      fetchExpenses();
+      await updateExpenseStatus(targetId, newStatus, remark);
+      alert(`Expense status updated to ${newStatus} successfully!`);
+      fetchExpenses(); 
     } catch (err: any) {
-      console.error("Update Error:", err);
-      alert(err?.message || "Failed to update expense record.");
+      console.error("Status Update Error:", err);
+      alert(err?.message || `Failed to update status to ${newStatus}.`);
     } finally {
-      setEditSubmitting(false);
+      setActionLoadingId(null);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!id || id === "undefined") {
-      alert("Error: Expense ID is missing or undefined.");
-      return;
-    }
+  const handleDeleteExpense = async (expense: ExpenseWithUser) => {
+    const targetId = expense.id || (expense as any).expense_id;
+    if (!targetId) return;
 
-    if (!window.confirm("Are you sure you want to delete this expense record?")) return;
+    if (!window.confirm("Are you sure you want to permanently delete this expense record?")) return;
 
+    setActionLoadingId(targetId);
     try {
-      await apiFetch(`/expense/expense_id`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
-        },
-        body: JSON.stringify({ expense_id: id })
-      });
-      
+      await deleteExpense(targetId);
       alert("Expense deleted successfully!");
       fetchExpenses();
     } catch (err: any) {
-      console.error("Delete Error:", err);
-      alert(err?.message || "Failed to delete expense record.");
+      console.error("Delete Expense Error:", err);
+      alert(err?.message || "Failed to delete the expense record.");
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
@@ -253,7 +206,7 @@ export const ExpenseTable: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
           
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hidden" size={18} />
             <input
               type="text"
               placeholder="Search by name, date, title..."
@@ -295,7 +248,7 @@ export const ExpenseTable: React.FC = () => {
                       <FiChevronDown size={12} className={sortColumn === 'employee' && sortDirection === 'desc' ? "text-white" : "text-white/40"} />
                     </div>
                   </div>
-                </th >
+                </th>
 
                 <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('title')}>
                   <div className="flex items-center gap-1.5">
@@ -330,7 +283,7 @@ export const ExpenseTable: React.FC = () => {
                 </th>
 
                 <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 w-24 text-center">Actions</th>
+                <th className="py-3 px-4 w-28 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-[13px] text-slate-600">
@@ -351,217 +304,181 @@ export const ExpenseTable: React.FC = () => {
                 </tr>
               )}
 
-              {!loading && !error && currentItems.map((expense, index) => (
-                <tr 
-                  key={expense.id || index} 
-                  onClick={() => handleRowClick(expense)} 
-                  className="hover:bg-slate-50/80 cursor-pointer transition-colors"
-                >
-                  <td className="py-3.5 px-4 font-normal text-slate-400">
-                    {indexOfFirstItem + index + 1}
-                  </td>
-                  <td className="py-3.5 px-4 font-medium text-slate-700">
-                    {expense.user?.name || currentUserName || "Unknown Employee"}
-                  </td>
-                  <td className="py-3.5 px-4 font-medium text-slate-700">
-                    {expense.title}
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-500">
-                    {expense.expense_date}
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    <span className="text-slate-600 capitalize">
-                      {expense.expense_type}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 font-normal text-slate-700">
-                    {Number(expense.cost).toLocaleString()}
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    <span className={getStatusStyles(expense.status)}>
-                      {expense.status === 'approved' ? 'Approved' : expense.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                      <button 
-                        type="button"
-                        onClick={() => handleEditClick(expense)} 
-                        className="text-[#3b82f6] hover:text-blue-700 active:scale-95 transition-all p-2"
-                        title="Edit Expense"
-                      >
-                        <FaEdit size={18} />
-                      </button>
+              {!loading && !error && currentItems.map((expense, index) => {
+                const currentId = expense.id || (expense as any).expense_id;
+                const isActionLoading = actionLoadingId === currentId;
 
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          const deleteId = expense.id || (expense as any).expense_id;
-                          handleDelete(deleteId);
-                        }} 
-                        className="text-red-500 hover:text-red-600 active:scale-95 transition-all p-2"
-                        title="Delete Expense"
-                      >
-                        <RiDeleteBin4Fill size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                return (
+                  <tr 
+                    key={currentId || index} 
+                    onClick={() => handleRowClick(expense)}
+                    className="hover:bg-slate-50/80 cursor-pointer transition-colors"
+                  >
+                    <td className="py-3.5 px-4 font-normal text-slate-400">
+                      {indexOfFirstItem + index + 1}
+                    </td>
+                    <td className="py-3.5 px-4 font-medium text-slate-700">
+                      {expense.user?.name || currentUserName || "Unknown Employee"}
+                    </td>
+                    <td className="py-3.5 px-4 font-medium text-slate-700">
+                      {expense.title}
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500">
+                      {expense.expense_date}
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <span className="text-slate-600 capitalize">
+                        {expense.expense_type}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 font-normal text-slate-700">
+                      {Number(expense.cost).toLocaleString()}
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <span className={getStatusStyles(expense.status)}>
+                        {expense.status === 'approved' ? 'Approved' : expense.status}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <div className="flex items-center justify-center gap-1" onClick={(e) => e.stopPropagation()}>
+                        
+                        {isActionLoading ? (
+                          <Loader2 className="animate-spin text-slate-400 mx-2" size={16} />
+                        ) : (
+                          <>
+                            {expense.status?.toLowerCase() !== 'approved' && 
+                             expense.status?.toLowerCase() !== 'canceled' && 
+                             expense.status?.toLowerCase() !== 'cancelled' && (
+                              <>
+                                {/* APPROVE BUTTON */}
+                                <button 
+                                  type="button"
+                                  onClick={() => handleUpdateStatus(expense, 'approved')} 
+                                  className="text-emerald-500 hover:text-emerald-700 active:scale-95 transition-all p-1.5 hover:bg-emerald-50 rounded-md"
+                                  title="Approve Expense"
+                                >
+                                  <CheckCircle size={16} />
+                                </button>
+
+                                {/* CANCEL BUTTON */}
+                                <button 
+                                  type="button"
+                                  onClick={() => handleUpdateStatus(expense, 'canceled')} 
+                                  className="text-red-500 hover:text-red-700 active:scale-95 transition-all p-1.5 hover:bg-red-50 rounded-md"
+                                  title="Cancel Expense"
+                                >
+                                  <XCircle size={16} />
+                                </button>
+                              </>
+                            )}
+
+                            {/* DELETE BUTTON */}
+                            <button 
+                              type="button"
+                              onClick={() => handleDeleteExpense(expense)} 
+                              className="text-slate-400 hover:text-red-600 active:scale-95 transition-all p-1.5 hover:bg-rose-50 rounded-md"
+                              title="Delete permanently"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        )}
+                        
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ── 🔢 FIXED PAGINATION DESIGN ─────────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-xs mt-3 select-none">
-        <div className="text-xs text-slate-500 font-medium">
-          Page {currentPage} of {totalPages} ({totalItems} total records)
+      {/* ── 🔢 FIXED PAGINATION DESIGN ── */}
+      <div className="flex items-center justify-between px-2 py-1 bg-white border border-slate-200 rounded-xl shadow-sm">
+        <div className="text-sm text-slate-500 font-medium">
+          Page {currentPage} of {totalPages} ({totalItems} total expenses)
         </div>
 
-        <div className="flex items-center space-x-1.5">
+        <div className="flex items-center gap-1">
           <button
-            type="button"
-            disabled={currentPage === 1 || loading}
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            className="w-8 h-8 inline-flex items-center justify-center rounded-md border border-slate-300 bg-white text-slate-500 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+            disabled={currentPage === 1}
+            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-400 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            <ChevronLeft size={16} />
+            <FiChevronLeft size={16} />
           </button>
-          
-          {[...Array(totalPages)].map((_, i) => {
-            const page = i + 1;
-            
-            if (totalPages > 4 && Math.abs(currentPage - page) > 1 && page !== 1 && page !== totalPages) {
-              if (page === 2 || page === totalPages - 1) {
-                return <span key={page} className="px-1 text-slate-600 font-medium tracking-normal text-sm select-none">...</span>;
+
+          {(() => {
+            const pageCount = totalPages;
+            const pages: (number | string)[] = [];
+            const siblingCount = 1; 
+
+            pages.push(1);
+
+            if (currentPage > siblingCount + 3) {
+              pages.push("...");
+            } else if (pageCount > 2) {
+              for (let i = 2; i < Math.min(currentPage - siblingCount, pageCount); i++) {
+                if (!pages.includes(i)) pages.push(i);
               }
-              return null;
             }
 
-            return (
-              <button
-                key={page}
-                type="button"
-                onClick={() => setCurrentPage(page)}
-                className={`w-9 h-9 text-sm font-semibold rounded-md transition-all cursor-pointer border ${
-                  currentPage === page 
-                    ? 'bg-[#1e40af] text-white border-[#1e40af]' 
-                    : 'text-slate-900 bg-[#eef2f6] border border-slate-300 hover:bg-slate-200/80'
-                }`}
-              >
-                {page}
-              </button>
-            );
-          })}
+            const startRange = Math.max(2, currentPage - siblingCount);
+            const endRange = Math.min(pageCount - 1, currentPage + siblingCount);
 
-          <button 
-            type="button"
-            disabled={currentPage === totalPages || loading}
+            for (let i = startRange; i <= endRange; i++) {
+              if (!pages.includes(i)) pages.push(i);
+            }
+
+            if (currentPage < pageCount - siblingCount - 2) {
+              pages.push("...");
+            } else if (pageCount > 1) {
+              for (let i = Math.max(currentPage + siblingCount + 1, 2); i < pageCount; i++) {
+                if (!pages.includes(i)) pages.push(i);
+              }
+            }
+
+            if (pageCount > 1 && !pages.includes(pageCount)) {
+              pages.push(pageCount);
+            }
+
+            return pages.map((page, index) => {
+              if (page === "...") {
+                return (
+                  <span key={`ellipsis-${index}`} className="px-2 text-slate-400 text-sm tracking-widest">
+                    ...
+                  </span>
+                );
+              }
+
+              const isPageActive = currentPage === page;
+
+              return (
+                <button
+                  key={`page-${page}`}
+                  onClick={() => setCurrentPage(page as number)}
+                  className={`w-8 h-8 text-sm font-semibold rounded-lg border transition-all flex items-center justify-center ${
+                    isPageActive
+                      ? "bg-blue-800 border-[#0a46b4] text-white shadow-sm"
+                      : "bg-slate-300 border-slate-500 text-slate-700 hover:bg-slate-200"
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            });
+          })()}
+
+          <button
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            className="w-9 h-9 inline-flex items-center justify-center rounded-md border border-slate-300 bg-white text-slate-500 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+            disabled={currentPage === totalPages}
+            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-500 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            <ChevronRight size={16} />
+            <FiChevronRight size={16} />
           </button>
         </div>
       </div>
-
-      {/* ── 📝 EDIT MODAL OVERLAY ─────────────────────────────────── */}
-      {isEditModalOpen && editingExpense && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full shadow-xl border border-slate-200 overflow-hidden transform transition-all">
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200">
-              <h3 className="text-sm font-bold text-slate-800">Edit Expense Record</h3>
-              <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100">
-                <X size={16} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleEditSubmit} className="p-5 space-y-3.5">
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Expense Title</label>
-                <input 
-                  type="text" 
-                  required
-                  value={editingExpense.title || ''} 
-                  onChange={(e) => setEditingExpense({...editingExpense, title: e.target.value})}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Cost (MMK)</label>
-                  <input 
-                    type="number" 
-                    required
-                    value={editingExpense.cost ?? ''} 
-                    onChange={(e) => setEditingExpense({...editingExpense, cost: Number(e.target.value)})}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 font-medium"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Expense Date</label>
-                  <input 
-                    type="text" 
-                    placeholder="YYYY-MM-DD"
-                    required
-                    value={editingExpense.expense_date || ''} 
-                    onChange={(e) => setEditingExpense({...editingExpense, expense_date: e.target.value})}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Expense Type</label>
-                  <select 
-                    value={editingExpense.expense_type || 'claim'} 
-                    onChange={(e) => setEditingExpense({...editingExpense, expense_type: e.target.value})}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 bg-white"
-                  >
-                    <option value="claim">Claim</option>
-                    <option value="maintenance">Maintenance</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Status</label>
-                  <select 
-                    value={editingExpense.status || 'requested'} 
-                    onChange={(e) => setEditingExpense({...editingExpense, status: e.target.value})}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 bg-white"
-                  >
-                    <option value="requested">Requested</option>
-                    <option value="approved">Approved</option>
-                    <option value="canceled">Canceled</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div className="pt-3.5 flex justify-end gap-2 border-t border-slate-200">
-                <button 
-                  type="button" 
-                  onClick={() => setIsEditModalOpen(false)} 
-                  className="px-3 py-1.5 border border-slate-300 text-slate-600 text-xs font-medium rounded-lg hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  disabled={editSubmitting}
-                  className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  {editSubmitting ? <Loader2 className="animate-spin" size={14}/> : <Save size={14}/>}
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* VIEW DETAIL COMPONENT DRAWER OVERLAY */}
       <ExpenseDetailModal 

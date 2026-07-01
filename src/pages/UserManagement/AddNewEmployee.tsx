@@ -6,15 +6,13 @@ import {
   User,
   ChevronDown,
   Camera,
-  Eye,     
+  Eye,    
   EyeOff,  
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { apiFetch } from '../../lib/api';
 import { normalizeImageSource } from '../../lib/utils';
-import type { Employee } from '../../types/employee';
 
-const DEFAULT_TOKEN = '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c'
+const DEFAULT_TOKEN = '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c';
 
 interface FormState {
   name: string;
@@ -28,41 +26,41 @@ interface FormState {
   role: string;
   password: string;
   password_confirmation: string;
-  image?: any;       
-  image_url?: any;   
 }
 
 const formatToInputDate = (dateString: string) => {
   if (!dateString || dateString === '-') return '';
   const date = new Date(dateString);
-
   if (!Number.isNaN(date.getTime())) {
     return date.toISOString().split('T')[0];
   }
-
   return dateString;
 };
 
 const convertImageToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => {
-      resolve(String(reader.result || ''));
-    };
+    reader.onload = () => resolve(String(reader.result || ''));
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
 
-const stripBase64Header = (base64String: string): string => {
-  if (!base64String) return '';
-  return base64String.includes(',') ? base64String.split(',')[1] : base64String;
+const stripBase64Header = (base64String: any): string => {
+  if (!base64String || typeof base64String !== 'string') return '';
+  if (base64String.startsWith('http://') || base64String.startsWith('https://')) {
+    return base64String;
+  }
+  if (base64String.includes(',')) {
+    return base64String.split(',')[1];
+  }
+  return base64String;
 };
 
 const AddEmployeeForm: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const editItem = (location.state as { editItem?: Employee } | null)?.editItem;
+  const editItem = (location.state as { editItem?: any } | null)?.editItem;
   const isEditMode = Boolean(editItem);
 
   const [formState, setFormState] = useState<FormState>({
@@ -78,19 +76,20 @@ const AddEmployeeForm: React.FC = () => {
     password: '',
     password_confirmation: '',
   });
+  
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (editItem) {
-      const normalizedRole = editItem.role
-        ? editItem.role.toLowerCase().replace(/-/g, ' ')
+      const rawRole = editItem.role || 'admin';
+      const normalizedRole = rawRole !== '-' 
+        ? rawRole.toLowerCase().replace(/-/g, ' ') 
         : 'admin';
 
       setFormState({
@@ -98,19 +97,22 @@ const AddEmployeeForm: React.FC = () => {
         employee_id: editItem.employee_id || '',
         email: editItem.email || '',
         position: editItem.position === '-' ? '' : (editItem.position || ''),
-        joined_date: formatToInputDate(editItem.joinedDate || ''),
-        left_date: formatToInputDate(editItem.leftDate || ''),
-        phone_number: editItem.phone === '-' ? '' : (editItem.phone || ''),
+        joined_date: formatToInputDate(editItem.joined_date || editItem.joinedDate || ''),
+        left_date: formatToInputDate(editItem.left_date || editItem.leftDate || ''),
+        phone_number: editItem.phone_number === '-' || editItem.phone === '-' 
+          ? '' 
+          : (editItem.phone_number || editItem.phone || ''),
         status: editItem.status === '-' ? 'active' : (editItem.status?.toLowerCase() || 'active'),
-        role: editItem.role === '-' ? 'admin' : (normalizedRole || 'admin'),
+        role: normalizedRole,
         password: '',
         password_confirmation: '',
       });
-      setProfileImage(
-        editItem.image === 'https://via.placeholder.com/120' || !editItem.image
-          ? null
-          : normalizeImageSource(editItem.image)
-      );
+
+      if (editItem.image && typeof editItem.image === 'string' && editItem.image !== 'https://via.placeholder.com/120') {
+        setProfileImage(normalizeImageSource(editItem.image));
+      } else {
+        setProfileImage(null);
+      }
     }
   }, [editItem]);
 
@@ -123,7 +125,6 @@ const AddEmployeeForm: React.FC = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setProfileImage(imageUrl);
@@ -151,15 +152,26 @@ const AddEmployeeForm: React.FC = () => {
         if (formState.password !== formState.password_confirmation) {
           throw new Error('Password and confirmation must match.');
         }
-      } else if (formState.password && formState.password !== formState.password_confirmation) {
-        throw new Error('Password and confirmation must match.');
+      } else if (formState.password) {
+        if (formState.password !== formState.password_confirmation) {
+          throw new Error('Password and confirmation must match.');
+        }
       }
 
       const targetId = editItem?.id; 
-      const endpointPath = isEditMode ? `/user/${targetId}` : '/user';
-      const method = isEditMode ? 'PATCH' : 'POST';
+      if (isEditMode && !targetId) {
+        throw new Error('Missing account identifier (id) for update.');
+      }
 
-      const payload: Record<string, any> = {
+      const myHeaders = new Headers();
+      myHeaders.append("Accept", "application/json");
+      myHeaders.append("Content-Type", "application/json");
+      
+      const savedToken = localStorage.getItem('token') || DEFAULT_TOKEN;
+      myHeaders.append("Authorization", `Bearer ${savedToken}`);
+
+      
+      const rawBody: Record<string, any> = {
         name: formState.name.trim(),
         employee_id: formState.employee_id.trim(),
         email: formState.email.trim(),
@@ -172,45 +184,49 @@ const AddEmployeeForm: React.FC = () => {
       };
 
       if (isEditMode) {
-        if (!targetId) {
-          throw new Error('Could not update profile: Missing unique account identifier (id).');
-        }
-        payload.id = targetId;
+        rawBody.id = targetId;
       }
 
       if (formState.password) {
-        payload.password = formState.password;
-        payload.password_confirmation = formState.password_confirmation;
+        rawBody.password = formState.password;
+        rawBody.password_confirmation = formState.password_confirmation;
       }
 
-      let finalizedImageString = '';
-
+      
       if (profileFile) {
         const base64WithHeader = await convertImageToBase64(profileFile);
-        finalizedImageString = stripBase64Header(base64WithHeader);
-        payload.image = finalizedImageString;
-      } else if (profileImage && profileImage.startsWith('data:image')) {
-        finalizedImageString = stripBase64Header(profileImage);
-        payload.image = finalizedImageString;
-      } else if (isEditMode && editItem?.image) {
-         payload.image = editItem.image; 
-      } else {
-        payload.image = null;
+        rawBody.image = stripBase64Header(base64WithHeader);
+      } else if (!isEditMode) {
+        rawBody.image = "";
       }
 
-      const savedToken = localStorage.getItem('token') || DEFAULT_TOKEN;
-      if (!localStorage.getItem('token')) {
-        localStorage.setItem('token', savedToken);
-      }
+      const url = isEditMode 
+        ? `http://192.168.100.185:1011/api/user/${targetId}` 
+        : `http://192.168.100.185:1011/api/user`;
+        
+      const method = isEditMode ? 'PATCH' : 'POST';
 
-      await apiFetch(endpointPath, {
-        method,
-        body: JSON.stringify(payload),
+      console.log("Sending Payload to Backend:", rawBody);
+
+      const response = await fetch(url, {
+        method: method,
+        headers: myHeaders,
+        body: JSON.stringify(rawBody),
+        redirect: 'follow'
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Server responded with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log(`${isEditMode ? 'Update' : 'Create'} Success:`, result);
+
       navigate('/employees', { state: { refresh: true }, replace: true });
+
     } catch (err) {
-      console.error('AddNewEmployee submit error:', err);
+      console.error('Submit error:', err);
       setError(
         err instanceof Error
           ? err.message
@@ -220,14 +236,13 @@ const AddEmployeeForm: React.FC = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-[#F3F0F7] p-8 font-sans text-slate-900">
-      <div className="max-w-3xl center mx-auto">
+      <div className="max-w-3xl mx-auto">
         
         <Link
           to="/employees"
-          className="mb-4 flex items-center text-sm font-medium text-blue-800 "
+          className="mb-4 flex items-center text-sm font-medium text-blue-800"
         >
           <ArrowLeft size={16} className="mr-2" />
           Back
@@ -297,7 +312,7 @@ const AddEmployeeForm: React.FC = () => {
                   </label>
                   <input
                     name="name"
-                    value={formState.name || ''} 
+                    value={formState.name} 
                     onChange={handleInputChange}
                     placeholder="e.g. Aung Aung"
                     className="w-full px-4 py-3 rounded-md border-slate-100 bg-slate-100"
@@ -311,7 +326,7 @@ const AddEmployeeForm: React.FC = () => {
                   </label>
                   <input
                     name="employee_id"
-                    value={formState.employee_id || ''}
+                    value={formState.employee_id}
                     onChange={handleInputChange}
                     placeholder="e.g. EMP-2026-001"
                     className="w-full px-4 py-3 rounded-md border-slate-100 bg-slate-100"
@@ -327,7 +342,7 @@ const AddEmployeeForm: React.FC = () => {
                   <input
                     name="email"
                     type="email"
-                    value={formState.email || ''}
+                    value={formState.email}
                     onChange={handleInputChange}
                     placeholder="e.g. aung.aung@example.com"
                     className="w-full px-4 py-3 rounded-md border-slate-100 bg-slate-100"
@@ -341,7 +356,7 @@ const AddEmployeeForm: React.FC = () => {
                   </label>
                   <input
                     name="position"
-                    value={formState.position || ''}
+                    value={formState.position}
                     onChange={handleInputChange}
                     placeholder="e.g. IT Support"
                     className="w-full px-4 py-3 rounded-md border-slate-100 bg-slate-100"
@@ -356,7 +371,7 @@ const AddEmployeeForm: React.FC = () => {
                     <input
                       name="joined_date"
                       type="date"
-                      value={formState.joined_date || ''}
+                      value={formState.joined_date}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border-slate-100 rounded-md bg-slate-100"
                     />
@@ -371,7 +386,7 @@ const AddEmployeeForm: React.FC = () => {
                     <input
                       name="left_date"
                       type="date"
-                      value={formState.left_date || ''} 
+                      value={formState.left_date} 
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border-slate-100 rounded-md bg-slate-100"
                     />
@@ -390,7 +405,7 @@ const AddEmployeeForm: React.FC = () => {
                 <input
                   name="phone_number"
                   type="tel"
-                  value={formState.phone_number || ''} 
+                  value={formState.phone_number} 
                   onChange={handleInputChange}
                   placeholder="e.g. 09123456789"
                   className="w-full px-4 py-3 rounded-md border-slate-100 bg-slate-100"
@@ -404,7 +419,7 @@ const AddEmployeeForm: React.FC = () => {
                 <div className="relative">
                   <select
                     name="status"
-                    value={formState.status || 'active'} 
+                    value={formState.status} 
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border-slate-100 rounded-md bg-slate-100 appearance-none"
                   >
@@ -426,7 +441,7 @@ const AddEmployeeForm: React.FC = () => {
                 <div className="relative">
                   <select
                     name="role"
-                    value={formState.role || 'admin'} 
+                    value={formState.role} 
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border-slate-100 rounded-md bg-slate-100 appearance-none"
                   >
@@ -445,21 +460,20 @@ const AddEmployeeForm: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              {/* ✅ Password Field */}
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-slate-600">
-                  Password
+                  Password {isEditMode && <span className="text-gray-400 font-normal">(Optional)</span>}
                 </label>
                 <div className="relative">
                   <input
                     name="password"
                     type={showPassword ? 'text' : 'password'} 
-                    value={formState.password || ''} 
+                    value={formState.password} 
                     onChange={handleInputChange}
                     placeholder="Enter password"
                     className="w-full px-4 pr-12 py-3 rounded-md border-slate-100 bg-slate-100"
                     autoComplete="new-password"
-                    {...(!isEditMode ? { required: true } : {})}
+                    required={!isEditMode}
                   />
                   <button
                     type="button"
@@ -471,7 +485,6 @@ const AddEmployeeForm: React.FC = () => {
                 </div>
               </div>
 
-              {/* ✅ Confirm Password Field */}
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-slate-600">
                   Confirm Password
@@ -480,12 +493,12 @@ const AddEmployeeForm: React.FC = () => {
                   <input
                     name="password_confirmation"
                     type={showConfirmPassword ? 'text' : 'password'} 
-                    value={formState.password_confirmation || ''} 
+                    value={formState.password_confirmation} 
                     onChange={handleInputChange}
                     placeholder="Confirm password"
                     className="w-full px-4 pr-12 py-3 rounded-md border-slate-100 bg-slate-100"
                     autoComplete="new-password"
-                    {...(!isEditMode ? { required: true } : {})}
+                    required={!isEditMode}
                   />
                   <button
                     type="button"
@@ -503,7 +516,7 @@ const AddEmployeeForm: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-8 py-2 border rounded"
+                className="px-8 py-2 border rounded hover:bg-slate-50"
               >
                 Cancel
               </button>
@@ -511,7 +524,7 @@ const AddEmployeeForm: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-2 bg-blue-800 text-white rounded disabled:opacity-50"
+                className="px-8 py-2 bg-blue-800 text-white rounded disabled:opacity-50 hover:bg-blue-900"
               >
                 {loading ? 'Saving...' : 'Save Employee'}
               </button>

@@ -1,14 +1,12 @@
 "use client"; 
 
 import { IoCloudDownloadOutline } from "react-icons/io5"; 
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Employee } from '../../types/employee';
 import { normalizeImageSource } from '../../lib/utils';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
 import { apiFetch } from '../../lib/api';
-
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -64,12 +62,12 @@ const formatStatus = (status: string) =>
 const mapApiUserToEmployee = (user: ApiUser): Employee => ({
   id: user.id,
   profileImage: normalizeImageSource(
+    user.image ||             
     user.preview_url ||
-      user.image_url ||
-      user.image ||
-      user.media?.[0]?.preview_url ||
-      user.media?.[0]?.original_url ||
-      null
+    user.image_url ||
+    user.media?.[0]?.preview_url ||
+    user.media?.[0]?.original_url ||
+    null
   ),
   employee_id: user.employee_id,
   name: user.name,
@@ -77,7 +75,7 @@ const mapApiUserToEmployee = (user: ApiUser): Employee => ({
   address: "-",
   position: user.position || "-",
   status: formatStatus(user.status),
-  role: user.roles?.[0]?.name || "-",
+  role: user.roles?.[0]?.name || user.status || "staff", 
   joinedDate: user.joined_date || "-",
   leftDate: user.left_date || "-",
   phone: user.phone_number || "-",
@@ -107,46 +105,46 @@ const UserManagement: React.FC = () => {
 
   const [showToast, setShowToast] = useState(false);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      setError("");
+  const fetchUsers = async () => {
+    setLoading(true);
+    setError("");
 
-      try {
-        const token = localStorage.getItem('token') || '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c';
-        if (!localStorage.getItem('token')) {
-          localStorage.setItem('token', token);
-        }
-
-        const response = await apiFetch(USER_ENDPOINT, {
-          method: 'GET',
-        });
-
-        const payload = response.data ? response : await response.json?.().catch(() => response);
-        const users = payload?.data?.data || payload?.data || payload || [];
-        
-        if (Array.isArray(users)) {
-          setData(users.map(mapApiUserToEmployee));
-        } else {
-          console.error("Unexpected data format:", payload);
-          setData([]);
-        }
-      } catch (err: any) {
-        console.error(err);
-        if (err?.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          navigate('/', { replace: true });
-          return;
-        }
-        setError("Cannot load users from server.");
-      } finally {
-        setLoading(false);
+    try {
+      const token = localStorage.getItem('token') || '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c';
+      if (!localStorage.getItem('token')) {
+        localStorage.setItem('token', token);
       }
-    };
 
+      const response = await apiFetch(USER_ENDPOINT, {
+        method: 'GET',
+      });
+
+      const payload = response.data ? response : await response.json?.().catch(() => response);
+      const users = payload?.data?.data || payload?.data || payload || [];
+      
+      if (Array.isArray(users)) {
+        setData(users.map(mapApiUserToEmployee));
+      } else {
+        console.error("Unexpected data format:", payload);
+        setData([]);
+      }
+    } catch (err: any) {
+      console.error(err);
+      if (err?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/', { replace: true });
+        return;
+      }
+      setError("Cannot load users from server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUsers();
-  }, [location.key, location.state, navigate]); 
+  }, [location.key]); 
 
   const handleDeleteTrigger = (id: string) => {
     setDeleteModal({
@@ -156,47 +154,71 @@ const UserManagement: React.FC = () => {
   };
 
   const handleConfirmDelete = async () => {
-    const targetId = deleteModal.targetId; 
-    if (!targetId) return;
+      const targetId = deleteModal.targetId; 
+      if (!targetId) return;
 
-    setLoading(true);
-    setError("");
+      setLoading(true);
+      setError("");
 
-    try {
-      await apiFetch(`/user/id`, {
-        method: 'DELETE',
-        body: JSON.stringify({
-          id: targetId 
-        })
-      });
+      try {
+        
+        const myHeaders = new Headers();
+        myHeaders.append("Accept", "application/json");
+        myHeaders.append("Content-Type", "application/json");
+        
+        const currentToken = localStorage.getItem('token') || '261|UKYS7uARyAxUtGBmPZJVTmphmMp8EQOGCcHo9Qsi8993df01';
+        myHeaders.append("Authorization", `Bearer ${currentToken}`);
 
-      setData((prev) => prev.filter((item) => String(item.id) !== String(targetId)));
-      setShowToast(true);
-    } catch (err: any) {
-      console.error('Delete user error:', err);
-      setError(err?.message || 'Failed to delete user.');
-    } finally {
-      setLoading(false);
-      setDeleteModal({ isOpen: false, targetId: null });
-    }
-  };
+        
+        const rawPayload = JSON.stringify({
+          "id": targetId
+        });
+
+        const requestOptions = {
+          method: 'DELETE',
+          headers: myHeaders,
+          body: rawPayload,
+          redirect: 'follow' as RequestRedirect
+        };
+
+        
+        const response = await fetch(`http://192.168.100.185:1011/api/user/${targetId}`, requestOptions);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `Server responded with status ${response.status}`);
+        }
+
+        
+        setData((prev) => prev.filter((item) => String(item.id) !== String(targetId)));
+        setShowToast(true);
+
+      } catch (err: any) {
+        console.error('Delete user error:', err);
+        setError(err?.message || 'Failed to delete user.');
+      } finally {
+        setLoading(false);
+        setDeleteModal({ isOpen: false, targetId: null });
+      }
+    };
 
   const handleEdit = (item: Employee) => {
     const imageValue = (item.profileImage === "-" || !item.profileImage) ? "" : item.profileImage;
 
+    
     const apiUserFormat = {
       id: item.id,
       employee_id: item.employee_id || "",
       name: item.name || "",
-      role: item.role?.toLowerCase() || "staff", 
+      role: item.role || "staff", 
       email: item.email || "",
       position: item.position === "-" ? "" : item.position,
-      phone_number: item.phone === "-" ? "" : item.phone,
-      joined_date: (item.joinedDate === "-" || !item.joinedDate) ? "" : item.joinedDate,
+      phone_number: item.phone === "-" ? "" : item.phone, 
+      joined_date: (item.joinedDate === "-" || !item.joinedDate) ? "" : item.joinedDate, 
       left_date: (item.leftDate === "-" || !item.leftDate) ? "" : item.leftDate,
       status: item.status?.toLowerCase() || "active",
-      image: imageValue,
-      image_url: imageValue
+      image: imageValue, 
+      password: "" 
     };
 
     navigate("/add-employee", {
@@ -232,7 +254,7 @@ const UserManagement: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const sortedData = React.useMemo(() => {
+  const sortedData = useMemo(() => {
     const sortableData = [...filteredData];
     if (sortColumn) {
       sortableData.sort((a, b) => {
@@ -247,7 +269,6 @@ const UserManagement: React.FC = () => {
     return sortableData;
   }, [filteredData, sortColumn, sortDirection]);
 
-  // PDF Export Function
   const handleExportPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(18);
@@ -277,7 +298,6 @@ const UserManagement: React.FC = () => {
   const startIndex = currentPage * pageSize;
   const currentPaginatedData = sortedData.slice(startIndex, startIndex + pageSize);
 
-  
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
@@ -291,16 +311,13 @@ const UserManagement: React.FC = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-blue-800">User Management</h1>
 
-        {/* Right Buttons Container */}
         <div className="flex items-center gap-3">
-          {/* PDF Download Button */}
           <button
-          onClick={handleExportPDF}
-          className="px-4 py-2 bg-blue-800 border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-blue-900"
-        >
-          <IoCloudDownloadOutline size={20} />
-          
-        </button>
+            onClick={handleExportPDF}
+            className="px-4 py-2 bg-blue-800 border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-blue-900"
+          >
+            <IoCloudDownloadOutline size={20} />
+          </button>
 
           <Link to="/add-employee">
             <button className="flex items-center gap-2 rounded-md bg-blue-800 px-4 py-2 text-sm text-white hover:bg-blue-700 transition-colors">
@@ -312,7 +329,6 @@ const UserManagement: React.FC = () => {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-300 p-4 shadow-sm space-y-4">
-        {/* Header Wrapper Card */}
         <div className="flex gap-4 rounded-xl bg-white p-3 border border-slate-200 shadow-sm items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
@@ -328,7 +344,6 @@ const UserManagement: React.FC = () => {
             />
           </div>
 
-          {/* Status Dropdown Box */}
           <div className="relative w-48">
             <select
               value={statusFilter}
@@ -411,7 +426,6 @@ const UserManagement: React.FC = () => {
             </TableHeader>
 
             <TableBody>
-              {/* 💡 Table Row Loading ကို ဖြုတ်လိုက်ပြီး Error handling နဲ့ Data ရလဒ်တွေကိုပဲ ထားရှိပါမယ် */}
               {!error && currentPaginatedData.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center text-slate-400 text-sm">No users found.</TableCell>
