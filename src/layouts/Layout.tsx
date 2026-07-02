@@ -72,9 +72,7 @@ export default function Layout() {
     return typeof p === "string" ? p : p.name;
   });
 
-  console.log("3. Data inside Layout:", permissions);
-  console.log("4. Extracted Names:", permissionNames);
-
+ 
   
   const filteredMenuItems = menuItems.filter((item) =>
     permissionNames.includes(item.permission)

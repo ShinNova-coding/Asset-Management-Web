@@ -7,10 +7,10 @@ export default function Delete({ onDelete }: { onDelete?: () => void }) {
         e.stopPropagation();
         onDelete?.();
       }} 
-      className="text-red-400 hover:text-red-700 transition p-1"
+      className="text-red-600 hover:text-red-700 transition p-1"
       title="Delete Asset"
     >
-      <RiDeleteBin4Fill size={20} />
+      <RiDeleteBin4Fill size={21} />
     </button>
   )
 }

@@ -470,9 +470,9 @@ const UserManagement: React.FC = () => {
                           event.stopPropagation();
                           handleDeleteTrigger(emp.id ?? emp.employee_id);
                         }}
-                        className="text-red-500 hover:text-red-700 transition-colors"
+                        className="text-red-600 hover:text-red-700 transition-colors"
                       >
-                        <RiDeleteBin4Fill size={18} />
+                        <RiDeleteBin4Fill size={21} />
                       </button>
                     </div>
                   </TableCell>

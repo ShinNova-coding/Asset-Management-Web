@@ -89,14 +89,14 @@ export const columns: ColumnDef<any>[] = [
         <div className="flex items-center gap-3">
          
           <button
-            className="text-blue-400 hover:text-blue-700 transition p-1"
+            className="text-blue-800 hover:text-blue-900 transition p-1"
             onClick={(e) => {
               e.stopPropagation()
               onEdit?.(item)
             }}
             title="Edit Assignment"
           >
-            <FaEdit size={20} />
+            <FaEdit size={21} />
           </button>
 
          
@@ -104,7 +104,7 @@ export const columns: ColumnDef<any>[] = [
             className={`transition p-1 ${
               isDeleteDisabled 
                 ? "text-red-300 cursor-not-allowed opacity-50" 
-                : "text-red-500 hover:text-red-700"
+                : "text-red-600 hover:text-red-700"
             }`}
             disabled={isDeleteDisabled}
             onClick={(e) => {
@@ -117,7 +117,7 @@ export const columns: ColumnDef<any>[] = [
                 : "Delete Assignment"
             }
           >
-            <RiDeleteBin4Fill size={20} />
+            <RiDeleteBin4Fill size={21} />
           </button>
         </div>
       )

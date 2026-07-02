@@ -16,10 +16,10 @@ export default function Edit({ onEdit }: EditProps) {
         e.stopPropagation() 
         if (onEdit) onEdit()
       }} 
-      className="text-blue-400 hover:text-blue-600 active:scale-95 transition-all p-1.5 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 flex items-center justify-center shadow-xs"
+      className="text-blue-800 hover:text-blue-900 active:scale-95 transition-all p-1.5 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 flex items-center justify-center shadow-xs"
       title="Edit Asset"
     >
-      <FaEdit size={16} />
+      <FaEdit size={21} />
     </button>
   )
 }

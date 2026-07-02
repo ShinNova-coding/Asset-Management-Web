@@ -1,4 +1,4 @@
-// src/components/layout/Navigation.tsx
+
 import { useState, useEffect } from "react"
 import { ChevronDown, LogOut } from "lucide-react" 
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -9,9 +9,9 @@ export default function Navigation() {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null)
   const navigate = useNavigate()
 
-  // Login ဝင်ထားတဲ့ user အချက်အလက်ကို localStorage ကနေ တစ်ခါတည်း ဆွဲယူပါတယ်
+  
   useEffect(() => {
-    const userData = localStorage.getItem("user"); // သင့် Login page မှာ save ထားတဲ့ key နာမည်နဲ့ တူအောင်စစ်ပေးပါ
+    const userData = localStorage.getItem("user");
     if (userData) {
       setUser(JSON.parse(userData));
     }
@@ -19,7 +19,7 @@ export default function Navigation() {
 
   function handleLogout() {
     localStorage.removeItem("token") 
-    localStorage.removeItem("user") // User အချက်အလက်ကိုလည်း ဖျက်ပေးပါ
+    localStorage.removeItem("user") 
     setOpen(false)
     navigate("/", { replace: true }) 
   }
@@ -37,7 +37,7 @@ export default function Navigation() {
             className="flex items-center gap-3 rounded-md px-2 py-2 transition hover:bg-slate-200/50"
           >
             <div className="hidden text-left sm:block">
-              {/* ဒီနေရာမှာ localStorage ကရတဲ့ user name နဲ့ role ကိုပြပါမယ် */}
+             
               <p className="text-xs font-bold text-white">{user?.name || "Admin User"}</p>
               <p className="text-[10px] text-blue-200 uppercase">{user?.role || ""}</p>
             </div>

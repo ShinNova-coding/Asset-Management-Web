@@ -51,9 +51,9 @@ export default function CategoriesEdit({ category, onUpdated }: EditProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <FaEdit className="h-5 w-5 text-blue-400" />
-        </Button>
+       
+          <FaEdit className="h-5 w-5 text-blue-800" />
+        
       </DialogTrigger>
       <DialogContent className="bg-white">
         <DialogHeader>
