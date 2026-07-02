@@ -309,11 +309,11 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
             if (status === "approved" || status === "in progress") {
               return (
                 <div className="flex items-center gap-3">
-                  <button onClick={(e) => { e.stopPropagation(); openEditDialog(item) }} className="text-blue-500 hover:text-blue-700 p-1">
-                    <FaEdit size={20} />
+                  <button onClick={(e) => { e.stopPropagation(); openEditDialog(item) }} className="text-blue-800 hover:text-blue-900 p-1">
+                    <FaEdit size={21} />
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); deleteRow(item, "record deleted.") }} className="text-red-500 hover:text-red-700 p-1">
-                    <RiDeleteBin4Fill size={20} />
+                  <button onClick={(e) => { e.stopPropagation(); deleteRow(item, "record deleted.") }} className="text-red-600 hover:text-red-700 p-1">
+                    <RiDeleteBin4Fill size={21} />
                   </button>
                 </div>
               )

@@ -25,8 +25,7 @@ export default function CategoriesDelete({ categoryId, categoryName, onDeleted }
   const handleDelete = async () => {
     setLoading(true);
     try {
-      // Matches your provided API structure: 
-      // DELETE request to /category/category_id with category_id in the body
+     
       await apiRequest("/category/category_id", "DELETE", {
         category_id: categoryId
       });
@@ -44,9 +43,9 @@ export default function CategoriesDelete({ categoryId, categoryName, onDeleted }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon">
+        
           <RiDeleteBin4Fill className="h-5 w-5 text-red-600" />
-        </Button>
+       
       </DialogTrigger>
      <DialogContent className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
   <DialogHeader>

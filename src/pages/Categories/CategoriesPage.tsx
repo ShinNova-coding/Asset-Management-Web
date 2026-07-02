@@ -24,13 +24,13 @@ import CategoriesEdit from "@/pages/Categories/CategoriesEdit";
 import { FaEdit } from "react-icons/fa";
 
 function EditButton() { 
-  return <div className="text-blue-400 hover:text-blue-600 transition p-1 cursor-pointer"><FaEdit size={18} /></div>; 
+  return <div className="text-blue-400 hover:text-blue-600 transition p-1 cursor-pointer"><FaEdit size={20} /></div>; 
 }
 
 function DeleteButton() { 
   return (
     <div className="text-red-400 hover:text-red-700 transition cursor-pointer">
-      <svg stroke="currentColor" fill="currentColor" viewBox="0 0 24 24" height="20" width="20">
+      <svg stroke="currentColor" fill="currentColor" viewBox="0 0 24 24" height="16" width="16">
         <path d="M5 20a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8H5v12zm5-10h2v8h-2v-8zm4 0h2v8h-2v-8zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path>
       </svg>
     </div>
@@ -81,7 +81,8 @@ export default function CategoriesPage() {
     { 
       accessorKey: "updated_at", 
       header: "Updated At", 
-      cell: (info) => info.getValue() ? new Date(info.getValue()).toLocaleDateString() : "N/A" 
+     cell: (info) => info.getValue() ? (info.getValue() as string).split('T')[0] : "N/A" 
+  
     },
     { 
       header: "Actions", 
@@ -186,7 +187,7 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="pt-6 px-8 pb-8 space-y-4 bg-[#F8FAFC] min-h-screen">
+    <div className="pt-6 px-8 pb-8 space-y-4 bg-[#F3F0F7] min-h-screen">
       <div className="max-w-8xl mx-auto w-full">
         
         {/* Top Header Section */}
