@@ -34,26 +34,27 @@ export default function AddNewCategories({ onCategoryAdded }: { onCategoryAdded:
           <Plus className="mr-2 h-4 w-4" /> Add Category
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add New Category</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Category Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Furniture"
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Adding..." : "Save Category"}
-          </Button>
-        </form>
-      </DialogContent>
+    
+      <DialogContent className="bg-white sm:max-w-md">
+  <DialogHeader>
+    <DialogTitle>Add New Category</DialogTitle>
+  </DialogHeader>
+  <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+    <div className="space-y-2">
+      <Label htmlFor="name">Category Name</Label>
+      <Input
+        id="name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="e.g. Furniture"
+        required
+      />
+    </div>
+    <Button type="submit" className="bg-blue-800 flex justify-end ml-auto" disabled={loading}>
+      {loading ? "Adding..." : "Save Category"}
+    </Button>
+  </form>
+</DialogContent>
     </Dialog>
   );
 }

@@ -1,190 +1,142 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { 
+  useReactTable, 
+  getCoreRowModel, 
+  getSortedRowModel, 
+  getFilteredRowModel, 
+  getPaginationRowModel, 
+  flexRender 
+} from "@tanstack/react-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/apiService";
+
 import AddNewCategories from "@/pages/Categories/AddNewCategories";
-import CategoriesDelete from "./CategoriesDelete";
-import CategoriesEdit from "./CategoriesEdit";
+import CategoriesDelete from "@/pages/Categories/CategoriesDelete";
+import CategoriesEdit from "@/pages/Categories/CategoriesEdit";
+import { FaEdit } from "react-icons/fa";
 
-// 💡 သင်ပေးထားသော Edit Component ဒီဇိုင်းအတိုင်း ပြင်ဆင်ထားပါသည်
-function EditButton({ onEdit }: { onEdit?: () => void }) {
-  return (
-    <button 
-      onClick={(e) => {
-        e.stopPropagation(); // TableRow ရဲ့ navigation handler တွေကို block ဖို့
-        if (onEdit) onEdit();
-      }} 
-      className="text-blue-400 hover:text-blue-600 transition p-1"
-      title="Edit Asset"
-    >
-      <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 576 512" height="20" width="20" xmlns="http://www.w3.org/2000/svg">
-        <path d="M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L428.5 251.5l-90.2-90.2 64.3-64.3c3.8-3.8 10-3.8 13.8 0zM211.9 368.1L292 288l90.2 90.2-80.1 80.1c-3.1 3.1-7.1 4.9-11.5 5.1l-130.7 6.5c-8.4.4-15.5-6.6-15.1-15l6.5-130.7c.2-4.4 2-8.4 5.1-11.5l112.9-112.9 90.2 90.2-112.9 112.9c-4.1 4.1-6.5 9.7-6.5 15.6v32c0 13.3 10.7 24 24 24h32c5.9 0 11.5-2.4 15.6-6.5zM563 21.1L514.9 69.2c-4.1 4.1-10.7 4.1-14.8 0l-90.2-90.2c-4.1-4.1-4.1-10.7 0-14.8L458 5.3c18.7-18.7 49.1-18.7 67.8 0l37.2 37.2c18.7 18.7 18.7 49.1 0 67.8z"></path>
-      </svg>
-    </button>
-  );
-}
-
-// 💡 သင်ပေးထားသော Delete Component ဒီဇိုင်းအတိုင်း ပြင်ဆင်ထားပါသည်
-function DeleteButton({ onDelete }: { onDelete?: () => void }) {
-  return (
-    <button 
-      onClick={(e) => {
-        e.stopPropagation(); // Delete နှိပ်လျှင်လည်း Row click မဖြစ်အောင် ထိန်းထားပါသည်
-        if (onDelete) onDelete();
-      }} 
-      className="text-red-400 hover:text-red-700 transition"
-      title="Delete Asset"
-    >
-      <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="20" width="20" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 20a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8H5v12zm5-10h2v8h-2v-8zm4 0h2v8h-2v-8zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path>
-      </svg>
-    </button>
-  );
-}
+function EditButton() { return <div className="text-blue-400 hover:text-blue-600 transition p-1 cursor-pointer"><FaEdit size={18} /></div>; }
+function DeleteButton() { return <div className="text-red-400 hover:text-red-700 transition cursor-pointer"><svg stroke="currentColor" fill="currentColor" viewBox="0 0 24 24" height="20" width="20"><path d="M5 20a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8H5v12zm5-10h2v8h-2v-8zm4 0h2v8h-2v-8zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg></div>; }
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(0);
-  const rowsPerPage = 5;
-  const pageCount = Math.ceil(categories.length / rowsPerPage);
+  const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  useEffect(() => { fetchCategories(); }, []);
 
   const fetchCategories = async () => {
     setLoading(true);
     try {
       const response = await apiRequest("/category", "GET");
-      setCategories(response.data);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    } finally {
-      setLoading(false);
-    }
+      setCategories(response.data || []);
+    } catch (error) { console.error("Error fetching categories:", error); } 
+    finally { setLoading(false); }
   };
 
-  // Slice data for pagination
-  const paginatedData = categories.slice(currentPage * rowsPerPage, (currentPage + 1) * rowsPerPage);
+  const columns = useMemo(() => [
+    { header: "No.", cell: (info) => info.row.index + 1, enableSorting: false },
+    { accessorKey: "name", header: "Name" },
+  
+    { accessorKey: "created_at", header: "Created At", cell: (info) => info.getValue()?.split('T')[0] },
+    { 
+      accessorKey: "updated_at", 
+      header: "Updated At", 
+      cell: (info) => info.getValue() ? new Date(info.getValue()).toLocaleDateString() : "N/A" 
+    },
+    { header: "Actions", enableSorting: false, cell: ({ row }) => (
+      <div className="flex justify-center ">
+        <CategoriesEdit category={row.original} onUpdated={fetchCategories} triggerIcon={<EditButton />} />
+        <CategoriesDelete categoryId={row.original.id} categoryName={row.original.name} onDeleted={fetchCategories} triggerIcon={<DeleteButton />} />
+      </div>
+    )},
+  ], []);
+
+  const table = useReactTable({
+    data: categories,
+    columns,
+    state: { sorting, columnFilters },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize: 5 } }
+  });
 
   return (
-    <div className="p-8 bg-slate-50 min-h-screen">
-      {/* Top Header Section */}
+    <div className="pt-6 px-8 pb-8 min-h-screen bg-[#F3F0F7]">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-extrabold text-blue-900 flex items-center gap-3 tracking-tight">
-          Categories
-        </h2>
+        <h2 className="text-3xl font-extrabold text-blue-900 tracking-tight">Categories</h2>
         <AddNewCategories onCategoryAdded={fetchCategories} />
       </div>
 
-      {/* Main Table Card Box Container */}
-      <Card className="shadow-sm border-slate-200 rounded-2xl overflow-hidden bg-white p-4">
-        <CardContent className="p-0">
+      <Card className="shadow-sm border-slate-200 rounded-2xl overflow-hidden bg-white">
+        <CardContent className="p-4 space-y-4">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              placeholder="Search by name..."
+              value={table.getColumn("name")?.getFilterValue() ?? ""}
+              onChange={(e) => table.getColumn("name")?.setFilterValue(e.target.value)}
+              className="w-full rounded-md border border-slate-300 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
           {loading ? (
-            <div className="flex justify-center p-12">
-              <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-            </div>
+            <div className="flex items-center justify-center p-12"><Loader2 className="animate-spin h-8 w-8 text-blue-800" /></div>
           ) : (
             <>
               <div className="overflow-hidden rounded-xl border border-slate-100">
                 <Table>
-                  <TableHeader className="bg-[#1E40AF] hover:bg-[#1E40AF]">
-                    <TableRow className="hover:bg-transparent border-none">
-                      <TableHead className="text-white font-bold py-4 pl-4 w-[80px]">No.</TableHead>
-                      <TableHead className="text-white font-bold py-4">Name</TableHead>
-                      <TableHead className="text-white font-bold py-4">Created At</TableHead>
-                      <TableHead className="text-white font-bold py-4 text-center w-[120px]">Actions</TableHead>
-                    </TableRow>
+                  <TableHeader className="bg-blue-800">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
+                        {headerGroup.headers.map((header) => {
+                          const canSort = header.column.getCanSort();
+                          return (
+                            <TableHead key={header.id} className={`text-white font-semibold py-3 text-sm ${canSort ? "cursor-pointer hover:bg-blue-700" : ""}`} onClick={header.column.getToggleSortingHandler()}>
+                              <div className="flex items-center gap-2">
+                                {flexRender(header.column.columnDef.header, header.getContext())}
+                                {canSort && (
+                                  <div className="flex flex-col">
+                                    <FiChevronUp size={12} className={header.column.getIsSorted() === "asc" ? "text-white" : "text-white/40"} />
+                                    <FiChevronDown size={12} className={header.column.getIsSorted() === "desc" ? "text-white" : "text-white/40"} />
+                                  </div>
+                                )}
+                              </div>
+                            </TableHead>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
                   </TableHeader>
                   <TableBody>
-                    {paginatedData.map((cat: any, index: number) => (
-                      <TableRow key={cat.id} className="hover:bg-slate-50/80 border-b border-slate-100 transition-colors cursor-pointer">
-                        {/* စဉ်နံပါတ် (No.) */}
-                        <TableCell className="font-medium text-slate-600 py-4 pl-4">
-                          {currentPage * rowsPerPage + index + 1}
-                        </TableCell>
-                        
-                        {/* Name */}
-                        <TableCell className="font-semibold text-slate-700 py-4">
-                          {cat.name}
-                        </TableCell>
-                        
-                        {/* Created At */}
-                        <TableCell className="text-slate-500 py-4">
-                          {new Date(cat.created_at).toISOString().split('T')[0]}
-                        </TableCell>
-                        
-                        {/* Actions (Edit & Delete Buttons) */}
-                        <TableCell className="text-center py-4">
-                          <div className="flex justify-center items-center gap-3">
-                            {/* 💡 triggerIcon နေရာတွင် သင်ပေးထားသော Edit Button ဒီဇိုင်းအတိုင်း အစားထိုးထားပါသည် */}
-                            <CategoriesEdit 
-                              category={{ id: cat.id, name: cat.name }} 
-                              onUpdated={fetchCategories} 
-                              triggerIcon={<EditButton />} 
-                            />
-                            
-                            {/* 💡 triggerIcon နေရာတွင် သင်ပေးထားသော Delete Button ဒီဇိုင်းအတိုင်း အစားထိုးထားပါသည် */}
-                            <CategoriesDelete 
-                              categoryId={cat.id} 
-                              categoryName={cat.name} 
-                              onDeleted={fetchCategories} 
-                              triggerIcon={<DeleteButton />} 
-                            />
-                          </div>
-                        </TableCell>
+                    {table.getRowModel().rows.map(row => (
+                      <TableRow key={row.id} className="border-b border-slate-100">
+                        {row.getVisibleCells().map(cell => (
+                          <TableCell key={cell.id} className="py-4">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                        ))}
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </div>
 
-              {/* Pagination Section */}
-              <div className="flex items-center justify-between pt-5 pb-2 px-2 border-t border-slate-100 mt-4">
-                <span className="text-sm font-medium text-slate-500">
-                  Page {currentPage + 1} of {pageCount || 1} ({categories.length} total categories)
-                </span>
-                
-                <div className="flex items-center gap-1.5">
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    className="w-8 h-8 rounded-lg border-slate-200 text-slate-600 hover:bg-slate-50"
-                    onClick={() => setCurrentPage(p => Math.max(0, p - 1))} 
-                    disabled={currentPage === 0}
-                  >
-                    <ChevronLeft size={16} />
-                  </Button>
-
-                  {Array.from({ length: pageCount }).map((_, i) => (
-                    <Button 
-                      key={i} 
-                      size="sm" 
-                      className={`w-8 h-8 rounded-lg font-semibold text-xs transition-all ${
-                        currentPage === i 
-                          ? "bg-[#1E40AF] text-white hover:bg-[#1E40AF]/90 shadow-sm" 
-                          : "bg-transparent text-slate-700 hover:bg-slate-100 border border-slate-200"
-                      }`}
-                      onClick={() => setCurrentPage(i)}
-                    >
-                      {i + 1}
-                    </Button>
+              <div className="flex items-center justify-between px-2 pt-2">
+                <span className="text-sm text-slate-500">Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}</span>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}><ChevronLeft size={16}/></Button>
+                  {Array.from({ length: table.getPageCount() }).map((_, i) => (
+                    <Button key={i} size="sm" className={table.getState().pagination.pageIndex === i ? "bg-blue-800 text-white" : "bg-transparent text-slate-700 hover:bg-slate-100"} onClick={() => table.setPageIndex(i)}>{i + 1}</Button>
                   ))}
-                  
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    className="w-8 h-8 rounded-lg border-slate-200 text-slate-600 hover:bg-slate-50"
-                    onClick={() => setCurrentPage(p => Math.min(pageCount - 1, p + 1))} 
-                    disabled={currentPage >= pageCount - 1}
-                  >
-                    <ChevronRight size={16} />
-                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}><ChevronRight size={16}/></Button>
                 </div>
               </div>
             </>
