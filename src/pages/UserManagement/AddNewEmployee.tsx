@@ -170,7 +170,6 @@ const AddEmployeeForm: React.FC = () => {
       const savedToken = localStorage.getItem('token') || DEFAULT_TOKEN;
       myHeaders.append("Authorization", `Bearer ${savedToken}`);
 
-      
       const rawBody: Record<string, any> = {
         name: formState.name.trim(),
         employee_id: formState.employee_id.trim(),
@@ -192,7 +191,6 @@ const AddEmployeeForm: React.FC = () => {
         rawBody.password_confirmation = formState.password_confirmation;
       }
 
-      
       if (profileFile) {
         const base64WithHeader = await convertImageToBase64(profileFile);
         rawBody.image = stripBase64Header(base64WithHeader);
@@ -206,8 +204,6 @@ const AddEmployeeForm: React.FC = () => {
         
       const method = isEditMode ? 'PATCH' : 'POST';
 
-      console.log("Sending Payload to Backend:", rawBody);
-
       const response = await fetch(url, {
         method: method,
         headers: myHeaders,
@@ -220,9 +216,7 @@ const AddEmployeeForm: React.FC = () => {
         throw new Error(errorData.message || `Server responded with status ${response.status}`);
       }
 
-      const result = await response.json();
-      console.log(`${isEditMode ? 'Update' : 'Create'} Success:`, result);
-
+      await response.json();
       navigate('/employees', { state: { refresh: true }, replace: true });
 
     } catch (err) {
@@ -236,28 +230,34 @@ const AddEmployeeForm: React.FC = () => {
       setLoading(false);
     }
   };
+
   return (
-    <div className="min-h-screen bg-[#F3F0F7] p-8 font-sans text-slate-900">
-      <div className="max-w-3xl mx-auto">
+    /* Top navigation header နား ကွက်တိဖြစ်အောင် ပတ်လည် padding ကို p-4 သို့မဟုတ် pt-2 px-4 pb-6 ဟု ညှိပေးထားပါတယ် */
+    <div className="w-full bg-[#F0F4F8] pt-2 px-4 pb-6 font-sans text-slate-900">
+      <div className="max-w-4xl mx-auto space-y-4">
         
-        <Link
-          to="/employees"
-          className="mb-4 flex items-center text-sm font-medium text-blue-800"
-        >
-          <ArrowLeft size={16} className="mr-2" />
-          Back
-        </Link>
+        {/* Back Button & Title Area */}
+        <div className="flex flex-col gap-1">
+          <Link
+            to="/employees"
+            className="inline-flex items-center text-xs font-semibold uppercase tracking-wider text-blue-800 hover:text-blue-800 transition-colors"
+          >
+            <ArrowLeft size={14} className="mr-1.5" />
+            Back 
+          </Link>
+          <h1 className="text-xl font-bold text-blue-800">
+            {isEditMode ? 'Edit Employee Profile' : 'AddNew Employee'}
+          </h1>
+        </div>
 
-        <h1 className="text-2xl font-bold text-blue-800 mb-2">
-          {isEditMode ? 'Edit Employee' : 'Add New Employee'}
-        </h1>
+        {/* Form Card Container */}
+        <div className="bg-white rounded-xl border border-blue-100 shadow-sm p-6 md:p-8">
+          <form className="space-y-4" onSubmit={handleSubmit}>
 
-        <div className="bg-white rounded-lg border border-slate-100 shadow-sm p-10">
-          <form className="space-y-5" onSubmit={handleSubmit}>
-
-            <div className="flex flex-col items-center justify-center">
+            {/* Profile Upload Section */}
+            <div className="flex flex-col items-center justify-center rounded-xl p-4 border border-dashed border-slate-50">
               <div className="relative">
-                <div className="w-28 h-28 rounded-full border-4 border-white shadow-md overflow-hidden bg-slate-200 flex items-center justify-center">
+                <div className="w-24 h-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-slate-200 flex items-center justify-center">
                   {profileImage ? (
                     <img
                       src={profileImage}
@@ -265,15 +265,15 @@ const AddEmployeeForm: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <User size={40} className="text-slate-500" />
+                    <User size={36} className="text-slate-400" />
                   )}
                 </div>
 
                 <label
                   htmlFor="profile-upload"
-                  className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-md"
+                  className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full cursor-pointer shadow-md transition-colors"
                 >
-                  <Camera size={16} />
+                  <Camera size={14} />
                 </label>
 
                 <input
@@ -285,238 +285,270 @@ const AddEmployeeForm: React.FC = () => {
                 />
               </div>
 
-              <p className="text-sm text-slate-500 mt-3">
-                Upload Employee Profile
+              <p className="text-xs font-medium text-slate-500 mt-2">
+                Upload Employee Profile Photo
               </p>
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 font-medium">
                 {error}
               </div>
             )}
 
-            <section>
-              <div className="flex items-center gap-3 mb-4 pb-2 border-b border-slate-200">
-                <User size={20} className="text-slate-400" />
-                <h2 className="text-lg font-semibold text-blue-800">
+            {/* General Information Section */}
+            <section className="space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <User size={18} className="text-blue-600" />
+                <h2 className="text-md font-bold text-blue-800">
                   General Information
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
-                    Name
-                  </label>
-                  <input
-                    name="name"
-                    value={formState.name} 
-                    onChange={handleInputChange}
-                    placeholder="e.g. Aung Aung"
-                    className="w-full px-4 py-3 rounded-md border-slate-100 bg-slate-100"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
-                    Employee ID
-                  </label>
-                  <input
-                    name="employee_id"
-                    value={formState.employee_id}
-                    onChange={handleInputChange}
-                    placeholder="e.g. EMP-2026-001"
-                    className="w-full px-4 py-3 rounded-md border-slate-100 bg-slate-100"
-                    required
-                    disabled={isEditMode}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
-                    Email
-                  </label>
-                  <input
-                    name="email"
-                    type="email"
-                    value={formState.email}
-                    onChange={handleInputChange}
-                    placeholder="e.g. aung.aung@example.com"
-                    className="w-full px-4 py-3 rounded-md border-slate-100 bg-slate-100"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
-                    Position
-                  </label>
-                  <input
-                    name="position"
-                    value={formState.position}
-                    onChange={handleInputChange}
-                    placeholder="e.g. IT Support"
-                    className="w-full px-4 py-3 rounded-md border-slate-100 bg-slate-100"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
-                    Joined Date
-                  </label>
-                  <div className="relative">
-                    <input
-                      name="joined_date"
-                      type="date"
-                      value={formState.joined_date}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border-slate-100 rounded-md bg-slate-100"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-slate-600">
-                    Left Date
-                  </label>
-                  <div className="relative">
-                    <input
-                      name="left_date"
-                      type="date"
-                      value={formState.left_date} 
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border-slate-100 rounded-md bg-slate-100"
-                    />
-                  </div>
-                </div>
-
-              </div>
-            </section>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-slate-600">
-                  Phone Number
-                </label>
-                <input
-                  name="phone_number"
-                  type="tel"
-                  value={formState.phone_number} 
-                  onChange={handleInputChange}
-                  placeholder="e.g. 09123456789"
-                  className="w-full px-4 py-3 rounded-md border-slate-100 bg-slate-100"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-slate-600">
-                  Status
-                </label>
-                <div className="relative">
-                  <select
-                    name="status"
-                    value={formState.status} 
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-slate-100 rounded-md bg-slate-100 appearance-none"
-                  >
-                    <option value="active">Active</option>
-                    <option value="suspended">Suspended</option>
-                    <option value="resigned">Resigned</option>
-                  </select>
-                  <ChevronDown
-                    size={18}
-                    className="absolute right-3 top-3 text-gray-400 pointer-events-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-slate-600">
-                  Role
-                </label>
-                <div className="relative">
-                  <select
-                    name="role"
-                    value={formState.role} 
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-slate-100 rounded-md bg-slate-100 appearance-none"
-                  >
-                    <option value="admin">Admin</option>
-                    <option value="employee">Employee</option>
-                    <option value="hr">HR</option>
-                  </select>
-                  <ChevronDown
-                    size={18}
-                    className="absolute right-3 top-3 text-gray-400 pointer-events-none"
-                  />
-                </div>
-              </div>
-
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-slate-600">
-                  Password {isEditMode && <span className="text-gray-400 font-normal">(Optional)</span>}
-                </label>
-                <div className="relative">
-                  <input
-                    name="password"
-                    type={showPassword ? 'text' : 'password'} 
-                    value={formState.password} 
-                    onChange={handleInputChange}
-                    placeholder="Enter password"
-                    className="w-full px-4 pr-12 py-3 rounded-md border-slate-100 bg-slate-100"
-                    autoComplete="new-password"
-                    required={!isEditMode}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3.5 text-gray-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                  </button>
-                </div>
-              </div>
+              
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  {/* Full Name */}
+  <div className="space-y-1.5">
+    <label className="text-xs font-semibold text-slate-600">
+      Full Name <span className="text-red-500">*</span>
+    </label>
+    <input
+      name="name"
+      value={formState.name} 
+      onChange={handleInputChange}
+      placeholder="e.g. Aung Aung"
+      className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
+        formState.name ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
+      }`}
+      required
+    />
+  </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-slate-600">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <input
-                    name="password_confirmation"
-                    type={showConfirmPassword ? 'text' : 'password'} 
-                    value={formState.password_confirmation} 
-                    onChange={handleInputChange}
-                    placeholder="Confirm password"
-                    className="w-full px-4 pr-12 py-3 rounded-md border-slate-100 bg-slate-100"
-                    autoComplete="new-password"
-                    required={!isEditMode}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-3.5 text-gray-400 hover:text-slate-600"
-                  >
-                    {showConfirmPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                  </button>
-                </div>
-              </div>
+  {/* Employee ID */}
+  <div className="space-y-1.5">
+    <label className="text-xs font-semibold text-slate-600">
+      Employee ID <span className="text-red-500">*</span>
+    </label>
+    <input
+      name="employee_id"
+      value={formState.employee_id}
+      onChange={handleInputChange}
+      placeholder="e.g. EMP-001"
+      className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed ${
+        isEditMode 
+          ? 'bg-slate-50 border-slate-200' 
+          : formState.employee_id 
+            ? 'bg-blue-50 border-blue-200' 
+            : 'bg-white border-slate-200'
+      }`}
+      required
+    
+    />
+  </div>
 
-            </div>
+  {/* Email Address */}
+  <div className="space-y-1.5">
+    <label className="text-xs font-semibold text-slate-600">
+      Email Address <span className="text-red-500">*</span>
+    </label>
+    <input
+      name="email"
+      type="email"
+      value={formState.email}
+      onChange={handleInputChange}
+      placeholder="e.g. aung.aung@example.com"
+      className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
+        formState.email ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
+      }`}
+      required
+    />
+  </div>
 
-            <div className="flex justify-end gap-4 pt-6">
+  {/* Position */}
+  <div className="space-y-1.5">
+    <label className="text-xs font-semibold text-slate-600">
+      Position
+    </label>
+    <input
+      name="position"
+      value={formState.position}
+      onChange={handleInputChange}
+      placeholder="e.g. Developer"
+      className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
+        formState.position ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
+      }`}
+    />
+  </div>
+
+  {/* Joined Date */}
+  <div className="space-y-1.5">
+    <label className="text-xs font-semibold text-slate-600">
+      Joined Date
+    </label>
+    <input
+      name="joined_date"
+      type="date"
+      value={formState.joined_date}
+      onChange={handleInputChange}
+      className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
+        formState.joined_date ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
+      }`}
+    />
+  </div>
+
+  {/* Left Date */}
+  <div className="space-y-1.5">
+    <label className="text-xs font-semibold text-slate-600">
+      Left Date
+    </label>
+    <input
+      name="left_date"
+      type="date"
+      value={formState.left_date} 
+      onChange={handleInputChange}
+      className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
+        formState.left_date ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
+      }`}
+    />
+  </div>
+</div>
+</section>
+
+{/* Status, Role & Contact Section */}
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+  {/* Phone Number */}
+  <div className="space-y-1.5">
+    <label className="text-xs font-semibold text-slate-600">
+      Phone Number
+    </label>
+    <input
+      name="phone_number"
+      type="tel"
+      value={formState.phone_number} 
+      onChange={handleInputChange}
+      placeholder="e.g. 09123456789"
+      className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
+        formState.phone_number ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
+      }`}
+    />
+  </div>
+
+  {/* Status */}
+  <div className="space-y-1.5">
+    <label className="text-xs font-semibold text-slate-600">
+      Status
+    </label>
+    <div className="relative">
+      <select
+        name="status"
+        value={formState.status} 
+        onChange={handleInputChange}
+        className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none pr-10 ${
+          formState.status ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
+        }`}
+      >
+        <option value="active">Active</option>
+        <option value="suspended">Suspended</option>
+        <option value="resigned">Resigned</option>
+      </select>
+      <ChevronDown
+        size={16}
+        className="absolute right-3 top-3.5 text-slate-400 pointer-events-none"
+      />
+    </div>
+  </div>
+
+  {/* System Role */}
+  <div className="space-y-1.5">
+    <label className="text-xs font-semibold text-slate-600">
+    Role
+    </label>
+    <div className="relative">
+      <select
+        name="role"
+        value={formState.role} 
+        onChange={handleInputChange}
+        className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none pr-10 ${
+          formState.role ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
+        }`}
+      >
+        <option value="admin">Admin</option>
+        <option value="employee">Employee</option>
+        <option value="hr">HR</option>
+      </select>
+      <ChevronDown
+        size={16}
+        className="absolute right-3 top-3.5 text-slate-400 pointer-events-none"
+      />
+    </div>
+  </div>
+</div>
+
+{/* Password Fields */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+  {/* Password */}
+  <div className="space-y-1.5">
+    <label className="text-xs font-semibold text-slate-600">
+      Password {isEditMode && <span className="text-slate-400 font-normal">(Leave blank to keep unchanged)</span>}
+    </label>
+    <div className="relative">
+      <input
+        name="password"
+        type={showPassword ? 'text' : 'password'} 
+        value={formState.password} 
+        onChange={handleInputChange}
+        placeholder="Enter password"
+        className={`w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
+          formState.password ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
+        }`}
+        autoComplete="new-password"
+        required={!isEditMode}
+      />
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+      >
+        {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+      </button>
+    </div>
+  </div>
+
+  {/* Confirm Password */}
+  <div className="space-y-1.5">
+    <label className="text-xs font-semibold text-slate-600">
+      Confirm Password
+    </label>
+    <div className="relative">
+      <input
+        name="password_confirmation"
+        type={showConfirmPassword ? 'text' : 'password'} 
+        value={formState.password_confirmation} 
+        onChange={handleInputChange}
+        placeholder="Confirm password"
+        className={`w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
+          formState.password_confirmation ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
+        }`}
+        autoComplete="new-password"
+        required={!isEditMode}
+      />
+      <button
+        type="button"
+        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+        className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+      >
+        {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+      </button>
+    </div>
+  </div>
+</div>
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-8 py-2 border rounded hover:bg-slate-50"
+                className="px-6 py-2 border border-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors"
               >
                 Cancel
               </button>
@@ -524,7 +556,7 @@ const AddEmployeeForm: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-2 bg-blue-800 text-white rounded disabled:opacity-50 hover:bg-blue-900"
+                className="px-6 py-2 bg-blue-800 hover:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-colors shadow-sm"
               >
                 {loading ? 'Saving...' : 'Save Employee'}
               </button>
