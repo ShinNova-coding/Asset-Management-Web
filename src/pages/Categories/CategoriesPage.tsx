@@ -68,8 +68,8 @@ export default function CategoriesPage() {
   const columns = useMemo(() => [
     { 
       header: "No.", 
-      cell: (info) => currentPage * rowsPerPage + info.row.index + 1, 
-      enableSorting: false 
+      cell: ({row}:any) => row.index +1
+      
     },
     { accessorKey: "name", header: "Name" },
     { 

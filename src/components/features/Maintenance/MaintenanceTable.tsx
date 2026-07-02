@@ -247,7 +247,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     }
   }
   
-  // ── Column overrides & Prepend Numbering ───────────────────────────
+  
   const columns = React.useMemo(() => {
     const indexColumn = {
       id: "rowNumber",
