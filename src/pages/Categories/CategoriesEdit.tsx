@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Pencil } from "lucide-react";
+import { FaEdit } from "react-icons/fa";
 import { apiRequest } from "@/lib/apiService";
 
 interface EditProps {
@@ -52,10 +52,10 @@ export default function CategoriesEdit({ category, onUpdated }: EditProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon">
-          <Pencil className="h-4 w-4 text-blue-600" />
+          <FaEdit className="h-5 w-5 text-blue-400" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-white">
         <DialogHeader>
           <DialogTitle>Edit Category</DialogTitle>
         </DialogHeader>
@@ -69,7 +69,7 @@ export default function CategoriesEdit({ category, onUpdated }: EditProps) {
               required
             />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="bg-blue-800 flex justify-end ml-auto" disabled={loading}>
             {loading ? "Updating..." : "Save Changes"}
           </Button>
         </form>

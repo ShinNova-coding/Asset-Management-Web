@@ -6,47 +6,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Loader2, ChevronLeft, ChevronRight, Search } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/apiService";
+
 import AddNewCategories from "@/pages/Categories/AddNewCategories";
-import CategoriesDelete from "./CategoriesDelete";
-import CategoriesEdit from "./CategoriesEdit";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import { IoCloudDownloadOutline } from "react-icons/io5";
+import CategoriesDelete from "@/pages/Categories/CategoriesDelete";
+import CategoriesEdit from "@/pages/Categories/CategoriesEdit";
 import { FaEdit } from "react-icons/fa";
 
-interface EditProps {
-  onEdit?: () => void;
-}
-function EditButton({ onEdit }: EditProps) {
-  return (
-    <button 
-      onClick={(e) => {
-        e.stopPropagation();
-        if (onEdit) onEdit();
-      }} 
-      className="text-blue-400 hover:text-blue-600 transition p-1"
-      title="Edit Asset"
-    >
-      <FaEdit size={20} />
-    </button>
-  );
-}
-
-import { RiDeleteBin4Fill } from "react-icons/ri";
-function DeleteButton({ onDelete }: { onDelete?: () => void }) {
-  return (
-    <button 
-      onClick={(e) => {
-        e.stopPropagation();
-        if (onDelete) onDelete();
-      }} 
-      className="text-red-400 hover:text-red-700 transition p-1"
-      title="Delete Asset"
-    >
-      <RiDeleteBin4Fill size={20} />
-    </button>
-  );
-}
+function EditButton() { return <div className="text-blue-400 hover:text-blue-600 transition p-1 cursor-pointer"><FaEdit size={18} /></div>; }
+function DeleteButton() { return <div className="text-red-400 hover:text-red-700 transition cursor-pointer"><svg stroke="currentColor" fill="currentColor" viewBox="0 0 24 24" height="20" width="20"><path d="M5 20a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8H5v12zm5-10h2v8h-2v-8zm4 0h2v8h-2v-8zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg></div>; }
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
@@ -57,20 +24,15 @@ export default function CategoriesPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 5;
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  useEffect(() => { fetchCategories(); }, []);
 
   const fetchCategories = async () => {
     setLoading(true);
     try {
       const response = await apiRequest("/category", "GET");
-      setCategories(response.data);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    } finally {
-      setLoading(false);
-    }
+      setCategories(response.data || []);
+    } catch (error) { console.error("Error fetching categories:", error); } 
+    finally { setLoading(false); }
   };
 
   const handleExportPDF = () => {
