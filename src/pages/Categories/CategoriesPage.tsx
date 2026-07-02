@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Loader2, ChevronLeft, ChevronRight, Search } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/apiService";
-
+import { IoCloudDownloadOutline } from "react-icons/io5";
 import AddNewCategories from "@/pages/Categories/AddNewCategories";
 import CategoriesDelete from "@/pages/Categories/CategoriesDelete";
 import CategoriesEdit from "@/pages/Categories/CategoriesEdit";
@@ -183,6 +183,7 @@ export default function CategoriesPage() {
                         <TableHead className="text-white font-semibold py-3.5 pl-6 w-[12%] text-center text-sm">No.</TableHead>
                         <TableHead className="text-white font-semibold py-3.5 px-4 w-[48%] text-sm">Name</TableHead>
                         <TableHead className="text-white font-semibold py-3.5 px-4 w-[22%] text-sm">Created At</TableHead>
+                        
                         <TableHead className="text-white font-semibold py-3.5 pr-6 w-[18%] text-center text-sm">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
