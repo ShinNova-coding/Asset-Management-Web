@@ -4,10 +4,11 @@ import React, { useEffect, useState, useMemo } from "react";
 import { 
   useReactTable, 
   getCoreRowModel, 
-  getSortedRowModel, 
+  getSortedRowModel,   
   getFilteredRowModel, 
   getPaginationRowModel, 
-  flexRender 
+  flexRender,
+  type SortingState 
 } from "@tanstack/react-table";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,10 @@ import AddNewCategories from "@/pages/Categories/AddNewCategories";
 import CategoriesDelete from "@/pages/Categories/CategoriesDelete";
 import CategoriesEdit from "@/pages/Categories/CategoriesEdit";
 import { FaEdit } from "react-icons/fa";
+
+// Imported PDF packages
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 function EditButton() { 
   return (
@@ -43,7 +48,7 @@ function DeleteButton() {
 export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sorting, setSorting] = useState([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [searchTerm, setSearchTerm] = useState("");
   
   const [currentPage, setCurrentPage] = useState(0);
@@ -67,26 +72,35 @@ export default function CategoriesPage() {
 
   const columns = useMemo(() => [
     { 
-      header: "No.", 
-      cell: ({row}:any) => row.index +1
-      
+      accessorKey: "no", 
+      header: "No.",
+      size: 60, 
+      enableSorting: false,
+      cell: ({row}:any) => <div className="text-center">{row.index + 1}</div>
     },
-    { accessorKey: "name", header: "Name" },
+    { 
+      accessorKey: "name", 
+      header: "Name",
+      size: 100, 
+    },
     { 
       accessorKey: "created_at", 
       header: "Created At", 
+      size: 160,
       cell: (info) => (info.getValue() as string)?.split('T')[0] 
     },
     { 
       accessorKey: "updated_at", 
       header: "Updated At", 
+      size: 120,
       cell: (info) => info.getValue() ? (info.getValue() as string).split('T')[0] : "N/A" 
     },
     { 
       header: "Actions", 
+      size: 120, 
       enableSorting: false, 
       cell: ({ row }) => (
-        <div className="flex justify-center items-center gap-3">
+        <div className="flex justify-center items-center gap-2"> 
           <CategoriesEdit category={{ id: row.original.id, name: row.original.name }} onUpdated={fetchCategories} triggerIcon={<EditButton />} />
           <CategoriesDelete categoryId={row.original.id} categoryName={row.original.name} onDeleted={fetchCategories} triggerIcon={<DeleteButton />} />
         </div>
@@ -94,27 +108,50 @@ export default function CategoriesPage() {
     },
   ], [currentPage]);
 
-  const table = useReactTable({
+  
+const table = useReactTable({
     data: categories,
     columns,
     state: { 
-      sorting, 
+      sorting,             
       globalFilter: searchTerm,
       pagination: { pageIndex: currentPage, pageSize: rowsPerPage }
     },
-    onSortingChange: setSorting,
+    onSortingChange: setSorting, 
     onGlobalFilterChange: setSearchTerm,
     onPaginationChange: (updater) => {
       const nextState = typeof updater === 'function' ? updater({ pageIndex: currentPage, pageSize: rowsPerPage }) : updater;
       setCurrentPage(nextState.pageIndex);
     },
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    getSortedRowModel: getSortedRowModel(),     
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    doc.setFontSize(18);
+    doc.text("Categories Report", 14, 20);
+    
+    const tableData = categories.map((item, index) => [
+      index + 1,
+      item.name || "N/A",
+      item.created_at ? String(item.created_at).split('T')[0] : "N/A",
+      item.updated_at ? String(item.updated_at).split('T')[0] : "N/A"
+    ]);
+    
+    autoTable(doc, {
+      startY: 30,
+      head: [['No.', 'Name', 'Created At', 'Updated At']],
+      body: tableData,
+      headStyles: { fillColor: [30, 64, 175] }, 
+      theme: 'striped'
+    });
 
-  const handleExportPDF = () => { /* PDF Logic */ };
+    doc.save("Categories_Report.pdf");
+  };
+  
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(0);
@@ -127,17 +164,20 @@ export default function CategoriesPage() {
       <div className="max-w-8xl mx-auto w-full">
         <div className="flex justify-between items-center mb-5 w-full">
           <h2 className="text-2xl font-bold text-blue-900 tracking-tight">Categories</h2>
-          <div className="flex items-center gap-3">
-            <Button onClick={handleExportPDF} className="bg-blue-800 hover:bg-blue-700 text-white rounded-xl h-10">
-               <IoCloudDownloadOutline size={16} /> 
-            </Button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExportPDF}
+              className="px-4 py-2 bg-blue-800 border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2"
+            >
+              <IoCloudDownloadOutline size={16} />
+            </button>
             <AddNewCategories onCategoryAdded={fetchCategories} />
           </div>
         </div>
 
-        <Card className="shadow-md border border-slate-200 rounded-2xl overflow-hidden bg-white p-4 w-full">
+        <Card className="shadow-md border border-slate-200 rounded-xl overflow-hidden bg-white p-3 w-full">
           <CardContent className="p-0 flex flex-col gap-4">
-            <div className="flex rounded-xl bg-white p-4 border border-slate-200 shadow-sm items-center w-full">
+            <div className="flex rounded-xl bg-white p-3 border border-slate-200 shadow-sm items-center w-full">
               <div className="relative w-full">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
                 <input
@@ -151,32 +191,69 @@ export default function CategoriesPage() {
             </div>
 
             {loading ? (
-             <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
-        </div>
+              <div className="flex items-center justify-center min-h-screen bg-slate-50">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+              </div>
             ) : (
               <>
                 <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
-                  <Table className="w-full table-fixed">
+                  <Table className="w-full table-fixed"> 
                     <TableHeader className="bg-blue-800">
                       {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
-                          {headerGroup.headers.map((header) => (
-                            <TableHead key={header.id} className="text-white font-semibold py-3 px-4 text-sm" onClick={header.column.getToggleSortingHandler()}>
-                              {flexRender(header.column.columnDef.header, header.getContext())}
-                            </TableHead>
-                          ))}
+                        <TableRow key={headerGroup.id} className="hover:bg-blue-800 border-none">
+                          {headerGroup.headers.map((header) => {
+                            const isCenter = header.column.id === "no" || header.column.id === "Actions";
+                            const canSort = header.column.getCanSort();
+                            const isSorted = header.column.getIsSorted();
+
+                            return (
+                              <TableHead 
+                                key={header.id} 
+                                className={`text-white font-semibold py-2 px-4 text-sm whitespace-nowrap ${
+                                  canSort ? "cursor-pointer select-none" : ""
+                                } ${isCenter ? "text-center" : "text-left"}`} 
+                                style={{ width: header.column.getSize() }}
+                                onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                              >
+                                <div className={`flex items-center gap-1 ${isCenter ? "justify-center" : ""}`}>
+                                  {flexRender(header.column.columnDef.header, header.getContext())}
+                                  
+                                  
+                                  {canSort && (
+                                    <span className="text-slate-300">
+                                      {isSorted === "asc" && <FiChevronUp size={16} className="text-white" />}
+                                      {isSorted === "desc" && <FiChevronDown size={16} className="text-white" />}
+                                      {!isSorted && (
+                                        <div className="flex flex-col opacity-30 hover:opacity-90">
+                                          <FiChevronUp size={10} className="-mb-0.5" />
+                                          <FiChevronDown size={10} />
+                                        </div>
+                                      )}
+                                    </span>
+                                  )}
+                                </div>
+                              </TableHead>
+                            );
+                          })}
                         </TableRow>
                       ))}
                     </TableHeader>
+
                     <TableBody>
                       {table.getRowModel().rows.map((row) => (
                         <TableRow key={row.id} className="hover:bg-slate-50/80 border-b border-slate-100 transition-colors">
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id} className="py-3.5 px-4 text-sm text-slate-700">
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
-                          ))}
+                          {row.getVisibleCells().map((cell) => {
+                            const isCenter = cell.column.id === "no" || cell.column.id === "Actions";
+                            return (
+                              <TableCell 
+                                key={cell.id} 
+                                className={`py-3.5 px-4 text-sm text-slate-700 ${isCenter ? "text-center" : "text-left"}`}
+                                style={{ width: cell.column.getSize() }}
+                              >
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </TableCell>
+                            );
+                          })}
                         </TableRow>
                       ))}
                     </TableBody>

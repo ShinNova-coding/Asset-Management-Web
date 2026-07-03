@@ -3,7 +3,6 @@ import { createBrowserRouter } from "react-router-dom"
 import Login from "@/pages/Auth/Login"
 import Layout from "@/layouts/Layout"
 import ProtectedRoute from "./ProtectedRoute"
-
 import DashboardPage from "@/pages/Dashboard/DashboardPage"
 import InventoryPage from "@/pages/Inventory/InventoryPage"
 import AssignmentPage from "@/pages/Assignment/AssignmentPage"
@@ -107,7 +106,7 @@ export const router = createBrowserRouter([
 
           {
             path: "employees",
-  element: <UserManagementPage />,
+            element: <UserManagementPage />,
           },
           {
             path: "add-employee",
