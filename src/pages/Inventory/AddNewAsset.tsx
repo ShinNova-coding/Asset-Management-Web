@@ -263,10 +263,10 @@ useEffect(() => {
 
      let response;
   if (isEditMode) {
-    // PATCH request အတွက်
+   
     response = await apiRequest(`/asset/${targetId}`, "PATCH", assetPayload);
   } else {
-    // POST request အတွက်
+   
     response = await apiRequest("/asset", "POST", assetPayload);
   }
 

@@ -24,7 +24,7 @@ export default function ViewDetailsForm({ data }: Props) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
+    <div className="max-w-6xl bg-[#F3F0F7] mx-auto p-4">
       <div className="bg-white shadow-sm border border-slate-200 rounded-2xl p-6 space-y-6">
         <h2 className="text-2xl font-bold text-blue-800">Employee Details</h2>
 

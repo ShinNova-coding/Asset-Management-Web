@@ -47,7 +47,7 @@ export default function CategoriesDelete({ categoryId, categoryName, onDeleted }
         <RiDeleteBin4Fill className="h-5 w-5 text-red-600 cursor-pointer" />
       </DialogTrigger>
       
-      {/* Box ပတ်လည် Border ကို နဂိုအတိုင်း ပြန်ထားပေးထားပါတယ် */}
+      
       <DialogContent className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
         <DialogHeader>
           <DialogTitle className="text-base font-bold text-slate-900">Confirm Delete</DialogTitle>
@@ -56,7 +56,7 @@ export default function CategoriesDelete({ categoryId, categoryName, onDeleted }
           </DialogDescription>
         </DialogHeader>
         
-        {/* ဒီနေရာမှာ ခလုတ်တွေရဲ့အပေါ်က လိုင်းပျောက်သွားအောင် border-t-0 ကို ထည့်ပေးလိုက်ပါတယ် */}
+        
         <DialogFooter className="flex justify-end gap-2.5 pt-2 border-t-0 shadow-none">
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel

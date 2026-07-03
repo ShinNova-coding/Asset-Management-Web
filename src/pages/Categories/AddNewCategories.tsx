@@ -15,11 +15,11 @@ export default function AddNewCategories({ onCategoryAdded }: { onCategoryAdded:
     e.preventDefault();
     setLoading(true);
     try {
-      // POST request to /category
+     
       await apiRequest("/category", "POST", { name });
       setName("");
       setOpen(false);
-      onCategoryAdded(); // Trigger refresh in parent
+      onCategoryAdded(); 
     } catch (error) {
       console.error("Error creating category:", error);
     } finally {

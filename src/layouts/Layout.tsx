@@ -46,7 +46,7 @@ export default function Layout() {
 
   const currentPath = location.pathname.toLowerCase();
 
-  // User Module တွေအောက် ရောက်နေသလား စစ်ဆေးချက် (Safety Net ပိုစိပ်အောင် /edit စာသားပါ ထည့်စစ်ပေးထားပါတယ်)
+ 
   const isUserModuleActive =
     currentPath.startsWith("/usermanagement") ||
     currentPath.startsWith("/roles") ||
@@ -59,7 +59,7 @@ export default function Layout() {
     currentPath.startsWith("/add-employee") ||
     currentPath.includes("employee");
 
-  // State initialization ကို ပထမဆုံးဝင်ကတည်းက လမ်းကြောင်းအလိုက် ပွင့်လျက်သားဖြစ်အောင် ထားခြင်း
+  
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(() => isUserModuleActive);
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function Layout() {
     }
   }, [currentPath, isUserModuleActive]);
 
-  // ဒုက္ခပေးနေတဲ့ ထိပ်ဆုံးက Block ဖြစ်စေမယ့် Return Loading ကို ဖယ်ထုတ်ပြီး Boolean ပြောင်းလိုက်ပါတယ်
+  
   const isLoading = !permissions || !Array.isArray(permissions);
 
   const permissionNames = isLoading
@@ -82,16 +82,16 @@ export default function Layout() {
   const hasUserManagementPermission = permissionNames.includes("view-users");
   const hasRolesPermission = permissionNames.includes("view-roles");
 
-  // Loading ဖြစ်နေရင်တောင် ဒီလမ်းကြောင်းပေါ်မှာ ရှိနေရင် User Management Button ကို DOM ကနေ လုံးဝအပျောက်မခံဘဲ အတင်းပြထားမယ့် Logic
+  
   const showUserManagementMenu = isLoading ? isUserModuleActive : (hasUserManagementPermission || hasRolesPermission || isUserModuleActive);
 
   return (
     <SidebarProvider style={{ "--sidebar-width": "240px" } as React.CSSProperties}>
       <div className="flex min-h-screen w-full bg-[#F0F4F8]">
-        {/* Sidebar Section - ၎င်းတည်ဆောက်ပုံကြီးတစ်ခုလုံး ဘယ်တော့မှ Unmount မဖြစ်တော့ပါ */}
+       
         <Sidebar className="border-r border-blue-100 bg-[#1E3A8A]">
           <SidebarContent className="bg-[#1E3A8A] px-4 py-8">
-            {/* Logo and Title */}
+           
             <div className="flex items-center gap-3 px-2 mb-8">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-900/20">
                 <BsFillBoxFill className="text-white h-6 w-6" />
@@ -99,16 +99,16 @@ export default function Layout() {
               <h1 className="text-xl font-bold tracking-tight text-white">ITAMS</h1>
             </div>
 
-            {/* Navigation Menu */}
+           
             <SidebarMenu className="space-y-1">
               {isLoading ? (
-                // ခေတ္တ Loading ဖြစ်ချိန်မှာ Sidebar ကြီး ပျောက်မသွားဘဲ စာသားလေးပဲ ငြိမ်ငြိမ်လေး ပြထားမယ်
+                
                 <div className="px-4 py-3 text-blue-300 text-xs animate-pulse">
                   Loading Menu...
                 </div>
               ) : (
                 <>
-                  {/* Regular Filtered Menu Items */}
+                 
                   {filteredMenuItems.map((item) => {
                     const isActive =
                       currentPath.startsWith(item.path.toLowerCase()) ||
@@ -133,10 +133,10 @@ export default function Layout() {
                 </>
               )}
 
-              {/* Collapsible User Management & Roles Menu */}
+              
               {showUserManagementMenu && (
                 <SidebarMenuItem>
-                  {/* Dropdown Parent Header Button */}
+                  
                   <SidebarMenuButton
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
@@ -159,7 +159,7 @@ export default function Layout() {
                   {/* Dropdown Sub-Items */}
                   {isUserMenuOpen && (
                     <div className="mt-1 pl-4 space-y-1 border-l border-blue-800/60 ml-6">
-                      {/* Sub item: Users - Loading ဖြစ်နေရင်တောင် လက်ရှိလမ်းကြောင်းအရ ပြထားပေးမယ် */}
+                     
                       {(hasUserManagementPermission || isUserModuleActive || isLoading) && (
                         <SidebarMenuButton
                           onClick={() => navigate("/usermanagement")}
@@ -210,7 +210,7 @@ export default function Layout() {
           </div>
           <main className="flex-1 overflow-y-auto">
             {isLoading ? (
-              // ကာကွယ်ရေးအနေနဲ့ Content ဧရိယာအလယ်ထဲမှာပဲ Loading ပြပေးထားပါတယ် (Sidebar ကြီး မထိခိုက်တော့ပါ)
+             
               <div className="h-full flex items-center justify-center text-[#1E3A8A] font-medium bg-[#F0F4F8]">
                 Loading Content Data...
               </div>

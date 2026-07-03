@@ -8,15 +8,13 @@ import {
   FiCalendar, 
   FiPackage, 
   FiShield, 
-  FiPhone, 
-  FiMapPin, 
-  FiBriefcase, 
+  
   FiTag,
   FiFileText,
   FiCpu,
   FiHardDrive,
   FiLayers,
-  FiInfo,
+  
   FiHash,
   FiEdit3 
 } from "react-icons/fi"
@@ -152,7 +150,7 @@ export function InventoryDetail() {
   }
 
   return (
-    <div className="max-w-8xl mx-auto p-6 md:p-10 space-y-6 text-blue-950 font-sans">
+    <div className="max-w-8xl bg-[#F3F0F7] mx-auto p-6 md:p-10 space-y-6 text-blue-950 font-sans">
       
      
       <div className="flex items-center justify-between">

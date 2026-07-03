@@ -22,7 +22,7 @@ export default function CategoriesEdit({ category, onUpdated }: EditProps) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
-  // Reset input if the category object changes
+ 
   useEffect(() => {
     setName(category.name);
   }, [category]);
@@ -31,8 +31,7 @@ export default function CategoriesEdit({ category, onUpdated }: EditProps) {
     e.preventDefault();
     setLoading(true);
     try {
-      // Matches your provided API structure:
-      // PATCH request to /category/category_id
+     
       await apiRequest("/category/category_id", "PATCH", {
         category_id: category.id,
         name: name

@@ -79,7 +79,7 @@ const MaintenanceDetailsForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-slate-50 min-h-screen font-sans relative">
+    <div className="max-w-8xl mx-auto p-6 bg-[#F3F0F7] min-h-screen font-sans relative">
       
       {/* Back Button */}
       <button

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { fetchRoles } from "@/lib/axios";
-import { apiRequest } from "@/lib/apiService"; // apiRequest ကို import လုပ်ပါ
+import { apiRequest } from "@/lib/apiService"; 
 
 export default function EditRolePage() {
   const { id } = useParams<{ id: string }>();
@@ -24,7 +24,7 @@ export default function EditRolePage() {
     const loadData = async () => {
       setLoading(true);
       try {
-        // apiRequest ကိုသုံးပြီး permission များရယူခြင်း
+       
         const [rolesData, permsResponse] = await Promise.all([
           fetchRoles(),
           apiRequest("/permission", "GET")
@@ -53,7 +53,7 @@ export default function EditRolePage() {
   const handleUpdate = async () => {
     setIsSaving(true);
     try {
-      // apiRequest ကိုသုံးပြီး PATCH request ပို့ခြင်း
+      
       await apiRequest(`/role/${id}`, "PATCH", {
         role_id: id,
         name: role.name,
@@ -70,7 +70,7 @@ export default function EditRolePage() {
     }
   };
 
-  // ... (togglePermission နှင့် return JSX အပိုင်းများကိုမူလအတိုင်းထားပါ)
+  
   const togglePermission = (permName: string) => {
     setSelectedPermissions(prev => 
       prev.includes(permName) 

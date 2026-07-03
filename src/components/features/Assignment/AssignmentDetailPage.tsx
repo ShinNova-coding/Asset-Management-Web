@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   FiCalendar, FiUser, FiCpu, FiFileText, 
-  FiClock, FiArrowLeft, FiHash, FiShield, FiMonitor
+   FiArrowLeft
 } from "react-icons/fi";
 import type { Assignment } from "@/data/assignmentdata";
 import { apiRequest } from "@/lib/apiService";
@@ -71,7 +71,7 @@ const AssignmentDetailPage = () => {
   const displayAssetName = formData.asset?.name || formData.asset_name || "Unknown Asset Unit";
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-10 font-sans">
+    <div className="min-h-screen bg-[#F3F0F7] p-4 md:p-10 font-sans">
       <div className="max-w-8xl mx-auto space-y-6">
         
         {/* Navigation */}
@@ -82,7 +82,7 @@ const AssignmentDetailPage = () => {
         {/* Title Section */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-blue-800"> Details</h1>
+            <h1 className="text-2xl font-bold text-blue-800">Assignment Details</h1>
             
           </div>
           <div className={`px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 ${isActive ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"}`}>
