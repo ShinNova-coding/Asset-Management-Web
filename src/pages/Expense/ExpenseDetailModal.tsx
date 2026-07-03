@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react' // useEffect ထည့်ထားပါတယ်
 import { X } from 'lucide-react'
 import { 
   FiCalendar, 
@@ -12,7 +12,8 @@ import {
   FiDollarSign, 
   FiTool, 
   FiPhone, 
-  FiMapPin 
+  FiMapPin,
+  FiImage 
 } from "react-icons/fi"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -56,6 +57,13 @@ export interface ExpenseDetailData {
   created_at: string;
   updated_at: string;
   
+  // Backend က လာနိုင်သမျှ key နာမည်များ
+  voucher_url?: string | null;
+  voucher_image?: string | null;
+  voucher_path?: string | null;
+  image_url?: string | null;
+  voucher?: string | null;
+
   user?: UserData | null;
   maintenance?: MaintenanceData | null;
   asset?: AssetData | null;
@@ -68,7 +76,33 @@ interface ExpenseDetailModalProps {
 }
 
 export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, onClose, expense }) => {
+  
+  // 🔍 DEBUGGING: ဘရောက်ဆာရဲ့ Console (F12) မှာ Backend ဒေတာကို စစ်ဖို့ ထည့်ထားပါတယ်
+  useEffect(() => {
+    if (isOpen && expense) {
+      console.log("=== Modal သို့ ရောက်လာသော Expense Object ===");
+      console.log(expense);
+    }
+  }, [isOpen, expense]);
+
   if (!isOpen || !expense) return null;
+
+  // ၁။ ဒေတာထဲကနေ ပုံရဲ့ string value ကို မိအောင်ဖမ်းယူခြင်း
+  const rawVoucherSrc = 
+    expense.voucher_url || 
+    expense.voucher_image || 
+    expense.voucher_path || 
+    expense.image_url || 
+    expense.voucher;
+
+  // ၂။ သင့်ရဲ့ API လိပ်စာအရ Base URL သတ်မှတ်ခြင်း
+  // အကယ်၍ Laravel storage link သုံးထားရင် "http://192.168.100.185:1011/storage/" ဟု ပြောင်းပေးရန် လိုအပ်နိုင်ပါသည်
+  const BASE_URL = "http://192.168.100.185:1011/"; 
+  
+  // ၃။ URL အပြည့်အစုံ ဖြစ်အောင် စုစည်းခြင်း
+  const finalVoucherUrl = rawVoucherSrc 
+    ? (rawVoucherSrc.startsWith('http') ? rawVoucherSrc : `${BASE_URL}${rawVoucherSrc}`)
+    : null;
 
   const isActive = expense.status?.toLowerCase() === "approved" || expense.status?.toLowerCase() === "active";
   const isRequested = expense.status?.toLowerCase() === "requested";
@@ -101,7 +135,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       
-      {/* Backdrop - နောက်ခံကို ဝါးစေရန် backdrop-blur-sm သုံးထားပါသည် */}
+      {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300" 
         onClick={onClose} 
@@ -277,6 +311,47 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
                     {maintenanceDetails.vendor_address}
                   </p>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Voucher Attachment Section */}
+          {finalVoucherUrl ? (
+            <Card className="border border-slate-200/80 shadow-sm bg-white rounded-xl overflow-hidden">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-center gap-2 text-sm font-bold uppercase text-blue-600">
+                  <FiImage className="w-4 h-4" />
+                  Voucher Attachment
+                </div>
+                <div className="relative mt-2 flex justify-center bg-slate-50 rounded-xl p-3 border border-slate-100 max-h-[320px] overflow-hidden group">
+                  <img 
+                    src={finalVoucherUrl} 
+                    alt="Expense Voucher" 
+                    className="max-h-[290px] w-auto object-contain rounded-lg shadow-sm transition duration-300 group-hover:scale-[1.01] cursor-pointer"
+                    onClick={() => window.open(finalVoucherUrl, '_blank')}
+                    title="Click to view full image"
+                    onError={(e) => {
+                      // ပုံမပွင့်ရခြင်း အကြောင်းအရင်းကို သိနိုင်ရန် ဖမ်းခြင်း
+                      e.currentTarget.style.display = 'none';
+                      const parent = e.currentTarget.parentElement;
+                      if (parent && !parent.querySelector('.img-error')) {
+                        const errText = document.createElement('p');
+                        errText.className = 'img-error text-xs text-rose-500 font-semibold py-4 text-center';
+                        errText.innerText = `⚠️ Image error (Tried URL: ${finalVoucherUrl})`;
+                        parent.appendChild(errText);
+                      }
+                    }}
+                  />
+                </div>
+                <p className="text-center text-xs text-slate-400 font-medium mt-1">
+                  💡 Click on the image to view full size
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border border-dashed border-slate-300 bg-slate-50/50 rounded-xl">
+              <CardContent className="p-4 text-center text-xs text-slate-400">
+                No voucher image data found in this expense object.
               </CardContent>
             </Card>
           )}

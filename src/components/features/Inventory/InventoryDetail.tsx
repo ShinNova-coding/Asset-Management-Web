@@ -128,7 +128,7 @@ export function InventoryDetail() {
 
   const API_REAL_IP = "http://192.168.100.185:1011"
   
-  // 🛠️ FIX: media array ထဲက image ကို အရင်ဆွဲထုတ်ရန် ပြင်ဆင်ထားပါသည်
+  
   let rawImageSource = ""
   if (assetItem.media && assetItem.media.length > 0) {
     rawImageSource = assetItem.media[0].original_url || assetItem.media[0].preview_url || ""
@@ -152,7 +152,7 @@ export function InventoryDetail() {
   }
 
   return (
-    <div className="max-w-8xl mx-auto p-6 md:p-10 space-y-6 text-slate-950 font-sans">
+    <div className="max-w-8xl mx-auto p-6 md:p-10 space-y-6 text-blue-950 font-sans">
       
      
       <div className="flex items-center justify-between">
@@ -207,7 +207,7 @@ export function InventoryDetail() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiPackage size={18} className="text-blue-600" />
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Device Specifications</h2>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-blue-800">Device Specifications</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
@@ -248,7 +248,7 @@ export function InventoryDetail() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
               <FiCalendar size={18} className="text-blue-600" />
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Procurement & Lifecycle</h2>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-blue-800">Procurement & Lifecycle</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
@@ -272,7 +272,7 @@ export function InventoryDetail() {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4 sticky top-6">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <FiFileText size={18} className="text-blue-600" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Profile Image</h2>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-blue-800">Profile Image</h2>
           </div>
           
           <div className="aspect-square w-full bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden p-2 shadow-inner">

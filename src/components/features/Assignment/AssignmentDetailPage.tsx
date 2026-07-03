@@ -1,205 +1,140 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useParams, useNavigate, useLocation } from "react-router-dom"
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import * as React from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
-  FiCalendar, 
-  FiUser, 
-  FiCpu, 
-  FiFileText, 
-  FiClock, 
-  FiArrowLeft
-} from "react-icons/fi"
-import type { Assignment } from "@/data/assignmentdata"
-import { apiRequest } from "@/lib/apiService"
+  FiCalendar, FiUser, FiCpu, FiFileText, 
+  FiClock, FiArrowLeft, FiHash, FiShield, FiMonitor
+} from "react-icons/fi";
+import type { Assignment } from "@/data/assignmentdata";
+import { apiRequest } from "@/lib/apiService";
 
 const AssignmentDetailPage = () => {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const [formData, setFormData] = useState<any | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [formData, setFormData] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRecordDetails = async () => {
-      const stateData = location.state as { editItem?: Assignment } | null
+      const stateData = location.state as { editItem?: Assignment } | null;
       if (stateData?.editItem) {
-        setFormData(stateData.editItem)
-        setLoading(false)
-        return
+        setFormData(stateData.editItem);
+        setLoading(false);
+        return;
       }
-
       try {
-        setLoading(true)
-        setError(null)
-        
-        
-        const response = await apiRequest(`/assignment/assignment_id?assignment_id=${id}`, "GET")
-        
+        setLoading(true);
+        const response = await apiRequest(`/assignment/assignment_id?assignment_id=${id}`, "GET");
         if (response?.success) {
-          const fetchedData = Array.isArray(response.data) 
-            ? response.data[0] 
-            : response.data
-            
-          setFormData(fetchedData)
+          setFormData(Array.isArray(response.data) ? response.data[0] : response.data);
         } else {
-          throw new Error(response?.message || "Failed to locate target record.")
+          throw new Error(response?.message || "Failed to locate target record.");
         }
       } catch (err: any) {
-        console.error("Error reading specific assignment:", err)
-        setError(`Unable to pull assignment record: ${err.message}`)
+        setError(err.message);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
+    if (id) fetchRecordDetails();
+  }, [id, location.state]);
 
-    if (id) {
-      fetchRecordDetails()
-    }
-  }, [id, location.state])
+  if (loading) return (
+    <div className="flex flex-col justify-center items-center h-screen bg-slate-50">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+    </div>
+  );
 
-  if (loading) {
-    return (
-       <div className="flex flex-col justify-center items-center h-48 space-y-2 text-slate-500">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
-          <p className="text-sm">Loading...</p>
-       </div>
-    )
-  }
-
-  if (error || !formData) {
-    return (
-      <div className="p-6 max-w-xl mx-auto mt-20 text-center space-y-6">
-        <div className="inline-flex p-4 bg-red-50 text-red-600 rounded-full">
+  if (error || !formData) return (
+    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+      <Card className="max-w-md w-full text-center p-8 border-none shadow-xl rounded-3xl">
+        <div className="mx-auto w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
           <FiFileText size={32} />
         </div>
-        <h1 className="text-xl font-bold text-slate-900">
-          {error || "Assignment Record Not Found"}
-        </h1>
-        <p className="text-sm text-slate-500 max-w-sm mx-auto">
-          The asset linkage system was unable to pull a matching log instance for ID token reference: {id}
-        </p>
-        <Button onClick={() => navigate("/assignment")} variant="outline" className="shadow-sm">
-          Return
-        </Button>
-      </div>
-    )
-  }
+        <h1 className="text-xl font-bold text-slate-900 mb-2">Record Not Found</h1>
+        <p className="text-slate-500 mb-6">{error || "The requested assignment could not be retrieved."}</p>
+        <Button onClick={() => navigate("/assignment")} className="w-full bg-blue-600 hover:bg-blue-700">Return to List</Button>
+      </Card>
+    </div>
+  );
 
-  const isActive = formData.status?.toLowerCase() === "active"
-  const displayUserId = formData.user?.employee_id || formData.employee_id || formData.users_id || "N/A"
-  const displayUserName = formData.user?.name || formData.user_name || "Unknown User"
-  const displayAssetCode = formData.asset?.asset_code || formData.asset_code || formData.assets_id || "N/A"
-  const displayAssetName = formData.asset?.name || formData.asset_name || "Unknown Asset Unit"
+  const isActive = formData.status?.toLowerCase() === "active";
+  const displayUserId = formData.user?.employee_id || formData.employee_id || formData.users_id || "N/A";
+  const displayUserName = formData.user?.name || formData.user_name || "Unknown User";
+  const displayAssetCode = formData.asset?.asset_code || formData.asset_code || formData.assets_id || "N/A";
+  const displayAssetName = formData.asset?.name || formData.asset_name || "Unknown Asset Unit";
 
   return (
-    <div className="p-2 md:p-8 min-h-screen bg-slate-50/50 text-slate-900 antialiased">
-      <div className="max-w-6xl mx-auto space-y-4">
-        <div className="space-y-3 pb-4">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/assignment")}
-              className="text-blue-500 hover:text-blue-700 -ml-3 gap-2 text-sm font-medium transition-colors h-8"
-            >
-              <FiArrowLeft size={16} />
-              Back 
-            </Button>
-          </div>
+    <div className="min-h-screen bg-slate-50 p-4 md:p-10 font-sans">
+      <div className="max-w-8xl mx-auto space-y-6">
+        
+        {/* Navigation */}
+        <Button variant="ghost" onClick={() => navigate("/assignment")} className="text-blue-800 hover:text-blue-900 pl-0">
+          <FiArrowLeft className="mr-2" /> Back
+        </Button>
 
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <h1 className="text-2xl font-bold tracking-tight text-blue-800">
-              Assignment Detail
-            </h1>
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-md font-semibold tracking-wide shadow-sm transition-all ${
-              isActive 
-                ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60" 
-                : "bg-blue-300 text-blue-600 border border-blue-400"
-            }`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-emerald-500" : "bg-blue-600"}`}></span>
-              {formData.status || "Unknown Status"}
-            </span>
+        {/* Title Section */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-blue-800"> Details</h1>
+            
+          </div>
+          <div className={`px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 ${isActive ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"}`}>
+            <span className={`h-2 w-2 rounded-full ${isActive ? "bg-emerald-500" : "bg-blue-500"}`} />
+            {formData.status || "Unknown"}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-lg">
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-blue-600">
-                <FiUser className="w-3.5 h-3.5 text-blue-600" />
-                User Detail
-              </div>
-              <div className="space-y-2">
-                <div>
-                  <label className="block text-xs font-medium uppercase tracking-tight">Employee ID</label>
-                  <p className="font-semibold text-slate-800 text-sm mt-0.5">{displayUserId}</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium uppercase tracking-tight">Employee Name</label>
-                  <p className="font-semibold text-slate-800 text-sm mt-0.5">{displayUserName}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-lg">
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-blue-600">
-                <FiCpu className="w-3.5 h-3.5 text-blue-600" />
-                Hardware Allocation
-              </div>
-              <div className="space-y-2">
-                <div>
-                  <label className="block text-xs font-medium uppercase tracking-tight">Asset Name</label>
-                  <p className="font-semibold text-slate-800 text-sm mt-0.5">{displayAssetName}</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium uppercase tracking-tight">Asset Code</label>
-                  <div className="font-semibold text-slate-800 text-sm mt-0.5">{displayAssetCode}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-blue-800">
+          <DetailCard title="Personnel" icon={<FiUser className="text-blue-800"/>}>
+            <DetailItem label="Employee ID" value={displayUserId} />
+            <DetailItem label="Full Name" value={displayUserName} />
+          </DetailCard>
+
+          <DetailCard title="Hardware Allocation" icon={<FiCpu className="text-blue-800"/>}>
+            <DetailItem label="Asset Name" value={displayAssetName} />
+            <DetailItem label="Asset Code" value={displayAssetCode} />
+          </DetailCard>
         </div>
 
-        <Card className="border border-slate-200/80 shadow-sm bg-white rounded-lg">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-blue-600 mb-2">
-              <FiCalendar className="w-3.5 h-3.5 text-blue-600" />
-              Timeline
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
-              <div className="space-y-0.5 border-l-2 border-slate-200 pl-3">
-                <label className="block text-xs font-medium uppercase tracking-wider">Assigned Date</label>
-                <p className="font-semibold text-slate-800 text-sm mt-0.5">{formData.assigned_date || "Not set"}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-100 to-indigo-50/20 rounded-lg -m-1 opacity-60 blur-sm pointer-events-none" />
-          <Card className="relative border border-slate-200 shadow-sm bg-white rounded-lg overflow-hidden">
-            <CardContent className="p-4 space-y-2">
-              <div className="flex items-center gap-2 text-md font-bold uppercase tracking-wider text-blue-600">
-                <FiClock className="w-3.5 h-3.5 text-blue-600" />
-                Note
-              </div>
-              <div>
-                <p className="font-semibold text-slate-800 text-sm mt-0.5">
-                  {formData.note || "No additional notes provided for this assignment."}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <DetailCard title="Notes & Timeline" icon={<FiCalendar className="text-blue-800"/>}>
+          <DetailItem label="Assigned Date" value={formData.assigned_date || "Not set"} />
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <label className="text-xs font-semibold uppercase text-black">Notes</label>
+            <p className="text-sm text-slate-700 mt-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              {formData.note || "No additional notes provided."}
+            </p>
+          </div>
+        </DetailCard>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AssignmentDetailPage
+
+const DetailCard = ({ title, icon, children }: any) => (
+  <Card className="border border-slate-200 shadow-sm rounded-2xl bg-white">
+    <CardContent className="p-6">
+      <div className="flex items-center gap-2 mb-6 text-blue-800 font-bold">
+        {icon} {title}
+      </div>
+      {children}
+    </CardContent>
+  </Card>
+);
+
+const DetailItem = ({ label, value }: { label: string, value: string }) => (
+  <div className="flex justify-between py-2 border-b border-slate-50 last:border-0">
+    <span className="text-xs font-semibold uppercase text-black">{label}</span>
+    <span className="text-sm font-medium text-slate-900">{value}</span>
+  </div>
+);
+
+export default AssignmentDetailPage;

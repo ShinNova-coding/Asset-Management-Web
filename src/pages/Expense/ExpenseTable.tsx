@@ -376,7 +376,7 @@ export const ExpenseTable: React.FC = () => {
                             <button 
                               type="button"
                               onClick={() => handleDeleteExpense(expense)} 
-                              className="text-red-600  active:scale-95 transition-all p-1.5 hover:bg-rose-50 rounded-md"
+                              className="text-red-400  active:scale-95 transition-all p-1.5 hover:bg-rose-50 rounded-md"
                               title="Delete permanently"
                             >
                               <RiDeleteBin4Fill size={16} />

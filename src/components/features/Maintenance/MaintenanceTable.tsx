@@ -572,7 +572,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
           <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
             <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">Edit Maintenance & Mark Complete</h2>
+              <h2 className="text-lg font-semibold text-blue-800">Edit Maintenance & Mark Complete</h2>
               <button onClick={closeDialog} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
                 <FiX size={18} />
               </button>
@@ -581,55 +581,55 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
             <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Employee Name</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Employee Name</label>
                   <input type="text" value={editEmployeeName} readOnly className={inputCls} />
                 </div>
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Asset Code</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Asset Code</label>
                   <input type="text" value={editAssetCode} readOnly className={inputCls} />
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Category</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Category</label>
                   <input type="text" value={editCategory} readOnly className={inputCls} /> 
                 </div>
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Approver</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Approver</label>
                   <input type="text" value={editApprover} readOnly className={inputCls} />
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Maintenance Date</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Maintenance Date</label>
                   <input type="date" value={editMaintenanceDate} readOnly className={inputCls} />
                 </div>
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Completed Date</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Completed Date</label>
                   <input type="date" value={editCompletedDate} onChange={(e) => setEditCompletedDate(e.target.value)} className={`${inputCls} !bg-white cursor-pointer`} />
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Vendor Name</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Vendor Name</label>
                   <input type="text" value={editVendor} onChange={(e) => setEditVendor(e.target.value)} className={`${inputCls} !bg-white`} />
                 </div>
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Vendor Phone</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Vendor Phone</label>
                   <input type="text" value={editVendorPhno} onChange={(e) => setEditVendorPhno(e.target.value)} className={`${inputCls} !bg-white`} />
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Vendor Address</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Vendor Address</label>
                   <input type="text" value={editVendorAddress} onChange={(e) => setEditVendorAddress(e.target.value)} className={`${inputCls} !bg-white`} />
                 </div>
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Duration (Days)</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Duration (Days)</label>
                   <input 
                     type="number" 
                     value={editDuration} 
@@ -641,11 +641,11 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Cost (MMK)</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Cost (MMK)</label>
                   <input type="number" value={editCost} onChange={(e) => setEditCost(e.target.value)} className={`${inputCls} !bg-white`} />
                 </div>
                 <div className="grid gap-1">
-                  <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Payment Status</label>
+                  <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Payment Status</label>
                   <select value={editPayment} onChange={(e) => setEditPayment(e.target.value)} className={`${inputCls} !bg-white cursor-pointer`}>
                     <option value="paid">Paid</option>
                     <option value="unpaid">Unpaid</option>
@@ -654,7 +654,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
               </div>
 
               <div className="grid gap-1 sm:col-span-2 border-t border-slate-100 pt-3">
-                <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Voucher Receipt (Image)</label>
+                <label className="text-sm text-slate-500 font-semibold uppercase tracking-wide">Voucher Receipt (Image)</label>
                 <input type="file" accept="image/*" onChange={handleFileChange} className={`${inputCls} !bg-white pt-1.5`} />
                 
                 {editVoucher && (
@@ -671,7 +671,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
 
               <div className="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:justify-end -mx-6 -mb-6 mt-4">
                 <Button variant="outline" onClick={closeDialog}>Cancel</Button>
-                <Button onClick={submitEdit} className="bg-blue-500 hover:bg-blue-600 text-white">Save & Complete</Button>
+                <Button onClick={submitEdit} className="bg-blue-800 hover:bg-blue-600 text-white">Complete</Button>
               </div>
             </div>
           </div>
@@ -683,7 +683,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
           <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
             <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">Maintenance Details</h2>
+              <h2 className="text-lg font-semibold text-blue-800">Maintenance Details</h2>
               <button onClick={closeDialog} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
                 <FiX size={18} />
               </button>
