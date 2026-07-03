@@ -31,7 +31,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard", permission: "view-dashboard" },
-  {title:"Categories",icon:Tag,path:"/categories",permission:"view-categories"},
+  { title: "Categories", icon: Tag, path: "/categories", permission: "view-categories" },
   { title: "Inventory", icon: Boxes, path: "/inventory", permission: "view-assets" },
   { title: "Assignment", icon: FileEdit, path: "/assignment", permission: "view-assignments" },
   { title: "Maintenance", icon: Wrench, path: "/maintenance", permission: "view-maintenances" },
@@ -42,50 +42,53 @@ const menuItems = [
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
-  
   const { permissions } = useAuth();
-  
-  
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
+  const currentPath = location.pathname.toLowerCase();
+
+  // User Module တွေအောက် ရောက်နေသလား စစ်ဆေးချက် (Safety Net ပိုစိပ်အောင် /edit စာသားပါ ထည့်စစ်ပေးထားပါတယ်)
+  const isUserModuleActive =
+    currentPath.startsWith("/usermanagement") ||
+    currentPath.startsWith("/roles") ||
+    currentPath.startsWith("/add-employee") ||
+    currentPath.includes("user") ||
+    currentPath.includes("employee");
+
+  const isUsersSubItemActive =
+    currentPath.startsWith("/usermanagement") ||
+    currentPath.startsWith("/add-employee") ||
+    currentPath.includes("employee");
+
+  // State initialization ကို ပထမဆုံးဝင်ကတည်းက လမ်းကြောင်းအလိုက် ပွင့်လျက်သားဖြစ်အောင် ထားခြင်း
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(() => isUserModuleActive);
 
   useEffect(() => {
-    if (
-      location.pathname.startsWith("/usermanagement") ||
-      location.pathname.startsWith("/roles")
-    ) {
+    if (isUserModuleActive) {
       setIsUserMenuOpen(true);
     }
-  }, [location.pathname]);
+  }, [currentPath, isUserModuleActive]);
 
-  
-  if (!permissions || !Array.isArray(permissions)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F0F4F8] text-[#1E3A8A] font-medium">
-        Loading Auth Data...
-      </div>
-    );
-  }
+  // ဒုက္ခပေးနေတဲ့ ထိပ်ဆုံးက Block ဖြစ်စေမယ့် Return Loading ကို ဖယ်ထုတ်ပြီး Boolean ပြောင်းလိုက်ပါတယ်
+  const isLoading = !permissions || !Array.isArray(permissions);
 
+  const permissionNames = isLoading
+    ? []
+    : permissions.map((p: any) => (typeof p === "string" ? p : p.name));
 
-  const permissionNames = permissions.map((p: any) => {
-    return typeof p === "string" ? p : p.name;
-  });
-
- 
-  
   const filteredMenuItems = menuItems.filter((item) =>
     permissionNames.includes(item.permission)
   );
 
-  
   const hasUserManagementPermission = permissionNames.includes("view-users");
   const hasRolesPermission = permissionNames.includes("view-roles");
+
+  // Loading ဖြစ်နေရင်တောင် ဒီလမ်းကြောင်းပေါ်မှာ ရှိနေရင် User Management Button ကို DOM ကနေ လုံးဝအပျောက်မခံဘဲ အတင်းပြထားမယ့် Logic
+  const showUserManagementMenu = isLoading ? isUserModuleActive : (hasUserManagementPermission || hasRolesPermission || isUserModuleActive);
 
   return (
     <SidebarProvider style={{ "--sidebar-width": "240px" } as React.CSSProperties}>
       <div className="flex min-h-screen w-full bg-[#F0F4F8]">
-        {/* Sidebar Section */}
+        {/* Sidebar Section - ၎င်းတည်ဆောက်ပုံကြီးတစ်ခုလုံး ဘယ်တော့မှ Unmount မဖြစ်တော့ပါ */}
         <Sidebar className="border-r border-blue-100 bg-[#1E3A8A]">
           <SidebarContent className="bg-[#1E3A8A] px-4 py-8">
             {/* Logo and Title */}
@@ -98,38 +101,47 @@ export default function Layout() {
 
             {/* Navigation Menu */}
             <SidebarMenu className="space-y-1">
-              {/* Regular Filtered Menu Items */}
-              {filteredMenuItems.map((item) => {
-                const isActive =
-                  location.pathname.startsWith(item.path) ||
-                  (item.path === "/dashboard" && location.pathname === "/");
+              {isLoading ? (
+                // ခေတ္တ Loading ဖြစ်ချိန်မှာ Sidebar ကြီး ပျောက်မသွားဘဲ စာသားလေးပဲ ငြိမ်ငြိမ်လေး ပြထားမယ်
+                <div className="px-4 py-3 text-blue-300 text-xs animate-pulse">
+                  Loading Menu...
+                </div>
+              ) : (
+                <>
+                  {/* Regular Filtered Menu Items */}
+                  {filteredMenuItems.map((item) => {
+                    const isActive =
+                      currentPath.startsWith(item.path.toLowerCase()) ||
+                      (item.path === "/dashboard" && currentPath === "/");
 
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      onClick={() => navigate(item.path)}
-                      className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
-                        isActive
-                          ? "bg-blue-500 text-[#1E3A8A]"
-                          : "text-blue-200 hover:bg-blue-800/50 hover:text-white"
-                      }`}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      {item.title}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          onClick={() => navigate(item.path)}
+                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                            isActive
+                              ? "bg-blue-500 text-[#1E3A8A]"
+                              : "text-blue-200 hover:bg-blue-800/50 hover:text-white"
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          {item.title}
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </>
+              )}
 
               {/* Collapsible User Management & Roles Menu */}
-              {(hasUserManagementPermission || hasRolesPermission) && (
+              {showUserManagementMenu && (
                 <SidebarMenuItem>
-                  {/* Dropdown Header Button */}
+                  {/* Dropdown Parent Header Button */}
                   <SidebarMenuButton
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
-                      location.pathname.startsWith("/usermanagement") || location.pathname.startsWith("/roles")
-                        ? "text-white font-semibold"
+                      isUserModuleActive
+                        ? "text-white font-semibold bg-blue-800/40"
                         : "text-blue-200 hover:bg-blue-800/50 hover:text-white"
                     }`}
                   >
@@ -144,15 +156,15 @@ export default function Layout() {
                     />
                   </SidebarMenuButton>
 
-                  {/* Dropdown Sub-Items (Child Links) */}
+                  {/* Dropdown Sub-Items */}
                   {isUserMenuOpen && (
                     <div className="mt-1 pl-4 space-y-1 border-l border-blue-800/60 ml-6">
-                      {/* Sub item: User List */}
-                      {hasUserManagementPermission && (
+                      {/* Sub item: Users - Loading ဖြစ်နေရင်တောင် လက်ရှိလမ်းကြောင်းအရ ပြထားပေးမယ် */}
+                      {(hasUserManagementPermission || isUserModuleActive || isLoading) && (
                         <SidebarMenuButton
                           onClick={() => navigate("/usermanagement")}
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-medium transition-all duration-200 ${
-                            location.pathname.startsWith("/usermanagement")
+                            isUsersSubItemActive
                               ? "bg-blue-300 text-[#1E3A8A]"
                               : "text-blue-300 hover:bg-blue-800/30 hover:text-white"
                           }`}
@@ -163,11 +175,11 @@ export default function Layout() {
                       )}
 
                       {/* Sub item: Roles */}
-                      {hasRolesPermission && (
+                      {(hasRolesPermission || currentPath.startsWith("/roles") || (isLoading && currentPath.startsWith("/roles"))) && (
                         <SidebarMenuButton
                           onClick={() => navigate("/roles")}
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-medium transition-all duration-200 ${
-                            location.pathname.startsWith("/roles")
+                            currentPath.startsWith("/roles")
                               ? "bg-blue-300 text-[#1E3A8A]"
                               : "text-blue-300 hover:bg-blue-800/30 hover:text-white"
                           }`}
@@ -181,8 +193,8 @@ export default function Layout() {
                 </SidebarMenuItem>
               )}
 
-              {/* fallback if no menu access at all */}
-              {filteredMenuItems.length === 0 && !hasUserManagementPermission && !hasRolesPermission && (
+              {/* Fallback Screen */}
+              {!isLoading && filteredMenuItems.length === 0 && !showUserManagementMenu && (
                 <div className="px-4 text-blue-300 text-xs italic">
                   No menu access available.
                 </div>
@@ -197,7 +209,14 @@ export default function Layout() {
             <Navigation />
           </div>
           <main className="flex-1 overflow-y-auto">
-            <Outlet />
+            {isLoading ? (
+              // ကာကွယ်ရေးအနေနဲ့ Content ဧရိယာအလယ်ထဲမှာပဲ Loading ပြပေးထားပါတယ် (Sidebar ကြီး မထိခိုက်တော့ပါ)
+              <div className="h-full flex items-center justify-center text-[#1E3A8A] font-medium bg-[#F0F4F8]">
+                Loading Content Data...
+              </div>
+            ) : (
+              <Outlet />
+            )}
           </main>
         </div>
       </div>
