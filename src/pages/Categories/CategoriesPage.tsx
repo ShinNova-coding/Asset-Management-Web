@@ -23,7 +23,7 @@ import CategoriesDelete from "@/pages/Categories/CategoriesDelete";
 import CategoriesEdit from "@/pages/Categories/CategoriesEdit";
 import { FaEdit } from "react-icons/fa";
 
-// Imported PDF packages
+
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
