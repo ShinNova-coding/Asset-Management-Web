@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { 
   Dialog, 
@@ -25,7 +27,6 @@ export default function CategoriesDelete({ categoryId, categoryName, onDeleted }
   const handleDelete = async () => {
     setLoading(true);
     try {
-     
       await apiRequest("/category/category_id", "DELETE", {
         category_id: categoryId
       });
@@ -43,33 +44,33 @@ export default function CategoriesDelete({ categoryId, categoryName, onDeleted }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        
-          <RiDeleteBin4Fill className="h-5 w-5 text-red-600" />
-       
+        <RiDeleteBin4Fill className="h-5 w-5 text-red-600 cursor-pointer" />
       </DialogTrigger>
-     <DialogContent className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
-  <DialogHeader>
-  
-    <DialogTitle className="text-base font-bold text-slate-900">Confirm Delete</DialogTitle>
-    <DialogDescription className="text-xs text-slate-500">
-      Are you sure you want to delete <strong>{categoryName}</strong>?
-    </DialogDescription>
-  </DialogHeader>
-  
-  <DialogFooter className="flex justify-end gap-2.5 pt-2">
-    <Button variant="outline" onClick={() => setOpen(false)}>
-      Cancel
-    </Button>
-    <Button 
-      variant="destructive" 
-      className="bg-red-700 hover:bg-red-900 text-white" 
-      onClick={handleDelete} 
-      disabled={loading}
-    >
-      {loading ? "Deleting..." : "Delete"}
-    </Button>
-  </DialogFooter>
-</DialogContent>
+      
+      {/* Box ပတ်လည် Border ကို နဂိုအတိုင်း ပြန်ထားပေးထားပါတယ် */}
+      <DialogContent className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
+        <DialogHeader>
+          <DialogTitle className="text-base font-bold text-slate-900">Confirm Delete</DialogTitle>
+          <DialogDescription className="text-xs text-slate-500">
+            Are you sure you want to delete <strong>{categoryName}</strong>?
+          </DialogDescription>
+        </DialogHeader>
+        
+        {/* ဒီနေရာမှာ ခလုတ်တွေရဲ့အပေါ်က လိုင်းပျောက်သွားအောင် border-t-0 ကို ထည့်ပေးလိုက်ပါတယ် */}
+        <DialogFooter className="flex justify-end gap-2.5 pt-2 border-t-0 shadow-none">
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="destructive" 
+            className="bg-red-700 hover:bg-red-900 text-white" 
+            onClick={handleDelete} 
+            disabled={loading}
+          >
+            {loading ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }
