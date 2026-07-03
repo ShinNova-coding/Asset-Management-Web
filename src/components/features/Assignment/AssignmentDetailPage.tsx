@@ -112,7 +112,7 @@ const AssignmentDetailPage = () => {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl font-bold tracking-tight text-blue-800">
               Assignment Detail
             </h1>
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-md font-semibold tracking-wide shadow-sm transition-all ${

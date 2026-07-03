@@ -126,23 +126,26 @@ export function InventoryDetail() {
 
   const displayCategory = assetItem.category?.name || assetItem.category || "Uncategorized"
 
-  
   const API_REAL_IP = "http://192.168.100.185:1011"
-  let rawImageSource = assetItem.preview_url || assetItem.image_url || assetItem.image || ""
+  
+  // 🛠️ FIX: media array ထဲက image ကို အရင်ဆွဲထုတ်ရန် ပြင်ဆင်ထားပါသည်
+  let rawImageSource = ""
+  if (assetItem.media && assetItem.media.length > 0) {
+    rawImageSource = assetItem.media[0].original_url || assetItem.media[0].preview_url || ""
+  } else {
+    rawImageSource = assetItem.preview_url || assetItem.image_url || assetItem.image || ""
+  }
+  
   let displayImage = ""
 
   if (rawImageSource) {
     if (rawImageSource.startsWith("data:image")) {
-      
       displayImage = rawImageSource
     } else if (rawImageSource.startsWith("http://localhost")) {
-      
       displayImage = rawImageSource.replace("http://localhost", API_REAL_IP)
     } else if (rawImageSource.startsWith("http")) {
-      
       displayImage = rawImageSource
     } else {
-      
       const cleanPath = rawImageSource.startsWith("/") ? rawImageSource : `/${rawImageSource}`
       displayImage = `${API_REAL_IP}${cleanPath}`
     }

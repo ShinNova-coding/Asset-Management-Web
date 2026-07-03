@@ -3,10 +3,8 @@
 import * as React from "react"
 import { FiDollarSign, FiCalendar, FiFileText, FiUpload, FiX, FiCheckCircle, FiArrowLeft, FiTag, FiHash, FiGrid, FiImage } from "react-icons/fi"
 import { useNavigate, Link } from "react-router-dom"
-// 💡 getCategories ကိုပါ import တွဲလုပ်လိုက်ပါမယ်
 import { createExpense, getCategories } from "@/lib/apiService"
 
-// 💡 Category data ရဲ့ structure အတွက် interface သတ်မှတ်ခြင်း
 interface CategoryItem {
   id: string;
   name: string;
@@ -23,7 +21,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
   const [cost, setCost] = React.useState<number>(0)
   const [expenseDate, setExpenseDate] = React.useState<string>("")
   const [title, setTitle] = React.useState<string>("")
-  const [expenseType, setExpenseType] = React.useState<string>("claim")
+  const [expenseType, setExpenseType] = React.useState<string>("maintenance")
   const [voucherBase64, setVoucherBase64] = React.useState<string>("")
   const [fileName, setFileName] = React.useState<string>("")
   
@@ -34,9 +32,8 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
   const [assetName, setAssetName] = React.useState<string>("")
   const [serialNumber, setSerialNumber] = React.useState<string>("")
   
-  // 💡 State ပြင်ဆင်မှုများ
   const [category, setCategory] = React.useState<string>("") 
-  const [categoriesList, setCategoriesList] = React.useState<CategoryItem[]>([]) // API ကလာမယ့် data သိမ်းရန်
+  const [categoriesList, setCategoriesList] = React.useState<CategoryItem[]>([])
 
   const [description, setDescription] = React.useState<string>("")
   const [assetImageBase64, setAssetImageBase64] = React.useState<string>("")
@@ -61,14 +58,13 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
     }
   }, [])
 
-  // 💡 Component စတက်ချိန်မှာ Backend API ကနေ Categories တွေလှမ်းဆွဲမည့် useEffect
   React.useEffect(() => {
     const fetchCategoriesData = async () => {
       try {
         const res = await getCategories();
         if (res.success && res.data && res.data.length > 0) {
           setCategoriesList(res.data);
-          setCategory(res.data[0].name); // ပထမဆုံးရလာတဲ့ category name ကို default အဖြစ်ပေးထားခြင်း
+          setCategory(res.data[0].name);
         }
       } catch (error) {
         console.error("Failed to load categories from backend:", error);
@@ -86,7 +82,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
     const reader = new FileReader()
     reader.onloadend = () => {
       const result = reader.result as string
-      const base64Data = result.split(",")[1]
+      const base64Data = result.split(",")[1] // Raw Base64 data (without prefix)
       
       if (type === "voucher") {
         setFileName(file.name)
@@ -94,7 +90,8 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
         setVoucherPreview(localPreviewUrl)
       } else {
         setAssetImageName(file.name)
-        setAssetImageBase64(base64Data)
+        // 🛠️ FIX 1: Backend sample အရ prefix မပါတဲ့ base64Data ကိုပဲ ထည့်ပေးလိုက်ပါတယ်။
+        setAssetImageBase64(base64Data) 
         setAssetImagePreview(localPreviewUrl)
       }
     }
@@ -142,8 +139,10 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
       return
     }
 
-    if (cost <= 0 || !expenseDate || !title.trim() || !description.trim()) {
-      alert("Please fill all required fields correctly (Cost, Date, Title, and Description are required).")
+    // Input Validation ကို ပိုစိပ်အောင် ပြင်ဆင်ထားပါတယ် (Cost က 0 ထက်ကြီးရမယ်)
+    const calculatedCost = Number(cost)
+    if (isNaN(calculatedCost) || calculatedCost <= 0 || !expenseDate || !title.trim() || !description.trim()) {
+      alert("Please fill all required fields correctly (Cost must be greater than 0, Date, Title, and Description are required).")
       return
     }
 
@@ -160,7 +159,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
       users_id: userId,
       maintenances_id: null,
       assets_id: null,
-      cost: Number(cost),
+      cost: calculatedCost,
       expense_date: expenseDate, 
       title: title.trim(),
       expense_type: expenseType,
@@ -171,6 +170,8 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
       name: expenseType === "asset_purchase" ? (assetName?.trim() || "") : "",
       category: expenseType === "asset_purchase" ? (category || "") : "",
       serial_number: expenseType === "asset_purchase" ? (serialNumber?.trim() || "") : "",
+      
+      // 🛠️ FIX 2: Backend POST API sample အတိုင်း 'asset_image' မှ 'image' သို့ ပြောင်းလဲပြင်ဆင်ထားပါတယ်
       image: expenseType === "asset_purchase" && assetImageBase64?.trim() ? assetImageBase64 : null,
     }
 
@@ -277,7 +278,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
               onChange={(e) => setExpenseType(e.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer"
             >
-              
               <option value="maintenance">Maintenance</option>
               <option value="asset_purchase">Asset_Purchase</option>
               <option value="office_supply">Office_Supply</option>
@@ -350,7 +350,6 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                   </div>
                 </div>
 
-                {/* 💡 ပြင်ဆင်လိုက်သော Asset Category Select Option နေရာ */}
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-semibold text-slate-700">Asset Category</label>
                   <div className="relative">
@@ -460,8 +459,9 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
         </form>
       </div>
 
+      {/* 🛠️ FIX 3: absolute မှ fixed သို့ ပြောင်းလဲထားပါတယ် */}
       {toastMessage && (
-        <div className="absolute bottom-5 right-5 z-50 flex items-center gap-2 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl animate-fade-in">
+        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl animate-fade-in">
           <FiCheckCircle className="text-emerald-400" size={18} />
           <span className="text-xs font-semibold">{toastMessage}</span>
         </div>

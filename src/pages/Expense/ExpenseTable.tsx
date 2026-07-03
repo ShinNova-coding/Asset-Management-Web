@@ -7,7 +7,7 @@ import { fetchExpenses as fetchExpensesAPI, updateExpenseStatus, deleteExpense }
 
 import { ExpenseDetailModal } from './ExpenseDetailModal';
 import type { ExpenseDetailData } from './ExpenseDetailModal';
-
+import { RiDeleteBin4Fill } from "react-icons/ri"
 interface ExpenseWithUser extends ExpenseDetailData {
   user?: {
     name?: string;
@@ -273,7 +273,7 @@ export const ExpenseTable: React.FC = () => {
                 <th className="py-3 px-4 text-center">Type</th>
 
                 <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('cost')}>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
                     Cost (MMK)
                     <div className="flex flex-col">
                       <FiChevronUp size={12} className={sortColumn === 'cost' && sortDirection === 'asc' ? "text-white" : "text-white/40"} />
@@ -331,7 +331,7 @@ export const ExpenseTable: React.FC = () => {
                         {expense.expense_type}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 font-normal text-slate-700">
+                    <td className="py-3.5 px-8 font-normal text-slate-700">
                       {Number(expense.cost).toLocaleString()}
                     </td>
                     <td className="py-3.5 px-4 text-center">
@@ -376,10 +376,10 @@ export const ExpenseTable: React.FC = () => {
                             <button 
                               type="button"
                               onClick={() => handleDeleteExpense(expense)} 
-                              className="text-slate-400 hover:text-red-600 active:scale-95 transition-all p-1.5 hover:bg-rose-50 rounded-md"
+                              className="text-red-600  active:scale-95 transition-all p-1.5 hover:bg-rose-50 rounded-md"
                               title="Delete permanently"
                             >
-                              <Trash2 size={16} />
+                              <RiDeleteBin4Fill size={16} />
                             </button>
                           </>
                         )}
