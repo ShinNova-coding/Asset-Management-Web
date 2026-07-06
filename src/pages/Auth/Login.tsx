@@ -22,7 +22,7 @@ const Login = () => {
     setError("");
 
     try {
-      const API_URL = "http://192.168.100.185:1011/api/login"; 
+      const API_URL = "http://192.168.100.190:1011/api/login"; 
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },

@@ -91,7 +91,7 @@ const AddNewAsset = () => {
         action: activeItem.status || activeItem.action || 'available'
       });
       
-      const API_REAL_IP = "http://192.168.100.185:1011";
+      const API_REAL_IP = "http://192.168.100.190:1011";
       let rawImageSource = activeItem.preview_url || activeItem.image_url || activeItem.image || "";
 
       if (rawImageSource) {
