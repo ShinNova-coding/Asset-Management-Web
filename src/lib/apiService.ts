@@ -1,6 +1,6 @@
 
 
-const BASE_URL = "http://192.168.100.190:1011/api";
+const BASE_URL = "http://localhost:1011/api";
 
 export const apiRequest = async (
   endpoint: string,

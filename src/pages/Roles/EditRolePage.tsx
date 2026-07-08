@@ -85,8 +85,8 @@ export default function EditRolePage() {
   return (
     <div className="p-6 min-h-screen bg-[#F3F0F7]">
       <div className="max-w-4xl mx-auto space-y-6">
-        <Button variant="ghost" onClick={() => navigate("/roles")}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back
+        <Button variant="ghost" className="text-blue-800 hover:text-blue-900" onClick={() => navigate("/roles")}>
+          <ArrowLeft className="w-4 h-4 mr-2 text-blue-800" /> Back
         </Button>
 
         <Card>
