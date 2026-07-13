@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { FiArrowLeft, FiEdit2 } from "react-icons/fi";
+import { FiArrowLeft } from "react-icons/fi";
+import { MdOutlineModeEditOutline } from "react-icons/md";
 import { apiRequest } from "@/lib/apiService"; 
 const EditAssignmentPage = () => {
   const { id } = useParams();
@@ -48,25 +49,25 @@ const EditAssignmentPage = () => {
 };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-10 font-sans text-slate-900">
+    <div className="min-h-screen bg-[#e9e5ff] p-10 font-sans text-slate-900">
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm font-medium text-blue-800 hover:text-blue-700 transition-colors mb-2"
+        className="flex items-center gap-2 text-sm font-medium text-[#7C3AED] hover:text-purple-700 transition-colors mb-2"
       >
         <FiArrowLeft size={16} /> Back
       </button>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-8 border-b border-slate-100 bg-white">
-          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3">
-            <FiEdit2 className="text-indigo-600" size={20} /> Edit Assignment 
+          <h2 className="text-xl font-bold text-[#7C3AED] flex items-center gap-3">
+            <MdOutlineModeEditOutline className="text-[#7C3AED] w-5 h-5"/> Edit Assignment 
           </h2>
         </div>
 
         <form onSubmit={handleUpdate} className="p-8 space-y-6 bg-white">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-[#7C3AED] mb-1 uppercase tracking-wider">
                 Asset Code
               </label>
               <input
@@ -79,7 +80,7 @@ const EditAssignmentPage = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-[#7C3AED] mb-1 uppercase tracking-wider">
                 Assigned Date
               </label>
               <input
@@ -93,7 +94,7 @@ const EditAssignmentPage = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-[#7C3AED] mb-1 uppercase tracking-wider">
               Note
             </label>
             <textarea
@@ -115,7 +116,7 @@ const EditAssignmentPage = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-md bg-blue-800 text-white font-medium hover:bg-blue-700 shadow-sm text-xs transition-colors"
+              className="px-5 py-2 rounded-md bg-[#7C3AED] text-white font-medium hover:bg-purple-700 shadow-sm text-xs transition-colors"
             >
               Save Changes
             </button>

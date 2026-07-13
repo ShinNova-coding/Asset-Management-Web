@@ -30,14 +30,14 @@ export default function AddNewCategories({ onCategoryAdded }: { onCategoryAdded:
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-800 hover:bg-blue-700 text-white font-semibold flex items-center gap-2 px-4 shadow-sm transition-all rounded-lg h-9">
+        <Button className="bg-[#7C3AED] hover:bg-[#A78BFA] text-white font-semibold flex items-center gap-2 px-4 shadow-sm transition-all rounded-lg h-9">
           <Plus className="mr-2 h-4 w-4" /> Add Category
         </Button>
       </DialogTrigger>
     
       <DialogContent className="bg-white sm:max-w-md">
   <DialogHeader>
-    <DialogTitle>Add New Category</DialogTitle>
+    <DialogTitle className="text-[#7C3AED]">Add New Category</DialogTitle>
   </DialogHeader>
   <form onSubmit={handleSubmit} className="space-y-4 pt-4">
     <div className="space-y-2">
@@ -50,7 +50,7 @@ export default function AddNewCategories({ onCategoryAdded }: { onCategoryAdded:
         required
       />
     </div>
-    <Button type="submit" className="bg-blue-800 flex justify-end ml-auto" disabled={loading}>
+    <Button type="submit" className="bg-[#7C3AED] flex justify-end ml-auto" disabled={loading}>
       {loading ? "Adding..." : "Save Category"}
     </Button>
   </form>

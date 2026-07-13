@@ -11,7 +11,8 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { RiDeleteBin4Fill } from "react-icons/ri";
+
+import { RiDeleteBinLine } from "react-icons/ri";
 import { apiRequest } from "@/lib/apiService";
 
 interface DeleteProps {
@@ -44,7 +45,7 @@ export default function CategoriesDelete({ categoryId, categoryName, onDeleted }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <RiDeleteBin4Fill className="h-5 w-5 text-red-600 cursor-pointer" />
+        <RiDeleteBinLine className="h-5 w-5 text-red-600 cursor-pointer" />
       </DialogTrigger>
       
       

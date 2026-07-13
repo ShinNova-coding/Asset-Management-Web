@@ -91,7 +91,7 @@ const AddNewAsset = () => {
         action: activeItem.status || activeItem.action || 'available'
       });
       
-      const API_REAL_IP = "http://192.168.100.190:1011";
+      const API_REAL_IP = "http://localhost:1011";
       let rawImageSource = activeItem.preview_url || activeItem.image_url || activeItem.image || "";
 
       if (rawImageSource) {
@@ -281,13 +281,13 @@ useEffect(() => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F0F7] p-10 font-sans text-slate-900">
+    <div className="min-h-screen bg-[#e9e5ff] p-10 font-sans text-slate-900">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="space-y-2">
-          <button type="button" onClick={goBack} className="flex items-center text-sm font-medium text-blue-800 hover:text-blue-700 transition-colors">
+          <button type="button" onClick={goBack} className="flex items-center text-sm font-medium text-[#7C3AED] hover:text-purple-700 transition-colors">
             <ArrowLeft size={16} className="mr-2" /> Back
           </button>
-          <h1 className="text-2xl font-bold text-blue-800">{isEditMode ? "Modify Asset Records" : "Register New IT Asset"}</h1>
+          <h1 className="text-2xl font-bold text-[#7C3AED]">{isEditMode ? "Modify Asset Records" : "Register New IT Asset"}</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -295,8 +295,8 @@ useEffect(() => {
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-                  <Package size={18} className="text-blue-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Asset Information</h2>
+                  <Package size={18} className="text-[#7C3AED]" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#7C3AED]">Asset Information</h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
@@ -336,8 +336,8 @@ useEffect(() => {
               </section>
  <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-                  <Cpu size={18} className="text-blue-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Hardware Specifications</h2>
+                  <Cpu size={18} className="text-[#7C3AED]" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#7C3AED]">Hardware Specifications</h2>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -394,8 +394,8 @@ useEffect(() => {
             
               <section className="space-y-4">
                 <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-                  <Settings size={18} className="text-blue-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Warranty & Procurement</h2>
+                  <Settings size={18} className="text-[#7C3AED]" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#7C3AED]">Warranty & Procurement</h2>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -435,7 +435,7 @@ useEffect(() => {
               </section>
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                 <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
-                <button type="submit" className="px-5 py-2 rounded-md bg-blue-800 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
+                <button type="submit" className="px-5 py-2 rounded-md bg-[#7C3AED] text-white font-medium hover:bg-purple-700 shadow-sm text-xs">
                   {isEditMode ? "Update" : "Save"}
                 </button>
               </div>
@@ -443,8 +443,8 @@ useEffect(() => {
           </div>
            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-              <ImageIcon size={18} className="text-blue-600" />
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Asset Photo</h2>
+              <ImageIcon size={18} className="text-[#7C3AED]" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#7C3AED]">Asset Photo</h2>
             </div>
             
             <input 
@@ -484,7 +484,7 @@ useEffect(() => {
               ) : (
                 <>
                   <div className="p-3 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
-                    <Upload size={24} className="text-blue-500" />
+                    <Upload size={24} className="text-[#7C3AED]" />
                   </div>
                   <p className="text-[11px] font-medium px-4 text-center text-slate-600">
                     Click to upload or drag and drop asset image

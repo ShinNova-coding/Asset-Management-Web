@@ -3,8 +3,8 @@
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiCheck, FiChevronUp, FiChevronDown, FiX } from "react-icons/fi" 
-import { FaEdit } from "react-icons/fa"
-import { RiDeleteBin4Fill } from "react-icons/ri"
+import { MdOutlineModeEditOutline } from "react-icons/md";
+import { RiDeleteBinLine } from "react-icons/ri";
 import { LuEye } from "react-icons/lu"
 import { Search } from "lucide-react"
 
@@ -300,7 +300,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
                     <FiCheck size={20} />
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); deleteRow(item, "request cancelled.") }} className="text-red-500 hover:text-red-700 p-1">
-                    <RiDeleteBin4Fill size={20} />
+                    <RiDeleteBinLine size={20} />
                   </button>
                 </div>
               )
@@ -310,10 +310,10 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
               return (
                 <div className="flex items-center gap-3">
                   <button onClick={(e) => { e.stopPropagation(); openEditDialog(item) }} className="text-blue-800 hover:text-blue-900 p-1">
-                    <FaEdit size={21} />
+                    <MdOutlineModeEditOutline size={21} />
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); deleteRow(item, "record deleted.") }} className="text-red-600 hover:text-red-700 p-1">
-                    <RiDeleteBin4Fill size={21} />
+                    <RiDeleteBinLine size={21} />
                   </button>
                 </div>
               )
@@ -378,7 +378,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
             placeholder="Search..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
           />
         </div>
       </div>
@@ -386,7 +386,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
       {/* ── TABLE VIEW ── */}
       <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
-          <TableHeader className="bg-blue-800">
+          <TableHeader className="bg-[#A78BFA]">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => {
@@ -394,7 +394,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
                   return (
                     <TableHead 
                       key={header.id} 
-                      className={`text-white font-semibold py-3 text-sm ${canSort ? "cursor-pointer select-none hover:bg-blue-500/30" : ""}`}
+                      className={`text-white font-semibold py-3 text-sm ${canSort ? "cursor-pointer select-none " : ""}`}
                       onClick={header.column.getToggleSortingHandler()} 
                     >
                       <div className="flex items-center gap-2">
@@ -527,7 +527,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
                   onClick={() => table.setPageIndex((page as number) - 1)}
                   className={`w-8 h-8 text-sm font-semibold rounded-lg border transition-all flex items-center justify-center ${
                     isPageActive
-                      ? "bg-blue-800 border-[#0a46b4] text-white shadow-sm"
+                      ? "bg-purple-700 border-[#0a46b4] text-white shadow-sm"
                       : "bg-slate-300 border-slate-500 text-slate-700 hover:bg-slate-300"
                   }`}
                 >

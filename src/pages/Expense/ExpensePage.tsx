@@ -69,20 +69,20 @@ export const ExpensePage: React.FC = () => {
   };
 
   return (
-    <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-[#F3F0F7] font-sans">
+    <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-[#e9e5ff] font-sans">
       <div className="max-w-6xl mx-auto space-y-6">
         
         
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-blue-800 tracking-tight">Expense</h1>
+            <h1 className="text-2xl font-bold text-[#7C3AED] tracking-tight">Expense</h1>
           </div>
           
           <div className="flex items-center gap-3">
             
             <button
           onClick={handleExportPDF}
-          className="px-4 py-2 bg-blue-800 border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-blue-900"
+          className="px-4 py-2 bg-[#7C3AED] border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-blue-900"
         >
           <IoCloudDownloadOutline size={20} />
           
@@ -90,7 +90,7 @@ export const ExpensePage: React.FC = () => {
 
             <button 
               onClick={() => navigate('/expense/createexpenseform')}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-blue-800 text-sm font-semibold text-white hover:bg-blue-900 transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-[#7C3AED] text-sm font-semibold text-white hover:bg-blue-900 transition-colors shadow-sm"
             >
               <Plus size={16} />
               Create Expense

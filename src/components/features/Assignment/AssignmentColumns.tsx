@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import type { ColumnDef } from "@tanstack/react-table"
-import { RiDeleteBin4Fill } from "react-icons/ri"
-import { FaEdit } from "react-icons/fa"
+import { RiDeleteBinLine } from "react-icons/ri";
+import { MdOutlineModeEditOutline } from "react-icons/md";
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -96,7 +96,7 @@ export const columns: ColumnDef<any>[] = [
             }}
             title="Edit Assignment"
           >
-            <FaEdit size={21} />
+            <MdOutlineModeEditOutline className="w-5 h-5 text-[#7C3AED]" />
           </button>
 
          
@@ -117,7 +117,7 @@ export const columns: ColumnDef<any>[] = [
                 : "Delete Assignment"
             }
           >
-            <RiDeleteBin4Fill size={21} />
+            <RiDeleteBinLine className="w-5 h-5" />
           </button>
         </div>
       )

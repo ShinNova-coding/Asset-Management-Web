@@ -124,7 +124,7 @@ export function InventoryDetail() {
 
   const displayCategory = assetItem.category?.name || assetItem.category || "Uncategorized"
 
-  const API_REAL_IP = "http://192.168.100.185:1011"
+  const API_REAL_IP = "http://localhost:1011"
   
   
   let rawImageSource = ""
@@ -150,7 +150,7 @@ export function InventoryDetail() {
   }
 
   return (
-    <div className="max-w-8xl bg-[#F3F0F7] mx-auto p-6 md:p-10 space-y-6 text-blue-950 font-sans">
+    <div className="max-w-8xl mx-auto space-y-6 bg-[#e9e5ff]  p-6 min-h-screen  text-blue-950 font-sans">
       
      
       <div className="flex items-center justify-between">
@@ -158,7 +158,7 @@ export function InventoryDetail() {
           variant="ghost" 
           size="sm" 
           onClick={() => navigate("/inventory")} 
-          className="flex items-center gap-2 text-blue-500 hover:text-blue-700 -ml-2 group transition-colors"
+          className="flex items-center gap-2 text-[#7C3AED] hover:text-purple-700 -ml-2 group transition-colors"
         >
           <FiArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
           Back
@@ -180,7 +180,7 @@ export function InventoryDetail() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-mono px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-600 font-semibold">
+            <span className="text-xs font-mono px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-[#7C3AED] font-semibold">
   {assetItem.asset_code || assetItem.asset_id || assetItem.id}
 </span>
             <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border tracking-wide uppercase ${getStatusStyles(assetItem.status)}`}>
@@ -192,7 +192,7 @@ export function InventoryDetail() {
               </span>
             )}
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 pt-1">
+          <h1 className="text-2xl font-bold tracking-tight text-[#7C3AED] pt-1">
             {assetItem.name}
           </h1>
         </div>
@@ -204,8 +204,8 @@ export function InventoryDetail() {
           
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-              <FiPackage size={18} className="text-blue-600" />
-              <h2 className="text-xs font-bold uppercase tracking-wider text-blue-800">Device Specifications</h2>
+              <FiPackage size={18} className="text-[#7C3AED]" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#7C3AED]">Device Specifications</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
@@ -245,8 +245,8 @@ export function InventoryDetail() {
           
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
             <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-              <FiCalendar size={18} className="text-blue-600" />
-              <h2 className="text-xs font-bold uppercase tracking-wider text-blue-800">Procurement & Lifecycle</h2>
+              <FiCalendar size={18} className="text-[#7C3AED]" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#7C3AED]">Procurement & Lifecycle</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
@@ -269,8 +269,8 @@ export function InventoryDetail() {
        
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4 sticky top-6">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-            <FiFileText size={18} className="text-blue-600" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-blue-800">Profile Image</h2>
+            <FiFileText size={18} className="text-[#7C3AED]" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#7C3AED]">Profile Image</h2>
           </div>
           
           <div className="aspect-square w-full bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden p-2 shadow-inner">
@@ -292,7 +292,7 @@ export function InventoryDetail() {
             ) : null}
 
             <div className={`image-fallback-placeholder flex flex-col items-center justify-center text-slate-400 text-center space-y-2 p-4 ${displayImage ? 'hidden' : ''}`}>
-              <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200/60 shadow-xs">
+              <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-[#7C3AED] border border-slate-200/60 shadow-xs">
                 <FiPackage size={20} />
               </div>
               <div className="space-y-0.5">

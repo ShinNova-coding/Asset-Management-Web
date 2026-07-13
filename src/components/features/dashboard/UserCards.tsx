@@ -33,7 +33,7 @@ const UserCards: React.FC = () => {
   return (
     <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm w-full max-w-xl">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-blue-800">Users</h2>
+        <h2 className="text-lg font-bold text-[#7C3AED]">Users</h2>
        
       </div>
 
@@ -45,8 +45,8 @@ const UserCards: React.FC = () => {
             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#64748b" }} />
             <Tooltip cursor={{ fill: "#f8fafc" }} contentStyle={{ borderRadius: '10px' }} />
             <Legend wrapperStyle={{ paddingTop: '20px' }} />
-            <Bar dataKey="Total" fill="#3b82f6" barSize={35} radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Active" fill="#059669" barSize={35} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Total" fill="#7C3AED" barSize={35} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Active" fill="#A78BFA" barSize={35} radius={[4, 4, 0, 0]} />
             <Bar dataKey="Suspended" fill="#d97706" barSize={35} radius={[4, 4, 0, 0]} />
             <Bar dataKey="Resigned" fill="#e11d48" barSize={35} radius={[4, 4, 0, 0]} />
           </BarChart>

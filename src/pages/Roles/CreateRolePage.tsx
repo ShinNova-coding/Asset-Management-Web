@@ -127,26 +127,26 @@ const handleSubmit = async (e: React.FormEvent) => {
 };
 
   return (
-    <div className="min-h-screen bg-[#F3F0F7] p-8 flex justify-center items-start">
+    <div className="min-h-screen bg-[#e9e5ff] p-8 flex justify-center items-start">
       <div className="w-full max-w-5xl bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
         
        
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100/50">
+            <div className="p-2.5 bg-indigo-50 text-[#7C3AED] rounded-2xl border border-indigo-100/50">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-blue-800">Add New Role</h1>
+              <h1 className="text-2xl font-bold text-[#7C3AED]">Add New Role</h1>
             </div>
           </div>
           
           <button 
             type="button"
             onClick={() => navigate("/roles")} 
-            className="px-4 py-2 text-sm  text-blue-800  text-shadow-violet-400 flex items-center gap-2"
+            className="px-4 py-2 text-sm  text-[#7C3AED]  text-shadow-violet-400 flex items-center gap-2"
           >
               <ArrowLeft size={16} className="mr-2" />
               
@@ -166,7 +166,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
          
           <div className="space-y-2">
-            <label className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+            <label className="text-xs font-bold tracking-wider text-[#7C3AED] uppercase">
               Role Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -183,7 +183,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           
           <div className="pt-6 border-t border-slate-100 flex justify-between items-center">
             <div>
-              <h2 className="text-sm font-bold text-blue-800">Assign Permissions</h2>
+              <h2 className="text-sm font-bold text-[#7C3AED]">Assign Permissions</h2>
             </div>
           
             <button
@@ -193,7 +193,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               className={`px-4 py-2 text-xs font-bold rounded-xl transition duration-200 ${
                 isEverythingChecked 
                   ? 'text-red-600 bg-red-50 hover:bg-red-100/70' 
-                  : 'text-blue-800 bg-blue-50 hover:bg-blue-100/70'
+                  : 'text-[#7C3AED] bg-purple-50 hover:bg-purple-400'
               }`}
             >
               {isEverythingChecked ? 'Unselect All Permissions' : 'Select All Permissions'}
@@ -206,26 +206,26 @@ const handleSubmit = async (e: React.FormEvent) => {
             
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
+                <span className="text-xs font-extrabold tracking-wider text-[#7C3AED] flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-[#A78BFA] rounded-full"></span>
                   MANAGE (CREATE)
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('create')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[10px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[10px] font-bold text-[#7C3AED] bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {managePermissions.filter(p => p.id.startsWith('create-')).every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
               </div>
               <div className="space-y-2.5">
                 {managePermissions.filter(p => p.id.startsWith('create-')).map((permission) => (
-                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
+                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-[#A78BFA] rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
                     <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
                       {permission.label.replace(' (Create)', '')}
                     </span>
-                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-blue-600 border-slate-300 rounded accent-blue-500" />
+                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-[#A78BFA] border-slate-300 rounded accent-[#A78BFA]" />
                   </label>
                 ))}
               </div>
@@ -234,26 +234,26 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* CARD 2: MANAGE (UPDATE) */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
+                <span className="text-xs font-extrabold tracking-wider text-[#7C3AED] flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-[#A78BFA] rounded-full"></span>
                   MANAGE (UPDATE)
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('update')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[10px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[10px] font-bold text-[#7C3AED] bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {managePermissions.filter(p => p.id.startsWith('update-')).every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
               </div>
               <div className="space-y-2.5">
                 {managePermissions.filter(p => p.id.startsWith('update-')).map((permission) => (
-                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
-                    <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
+                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-[#A78BFA] rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
+                    <span className="text-xs font-semibold text-[#7C3AED] group-hover:text-slate-900">
                       {permission.label.replace(' (Update)', '')}
                     </span>
-                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-blue-600 border-slate-300 rounded accent-blue-500" />
+                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-[#A78BFA] border-slate-300 rounded accent-[#A78BFA]" />
                   </label>
                 ))}
               </div>
@@ -262,26 +262,26 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* CARD 3: MANAGE (DELETE) */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
+                <span className="text-xs font-extrabold tracking-wider text-[#7C3AED] flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-[#A78BFA] rounded-full"></span>
                   MANAGE (DELETE)
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('delete')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[10px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[10px] font-bold text-[#7C3AED] bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {managePermissions.filter(p => p.id.startsWith('delete-')).every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
               </div>
               <div className="space-y-2.5">
                 {managePermissions.filter(p => p.id.startsWith('delete-')).map((permission) => (
-                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
+                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-[#A78BFA] rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
                     <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
                       {permission.label.replace(' (Delete)', '')}
                     </span>
-                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-blue-600 border-slate-300 rounded accent-blue-500" />
+                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-[#A78BFA] border-slate-300 rounded accent-[#A78BFA]" />
                   </label>
                 ))}
               </div>
@@ -290,26 +290,26 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* CARD 4: MANAGE (APPROVE) */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
+                <span className="text-xs font-extrabold tracking-wider text-[#7C3AED] flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-[#A78BFA] rounded-full"></span>
                   MANAGE(APPROVE)
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('approve')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[9px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[9px] font-bold text-[#7C3AED] bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {managePermissions.filter(p => p.id.startsWith('approve-')).every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
               </div>
               <div className="space-y-2.5">
                 {managePermissions.filter(p => p.id.startsWith('approve-')).map((permission) => (
-                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
+                  <label key={permission.id} className="group flex items-center justify-between bg-slate-50/50 border border-slate-100/70 border-l-4 border-l-[#A78BFA] rounded-xl p-3 cursor-pointer hover:bg-white hover:border-slate-200 transition">
                     <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
                       {permission.label.replace(' (Approve)', '')}
                     </span>
-                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-blue-600 border-slate-300 rounded accent-blue-500" />
+                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-[#A78BFA] border-slate-300 rounded accent-[#A78BFA]" />
                   </label>
                 ))}
               </div>
@@ -318,26 +318,26 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* CARD 5: MANAGE (CANCEL) */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
+                <span className="text-xs font-extrabold tracking-wider text-[#7C3AED] flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-[#A78BFA] rounded-full"></span>
                   MANAGE (CANCEL)
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('cancel')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[9px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[9px] font-bold text-[#7C3AED] bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {managePermissions.filter(p => p.id.startsWith('cancel-')).every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
               </div>
               <div className="space-y-2.5">
                 {managePermissions.filter(p => p.id.startsWith('cancel-')).map((permission) => (
-                  <label key={permission.id} className="group flex items-center justify-between bg-blue-50/50 border border-blue-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-blue-200 transition">
+                  <label key={permission.id} className="group flex items-center justify-between bg-blue-50/50 border border-blue-100/70 border-l-4 border-l-[#A78BFA] rounded-xl p-3 cursor-pointer hover:bg-white hover:border-blue-200 transition">
                     <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
                       {permission.label.replace(' (Cancel)', '')}
                     </span>
-                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-blue-600 border-blue-300 rounded accent-blue-500" />
+                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'manage')} disabled={loading} className="w-4 h-4 text-[#A78BFA] border-blue-300 rounded accent-[#A78BFA]" />
                   </label>
                 ))}
               </div>
@@ -346,26 +346,26 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* CARD 6: VIEW / READ ONLY */}
             <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                <span className="text-xs font-extrabold tracking-wider text-slate-500 flex items-center gap-2">
-                  <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
+                <span className="text-xs font-extrabold tracking-wider text-[#7C3AED] flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-[#A78BFA] rounded-full"></span>
                   VIEW / READ ONLY
                 </span>
                 <button
                   type="button"
                   onClick={() => handleToggleModule('view')}
                   disabled={loading}
-                  className="px-2 py-0.5 text-[9px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
+                  className="px-2 py-0.5 text-[9px] font-bold text-[#7C3AED] bg-blue-50 hover:bg-blue-100/80 border border-blue-100 rounded-md uppercase transition duration-150"
                 >
                   {viewPermissions.every(p => p.checked) ? 'Unselect All' : 'Select Module'}
                 </button>
               </div>
               <div className="space-y-2.5">
                 {viewPermissions.map((permission) => (
-                  <label key={permission.id} className="group flex items-center justify-between bg-blue-50/50 border border-blue-100/70 border-l-4 border-l-blue-500 rounded-xl p-3 cursor-pointer hover:bg-white hover:border-blue-200 transition">
+                  <label key={permission.id} className="group flex items-center justify-between bg-blue-50/50 border border-blue-100/70 border-l-4 border-l-[#A78BFA] rounded-xl p-3 cursor-pointer hover:bg-white hover:border-blue-200 transition">
                     <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-900">
                       {permission.label}
                     </span>
-                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'view')} disabled={loading} className="w-4 h-4 text-blue-600 border-blue-300 rounded accent-blue-500" />
+                    <input type="checkbox" checked={permission.checked} onChange={() => handleCheckboxChange(permission.id, 'view')} disabled={loading} className="w-4 h-4 text-[#A78BFA] border-blue-300 rounded accent-[#A78BFA]" />
                   </label>
                 ))}
               </div>
@@ -387,7 +387,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-blue-800 text-white font-semibold text-sm rounded-xl hover:bg-blue-700 focus:ring-4 focus:ring-indigo-500/20 shadow-sm shadow-indigo-500/10 transition duration-200 disabled:bg-blue-400"
+              className="px-6 py-3 bg-[#7C3AED] text-white font-semibold text-sm rounded-xl hover:bg-purple-700 focus:ring-4 focus:ring-indigo-500/20 shadow-sm shadow-indigo-500/10 transition duration-200 disabled:bg-blue-400"
             >
               {loading ? 'Creating...' : 'Create Permissions'}
             </button>

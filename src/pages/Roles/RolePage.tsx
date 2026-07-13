@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RiDeleteBin4Fill } from "react-icons/ri"
 import { ChevronLeft, ChevronRight, ShieldCheck, Plus, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FaEdit } from "react-icons/fa"
+import { RiDeleteBinLine } from "react-icons/ri";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { fetchRoles, deleteRole } from "@/lib/axios"; 
 import { apiRequest } from "@/lib/apiService";
+import { MdOutlineModeEditOutline } from "react-icons/md";
 export default function RolesPage() {
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,22 +107,22 @@ export default function RolesPage() {
   const groupedPermissions = groupPermissions(currentRole.permissions || []);
 
   return (
-    <div className="p-4 min-h-screen bg-[#F3F0F7]">
+    <div className="p-4 min-h-screen bg-[#e9e5ff]">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-start mb-8">
-          <h1 className="text-2xl font-bold text-blue-800">Permissions List</h1>
-          <Button onClick={() => navigate("/roles/create")} className="bg-blue-800 hover:bg-blue-700">
+          <h1 className="text-2xl font-bold text-[#7C3AED]">Permissions List</h1>
+          <Button onClick={() => navigate("/roles/create")} className="bg-[#7C3AED] hover:bg-purple-700">
             <Plus className="w-4 h-4 mr-2" /> Add Permissions
           </Button>
         </div>
 
-        <Card className="border-l-4 border-blue-800 shadow-md">
+        <Card className="border-l-4 border-[#7C3AED] shadow-md">
           <CardContent className="pt-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="bg-blue-100 p-3 rounded-xl"><ShieldCheck className="w-8 h-8 text-blue-800" /></div>
+              <div className="bg-blue-100 p-3 rounded-xl"><ShieldCheck className="w-8 h-8 text-[#7C3AED]" /></div>
               <div>
-                <h2 className="text-xl font-bold">{currentRole.name} Role</h2>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">
+                <h2 className="text-xl font-bold text-[#7C3AED]">{currentRole.name} Role</h2>
+                <p className="text-xs text-[#A78BFA] uppercase tracking-wide">
                     {currentRole.permissions?.length || 0} Permissions Assigned
                 </p>
               </div>
@@ -134,10 +134,10 @@ export default function RolesPage() {
     <Button 
       variant="outline" 
       
-      className="text-blue-800 border-blue-600 hover:bg-blue-50"
+      className="text-[#7C3AED] border-purple-700 hover:bg-purple-600"
       onClick={() => navigate(`/roles/${currentRole.id}`)} 
     >
-     <FaEdit/>
+     <MdOutlineModeEditOutline className="w-5 h-5"/>
     </Button>
               <Button 
                 variant="ghost" 
@@ -145,7 +145,7 @@ export default function RolesPage() {
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
-                <RiDeleteBin4Fill /> {isDeleting ? "Deleting..." : ""}
+                < RiDeleteBinLine className="w-5 h-5"/> {isDeleting ? "Deleting..." : ""}
               </Button>
              <div className="flex items-center gap-2">
   
@@ -160,10 +160,10 @@ export default function RolesPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Object.entries(groupedPermissions).map(([module, perms]) => (
-            <Card key={module} className="hover:shadow-lg transition-all duration-300 border-t-2 border-blue-800">
+            <Card key={module} className="hover:shadow-lg transition-all duration-300 border-t-2 border-[#7C3AED]">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm capitalize flex items-center gap-2 text-slate-700">
-                    <Database className="w-4 h-4 text-blue-800" />
+                <CardTitle className="text-sm capitalize flex items-center gap-2 text-[#7C3AED]">
+                    <Database className="w-4 h-4 text-[#7C3AED]" />
                     {module} Control
                 </CardTitle>
               </CardHeader>

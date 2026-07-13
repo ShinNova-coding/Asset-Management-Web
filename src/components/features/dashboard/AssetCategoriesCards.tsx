@@ -13,7 +13,7 @@ const AssetCategoriesCards = ({ data }: { data?: any }) => {
       }))
     : [];
 
-  const COLORS = ["#2563eb", "#0d9488", "#4f46e5", "#f59e0b", "#db2777"];
+  const COLORS = ["#C4B5FD", "#7C3AED", "#A78BFA", "#e9e5ff", "#db2777"];
 
   return (
     <div className="p-6 bg-white rounded-2xl shadow-sm border border-slate-200 w-full flex flex-col md:flex-row items-center gap-8">
@@ -46,7 +46,7 @@ const AssetCategoriesCards = ({ data }: { data?: any }) => {
 
       
       <div className="w-full md:w-1/2 space-y-3">
-        <h2 className="text-lg font-bold text-blue-800 mb-4">Category</h2>
+        <h2 className="text-lg font-bold text-[#7C3AED] mb-4">Category</h2>
         {chartData.map((item, index) => (
           <button
             key={item.name}

@@ -31,7 +31,7 @@ export function InventoryFilter<TData>({ table }: InventoryFilterProps<TData>) {
           statusColumn.setFilterValue(value === "all" ? undefined : value)
         }}
       >
-        <SelectTrigger className="w-full h-10 border border-slate-200 bg-white rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 data-[state=open]:ring-2 data-[state=open]:ring-blue-400 data-[state=open]:border-blue-400 transition-all duration-150">
+        <SelectTrigger className="w-full h-10 border border-slate-200 bg-white rounded-xl focus:ring-2 focus:ring-[#7C3AED] focus:border-[#7C3AED] data-[state=open]:ring-2 data-[state=open]:ring-[#7C3AED] data-[state=open]:border-[#7C3AED] transition-all duration-150">
           <SelectValue placeholder="Select Status" />
         </SelectTrigger>
         

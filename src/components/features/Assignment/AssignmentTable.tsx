@@ -138,7 +138,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
             placeholder="Search by ID,name,asset code,date,status..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
           />
         </div>
         
@@ -146,7 +146,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
           <select
             value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
             onChange={(e) => table.getColumn("status")?.setFilterValue(e.target.value)}
-            className="w-full rounded-md border border-slate-400 bg-slate-50 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-md border border-[#e9e5ff] bg-slate-50 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
           >
             <option value="">All Status</option>
             <option value="active">Active</option>
@@ -157,7 +157,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
 
       <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
         <Table>
-          <TableHeader className="bg-blue-800">
+          <TableHeader className="bg-[#A78BFA]">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => {
@@ -165,7 +165,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
                   return (
                     <TableHead 
                       key={header.id} 
-                      className={`text-white font-semibold py-3 text-sm ${canSort ? "cursor-pointer select-none hover:bg-blue-500/50" : ""}`}
+                      className={`text-white font-semibold py-3 text-sm ${canSort ? "cursor-pointer select-none " : ""}`}
                       onClick={header.column.getToggleSortingHandler()}
                     >
                       <div className="flex items-center gap-2">
@@ -259,7 +259,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
                     key={index}
                     variant={currentPage === index ? "default" : "outline"}
                     size="sm"
-                    className={currentPage === index ? "bg-blue-800 hover:bg-blue-700 text-white border-none" : "bg-slate-200"}
+                    className={currentPage === index ? "bg-[#A78BFA] text-white border-none" : "bg-slate-200"}
                     onClick={() => table.setPageIndex(index)}
                   >
                     {index + 1}

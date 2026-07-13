@@ -40,13 +40,13 @@ const AddNewAsset = () => {
       };
 
       try {
-        const usersResponse = await fetch("http://192.168.100.190:1011/api/user", { headers });
+        const usersResponse = await fetch("http://localhost:1011/api/user", { headers });
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
           setUsersList(usersData.data?.data || usersData.data || []);
         }
 
-        const assetsResponse = await fetch("http://192.168.100.190:1011/api/asset", { headers });
+        const assetsResponse = await fetch("http://localhost:1011/api/asset", { headers });
         if (assetsResponse.ok) {
           const assetsData = await assetsResponse.json();
           setAssetsList(assetsData.data?.data || assetsData.data || []);
@@ -170,7 +170,7 @@ const AddNewAsset = () => {
 
       console.log(" Sending Payload to Assignment API:", assignmentPayload);
 
-      const API_URL = "http://192.168.100.190:1011/api/assignment"; 
+      const API_URL = "http://localhost:1011/api/assignment"; 
       
       const targetId = stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
@@ -211,19 +211,19 @@ const AddNewAsset = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F0F7] p-10 font-sans text-slate-900">
+    <div className="min-h-screen bg-[#e9e5ff] p-10 font-sans text-slate-900">
       
         
         <div className="space-y-2">
           <button 
             type="button" 
             onClick={goBack} 
-            className="flex items-center text-sm font-medium text-blue-800 hover:text-blue-700 transition-colors"
+            className="flex items-center text-sm font-medium text-[#7C3AED] hover:text-purple-700 transition-colors"
           >
             <ArrowLeft size={16} className="mr-2" />
             Back   
           </button>
-          <h1 className="text-2xl font-bold text-blue-800">
+          <h1 className="text-2xl font-bold text-[#7C3AED]">
             {isEditMode ? "Edit Handover Record" : "New Assignment"}
           </h1>
         </div>
@@ -235,11 +235,11 @@ const AddNewAsset = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
                 <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
-                  <User size={18} className="text-blue-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Employee</h2>
+                  <User size={18} className="text-[#7C3AED]" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#7C3AED]">Employee</h2>
                 </div>
                 <div className="relative" ref={userDropdownRef}>
-                  <label className="text-xs font-semibold text-slate-600 block mb-1">Employee Name</label>
+                  <label className="text-xs font-semibold text-[#7C3AED] block mb-1">Employee Name</label>
                   
                   <button
                     type="button"
@@ -274,11 +274,11 @@ const AddNewAsset = () => {
 
               <div className="space-y-3">
                 <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
-                  <Package size={18} className="text-blue-600" />
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Asset</h2>
+                  <Package size={18} className="text-[#7C3AED]" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#7C3AED]">Asset</h2>
                 </div>
                 <div className="relative" ref={assetDropdownRef}>
-                  <label className="text-xs font-semibold text-slate-600 block mb-1">Asset Name</label>
+                  <label className="text-xs font-semibold text-[#7C3AED] block mb-1">Asset Name</label>
                   
                   <button
                     type="button"
@@ -319,12 +319,12 @@ const AddNewAsset = () => {
             
             <div className="space-y-3">
               <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
-                <Calendar size={18} className="text-blue-600" />
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Timeline & Status</h2>
+                <Calendar size={18} className="text-[#7C3AED]" />
+                <h2 className="text-xs font-bold uppercase tracking-wider text-[#7C3AED]">Timeline & Status</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 block mb-1">Assigned Date</label>
+                  <label className="text-xs font-semibold text-[#7C3AED] block mb-1">Assigned Date</label>
                   <input
                     type="date"
                     name="assigned_date"
@@ -335,7 +335,7 @@ const AddNewAsset = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 block mb-1">Status</label>
+                  <label className="text-xs font-semibold text-[#7C3AED] block mb-1">Status</label>
                   <input
                     type="text"
                     name="status"
@@ -350,7 +350,7 @@ const AddNewAsset = () => {
 
            
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-600 block mb-1">Admin Remarks / Notes</label>
+              <label className="text-xs font-semibold text-[#7C3AED] block mb-1">Admin Remarks / Notes</label>
               <textarea 
                 name="note"
                 value={formData.note}
@@ -363,7 +363,7 @@ const AddNewAsset = () => {
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
               <button type="button" onClick={goBack} className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs">Cancel</button>
-              <button type="submit" className="px-5 py-2 rounded-md bg-blue-800 text-white font-medium hover:bg-blue-700 shadow-sm text-xs">
+              <button type="submit" className="px-5 py-2 rounded-md bg-[#7C3AED] text-white font-medium hover:bg-purple-700 shadow-sm text-xs">
                 {isEditMode ? "Update Record" : "Assign"}
               </button>
             </div>

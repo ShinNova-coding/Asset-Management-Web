@@ -79,12 +79,12 @@ const MaintenanceDetailsForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-8xl mx-auto p-6 bg-[#F3F0F7] min-h-screen font-sans relative">
+    <div className="max-w-8xl mx-auto p-6 bg-[#e9e5ff] min-h-screen font-sans relative">
       
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm text-blue-800 hover:text-slate-900 mb-6 transition-colors"
+        className="flex items-center gap-2 text-sm text-[#7C3AED] hover:text-purple-700 mb-6 transition-colors"
       >
         <ArrowLeft size={16} />
         Back
@@ -93,7 +93,7 @@ const MaintenanceDetailsForm: React.FC = () => {
       {/* Header Section with Status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-blue-800">Maintenance Details</h1>
+          <h1 className="text-2xl font-bold text-[#7C3AED]">Maintenance Details</h1>
         </div>
         <div>
           <span className={`px-3 py-1.5 rounded-full text-sm font-semibold border ${getStatusClass(record.status)}`}>
@@ -106,8 +106,8 @@ const MaintenanceDetailsForm: React.FC = () => {
         
         {/* SECTION 1: Asset Information */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 border-b pb-2">
-            <Wrench size={16} className="text-indigo-500" /> Asset Info
+          <h2 className="text-sm font-bold text-[#7C3AED] flex items-center gap-2 border-b pb-2">
+            <Wrench size={16} className="text-[#7C3AED]" /> Asset Info
           </h2>
           
           <div>
@@ -128,8 +128,8 @@ const MaintenanceDetailsForm: React.FC = () => {
 
         {/* SECTION 2: Personnel & Assignment */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 border-b pb-2">
-            <ShieldCheck size={16} className="text-indigo-500" /> Personnel
+          <h2 className="text-sm font-bold text-[#7C3AED] flex items-center gap-2 border-b pb-2">
+            <ShieldCheck size={16} className="text-[#7C3AED]" /> Personnel
           </h2>
 
           <div>
@@ -145,8 +145,8 @@ const MaintenanceDetailsForm: React.FC = () => {
 
         {/* SECTION 3: Issue Details */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 md:col-span-2">
-          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 border-b pb-2">
-            <FileText size={16} className="text-indigo-500" /> Issue Details
+          <h2 className="text-sm font-bold text-[#7C3AED] flex items-center gap-2 border-b pb-2">
+            <FileText size={16} className="text-[#7C3AED]" /> Issue Details
           </h2> 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -169,8 +169,8 @@ const MaintenanceDetailsForm: React.FC = () => {
 
         {/* SECTION 4: Timeline */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 border-b pb-2">
-            <Calendar size={16} className="text-indigo-500" /> Schedule & Timeline
+          <h2 className="text-sm font-bold text-[#7C3AED] flex items-center gap-2 border-b pb-2">
+            <Calendar size={16} className="text-[#7C3AED]" /> Schedule & Timeline
           </h2>
 
           <div className="grid grid-cols-2 gap-2">
@@ -188,8 +188,8 @@ const MaintenanceDetailsForm: React.FC = () => {
         {/* SECTION 5: Evidence Attachment */}
         {record.image_url && (
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-            <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 border-b pb-2">
-              <ImageIcon size={16} className="text-indigo-500" /> Evidence Image
+            <h2 className="text-sm font-bold text-[#7C3AED] flex items-center gap-2 border-b pb-2">
+              <ImageIcon size={16} className="text-[#7C3AED]" /> Evidence Image
             </h2>
             <div 
               onClick={() => setIsImageModalOpen(true)}

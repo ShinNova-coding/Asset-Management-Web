@@ -60,7 +60,7 @@ export default function InventoryPage() {
   };
 
   return (
-    <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-[#F3F0F7]">
+    <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-[#e9e5ff]">
       {isLoading ? (
        <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
@@ -69,7 +69,7 @@ export default function InventoryPage() {
         <>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-blue-800">
+              <h1 className="text-2xl font-bold tracking-tight text-[#7C3AED]">
                 Inventory
               </h1>
             </div>
@@ -77,7 +77,7 @@ export default function InventoryPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleExportPDF}
-                className="px-4 py-2 bg-blue-800 border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2"
+                className="px-4 py-2 bg-[#7C3AED] border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2"
               >
                 <IoCloudDownloadOutline size={16} />
               </button>

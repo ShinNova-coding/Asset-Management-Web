@@ -71,40 +71,40 @@ const AssignmentDetailPage = () => {
   const displayAssetName = formData.asset?.name || formData.asset_name || "Unknown Asset Unit";
 
   return (
-    <div className="min-h-screen bg-[#F3F0F7] p-4 md:p-10 font-sans">
+    <div className="min-h-screen bg-[#e9e5ff] p-4 md:p-10 font-sans">
       <div className="max-w-8xl mx-auto space-y-6">
         
         {/* Navigation */}
-        <Button variant="ghost" onClick={() => navigate("/assignment")} className="text-blue-800 hover:text-blue-900 pl-0">
+        <Button variant="ghost" onClick={() => navigate("/assignment")} className="text-[#7C3AED] hover:text-blue-900 pl-0">
           <FiArrowLeft className="mr-2" /> Back
         </Button>
 
         {/* Title Section */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-blue-800">Assignment Details</h1>
+            <h1 className="text-2xl font-bold text-[#7C3AED]">Assignment Details</h1>
             
           </div>
-          <div className={`px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 ${isActive ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"}`}>
+          <div className={`px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 ${isActive ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-[#7C3AED]"}`}>
             <span className={`h-2 w-2 rounded-full ${isActive ? "bg-emerald-500" : "bg-blue-500"}`} />
             {formData.status || "Unknown"}
           </div>
         </div>
 
         {/* Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-blue-800">
-          <DetailCard title="Personnel" icon={<FiUser className="text-blue-800"/>}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-[#7C3AED]">
+          <DetailCard title="Personnel"  icon={<FiUser className="text-[#7C3AED]"/>}>
             <DetailItem label="Employee ID" value={displayUserId} />
             <DetailItem label="Full Name" value={displayUserName} />
           </DetailCard>
 
-          <DetailCard title="Hardware Allocation" icon={<FiCpu className="text-blue-800"/>}>
+          <DetailCard title="Hardware Allocation" icon={<FiCpu className="text-[#7C3AED]"/>}>
             <DetailItem label="Asset Name" value={displayAssetName} />
             <DetailItem label="Asset Code" value={displayAssetCode} />
           </DetailCard>
         </div>
 
-        <DetailCard title="Notes & Timeline" icon={<FiCalendar className="text-blue-800"/>}>
+        <DetailCard title="Notes & Timeline" icon={<FiCalendar className="text-[#7C3AED]"/>}>
           <DetailItem label="Assigned Date" value={formData.assigned_date || "Not set"} />
           <div className="mt-4 pt-4 border-t border-slate-100">
             <label className="text-xs font-semibold uppercase text-black">Notes</label>
@@ -122,7 +122,7 @@ const AssignmentDetailPage = () => {
 const DetailCard = ({ title, icon, children }: any) => (
   <Card className="border border-slate-200 shadow-sm rounded-2xl bg-white">
     <CardContent className="p-6">
-      <div className="flex items-center gap-2 mb-6 text-blue-800 font-bold">
+      <div className="flex items-center gap-2 mb-6 text-[#7C3AED] font-bold">
         {icon} {title}
       </div>
       {children}

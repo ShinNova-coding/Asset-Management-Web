@@ -89,14 +89,14 @@ export default function Layout() {
     <SidebarProvider style={{ "--sidebar-width": "240px" } as React.CSSProperties}>
       <div className="flex min-h-screen w-full bg-[#F0F4F8]">
        
-        <Sidebar className="border-r border-blue-100 bg-[#1E3A8A]">
-          <SidebarContent className="bg-[#1E3A8A] px-4 py-8">
+        <Sidebar className="border-r border-blue-100 bg-[#e9e5ff]">
+          <SidebarContent className="bg-[#e9e5ff] px-4 py-8">
            
             <div className="flex items-center gap-3 px-2 mb-8">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-900/20">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#7C3AED] shadow-lg shadow-blue-900/20">
                 <BsFillBoxFill className="text-white h-6 w-6" />
               </div>
-              <h1 className="text-xl font-bold tracking-tight text-white">ITAMS</h1>
+              <h1 className="text-xl font-bold tracking-tight text-[#7C3AED]">ITAMS</h1>
             </div>
 
            
@@ -120,8 +120,8 @@ export default function Layout() {
                           onClick={() => navigate(item.path)}
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
                             isActive
-                              ? "bg-blue-500 text-[#1E3A8A]"
-                              : "text-blue-200 hover:bg-blue-800/50 hover:text-white"
+                              ? "bg-[#ab8ffe] text-[#7C3AED]"
+                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED]"
                           }`}
                         >
                           <item.icon className="h-5 w-5" />
@@ -141,8 +141,8 @@ export default function Layout() {
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
                       isUserModuleActive
-                        ? "text-white font-semibold bg-blue-800/40"
-                        : "text-blue-200 hover:bg-blue-800/50 hover:text-white"
+                        ? "bg-[#ab8ffe] text-[#7C3AED]"
+                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED]"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -165,8 +165,8 @@ export default function Layout() {
                           onClick={() => navigate("/usermanagement")}
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-medium transition-all duration-200 ${
                             isUsersSubItemActive
-                              ? "bg-blue-300 text-[#1E3A8A]"
-                              : "text-blue-300 hover:bg-blue-800/30 hover:text-white"
+                              ?"bg-[#ab8ffe] text-[#7C3AED]"
+                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED]"
                           }`}
                         >
                           <Users className="h-4 w-4" />
@@ -180,8 +180,8 @@ export default function Layout() {
                           onClick={() => navigate("/roles")}
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-medium transition-all duration-200 ${
                             currentPath.startsWith("/roles")
-                              ? "bg-blue-300 text-[#1E3A8A]"
-                              : "text-blue-300 hover:bg-blue-800/30 hover:text-white"
+                              ? "bg-[#ab8ffe] text-[#7C3AED]"
+                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED]"
                           }`}
                         >
                           <UserCog className="h-4 w-4" />
@@ -211,7 +211,7 @@ export default function Layout() {
           <main className="flex-1 overflow-y-auto">
             {isLoading ? (
              
-              <div className="h-full flex items-center justify-center text-[#1E3A8A] font-medium bg-[#F0F4F8]">
+              <div className="h-full flex items-center justify-center text-[#A78BFA] font-medium bg-[#F0F4F8]">
                 Loading Content Data...
               </div>
             ) : (

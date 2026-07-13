@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AssignmentTable } from "@/components/features/Assignment/AssignmentTable";
 import { assignmentData as fallbackData } from "@/data/assignmentdata";
 import type { Assignment } from "@/data/assignmentdata";
-import { FiTrash2, FiX } from "react-icons/fi";
+
 import { IoCloudDownloadOutline } from "react-icons/io5";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -22,7 +22,7 @@ const AssignmentPage = () => {
   });
 
   const navigate = useNavigate();
-  const location = useLocation();
+ 
 
   const fetchAssignments = async () => {
     try {
@@ -88,7 +88,7 @@ const AssignmentPage = () => {
   };
 
   return (
-    <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-[#F3F0F7]">
+    <div className="pt-6 px-8 pb-8 space-y-4 min-h-screen bg-[#e9e5ff]">
       {loading ? (
        <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
@@ -96,11 +96,11 @@ const AssignmentPage = () => {
       ) : (
         <>
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold tracking-tight text-blue-800">Assignment</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-[#7C3AED]">Assignment</h1>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleExportPDF}
-                className="px-4 py-2 bg-blue-800 text-white rounded-lg transition-colors font-medium shadow-sm flex items-center gap-2"
+                className="px-4 py-2 bg-[#7C3AED] text-white rounded-lg transition-colors font-medium shadow-sm flex items-center gap-2"
               >
                 <IoCloudDownloadOutline size={16} /> 
               </button>

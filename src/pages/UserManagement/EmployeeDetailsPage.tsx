@@ -100,16 +100,7 @@ export default function EmployeeDetailsPage() {
   return (
     <div>
       
-      <button
-        onClick={() => navigate(-1)}
-        
-        className="mb-4 flex items-center text-sm font-medium text-blue-800 hover:underline"
-        >
-          <ArrowLeft size={16} className="mr-2" />
-          Back 
-      
-    
-      </button>
+     
 
       {loading && (
         <div className="p-6 text-gray-500 font-medium animate-pulse">

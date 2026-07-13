@@ -83,15 +83,15 @@ export default function EditRolePage() {
   if (!role) return <div className="p-10 text-center">Role not found.</div>;
 
   return (
-    <div className="p-6 min-h-screen bg-[#F3F0F7]">
+    <div className="p-6 min-h-screen bg-[#e9e5ff]">
       <div className="max-w-4xl mx-auto space-y-6">
-        <Button variant="ghost" className="text-blue-800 hover:text-blue-900" onClick={() => navigate("/roles")}>
-          <ArrowLeft className="w-4 h-4 mr-2 text-blue-800" /> Back
+        <Button variant="ghost" className="text-[#7C3AED] hover:text-purple-700" onClick={() => navigate("/roles")}>
+          <ArrowLeft className="w-4 h-4 mr-2 text-[#7C3AED]" /> Back
         </Button>
 
         <Card>
           <CardHeader className="flex flex-row justify-between items-center">
-            <CardTitle>Editing: {role.name}</CardTitle>
+            <CardTitle className="text-[#7C3AED]">Editing: {role.name}</CardTitle>
             <Button onClick={handleUpdate} disabled={isSaving}>
               {isSaving ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />} 
               Save Changes

@@ -199,8 +199,8 @@ const AddEmployeeForm: React.FC = () => {
       }
 
       const url = isEditMode 
-        ? `http://192.168.100.185:1011/api/user/${targetId}` 
-        : `http://192.168.100.185:1011/api/user`;
+        ? `http://localhost:1011/api/user/${targetId}` 
+        : `http://localhost:1011/api/user`;
         
       const method = isEditMode ? 'PATCH' : 'POST';
 
@@ -233,19 +233,19 @@ const AddEmployeeForm: React.FC = () => {
 
   return (
     /* Top navigation header နား ကွက်တိဖြစ်အောင် ပတ်လည် padding ကို p-4 သို့မဟုတ် pt-2 px-4 pb-6 ဟု ညှိပေးထားပါတယ် */
-    <div className="w-full bg-[#F0F4F8] pt-2 px-4 pb-6 font-sans text-slate-900">
+    <div className="w-full bg-[#e9e5ff] pt-2 px-4 pb-6 font-sans text-slate-900">
       <div className="max-w-4xl mx-auto space-y-4">
         
         {/* Back Button & Title Area */}
         <div className="flex flex-col gap-1">
           <Link
             to="/employees"
-            className="inline-flex items-center text-xs font-semibold uppercase tracking-wider text-blue-800 hover:text-blue-800 transition-colors"
+            className="inline-flex items-center text-xs font-semibold uppercase tracking-wider text-[#7C3AED] hover:text-blue-800 transition-colors"
           >
             <ArrowLeft size={14} className="mr-1.5" />
             Back 
           </Link>
-          <h1 className="text-xl font-bold text-blue-800">
+          <h1 className="text-xl font-bold text-[#7C3AED]">
             {isEditMode ? 'Edit Employee Profile' : 'AddNew Employee'}
           </h1>
         </div>

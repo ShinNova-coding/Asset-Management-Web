@@ -1,13 +1,13 @@
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Loader2, ChevronDown, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { Loader2, ChevronDown, CheckCircle, XCircle } from 'lucide-react';
 import { FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi"; 
 import { fetchExpenses as fetchExpensesAPI, updateExpenseStatus, deleteExpense } from "@/lib/apiService";
 
 import { ExpenseDetailModal } from './ExpenseDetailModal';
 import type { ExpenseDetailData } from './ExpenseDetailModal';
-import { RiDeleteBin4Fill } from "react-icons/ri"
+import { RiDeleteBinLine } from "react-icons/ri";
 interface ExpenseWithUser extends ExpenseDetailData {
   user?: {
     name?: string;
@@ -212,7 +212,7 @@ export const ExpenseTable: React.FC = () => {
               placeholder="Search by name, date, title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-md border border-slate-300 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400 text-slate-700 shadow-3xs"
+              className="w-full rounded-md border border-slate-300 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-400 transition-all placeholder:text-slate-400 text-slate-700 shadow-3xs"
             />
           </div>
 
@@ -220,7 +220,7 @@ export const ExpenseTable: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-3 pr-10 py-2 bg-slate-55 border border-slate-300 rounded-md text-sm font-normal text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer shadow-3xs"
+              className="w-full pl-3 pr-10 py-2 bg-slate-55 border border-slate-300 rounded-md text-sm font-normal text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-400 transition-all cursor-pointer shadow-3xs"
             >
               <option value="All">All Status</option>
               <option value="requested">Requested</option>
@@ -237,7 +237,7 @@ export const ExpenseTable: React.FC = () => {
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse table-auto">
             <thead>
-              <tr className="bg-blue-800 text-white text-[13px] font-semibold border-b border-blue-600 select-none">
+              <tr className="bg-[#A78BFA] text-white text-[13px] font-semibold border-b select-none">
                 <th className="py-3 px-4 w-16">No.</th>
                 
                 <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('employee')}>
@@ -379,7 +379,7 @@ export const ExpenseTable: React.FC = () => {
                               className="text-red-600  active:scale-95 transition-all p-1.5 hover:bg-rose-50 rounded-md"
                               title="Delete permanently"
                             >
-                              <RiDeleteBin4Fill size={16} />
+                              <RiDeleteBinLine size={16} />
                             </button>
                           </>
                         )}

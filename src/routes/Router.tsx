@@ -25,6 +25,7 @@ import CategoriesPage from "@/pages/Categories/CategoriesPage"
 import ExpensePage from "@/pages/Expense/ExpensePage" 
 import ExpenseTable from "@/pages/Expense/ExpenseTable" 
 import { CreateExpenseForm } from "@/pages/Expense/CreateExpenseForm"
+import ExpenseDashboard from "@/components/features/Dashboard/ExpenseDashboard"; // Adjust path as needed
 import AddNewCategories from "@/pages/Categories/AddNewCategories"
 export const router = createBrowserRouter([
   {
@@ -135,6 +136,11 @@ export const router = createBrowserRouter([
             path: "expense",
             element: <ExpensePage />
           },
+          // Inside your createBrowserRouter children array
+{
+  path: "expense/report", // The URL path for this new view
+  element: <ExpenseDashboard />,
+},
 
           {
             path: "expense/createexpenseform",

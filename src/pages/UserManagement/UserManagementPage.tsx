@@ -20,7 +20,7 @@ import {
   FiChevronUp,
   FiChevronDown,
 } from "react-icons/fi";
-import { RiDeleteBin4Fill } from "react-icons/ri";
+import { RiDeleteBinLine } from "react-icons/ri";
 
 import {
   Table,
@@ -307,20 +307,20 @@ const UserManagement: React.FC = () => {
   }
 
   return (
-    <div className="w-full space-y-6 p-6 relative bg-[#F3F0F7] min-h-screen font-sans text-slate-800">
+    <div className="w-full space-y-6 p-6 relative bg-[#e9e5ff] min-h-screen font-sans text-slate-800">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-blue-800">User Management</h1>
+        <h1 className="text-2xl font-bold text-[#7C3AED]">User Management</h1>
 
         <div className="flex items-center gap-3">
           <button
             onClick={handleExportPDF}
-            className="px-4 py-2 bg-blue-800 border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-blue-900"
+            className="px-4 py-2 bg-[#7C3AED] border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-purple-700"
           >
             <IoCloudDownloadOutline size={20} />
           </button>
 
           <Link to="/add-employee">
-            <button className="flex items-center gap-2 rounded-md bg-blue-800 px-4 py-2 text-sm text-white hover:bg-blue-700 transition-colors">
+            <button className="flex items-center gap-2 rounded-md bg-[#7C3AED] px-4 py-2 text-sm text-white hover:bg-purple-700 transition-colors">
               <UserPlus size={18} />
               Add Employee
             </button>
@@ -351,7 +351,7 @@ const UserManagement: React.FC = () => {
                 setStatusFilter(e.target.value);
                 setCurrentPage(0);
               }}
-              className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-[#334155] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer"
+              className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-[#334155] focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-colors cursor-pointer"
             >
               <option value="">All Status</option>
               <option value="active">Active</option>
@@ -364,7 +364,7 @@ const UserManagement: React.FC = () => {
 
         <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <Table>
-            <TableHeader className="bg-blue-800">
+            <TableHeader className="bg-[#A78BFA]">
               <TableRow className="hover:bg-transparent border-none">
                 <TableHead className="text-white font-semibold py-3.5 text-sm w-12">No</TableHead>
                 
@@ -472,7 +472,7 @@ const UserManagement: React.FC = () => {
                         }}
                         className="text-red-600 hover:text-red-700 transition-colors"
                       >
-                        <RiDeleteBin4Fill size={21} />
+                        <RiDeleteBinLine className="w-5 h-5" />
                       </button>
                     </div>
                   </TableCell>

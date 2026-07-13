@@ -7,9 +7,10 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { MdOutlineModeEditOutline } from "react-icons/md";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FaEdit } from "react-icons/fa";
+
 import { apiRequest } from "@/lib/apiService";
 
 interface EditProps {
@@ -51,12 +52,12 @@ export default function CategoriesEdit({ category, onUpdated }: EditProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
        
-          <FaEdit className="h-5 w-5 text-blue-800" />
+        <MdOutlineModeEditOutline className="h-5 w-5 text-[#7C3AED]" />
         
       </DialogTrigger>
       <DialogContent className="bg-white">
         <DialogHeader>
-          <DialogTitle>Edit Category</DialogTitle>
+          <DialogTitle className="text-[#7C3AED]">Edit Category</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleUpdate} className="space-y-4 pt-4">
           <div className="space-y-2">
@@ -68,7 +69,7 @@ export default function CategoriesEdit({ category, onUpdated }: EditProps) {
               required
             />
           </div>
-          <Button type="submit" className="bg-blue-800 flex justify-end ml-auto" disabled={loading}>
+          <Button type="submit" className="bg-[#7C3AED] flex justify-end ml-auto" disabled={loading}>
             {loading ? "Updating..." : "Save Changes"}
           </Button>
         </form>

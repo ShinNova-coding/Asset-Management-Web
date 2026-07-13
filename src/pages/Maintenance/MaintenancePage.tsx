@@ -96,15 +96,15 @@ export default function MaintenancePage() {
   }
 
   return (
-    <div className="pt-6 px-8 pb-8 min-h-screen space-y-4 bg-[#F3F0F7]"> 
+    <div className="pt-6 px-8 pb-8 min-h-screen space-y-4 bg-[#e9e5ff]"> 
       {/* Header Container */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight text-blue-800">
+        <h1 className="text-2xl font-bold tracking-tight text-[#7C3AED]">
           Maintenance
         </h1>
         <button
           onClick={handleExportPDF}
-          className="px-4 py-2 bg-blue-800 border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-blue-900"
+          className="px-4 py-2 bg-[#7C3AED] border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-purple-700"
         >
           <IoCloudDownloadOutline size={20} />
         </button>

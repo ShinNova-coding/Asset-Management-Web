@@ -68,7 +68,11 @@ export const updateExpense = async (id: string, payload: Partial<ExpensePayload>
 export const deleteExpense = async (id: string) => {
   return apiRequest("/expense/expense_id", "DELETE", { expense_id: id });
 };
-
+// Expense Report အတွက် function အသစ်
+export const getExpenseReport = async () => {
+  // Query parameters အနေနဲ့ URL မှာ ထည့်ပေးရပါမယ်
+  return apiRequest("/expense", "GET");
+};
 export const updateExpenseStatus = async (expenseId: string, status: "approved" | "canceled" | string, remark?: string) => {
   const payload: any = {
     expense_id: expenseId,
@@ -99,7 +103,25 @@ export interface UserUpdatePayload {
   left_date?: string | null;
 }
 // @/lib/apiService ဖိုင်ထဲမှာ သွားထည့်ပေးရန်
+// Add this to your @/lib/apiService.ts
+export const loginUser = async (credentials: { email: string; password: string }) => {
+  // We use direct fetch here because the generic apiRequest adds 
+  // an Authorization header, which isn't present yet during login
+  const response = await fetch(`${BASE_URL}/login`, {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json", 
+      "Accept": "application/json" 
+    },
+    body: JSON.stringify(credentials),
+  });
 
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Login failed");
+  }
+  return data;
+};
 export async function getCategories() {
   const myHeaders = new Headers();
   myHeaders.append("Accept", "application/json");
@@ -111,7 +133,7 @@ export async function getCategories() {
     redirect: 'follow'
   };
 
-  const response = await fetch("http://192.168.100.190:1011/api/category", requestOptions);
+  const response = await fetch("http://localhost:1011/api/category", requestOptions);
   if (!response.ok) {
     throw new Error("Failed to fetch categories");
   }

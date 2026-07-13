@@ -46,6 +46,12 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+    --animate-active-float: active-float 3s ease-in-out infinite;
+
+    @keyframes active-float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(5deg); }
+    }
 }
 
 /* index.css */
@@ -63,7 +69,7 @@
   
 
   /* Buttons & accents */
-  --primary: #0070EB;               /* blue button background */
+  --primary: #ab8ffe;               /* blue button background */
   --primary-foreground: #ffffff;    /* white text on buttons */
   
 
@@ -76,15 +82,31 @@
   /* Sidebar */
   --sidebar: #eef7fa;
   --sidebar-foreground: #111827;
-  --sidebar-primary: #3b82f6;
+  --sidebar-primary: #A78BFA;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #3b82f6;
+  --sidebar-accent: #A78BFA;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #e5e7eb;
-  --sidebar-ring: #3b82f6;
+  --sidebar-ring: #A78BFA;
 
   /* Radius */
   --radius: 0.625rem;
+}
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.total-val {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 1rem;
 }
 
 @layer base {

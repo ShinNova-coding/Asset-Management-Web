@@ -11,23 +11,20 @@ interface StatCardProps {
   label: string;
   value: string | number;
   Icon?: React.ElementType;
-  gradient: string;
+  iconColor: string;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ label, value, Icon, gradient }) => {
+const StatCard: React.FC<StatCardProps> = ({ label, value, Icon, iconColor }) => {
   return (
-    <div className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-lg transition-transform hover:-translate-y-1 ${gradient}`}>
-      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/20 blur-2xl" />
-      
-      <div className="relative z-10">
-        <div className="mb-4 flex justify-between items-start">
-          <div className="rounded-lg bg-white/20 p-2 backdrop-blur-sm">
-            {Icon && <Icon className="h-6 w-6 text-white" />}
-          </div>
-          <span className="text-xs font-bold opacity-80 uppercase tracking-widest">{label}</span>
+    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] transition-all hover:shadow-lg">
+      <div className="mb-4 flex items-center gap-3">
+        <div className={`rounded-xl p-2.5 ${iconColor} bg-opacity-6`}>
+          {Icon && <Icon className={`h-4 w-4 ${iconColor.replace('bg-', 'text-')}`} />}
         </div>
-        <h3 className="text-xl font-bold">{value}</h3>
+        <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">{label}</span>
       </div>
+      <h3 className="text-xl font-bold text-slate-900">{value}</h3>
+     
     </div>
   );
 };
@@ -42,23 +39,23 @@ const DashboardStats: React.FC<{ data?: any }> = ({ data }) => {
   };
 
   const stats = [
-    { label: "Total", value: assetData.total_assets, gradient: "bg-gradient-to-br from-blue-500 to-blue-700", Icon: CubeIcon },
-    { label: "Available", value: assetData.available_assets, gradient: "bg-gradient-to-br from-emerald-500 to-emerald-700", Icon: CheckCircleIcon },
-    { label: "Assigned", value: assetData.assigned_assets, gradient: "bg-gradient-to-br from-violet-500 to-violet-700", Icon: UserIcon },
-    { label: "Repair", value: assetData.maintenance_assets, gradient: "bg-gradient-to-br from-rose-500 to-rose-700", Icon: WrenchIcon },
-    { label: "Retired", value: assetData.retired_assets, gradient: "bg-gradient-to-br from-amber-500 to-amber-700", Icon: TrashIcon },
+    { label: "Total", value: assetData.total_assets, iconColor: "bg-blue-100", Icon: CubeIcon },
+    { label: "Available", value: assetData.available_assets, iconColor: "bg-emerald-300", Icon: CheckCircleIcon },
+    { label: "Assigned", value: assetData.assigned_assets, iconColor: "bg-violet-300", Icon: UserIcon },
+    { label: "Repair", value: assetData.maintenance_assets, iconColor: "bg-rose-300", Icon: WrenchIcon },
+    { label: "Retired", value: assetData.retired_assets, iconColor: "bg-amber-300", Icon: TrashIcon },
   ];
 
   return (
     <div className="w-full py-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {stats.map((stat, index) => (
           <StatCard
             key={index}
             label={stat.label}
             value={stat.value}
             Icon={stat.Icon}
-            gradient={stat.gradient}
+            iconColor={stat.iconColor}
           />
         ))}
       </div>

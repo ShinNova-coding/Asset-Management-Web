@@ -19,7 +19,7 @@ export function AssignmentFilter<TData>({ table }: AssignmentFilterProps<TData>)
   if (!statusColumn) return null
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-[#e9e5ff]">
       <Select
         value={(statusColumn.getFilterValue() as string) ?? "All Status"}
         onValueChange={(value) => {
@@ -30,7 +30,7 @@ export function AssignmentFilter<TData>({ table }: AssignmentFilterProps<TData>)
   <SelectValue placeholder="Select Status" />
 </SelectTrigger>
         
-        <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-md z-5">
+        <SelectContent className="bg-[#e9e5ff] border border-gray-200 shadow-lg rounded-md z-5">
           <SelectItem value="All Status">All Status</SelectItem>
           <SelectItem value="Active">Active</SelectItem>
           <SelectItem value="Returned">Returned</SelectItem>

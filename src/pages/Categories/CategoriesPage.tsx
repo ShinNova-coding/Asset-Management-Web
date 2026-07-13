@@ -160,14 +160,14 @@ const table = useReactTable({
   const pageCount = table.getPageCount();
 
   return (
-    <div className="pt-6 px-8 pb-8 space-y-4 bg-[#F3F0F7] min-h-screen">
+    <div className="pt-6 px-8 pb-8 space-y-4 bg-[#e9e5ff] min-h-screen">
       <div className="max-w-8xl mx-auto w-full">
         <div className="flex justify-between items-center mb-5 w-full">
-          <h2 className="text-2xl font-bold text-blue-900 tracking-tight">Categories</h2>
+          <h2 className="text-2xl font-bold text-[#7C3AED] tracking-tight">Categories</h2>
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportPDF}
-              className="px-4 py-2 bg-blue-800 border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2"
+              className="px-4 py-2 bg-[#7C3AED] border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2"
             >
               <IoCloudDownloadOutline size={16} />
             </button>
@@ -185,7 +185,7 @@ const table = useReactTable({
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={handleSearchChange}
-                  className="w-full pl-11 pr-4 py-2.5 bg-[#F8FAFC] border border-slate-300 focus:border-blue-400 rounded-xl outline-none text-sm"
+                  className="w-full pl-11 pr-4 py-2.5 bg-[#F8FAFC] border border-slate-300 focus:border-purple-400 rounded-xl outline-none text-sm"
                 />
               </div>
             </div>
@@ -198,9 +198,9 @@ const table = useReactTable({
               <>
                 <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
                   <Table className="w-full table-fixed"> 
-                    <TableHeader className="bg-blue-800">
+                    <TableHeader className="bg-[#A78BFA]">
                       {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id} className="hover:bg-blue-800 border-none">
+                        <TableRow key={headerGroup.id} className="border-none">
                           {headerGroup.headers.map((header) => {
                             const isCenter = header.column.id === "no" || header.column.id === "Actions";
                             const canSort = header.column.getCanSort();
@@ -271,7 +271,7 @@ const table = useReactTable({
                     {Array.from({ length: pageCount }).map((_, index) => {
                       if (index === 0 || index === pageCount - 1 || (index >= currentPage - 1 && index <= currentPage + 1)) {
                         return (
-                          <Button key={index} size="sm" className={`h-8 w-8 p-0 ${currentPage === index ? "bg-[#1E3A8A] text-white" : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"}`} onClick={() => table.setPageIndex(index)}>
+                          <Button key={index} size="sm" className={`h-8 w-8 p-0 ${currentPage === index ? "bg-[#A78BFA] text-white" : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"}`} onClick={() => table.setPageIndex(index)}>
                             {index + 1}
                           </Button>
                         );

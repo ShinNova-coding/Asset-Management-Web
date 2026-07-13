@@ -65,12 +65,12 @@ export default function ActivityPage() {
   const currentLogs = logs.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
 
   return (
-    <div className="pt-4 px-6 pb-6 space-y-6 min-h-screen bg-[#F3F0F7]">
-      <h1 className="text-2xl font-bold text-blue-800">Activity Logs</h1>
+    <div className="pt-4 px-6 pb-6 space-y-6 min-h-screen bg-[#e9e5ff]">
+      <h1 className="text-2xl font-bold text-[#7C3AED]">Activity Logs</h1>
 
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <table className="w-full text-left border-collapse">
-          <thead className="bg-blue-800 text-white text-sm">
+          <thead className="bg-[#A78BFA] text-white text-sm">
             <tr>
               <th className="px-6 py-4">ID</th>
               <th className="px-6 py-4">Action</th>
@@ -117,7 +117,7 @@ export default function ActivityPage() {
                       key={index}
                       variant={currentPage === index ? "default" : "outline"}
                       size="sm"
-                      className={currentPage === index ? "bg-blue-800 hover:bg-blue-700 text-white border-none" : "bg-slate-200"}
+                      className={currentPage === index ? "bg-[#A78BFA] hover:bg-[#7C3AED] text-white border-none" : "bg-slate-200"}
                       onClick={() => setCurrentPage(index)}
                     >
                       {index + 1}
