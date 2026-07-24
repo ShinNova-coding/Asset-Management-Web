@@ -31,7 +31,7 @@ export default function AddNewCategories({ onCategoryAdded }: { onCategoryAdded:
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-[#7C3AED] hover:bg-[#A78BFA] text-white font-semibold flex items-center gap-2 px-4 shadow-sm transition-all rounded-lg h-9">
-          <Plus className="mr-2 h-4 w-4" /> Add Category
+          <Plus className="mr-2 h-4 w-3" /> Add Category
         </Button>
       </DialogTrigger>
     
