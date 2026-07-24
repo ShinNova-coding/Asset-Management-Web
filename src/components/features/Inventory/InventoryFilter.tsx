@@ -19,32 +19,37 @@ export function InventoryFilter<TData>({ table }: InventoryFilterProps<TData>) {
 
   if (!statusColumn) return null
 
- 
-  const currentValue = (statusColumn.getFilterValue() as string) ?? ""
+ //if there's no filter set is to select status
+  const currentValue = (statusColumn.getFilterValue() as string) ?? "Select status"
 
   return (
-    <div className="w-full bg-transparent">
+    <div className=" w-full bg-transparent">
+      
       <Select
         value={currentValue}
         onValueChange={(value) => {
-          
           statusColumn.setFilterValue(value === "all" ? undefined : value)
         }}
       >
-        <SelectTrigger className="w-full h-10 border border-slate-200 bg-white rounded-xl focus:ring-2 focus:ring-[#7C3AED] focus:border-[#7C3AED] data-[state=open]:ring-2 data-[state=open]:ring-[#7C3AED] data-[state=open]:border-[#7C3AED] transition-all duration-150">
-          <SelectValue placeholder="Select Status" />
-        </SelectTrigger>
+       
+<SelectTrigger className="w-full ...">
+ 
+  <SelectValue placeholder="Select Status" />
+</SelectTrigger>
         
-        <SelectContent className="bg-white border border-slate-200 rounded-xl shadow-lg">
-         
-          <SelectItem value="all">All Status</SelectItem>
-          <SelectItem value="available">Available</SelectItem>
-          <SelectItem value="returned">Returned</SelectItem>
-          <SelectItem value="maintenance">Maintenance</SelectItem>
-        
-          <SelectItem value="retired">Retired</SelectItem>
-        </SelectContent>
-      </Select>
+      
+     <SelectContent 
+  className="bg-white border border-slate-200 rounded-xl shadow-lg" 
+  sideOffset={2}//to set distance from trigger
+  alignItemWithTrigger={false} 
+>
+  <SelectItem value="all">All Status</SelectItem>
+  <SelectItem value="available">Available</SelectItem>
+  <SelectItem value="assigned">Assigned</SelectItem>
+  <SelectItem value="maintenance">Maintenance</SelectItem>
+  <SelectItem value="retired">Retired</SelectItem>
+</SelectContent>
+</Select>
     </div>
   )
 }

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiX, FiChevronDown, FiChevronUp } from "react-icons/fi"
-import { Search } from "lucide-react"
+import { InventorySearch } from "./InventorySearchBox"
 import {
   flexRender,
   getCoreRowModel,
@@ -24,7 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-
+import { InventoryFilter } from "./InventoryFilter"
 import { columns as baseColumns } from "./InventoryColumns"
 import { apiRequest } from "@/lib/apiService";
 interface InventoryTableProps {
@@ -168,30 +168,18 @@ const handleConfirmDelete = async () => {
   return (
     <div className="w-full space-y-4 p-3 relative">
       <div className="flex gap-4 rounded-md rounded-t-xl bg-white p-4 border border-slate-100 shadow-sm">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
-          <input
-            type="text"
-            placeholder="Search by name,date,warranty,status..."
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-          />
-        </div>
+       <div className="relative flex-1">
+  <InventorySearch 
+    value={globalFilter ?? ""} 
+    onChange={setGlobalFilter} 
+  />
+</div>
 
-        <div className="relative w-48">
-          <select
-            value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
-            onChange={(e) => table.getColumn("status")?.setFilterValue(e.target.value)}
-            className="w-full rounded-md border border-slate-400  bg-slate-50 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-          >
-            <option value="">All Status</option>
-            <option value="available">Available</option>
-            <option value="assigned">Assigned</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="retired">Retired</option>
-          </select>
-        </div>
+       
+
+<div className="relative w-48">
+  <InventoryFilter table={table} />
+</div>
       </div>
 
       <div className="rounded-md rounded-b-xl border border-slate-200 overflow-hidden bg-white shadow-sm">

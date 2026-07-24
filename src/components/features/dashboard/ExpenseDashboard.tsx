@@ -21,10 +21,10 @@ interface ExpenseDashboardProps {
 const ExpenseDashboard: React.FC<ExpenseDashboardProps> = ({ data }) => {
   const safeData = Array.isArray(data) ? data : [];
 
-  // လအလိုက် အသုံးစရိတ်များကို စုစည်းခြင်း (Monthly Aggregation)
+  //  (Monthly Aggregation)
   const monthlyTotals = safeData.reduce((acc, item) => {
     const date = new Date(item.expense_date);
-    const month = date.toLocaleString('default', { month: 'short' }); // Jan, Feb, etc.
+    const month = date.toLocaleString('default', { month: 'short' }); 
     acc[month] = (acc[month] || 0) + (parseFloat(item.cost) || 0);
     return acc;
   }, {} as Record<string, number>);

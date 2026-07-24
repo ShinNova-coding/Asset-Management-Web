@@ -14,28 +14,40 @@ interface AssignmentFilterProps<TData> {
 }
 
 export function AssignmentFilter<TData>({ table }: AssignmentFilterProps<TData>) {
-  const statusColumn = table.getColumn("status")
+ const statusColumn = table.getColumn("status")
 
   if (!statusColumn) return null
 
+ //if there's no filter set is to select status
+  const currentValue = (statusColumn.getFilterValue() as string) ?? "Select status"
+
   return (
-    <div className="bg-[#e9e5ff]">
+    <div className=" w-full bg-transparent">
+      
       <Select
-        value={(statusColumn.getFilterValue() as string) ?? "All Status"}
+        value={currentValue}
         onValueChange={(value) => {
-          statusColumn.setFilterValue(value === "All Status" ? undefined : value)
+          statusColumn.setFilterValue(value === "all" ? undefined : value)
         }}
       >
-        <SelectTrigger className="w-[200px] h-15">
+       
+<SelectTrigger className="w-full ...">
+ 
   <SelectValue placeholder="Select Status" />
 </SelectTrigger>
         
-        <SelectContent className="bg-[#e9e5ff] border border-gray-200 shadow-lg rounded-md z-5">
-          <SelectItem value="All Status">All Status</SelectItem>
+      
+     <SelectContent 
+  className="bg-white border border-slate-200 rounded-xl shadow-lg" 
+  sideOffset={2}//to set distance from trigger
+  alignItemWithTrigger={false} 
+>
+   <SelectItem value="All Status">All Status</SelectItem>
           <SelectItem value="Active">Active</SelectItem>
           <SelectItem value="Returned">Returned</SelectItem>
-        </SelectContent>
-      </Select>
+</SelectContent>
+</Select>
     </div>
   )
 }
+ 

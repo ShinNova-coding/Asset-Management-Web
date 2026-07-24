@@ -18,25 +18,37 @@ export function UserManagementFilter<TData>({ table }: UserManagementFilterProps
 
   if (!statusColumn) return null
 
+ //if there's no filter set is to select status
+  const currentValue = (statusColumn.getFilterValue() as string) ?? "all"
+
   return (
-    <div className=" bg-gray-50">
+    <div className=" w-full bg-transparent">
+      
       <Select
-        value={(statusColumn.getFilterValue() as string) ?? "Status"}
+        value={currentValue}
         onValueChange={(value) => {
-         
           statusColumn.setFilterValue(value === "all" ? undefined : value)
         }}
       >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Status" />
-        </SelectTrigger>
-        <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-md z-5">
-          <SelectItem value="all">All Status</SelectItem>
+       
+<SelectTrigger className="w-full ...">
+ 
+  <SelectValue placeholder="Select Status" />
+</SelectTrigger>
+        
+      
+     <SelectContent 
+  className="bg-white border border-slate-200 rounded-xl shadow-lg" 
+  sideOffset={2}//to set distance from trigger
+  alignItemWithTrigger={false} 
+>
+   <SelectItem value="all">All Status</SelectItem>
           <SelectItem value="active">Active</SelectItem>
           <SelectItem value="suspended">Suspended</SelectItem>
           <SelectItem value="resigned">Resigned</SelectItem>
-        </SelectContent>
-      </Select>
+</SelectContent>
+</Select>
     </div>
   )
 }
+ 

@@ -1,4 +1,4 @@
-import * as React from "react"
+
 import { Dialog, DialogContent, DialogHeader, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 

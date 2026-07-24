@@ -7,10 +7,18 @@ import type { Employee } from '../../types/employee';
 import { normalizeImageSource } from '../../lib/utils';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
 import { apiFetch } from '../../lib/api';
-
+import { UserManagementSearch } from "@/components/features/UserManagement/UserManagementSearchBox";
 import jsPDF from "jspdf";
+import { UserManagementFilter } from "@/components/features/UserManagement/UserMangementFilter";
 import autoTable from "jspdf-autotable";
-import { Search, UserPlus, ChevronDown } from 'lucide-react'; 
+import { UserPlus } from 'lucide-react'; 
+import {
+  type ColumnDef,
+  type ColumnFiltersState,
+  getCoreRowModel,
+  getFilteredRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import {
   FiChevronLeft,
   FiChevronRight,
@@ -86,14 +94,12 @@ const USER_ENDPOINT = "/user";
 const UserManagement: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [data, setData] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
 
   const [sortColumn, setSortColumn] = useState<keyof Employee | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -182,7 +188,7 @@ const UserManagement: React.FC = () => {
         };
 
         
-        const response = await fetch(`http://192.168.100.185:1011/api/user/${targetId}`, requestOptions);
+        const response = await fetch(`http://192.168.100.186:1011/api/user/${targetId}`, requestOptions);
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
@@ -241,18 +247,35 @@ const UserManagement: React.FC = () => {
     setCurrentPage(0);
   };
 
-  const filteredData = data.filter((emp) => {
-    const searchTerm = search.toLowerCase();
-    const matchesSearch =
-      (emp.name || "").toLowerCase().includes(searchTerm) ||
-      (emp.email || "").toLowerCase().includes(searchTerm) ||
-      (emp.employee_id || "").toLowerCase().includes(searchTerm);
+  const columns = useMemo<ColumnDef<Employee>[]>(() => [
+    {
+      accessorKey: "status",
+      filterFn: (row, columnId, filterValue) =>
+        String(row.getValue(columnId) ?? "").toLowerCase() ===
+        String(filterValue ?? "").toLowerCase(),
+    },
+  ], []);
 
-    const matchesStatus =
-      !statusFilter || (emp.status || "").toLowerCase() === statusFilter.toLowerCase();
-
-    return matchesSearch && matchesStatus;
+  const table = useReactTable({
+    data,
+    columns,
+    state: { globalFilter, columnFilters },
+    onGlobalFilterChange: setGlobalFilter,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const searchTerm = String(filterValue ?? "").toLowerCase();
+      return [row.original.name, row.original.email, row.original.employee_id]
+        .some((value) => String(value ?? "").toLowerCase().includes(searchTerm));
+    },
   });
+
+  const filteredData = table.getFilteredRowModel().rows.map((row) => row.original);
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [globalFilter, columnFilters]);
 
   const sortedData = useMemo(() => {
     const sortableData = [...filteredData];
@@ -331,34 +354,13 @@ const UserManagement: React.FC = () => {
       <div className="bg-white rounded-2xl border border-slate-300 p-4 shadow-sm space-y-4">
         <div className="flex gap-4 rounded-xl bg-white p-3 border border-slate-200 shadow-sm items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
-            <input
-              type="text"
-              placeholder="Search by name, date, title..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(0);
-              }}
-              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            />
-          </div>
-
+            <UserManagementSearch 
+               value={globalFilter ?? ""} 
+               onChange={setGlobalFilter} 
+             />
+           </div>
           <div className="relative w-48">
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(0);
-              }}
-              className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-[#334155] focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-colors cursor-pointer"
-            >
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="suspended">Suspended</option>
-              <option value="resigned">Resigned</option>
-            </select>
-            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#64748B] pointer-events-none" size={16} />
+            <UserManagementFilter table={table} />
           </div>
         </div>
 

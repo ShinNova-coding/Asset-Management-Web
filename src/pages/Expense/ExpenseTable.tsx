@@ -4,10 +4,19 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Loader2, ChevronDown, CheckCircle, XCircle } from 'lucide-react';
 import { FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi"; 
 import { fetchExpenses as fetchExpensesAPI, updateExpenseStatus, deleteExpense } from "@/lib/apiService";
-
+import { FaSearch } from 'react-icons/fa';
+import { Input } from '@base-ui/react';
 import { ExpenseDetailModal } from './ExpenseDetailModal';
 import type { ExpenseDetailData } from './ExpenseDetailModal';
 import { RiDeleteBinLine } from "react-icons/ri";
+import type { Table } from "@tanstack/react-table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 interface ExpenseWithUser extends ExpenseDetailData {
   user?: {
     name?: string;
@@ -205,31 +214,45 @@ export const ExpenseTable: React.FC = () => {
       <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
         <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
           
-          <div className="relative flex-1 w-full">
-            <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hidden" size={18} />
-            <input
-              type="text"
-              placeholder="Search by name, date, title..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-md border border-slate-300 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-400 transition-all placeholder:text-slate-400 text-slate-700 shadow-3xs"
-            />
-          </div>
+          <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
+  {/* SEARCH INPUT */}
+  <div className="relative flex-1">
+    <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+    <Input 
+      className="w-full rounded-md border border-slate-400 bg-slate-50 py-1 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+      placeholder="Search by name, date, title..." 
+      value={searchQuery} 
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} 
+    />
+  </div>
 
-          <div className="relative w-full sm:w-48">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-3 pr-10 py-2 bg-slate-55 border border-slate-300 rounded-md text-sm font-normal text-slate-700 appearance-none focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-400 transition-all cursor-pointer shadow-3xs"
-            >
-              <option value="All">All Status</option>
-              <option value="requested">Requested</option>
-              <option value="approved">Approved</option>
-              <option value="canceled">Canceled</option>
-            </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-          </div>
-
+  {/* STATUS SELECT */}
+  <div className="w-full sm:w-48">
+    <Select
+    value={statusFilter === 'All' ? "" : statusFilter}
+    onValueChange={(value) => setStatusFilter(value || 'All')}
+      
+    >
+     <SelectTrigger className="w-full ...">
+ 
+  <SelectValue placeholder="Select Status" />
+</SelectTrigger>
+        
+      
+     <SelectContent 
+  className="bg-white border border-slate-200 rounded-xl shadow-lg" 
+  sideOffset={2}//to set distance from trigger
+  alignItemWithTrigger={false} 
+>
+        <SelectItem value="All">All Status</SelectItem>
+        <SelectItem value="requested">Requested</SelectItem>
+        <SelectItem value="approved">Approved</SelectItem>
+        <SelectItem value="canceled">Canceled</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+</div>
+           
         </div>
       </div>
       

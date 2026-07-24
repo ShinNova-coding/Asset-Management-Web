@@ -3,8 +3,9 @@
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { FiChevronLeft, FiChevronRight, FiCheckCircle, FiX, FiChevronUp, FiChevronDown } from "react-icons/fi"
-import { Search } from "lucide-react"
+import { AssignmentFilter } from "./AssignmentFilter"
 import { apiRequest } from "@/lib/apiService"; 
+import { AssignmentSearch } from "./AssignmentSearchBox"
 import {
   flexRender,
   getCoreRowModel,
@@ -132,26 +133,13 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
     <div className="w-full space-y-4 p-3 relative">
       <div className="flex gap-4 rounded-xl bg-white p-4 border border-slate-200 shadow-sm items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={18} />
-          <input
-            type="text"
-            placeholder="Search by ID,name,asset code,date,status..."
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full rounded-md border border-slate-400 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-          />
+          <AssignmentSearch
+              value={globalFilter ?? ""} 
+              onChange={setGlobalFilter} 
+            />
         </div>
-        
         <div className="relative w-48">
-          <select
-            value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
-            onChange={(e) => table.getColumn("status")?.setFilterValue(e.target.value)}
-            className="w-full rounded-md border border-[#e9e5ff] bg-slate-50 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-          >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="returned">Returned</option>
-          </select>
+          <AssignmentFilter table={table} />
         </div>
       </div>
 
