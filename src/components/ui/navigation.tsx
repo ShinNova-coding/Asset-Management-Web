@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react"
-import { ChevronDown, LogOut, Search } from "lucide-react" // Added Search
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { ChevronDown, LogOut, PanelLeft } from "lucide-react"
+import { useSidebar } from "@/components/ui/sidebar"
 import { useNavigate } from "react-router-dom"
 
 export default function Navigation() {
   const [open, setOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("") // State for search
   const [user, setUser] = useState<{ name: string; role: string } | null>(null)
   const navigate = useNavigate()
+  
+  // Safely fallback if provider context is missing
+  const sidebar = useSidebar()
+  const toggleSidebar = sidebar?.toggleSidebar ?? (() => {})
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -24,23 +27,15 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="sticky top-0 z-30 flex h-[50px] items-center justify-between border-b border-slate-400 bg-[#e9e5ff] px-2">
+    <nav className="sticky top-0 z-30 flex h-[50px] items-center justify-between border-b border-slate-400 bg-[#e9e5ff] px-3">
       <div className="flex items-center gap-4">
-        <SidebarTrigger className="text-slate-500 hover:bg-slate-100" />
-      </div>
-
-      {/* Search Bar Section */}
-      <div className="flex flex-1 justify-center px-4">
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-8 pr-4 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-          />
-        </div>
+        <button
+          onClick={toggleSidebar}
+          className="flex h-9 w-9 items-center justify-center rounded-md bg-white/60 text-[#7C3AED] shadow-sm transition hover:bg-white hover:text-violet-700"
+          aria-label="Toggle Sidebar"
+        >
+          <PanelLeft className="h-5 w-5" />
+        </button>
       </div>
 
       <div className="flex items-center gap-4">

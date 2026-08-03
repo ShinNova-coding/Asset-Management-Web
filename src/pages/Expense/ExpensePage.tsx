@@ -82,7 +82,7 @@ export const ExpensePage: React.FC = () => {
             
             <button
           onClick={handleExportPDF}
-          className="px-4 py-2 bg-[#7C3AED] border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-blue-900"
+          className="px-4 py-2 bg-[#7C3AED] border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-purple-700"
         >
           <IoCloudDownloadOutline size={20} />
           
@@ -90,7 +90,7 @@ export const ExpensePage: React.FC = () => {
 
             <button 
               onClick={() => navigate('/expense/createexpenseform')}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-[#7C3AED] text-sm font-semibold text-white hover:bg-blue-900 transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-[#7C3AED] text-sm font-semibold text-white hover:bg-purple-700 transition-colors shadow-sm"
             >
               <Plus size={16} />
               Create Expense

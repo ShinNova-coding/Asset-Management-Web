@@ -188,7 +188,7 @@ const UserManagement: React.FC = () => {
         };
 
         
-        const response = await fetch(`http://192.168.100.186:1011/api/user/${targetId}`, requestOptions);
+        const response = await fetch(`http://localhost:1011/api/user/${targetId}`, requestOptions);
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
@@ -371,7 +371,7 @@ const UserManagement: React.FC = () => {
                 <TableHead className="text-white font-semibold py-3.5 text-sm w-12">No</TableHead>
                 
                 <TableHead 
-                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none hover:bg-blue-500/50" 
+                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none " 
                   onClick={() => handleSort('employee_id')}
                 >
                   <div className="flex items-center gap-2">
@@ -384,7 +384,7 @@ const UserManagement: React.FC = () => {
                 </TableHead>
 
                 <TableHead 
-                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none hover:bg-blue-500/50" 
+                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none " 
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center gap-2">
@@ -397,7 +397,7 @@ const UserManagement: React.FC = () => {
                 </TableHead>
 
                 <TableHead 
-                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none hover:bg-blue-500/50" 
+                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none " 
                   onClick={() => handleSort('email')}
                 >
                   <div className="flex items-center gap-2">
@@ -410,7 +410,7 @@ const UserManagement: React.FC = () => {
                 </TableHead>
 
                 <TableHead 
-                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none hover:bg-blue-500/50" 
+                  className="text-white font-semibold py-3.5 text-sm cursor-pointer select-none " 
                   onClick={() => handleSort('position')}
                 >
                   <div className="flex items-center gap-2">

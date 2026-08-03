@@ -263,7 +263,7 @@ export const ExpenseTable: React.FC = () => {
               <tr className="bg-[#A78BFA] text-white text-[13px] font-semibold border-b select-none">
                 <th className="py-3 px-4 w-16">No.</th>
                 
-                <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('employee')}>
+                <th className="py-3 px-4 cursor-pointer transition-colors" onClick={() => handleSort('employee')}>
                   <div className="flex items-center gap-1.5">
                     Employee
                     <div className="flex flex-col">
@@ -273,7 +273,7 @@ export const ExpenseTable: React.FC = () => {
                   </div>
                 </th>
 
-                <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('title')}>
+                <th className="py-3 px-4 cursor-pointer  transition-colors" onClick={() => handleSort('title')}>
                   <div className="flex items-center gap-1.5">
                     Expense Title
                     <div className="flex flex-col">
@@ -283,7 +283,7 @@ export const ExpenseTable: React.FC = () => {
                   </div>
                 </th>
 
-                <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('expense_date')}>
+                <th className="py-3 px-4 cursor-pointer  transition-colors" onClick={() => handleSort('expense_date')}>
                   <div className="flex items-center gap-1.5">
                     Date
                     <div className="flex flex-col">
@@ -295,7 +295,7 @@ export const ExpenseTable: React.FC = () => {
 
                 <th className="py-3 px-4 text-center">Type</th>
 
-                <th className="py-3 px-4 cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={() => handleSort('cost')}>
+                <th className="py-3 px-4 cursor-pointer  transition-colors" onClick={() => handleSort('cost')}>
                   <div className="flex items-center gap-1">
                     Cost (MMK)
                     <div className="flex flex-col">
@@ -483,7 +483,7 @@ export const ExpenseTable: React.FC = () => {
                   onClick={() => setCurrentPage(page as number)}
                   className={`w-8 h-8 text-sm font-semibold rounded-lg border transition-all flex items-center justify-center ${
                     isPageActive
-                      ? "bg-blue-800 border-[#0a46b4] text-white shadow-sm"
+                      ? "bg-purple-700 border-[#0a46b4] text-white shadow-sm"
                       : "bg-slate-300 border-slate-500 text-slate-700 hover:bg-slate-200"
                   }`}
                 >

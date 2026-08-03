@@ -139,11 +139,11 @@ export function InventoryDetail() {
   if (rawImageSource) {
     if (rawImageSource.startsWith("data:image")) {
       displayImage = rawImageSource
-    } else if (rawImageSource.startsWith("http://localhost")) {
+    } else if (rawImageSource.startsWith("http://") || rawImageSource.startsWith("https://")) {
+      // If it's already an absolute URL, fix it just in case it points to base localhost
       displayImage = rawImageSource.replace("http://localhost", API_REAL_IP)
-    } else if (rawImageSource.startsWith("http")) {
-      displayImage = rawImageSource
     } else {
+      // Handles relative paths like "/storage/uploads/image.png" or "storage/uploads/image.png"
       const cleanPath = rawImageSource.startsWith("/") ? rawImageSource : `/${rawImageSource}`
       displayImage = `${API_REAL_IP}${cleanPath}`
     }

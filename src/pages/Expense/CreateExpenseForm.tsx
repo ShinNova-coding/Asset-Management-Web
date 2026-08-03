@@ -201,30 +201,30 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
   }
 
   const inputCls =
-    "w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
+    "w-full rounded-xl  border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 placeholder:text-slate-400"
 
   return (
-    <div className="w-full max-w-3xl mx-auto my-6">
-      <div className="mb-4">
+    <div className="w-full max-w-4xl mx-auto my-6  ">
+      <div className="mb-4 ">
         <Link 
           to="/expense" 
-          className="inline-flex items-center text-sm font-medium text-blue-800 hover:underline"
+          className="inline-flex items-center text-sm font-medium text-[#7C3AED] hover:text-purple-700"
         >
           <FiArrowLeft size={16} className="mr-2" />
           Back
         </Link>
       </div>
 
-      <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden p-8 relative">
-        <div className="border-b border-slate-100 pb-5 mb-6">
-          <h2 className="text-2xl font-bold text-blue-800 tracking-tight">Create New Expense</h2>
+      <div className="w-full  rounded-2xl border border-slate-200 shadow-2xl overflow-hidden p-8 relative">
+        <div className="border-b border-slate-100 pb-5 mb-6 ">
+          <h2 className="text-2xl font-bold text-[#7C3AED] tracking-tight">Create New Expense</h2>
           <p className="text-xs text-slate-400 mt-1.5">
-            Creating as: <span className="font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md ml-1">{employeeName}</span>
+            Creating as: <span className="font-semibold text-[#7C3AED] bg-blue-50 px-2 py-0.5 rounded-md ml-1">{employeeName}</span>
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 ">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Expense Title *</label>
             <div className="relative">
               <FiFileText className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />

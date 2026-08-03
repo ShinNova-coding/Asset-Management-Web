@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from 'react';
 import {
@@ -6,7 +6,7 @@ import {
   User,
   ChevronDown,
   Camera,
-  Eye,    
+  Eye,     
   EyeOff,  
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -176,7 +176,7 @@ const AddEmployeeForm: React.FC = () => {
         email: formState.email.trim(),
         position: formState.position.trim() || '-',
         joined_date: formState.joined_date || null, 
-        left_date: formState.left_date || null,     
+        left_date: formState.left_date || null,    
         phone_number: formState.phone_number.trim() || '-',
         status: formState.status,
         role: formState.role.trim(),
@@ -191,11 +191,10 @@ const AddEmployeeForm: React.FC = () => {
         rawBody.password_confirmation = formState.password_confirmation;
       }
 
+      // Profile image is now completely optional (Facebook style)
       if (profileFile) {
         const base64WithHeader = await convertImageToBase64(profileFile);
         rawBody.image = stripBase64Header(base64WithHeader);
-      } else if (!isEditMode) {
-        rawBody.image = "";
       }
 
       const url = isEditMode 
@@ -211,12 +210,13 @@ const AddEmployeeForm: React.FC = () => {
         redirect: 'follow'
       });
 
+      const responseData = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Server responded with status ${response.status}`);
+        throw new Error(responseData.message || JSON.stringify(responseData.errors) || `Server responded with status ${response.status}`);
       }
 
-      await response.json();
+      // Successfully saved, navigate back and signal refresh
       navigate('/employees', { state: { refresh: true }, replace: true });
 
     } catch (err) {
@@ -232,7 +232,6 @@ const AddEmployeeForm: React.FC = () => {
   };
 
   return (
-    /* Top navigation header နား ကွက်တိဖြစ်အောင် ပတ်လည် padding ကို p-4 သို့မဟုတ် pt-2 px-4 pb-6 ဟု ညှိပေးထားပါတယ် */
     <div className="w-full bg-[#e9e5ff] pt-2 px-4 pb-6 font-sans text-slate-900">
       <div className="max-w-4xl mx-auto space-y-4">
         
@@ -254,8 +253,8 @@ const AddEmployeeForm: React.FC = () => {
         <div className="bg-white rounded-xl border border-blue-100 shadow-sm p-6 md:p-8">
           <form className="space-y-4" onSubmit={handleSubmit}>
 
-            {/* Profile Upload Section */}
-            <div className="flex flex-col items-center justify-center rounded-xl p-4 border border-dashed border-slate-50">
+            {/* Profile Upload Section (Optional / Facebook Style Avatar) */}
+            <div className="flex flex-col items-center justify-center rounded-xl p-4 border border-dashed border-slate-100">
               <div className="relative">
                 <div className="w-24 h-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-slate-200 flex items-center justify-center">
                   {profileImage ? (
@@ -286,7 +285,7 @@ const AddEmployeeForm: React.FC = () => {
               </div>
 
               <p className="text-xs font-medium text-slate-500 mt-2">
-                Upload Employee Profile Photo
+                Upload Employee Profile Photo <span className="text-slate-400 font-normal">(Optional)</span>
               </p>
             </div>
 
@@ -305,244 +304,219 @@ const AddEmployeeForm: React.FC = () => {
                 </h2>
               </div>
 
-              
-              
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {/* Full Name */}
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-slate-600">
-      Full Name <span className="text-red-500">*</span>
-    </label>
-    <input
-      name="name"
-      value={formState.name} 
-      onChange={handleInputChange}
-      placeholder="e.g. Aung Aung"
-      className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
-        formState.name ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
-      }`}
-      required
-    />
-  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Full Name */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-600">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="name"
+                    value={formState.name} 
+                    onChange={handleInputChange}
+                    placeholder="e.g. Aung Aung"
+                    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                    required
+                  />
+                </div>
 
-  {/* Employee ID */}
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-slate-600">
-      Employee ID <span className="text-red-500">*</span>
-    </label>
-    <input
-      name="employee_id"
-      value={formState.employee_id}
-      onChange={handleInputChange}
-      placeholder="e.g. EMP-001"
-      className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed ${
-        isEditMode 
-          ? 'bg-slate-50 border-slate-200' 
-          : formState.employee_id 
-            ? 'bg-blue-50 border-blue-200' 
-            : 'bg-white border-slate-200'
-      }`}
-      required
-    
-    />
-  </div>
+                {/* Employee ID */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-600">
+                    Employee ID <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="employee_id"
+                    value={formState.employee_id}
+                    onChange={handleInputChange}
+                    placeholder="e.g. EMP-001"
+                    disabled={isEditMode}
+                    className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none ${
+                      isEditMode ? 'bg-slate-50 border-slate-200 cursor-not-allowed opacity-70' : 'bg-white border-slate-200'
+                    }`}
+                    required
+                  />
+                </div>
 
-  {/* Email Address */}
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-slate-600">
-      Email Address <span className="text-red-500">*</span>
-    </label>
-    <input
-      name="email"
-      type="email"
-      value={formState.email}
-      onChange={handleInputChange}
-      placeholder="e.g. aung.aung@example.com"
-      className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
-        formState.email ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
-      }`}
-      required
-    />
-  </div>
+                {/* Email Address */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-600">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="email"
+                    type="email"
+                    value={formState.email}
+                    onChange={handleInputChange}
+                    placeholder="e.g. aung.aung@example.com"
+                    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                    required
+                  />
+                </div>
 
-  {/* Position */}
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-slate-600">
-      Position
-    </label>
-    <input
-      name="position"
-      value={formState.position}
-      onChange={handleInputChange}
-      placeholder="e.g. Developer"
-      className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
-        formState.position ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
-      }`}
-    />
-  </div>
+                {/* Position */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-600">
+                    Position
+                  </label>
+                  <input
+                    name="position"
+                    value={formState.position}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Developer"
+                    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                  />
+                </div>
 
-  {/* Joined Date */}
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-slate-600">
-      Joined Date
-    </label>
-    <input
-      name="joined_date"
-      type="date"
-      value={formState.joined_date}
-      onChange={handleInputChange}
-      className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
-        formState.joined_date ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
-      }`}
-    />
-  </div>
+                {/* Joined Date */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-600">
+                    Joined Date
+                  </label>
+                  <input
+                    name="joined_date"
+                    type="date"
+                    value={formState.joined_date}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                  />
+                </div>
 
-  {/* Left Date */}
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-slate-600">
-      Left Date
-    </label>
-    <input
-      name="left_date"
-      type="date"
-      value={formState.left_date} 
-      onChange={handleInputChange}
-      className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
-        formState.left_date ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
-      }`}
-    />
-  </div>
-</div>
-</section>
+                {/* Left Date */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-600">
+                    Left Date
+                  </label>
+                  <input
+                    name="left_date"
+                    type="date"
+                    value={formState.left_date} 
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                  />
+                </div>
+              </div>
+            </section>
 
-{/* Status, Role & Contact Section */}
-<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-  {/* Phone Number */}
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-slate-600">
-      Phone Number
-    </label>
-    <input
-      name="phone_number"
-      type="tel"
-      value={formState.phone_number} 
-      onChange={handleInputChange}
-      placeholder="e.g. 09123456789"
-      className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
-        formState.phone_number ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
-      }`}
-    />
-  </div>
+            {/* Status, Role & Contact Section */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              {/* Phone Number */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-600">
+                  Phone Number
+                </label>
+                <input
+                  name="phone_number"
+                  type="tel"
+                  value={formState.phone_number} 
+                  onChange={handleInputChange}
+                  placeholder="e.g. 09123456789"
+                  className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                />
+              </div>
 
-  {/* Status */}
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-slate-600">
-      Status
-    </label>
-    <div className="relative">
-      <select
-        name="status"
-        value={formState.status} 
-        onChange={handleInputChange}
-        className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none pr-10 ${
-          formState.status ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
-        }`}
-      >
-        <option value="active">Active</option>
-        <option value="suspended">Suspended</option>
-        <option value="resigned">Resigned</option>
-      </select>
-      <ChevronDown
-        size={16}
-        className="absolute right-3 top-3.5 text-slate-400 pointer-events-none"
-      />
-    </div>
-  </div>
+              {/* Status */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-600">
+                  Status
+                </label>
+                <div className="relative">
+                  <select
+                    name="status"
+                    value={formState.status} 
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none pr-10 bg-white border-slate-200"
+                  >
+                    <option value="active">Active</option>
+                    <option value="suspended">Suspended</option>
+                    <option value="resigned">Resigned</option>
+                  </select>
+                  <ChevronDown
+                    size={16}
+                    className="absolute right-3 top-3.5 text-slate-400 pointer-events-none"
+                  />
+                </div>
+              </div>
 
-  {/* System Role */}
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-slate-600">
-    Role
-    </label>
-    <div className="relative">
-      <select
-        name="role"
-        value={formState.role} 
-        onChange={handleInputChange}
-        className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none pr-10 ${
-          formState.role ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
-        }`}
-      >
-        <option value="admin">Admin</option>
-        <option value="employee">Employee</option>
-        <option value="hr">HR</option>
-      </select>
-      <ChevronDown
-        size={16}
-        className="absolute right-3 top-3.5 text-slate-400 pointer-events-none"
-      />
-    </div>
-  </div>
-</div>
+              {/* System Role */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-600">
+                  Role
+                </label>
+                <div className="relative">
+                  <select
+                    name="role"
+                    value={formState.role} 
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none pr-10 bg-white border-slate-200"
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="employee">Employee</option>
+                    <option value="hr">HR</option>
+                  </select>
+                  <ChevronDown
+                    size={16}
+                    className="absolute right-3 top-3.5 text-slate-400 pointer-events-none"
+                  />
+                </div>
+              </div>
+            </div>
 
-{/* Password Fields */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-  {/* Password */}
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-slate-600">
-      Password {isEditMode && <span className="text-slate-400 font-normal">(Leave blank to keep unchanged)</span>}
-    </label>
-    <div className="relative">
-      <input
-        name="password"
-        type={showPassword ? 'text' : 'password'} 
-        value={formState.password} 
-        onChange={handleInputChange}
-        placeholder="Enter password"
-        className={`w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
-          formState.password ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
-        }`}
-        autoComplete="new-password"
-        required={!isEditMode}
-      />
-      <button
-        type="button"
-        onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
-      >
-        {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
-      </button>
-    </div>
-  </div>
+            {/* Password Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              {/* Password */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-600">
+                  Password {isEditMode && <span className="text-slate-400 font-normal">(Leave blank to keep unchanged)</span>}
+                </label>
+                <div className="relative">
+                  <input
+                    name="password"
+                    type={showPassword ? 'text' : 'password'} 
+                    value={formState.password} 
+                    onChange={handleInputChange}
+                    placeholder="Enter password"
+                    className="w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                    autoComplete="new-password"
+                    required={!isEditMode}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                  </button>
+                </div>
+              </div>
 
-  {/* Confirm Password */}
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-slate-600">
-      Confirm Password
-    </label>
-    <div className="relative">
-      <input
-        name="password_confirmation"
-        type={showConfirmPassword ? 'text' : 'password'} 
-        value={formState.password_confirmation} 
-        onChange={handleInputChange}
-        placeholder="Confirm password"
-        className={`w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all ${
-          formState.password_confirmation ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
-        }`}
-        autoComplete="new-password"
-        required={!isEditMode}
-      />
-      <button
-        type="button"
-        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-        className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
-      >
-        {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
-      </button>
-    </div>
-  </div>
-</div>
+              {/* Confirm Password */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-600">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    name="password_confirmation"
+                    type={showConfirmPassword ? 'text' : 'password'} 
+                    value={formState.password_confirmation} 
+                    onChange={handleInputChange}
+                    placeholder="Confirm password"
+                    className="w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                    autoComplete="new-password"
+                    required={!isEditMode}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  >
+                    {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
               <button

@@ -26,7 +26,7 @@ import {
 
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import Navigation from "@/components/ui/navigation";
-import { BsFillBoxFill } from "react-icons/bs";
+import { BsBoxFill } from "react-icons/bs";
 import { useAuth } from "@/hooks/useAuth";
 
 const menuItems = [
@@ -92,12 +92,15 @@ export default function Layout() {
         <Sidebar className="border-r border-blue-100 bg-[#e9e5ff]">
           <SidebarContent className="bg-[#e9e5ff] px-4 py-8">
            
-            <div className="flex items-center gap-3 px-2 mb-8">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#7C3AED] shadow-lg shadow-blue-900/20">
-                <BsFillBoxFill className="text-white h-6 w-6" />
-              </div>
-              <h1 className="text-xl font-bold tracking-tight text-[#7C3AED]">ITAMS</h1>
-            </div>
+           <div className="flex items-center gap-3 px-2 mb-8">
+  <div 
+    className="w-12 h-12 flex-shrink-0 bg-white border-2 border-[#A78BFA] rounded-full flex items-center justify-center shadow-sm transition-transform hover:scale-105"
+    style={{ animation: 'bounce 3s infinite ease-in-out' }}
+  >
+    <BsBoxFill className="w-6 h-6 text-[#7C3AED]" />
+  </div>
+  <h1 className="text-xl font-bold tracking-tight text-[#7C3AED]">ITAMS</h1>
+</div>
 
            
             <SidebarMenu className="space-y-1">
