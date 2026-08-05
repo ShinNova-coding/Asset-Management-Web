@@ -6,13 +6,17 @@ import {
   User,
   ChevronDown,
   Camera,
+  Clock,
   Eye,     
   EyeOff,  
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { normalizeImageSource } from '../../lib/utils';
+import { apiFetch } from '../../lib/api';
 
 const DEFAULT_TOKEN = '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c';
+const EMPTY_PROFILE_IMAGE =
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=';
 
 interface FormState {
   name: string;
@@ -54,6 +58,11 @@ const stripBase64Header = (base64String: any): string => {
     return base64String.split(',')[1];
   }
   return base64String;
+};
+
+const unwrapSavedUser = (responseData: any) => {
+  const candidate = responseData?.data?.data || responseData?.data || responseData?.user || responseData;
+  return Array.isArray(candidate) ? null : candidate;
 };
 
 const AddEmployeeForm: React.FC = () => {
@@ -163,12 +172,10 @@ const AddEmployeeForm: React.FC = () => {
         throw new Error('Missing account identifier (id) for update.');
       }
 
-      const myHeaders = new Headers();
-      myHeaders.append("Accept", "application/json");
-      myHeaders.append("Content-Type", "application/json");
-      
       const savedToken = localStorage.getItem('token') || DEFAULT_TOKEN;
-      myHeaders.append("Authorization", `Bearer ${savedToken}`);
+      if (!localStorage.getItem('token')) {
+        localStorage.setItem('token', savedToken);
+      }
 
       const rawBody: Record<string, any> = {
         name: formState.name.trim(),
@@ -191,33 +198,27 @@ const AddEmployeeForm: React.FC = () => {
         rawBody.password_confirmation = formState.password_confirmation;
       }
 
-      // Profile image is now completely optional (Facebook style)
       if (profileFile) {
         const base64WithHeader = await convertImageToBase64(profileFile);
         rawBody.image = stripBase64Header(base64WithHeader);
+      } else if (!isEditMode) {
+        rawBody.image = EMPTY_PROFILE_IMAGE;
       }
 
-      const url = isEditMode 
-        ? `http://localhost:1011/api/user/${targetId}` 
-        : `http://localhost:1011/api/user`;
-        
       const method = isEditMode ? 'PATCH' : 'POST';
 
-      const response = await fetch(url, {
-        method: method,
-        headers: myHeaders,
+      const responseData = await apiFetch(isEditMode ? `/user/${targetId}` : '/user', {
+        method,
         body: JSON.stringify(rawBody),
-        redirect: 'follow'
       });
 
-      const responseData = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(responseData.message || JSON.stringify(responseData.errors) || `Server responded with status ${response.status}`);
-      }
-
-      // Successfully saved, navigate back and signal refresh
-      navigate('/employees', { state: { refresh: true }, replace: true });
+      navigate('/employees', {
+        state: {
+          refresh: true,
+          savedUser: unwrapSavedUser(responseData),
+        },
+        replace: true,
+      });
 
     } catch (err) {
       console.error('Submit error:', err);
@@ -239,13 +240,13 @@ const AddEmployeeForm: React.FC = () => {
         <div className="flex flex-col gap-1">
           <Link
             to="/employees"
-            className="inline-flex items-center text-xs font-semibold uppercase tracking-wider text-[#7C3AED] hover:text-blue-800 transition-colors"
+            className="inline-flex items-center text-xs font-semibold uppercase tracking-wider text-[#7C3AED] hover:text-purple-700 transition-colors"
           >
             <ArrowLeft size={14} className="mr-1.5" />
             Back 
           </Link>
           <h1 className="text-xl font-bold text-[#7C3AED]">
-            {isEditMode ? 'Edit Employee Profile' : 'AddNew Employee'}
+            {isEditMode ? 'Edit Employee Profile' : 'Add New Employee'}
           </h1>
         </div>
 
@@ -253,14 +254,16 @@ const AddEmployeeForm: React.FC = () => {
         <div className="bg-white rounded-xl border border-blue-100 shadow-sm p-6 md:p-8">
           <form className="space-y-4" onSubmit={handleSubmit}>
 
-            {/* Profile Upload Section (Optional / Facebook Style Avatar) */}
-            <div className="flex flex-col items-center justify-center rounded-xl p-4 border border-dashed border-slate-100">
+            <div className="flex flex-col items-center justify-center rounded-xl p-4 border border-dashed border-violet-200 bg-violet-50/40">
               <div className="relative">
                 <div className="w-24 h-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-slate-200 flex items-center justify-center">
                   {profileImage ? (
                     <img
                       src={profileImage}
                       alt="Profile"
+                      onError={(event) => {
+                        event.currentTarget.src = 'https://via.placeholder.com/120';
+                      }}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -270,7 +273,7 @@ const AddEmployeeForm: React.FC = () => {
 
                 <label
                   htmlFor="profile-upload"
-                  className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full cursor-pointer shadow-md transition-colors"
+                  className="absolute bottom-0 right-0 bg-[#7C3AED] hover:bg-purple-700  p-2 rounded-full cursor-pointer shadow-md transition-colors"
                 >
                   <Camera size={14} />
                 </label>
@@ -284,9 +287,14 @@ const AddEmployeeForm: React.FC = () => {
                 />
               </div>
 
-              <p className="text-xs font-medium text-slate-500 mt-2">
-                Upload Employee Profile Photo <span className="text-slate-400 font-normal">(Optional)</span>
-              </p>
+              <div className="mt-3 flex items-center gap-2 rounded-lg border border-violet-100 bg-white px-3 py-2 text-xs text-slate-600">
+                <Clock size={14} className="text-[#7C3AED]" />
+                <span>
+                  {profileImage
+                    ? 'Profile photo selected'
+                    : 'No profile photo yet. You can add it later from edit.'}
+                </span>
+              </div>
             </div>
 
             {error && (
@@ -298,28 +306,32 @@ const AddEmployeeForm: React.FC = () => {
             {/* General Information Section */}
             <section className="space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                <User size={18} className="text-blue-600" />
-                <h2 className="text-md font-bold text-blue-800">
+                <User size={18} className="text-purple-600" />
+                <h2 className="text-md font-bold text-purple-800">
                   General Information
                 </h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Full Name */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-600">
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    name="name"
-                    value={formState.name} 
-                    onChange={handleInputChange}
-                    placeholder="e.g. Aung Aung"
-                    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
-                    required
-                  />
-                </div>
-
+               <div className="space-y-1.5">
+  <label className="text-xs font-semibold text-slate-600">
+    Full Name <span className="text-red-500">*</span>
+  </label>
+  <input
+    name="name"
+    type="text"
+    value={formState.name} 
+    onChange={handleInputChange}
+    onInput={(e) => {
+      // Allows letters (including common diacritics/accents), spaces, dots, and hyphens, but strips out numbers and special symbols
+      e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-ZÀ-ÿ\s.\-]/g, "");
+    }}
+    placeholder="e.g. Aung Aung"
+    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+    required
+  />
+</div>
                 {/* Employee ID */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-600">
@@ -378,7 +390,7 @@ const AddEmployeeForm: React.FC = () => {
                     type="date"
                     value={formState.joined_date}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all bg-white border-slate-200"
                   />
                 </div>
 
@@ -392,7 +404,12 @@ const AddEmployeeForm: React.FC = () => {
                     type="date"
                     value={formState.left_date} 
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                    disabled={!isEditMode}
+                    className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none transition-all ${
+                      isEditMode
+                        ? 'focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] bg-white border-slate-200'
+                        : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                    }`}
                   />
                 </div>
               </div>
@@ -401,19 +418,24 @@ const AddEmployeeForm: React.FC = () => {
             {/* Status, Role & Contact Section */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               {/* Phone Number */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-600">
-                  Phone Number
-                </label>
-                <input
-                  name="phone_number"
-                  type="tel"
-                  value={formState.phone_number} 
-                  onChange={handleInputChange}
-                  placeholder="e.g. 09123456789"
-                  className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
-                />
-              </div>
+            <div className="space-y-1.5">
+  <label className="text-xs font-semibold text-slate-600">
+    Phone Number
+  </label>
+  <input
+    name="phone_number"
+    type="text"
+    maxLength={13}
+    value={formState.phone_number} 
+    onChange={handleInputChange}
+    onInput={(e) => {
+      // Strips non-digits and limits to a maximum of 13 characters
+      e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "").slice(0, 13);
+    }}
+    placeholder="e.g. 09123456789"
+    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+  />
+</div>
 
               {/* Status */}
               <div className="space-y-1.5">
@@ -522,7 +544,7 @@ const AddEmployeeForm: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-6 py-2 border border-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors"
+                className="px-6 py-2 border border-slate-200 text-red-600 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors"
               >
                 Cancel
               </button>
@@ -530,7 +552,7 @@ const AddEmployeeForm: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2 bg-blue-800 hover:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-colors shadow-sm"
+                className="px-6 py-2 bg-[#7C3AED] hover:bg-purple-700 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-colors shadow-sm"
               >
                 {loading ? 'Saving...' : 'Save Employee'}
               </button>

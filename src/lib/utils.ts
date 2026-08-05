@@ -16,6 +16,14 @@ export function normalizeImageSource(value?: string | null): string {
     return trimmed
   }
 
+  if (/^\/(storage|uploads|images)\//i.test(trimmed)) {
+    return `http://localhost:1011${trimmed}`
+  }
+
+  if (/^(storage|uploads|images)\//i.test(trimmed)) {
+    return `http://localhost:1011/${trimmed}`
+  }
+
   if (/^(https?:\/\/|\/|blob:)/i.test(trimmed)) {
     return trimmed
   }
@@ -28,4 +36,42 @@ export function normalizeImageSource(value?: string | null): string {
   }
 
   return trimmed
+}
+
+export function getImageValue(record: any): string | null {
+  if (!record) return null
+
+  const candidates = [
+    record.image,
+    record.profileImage,
+    record.preview_url,
+    record.image_url,
+    record.original_url,
+    record.path,
+    record.url,
+    record.media?.[0]?.preview_url,
+    record.media?.[0]?.original_url,
+    record.media?.[0]?.url,
+    record.media?.[0]?.path,
+  ]
+
+  for (const candidate of candidates) {
+    if (!candidate) continue
+
+    if (typeof candidate === "string") {
+      return candidate
+    }
+
+    if (Array.isArray(candidate)) {
+      const nested = getImageValue(candidate[0])
+      if (nested) return nested
+    }
+
+    if (typeof candidate === "object") {
+      const nested = getImageValue(candidate)
+      if (nested) return nested
+    }
+  }
+
+  return null
 }

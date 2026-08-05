@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ViewDetailsForm from "../../components/features/UserManagement/ViewDetailsForm";
 import { apiFetch } from "../../lib/api";
-import { normalizeImageSource } from "../../lib/utils";
+import { getImageValue, normalizeImageSource } from "../../lib/utils";
 import type { Employee } from "../../types/employee";
-import { ArrowLeft } from "lucide-react";
 
 const formatStatus = (status: string) =>
   status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : "-";
@@ -20,28 +19,25 @@ export default function EmployeeDetailsPage() {
   useEffect(() => {
     if (!id) return;
 
-    try {
-      if (import.meta.env.DEV && typeof window !== "undefined") {
-        localStorage.setItem(
-          "token",
-          "7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c"
-        );
-      }
-    } catch (e) {
-      // ignore
-    }
-
     const fetchUser = async () => {
       setLoading(true);
       setError(null);
 
       try {
         const attemptFetch = async () => {
-          const primary = await apiFetch(`/user/${id}`);
-          if (primary?.success && primary.data) return primary.data;
+          try {
+            const primary = await apiFetch(`/user/${id}`);
+            if (primary?.success && primary.data) return primary.data;
+            if (primary?.data) return primary.data;
+          } catch (primaryError: any) {
+            if (primaryError?.status && primaryError.status !== 404) {
+              throw primaryError;
+            }
+          }
 
           const fallback = await apiFetch(`/user/id?id=${encodeURIComponent(id)}`);
           if (fallback?.success && fallback.data) return fallback.data;
+          if (fallback?.data) return fallback.data;
 
           return null;
         };
@@ -54,14 +50,7 @@ export default function EmployeeDetailsPage() {
 
         const mapped: Employee = {
           id: user.id,
-          profileImage: normalizeImageSource(
-            user.preview_url ||
-            user.image_url ||
-            user.image ||
-            user.media?.[0]?.preview_url ||
-            user.media?.[0]?.original_url ||
-            null
-          ),
+          profileImage: normalizeImageSource(getImageValue(user)),
           employee_id: user.employee_id || "-",
           name: user.name || "Unknown",
           email: user.email || "-",
@@ -80,6 +69,15 @@ export default function EmployeeDetailsPage() {
 
         let errorMsg = err.message || "Failed to load user";
 
+        if (err?.status === 401 || errorMsg.toLowerCase().includes("unauthenticated")) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          localStorage.removeItem("user_role");
+          localStorage.removeItem("user_permissions");
+          navigate("/", { replace: true });
+          return;
+        }
+
         if (errorMsg.includes("404")) {
           errorMsg = `Employee not found with ID: ${id}`;
         }
@@ -91,7 +89,7 @@ export default function EmployeeDetailsPage() {
     };
 
     fetchUser();
-  }, [id]);
+  }, [id, navigate]);
 
   if (!id) {
     return <div className="p-6 text-red-500 font-medium">Employee ID not specified in route URL.</div>;

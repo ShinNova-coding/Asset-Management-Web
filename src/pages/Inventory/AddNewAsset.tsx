@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from "react-router-dom"; 
 import { ArrowLeft, Package, Settings, ImageIcon, Upload, X, Cpu } from 'lucide-react';
 import { apiRequest } from '@/lib/apiService';
+import { normalizeImageSource } from '@/lib/utils';
 const AddNewAsset = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,7 +43,38 @@ const AddNewAsset = () => {
     return ""; 
   };
 
+  const getAssetImagePreview = (asset: any) => {
+    const API_REAL_IP = "http://localhost:1011";
+    let rawImageSource = "";
+
+    if (asset?.media && asset.media.length > 0) {
+      rawImageSource = asset.media[0].original_url || asset.media[0].preview_url || "";
+    } else {
+      rawImageSource = asset?.preview_url || asset?.image_url || asset?.image || "";
+    }
+
+    if (!rawImageSource) return null;
+
+    if (rawImageSource.startsWith("data:image")) {
+      return rawImageSource;
+    }
+
+    if (rawImageSource.startsWith("http://") || rawImageSource.startsWith("https://")) {
+      return rawImageSource.replace("http://localhost", API_REAL_IP);
+    }
+
+    const normalizedImage = normalizeImageSource(rawImageSource);
+    if (normalizedImage.startsWith("data:image")) {
+      return normalizedImage;
+    }
+
+    const cleanPath = normalizedImage.startsWith("/") ? normalizedImage : `/${normalizedImage}`;
+    return `${API_REAL_IP}${cleanPath}`;
+  };
+
   useEffect(() => {
+    let isMounted = true;
+
     if (!isEditMode) {
       setFormData({
         assetId: '',
@@ -76,40 +108,53 @@ const AddNewAsset = () => {
       }
     }
 
-    if (activeItem) {
-      setFormData({
-        assetId: activeItem.asset_code || activeItem.asset_id || activeItem.id || String(targetId || ''),
-        name: activeItem.name || '',
-        category: activeItem.category?.id || activeItem.category_id || '', 
-        model: activeItem.model || '',
-        ram: activeItem.ram_capacity || activeItem.ram || '',
-        storage: activeItem.storage || '',
-        serial_number: activeItem.serial_number || '',
-        purchased_date: formatToInputDate(activeItem.purchased_date || activeItem.purchase_date || activeItem.purchase),
-        warranty: activeItem.warranty_period || activeItem.warranty || '',
-        condition: activeItem.condition || 'fair', 
-        action: activeItem.status || activeItem.action || 'available'
-      });
-      
-      const API_REAL_IP = "http://localhost:1011";
-      let rawImageSource = activeItem.preview_url || activeItem.image_url || activeItem.image || "";
+    const applyAssetToForm = (asset: any) => {
+      if (!isMounted) return;
 
-      if (rawImageSource) {
-        if (rawImageSource.startsWith("data:image")) {
-          setImagePreview(rawImageSource);
-        } else if (rawImageSource.startsWith("http://localhost:1011")) {
-          const correctedUrl = rawImageSource.replace("http://localhost:1011", API_REAL_IP);
-          setImagePreview(correctedUrl);
-        } else if (rawImageSource.startsWith("http")) {
-          setImagePreview(rawImageSource);
-        } else {
-          const cleanPath = rawImageSource.startsWith("/") ? rawImageSource : `/${rawImageSource}`;
-          setImagePreview(`${API_REAL_IP}${cleanPath}`);
+      setFormData({
+        assetId: asset.asset_code || asset.asset_id || asset.id || String(targetId || ''),
+        name: asset.name || '',
+        category: asset.category?.id || asset.category_id || '', 
+        model: asset.model || '',
+        ram: asset.ram_capacity || asset.ram || '',
+        storage: asset.storage || '',
+        serial_number: asset.serial_number || '',
+        purchased_date: formatToInputDate(asset.purchased_date || asset.purchase_date || asset.purchase),
+        warranty: asset.warranty_period || asset.warranty || '',
+        condition: asset.condition || 'fair', 
+        action: asset.status || asset.action || 'available'
+      });
+
+      setImagePreview(getAssetImagePreview(asset));
+    };
+
+    const fetchFullAsset = async () => {
+      if (!targetId) return;
+
+      try {
+        const response = await apiRequest(`/asset/${targetId}`, "GET");
+        const fetchedAsset = response?.data?.data || response?.data || response;
+        if (fetchedAsset && typeof fetchedAsset === "object") {
+          applyAssetToForm(fetchedAsset);
         }
+      } catch (err: any) {
+        console.error("Failed to fetch full asset for edit image:", err?.message || err);
+      }
+    };
+
+    if (activeItem) {
+      applyAssetToForm(activeItem);
+      if (targetId) {
+        fetchFullAsset();
       }
     } else if (targetId) {
       setFormData(prev => ({ ...prev, assetId: String(targetId) }));
+      fetchFullAsset();
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [stateId, stateEditItem, routeId, isEditMode]);
 useEffect(() => {
   const fetchCategories = async () => {

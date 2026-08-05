@@ -92,6 +92,99 @@
   /* Radius */
   --radius: 0.625rem;
 }
+
+.dark {
+  color-scheme: dark;
+  --background: #0f172a;
+  --foreground: #e5e7eb;
+  --card: #111827;
+  --card-foreground: #e5e7eb;
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+  --input: #334155;
+  --ring: #8b5cf6;
+  --sidebar: #111827;
+  --sidebar-foreground: #e5e7eb;
+  --sidebar-primary: #8b5cf6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #312e81;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #334155;
+  --sidebar-ring: #8b5cf6;
+}
+
+.dark body {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+.dark [class~="bg-white"],
+.dark [class~="bg-white/80"],
+.dark [class~="bg-white/60"],
+.dark [class~="bg-slate-50"],
+.dark [class~="bg-slate-50/50"],
+.dark [class~="bg-[#F0F4F8]"],
+.dark [class~="bg-[#F5F3FF]"],
+.dark [class~="bg-[#e9e5ff]"] {
+  background-color: #111827 !important;
+}
+
+.dark [class~="bg-slate-100"],
+.dark [class~="bg-violet-50"],
+.dark [class~="bg-violet-50/40"],
+.dark [class~="bg-blue-50"] {
+  background-color: #1f2937 !important;
+}
+
+.dark [class~="border-slate-100"],
+.dark [class~="border-slate-200"],
+.dark [class~="border-slate-300"],
+.dark [class~="border-slate-400"],
+.dark [class~="border-blue-100"],
+.dark [class~="border-violet-100"],
+.dark [class~="border-violet-200"] {
+  border-color: #334155 !important;
+}
+
+.dark [class~="text-slate-900"],
+.dark [class~="text-slate-800"],
+.dark [class~="text-slate-700"],
+.dark [class~="text-[#1E1B4B]"] {
+  color: #e5e7eb !important;
+}
+
+.dark [class~="text-slate-600"],
+.dark [class~="text-slate-500"],
+.dark [class~="text-slate-400"],
+.dark [class~="text-blue-800"] {
+  color: #cbd5e1 !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1f2937;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8;
+}
+
+.dark table tbody tr:hover {
+  background-color: #1f2937 !important;
+}
+
+.dark .glass-card {
+  background: rgba(17, 24, 39, 0.82);
+  border-color: rgba(51, 65, 85, 0.8);
+}
+
+.dark .total-val {
+  color: #e5e7eb;
+}
 .glass-card {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px);

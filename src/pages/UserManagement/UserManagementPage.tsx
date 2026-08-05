@@ -4,7 +4,7 @@ import { IoCloudDownloadOutline } from "react-icons/io5";
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Employee } from '../../types/employee';
-import { normalizeImageSource } from '../../lib/utils';
+import { getImageValue, normalizeImageSource } from '../../lib/utils';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
 import { apiFetch } from '../../lib/api';
 import { UserManagementSearch } from "@/components/features/UserManagement/UserManagementSearchBox";
@@ -69,14 +69,7 @@ const formatStatus = (status: string) =>
 
 const mapApiUserToEmployee = (user: ApiUser): Employee => ({
   id: user.id,
-  profileImage: normalizeImageSource(
-    user.image ||             
-    user.preview_url ||
-    user.image_url ||
-    user.media?.[0]?.preview_url ||
-    user.media?.[0]?.original_url ||
-    null
-  ),
+  profileImage: normalizeImageSource(getImageValue(user)),
   employee_id: user.employee_id,
   name: user.name,
   email: user.email,
@@ -88,6 +81,22 @@ const mapApiUserToEmployee = (user: ApiUser): Employee => ({
   leftDate: user.left_date || "-",
   phone: user.phone_number || "-",
 });
+
+const mergeSavedEmployee = (employees: Employee[], savedUser?: ApiUser | null) => {
+  if (!savedUser || typeof savedUser !== "object" || Array.isArray(savedUser)) return employees;
+
+  const savedEmployee = mapApiUserToEmployee(savedUser);
+  const savedKey = String(savedEmployee.id || savedEmployee.employee_id || "");
+  if (!savedKey) return employees;
+
+  return [
+    savedEmployee,
+    ...employees.filter((employee) => (
+      String(employee.id || employee.employee_id) !== savedKey &&
+      String(employee.employee_id) !== String(savedEmployee.employee_id)
+    )),
+  ];
+};
 
 const USER_ENDPOINT = "/user"; 
 
@@ -129,16 +138,19 @@ const UserManagement: React.FC = () => {
       const users = payload?.data?.data || payload?.data || payload || [];
       
       if (Array.isArray(users)) {
-        setData(users.map(mapApiUserToEmployee));
+        const savedUser = (location.state as { savedUser?: ApiUser } | null)?.savedUser;
+        setData(mergeSavedEmployee(users.map(mapApiUserToEmployee), savedUser));
       } else {
         console.error("Unexpected data format:", payload);
         setData([]);
       }
     } catch (err: any) {
       console.error(err);
-      if (err?.status === 401) {
+      if (err?.status === 401 || err?.message?.toLowerCase().includes("unauthenticated")) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_permissions');
         navigate('/', { replace: true });
         return;
       }

@@ -48,6 +48,9 @@ export default function ViewDetailsForm({ data }: Props) {
             <img
               src={data.profileImage || "https://dummyimage.com/150"}
               alt={data.name}
+              onError={(event) => {
+                event.currentTarget.src = "https://via.placeholder.com/150";
+              }}
               className="w-24 h-24 rounded-2xl border-4 border-white/20 shadow-lg object-cover"
             />
             <div>

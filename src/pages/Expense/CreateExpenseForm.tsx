@@ -3,7 +3,7 @@
 import * as React from "react"
 import { FiDollarSign, FiCalendar, FiFileText, FiUpload, FiX, FiCheckCircle, FiArrowLeft, FiTag, FiHash, FiGrid, FiImage } from "react-icons/fi"
 import { useNavigate, Link } from "react-router-dom"
-import { createExpense, getCategories } from "@/lib/apiService"
+import { apiRequest, createExpense } from "@/lib/apiService"
 
 interface CategoryItem {
   id: string;
@@ -61,13 +61,18 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
   React.useEffect(() => {
     const fetchCategoriesData = async () => {
       try {
-        const res = await getCategories();
-        if (res.success && res.data && res.data.length > 0) {
-          setCategoriesList(res.data);
-          setCategory(res.data[0].name);
+        const res = await apiRequest("/category", "GET");
+        const categories = res?.data?.data || res?.data || res || [];
+
+        if (Array.isArray(categories) && categories.length > 0) {
+          setCategoriesList(categories);
+          setCategory((prev) => prev || categories[0].name);
+        } else {
+          setCategoriesList([]);
         }
       } catch (error) {
         console.error("Failed to load categories from backend:", error);
+        setCategoriesList([]);
       }
     };
 
@@ -155,7 +160,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
 
     setLoading(true)
 
-    const payload: Record<string, any> = {
+    const payload = {
       users_id: userId,
       maintenances_id: null,
       assets_id: null,
@@ -359,6 +364,9 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                       onChange={(e) => setCategory(e.target.value)}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer"
                     >
+                      <option value="" disabled>
+                        Select a Category
+                      </option>
                       {categoriesList.map((cat) => (
                         <option key={cat.id} value={cat.name}>
                           {cat.name}

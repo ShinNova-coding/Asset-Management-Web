@@ -87,19 +87,19 @@ export default function Layout() {
 
   return (
     <SidebarProvider style={{ "--sidebar-width": "240px" } as React.CSSProperties}>
-      <div className="flex min-h-screen w-full bg-[#F0F4F8]">
+      <div className="flex min-h-screen w-full bg-[#F0F4F8] dark:bg-slate-950">
        
-        <Sidebar className="border-r border-blue-100 bg-[#e9e5ff]">
-          <SidebarContent className="bg-[#e9e5ff] px-4 py-8">
+        <Sidebar collapsible="icon" className="border-r border-blue-100 bg-[#e9e5ff] dark:border-slate-700 dark:bg-slate-900">
+          <SidebarContent className="bg-[#e9e5ff] px-4 py-8 group-data-[collapsible=icon]:px-2 dark:bg-slate-900">
            
-           <div className="flex items-center gap-3 px-2 mb-8">
+           <div className="flex items-center gap-3 px-2 mb-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
   <div 
-    className="w-12 h-12 flex-shrink-0 bg-white border-2 border-[#A78BFA] rounded-full flex items-center justify-center shadow-sm transition-transform hover:scale-105"
+    className="w-12 h-12 flex-shrink-0 bg-white border-2 border-[#A78BFA] rounded-full flex items-center justify-center shadow-sm transition-transform hover:scale-105 group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:w-9 dark:bg-slate-800 dark:border-violet-400"
     style={{ animation: 'bounce 3s infinite ease-in-out' }}
   >
-    <BsBoxFill className="w-6 h-6 text-[#7C3AED]" />
+    <BsBoxFill className="w-6 h-6 text-[#7C3AED] group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
   </div>
-  <h1 className="text-xl font-bold tracking-tight text-[#7C3AED]">ITAMS</h1>
+  <h1 className="text-xl font-bold tracking-tight text-[#7C3AED] group-data-[collapsible=icon]:hidden dark:text-violet-300">ITAMS</h1>
 </div>
 
            
@@ -121,14 +121,15 @@ export default function Layout() {
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
                           onClick={() => navigate(item.path)}
-                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                          tooltip={item.title}
+                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 ${
                             isActive
                               ? "bg-[#ab8ffe] text-[#7C3AED]"
-                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED]"
+                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
                           }`}
                         >
                           <item.icon className="h-5 w-5" />
-                          {item.title}
+                          <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     );
@@ -142,18 +143,19 @@ export default function Layout() {
                   
                   <SidebarMenuButton
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                    tooltip="User Management"
+                    className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 ${
                       isUserModuleActive
                         ? "bg-[#ab8ffe] text-[#7C3AED]"
-                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED]"
+                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <Users className="h-5 w-5" />
-                      <span>User Management</span>
+                      <span className="group-data-[collapsible=icon]:hidden">User Management</span>
                     </div>
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform duration-200 ${
+                      className={`h-4 w-4 transition-transform duration-200 group-data-[collapsible=icon]:hidden ${
                         isUserMenuOpen ? "transform rotate-180" : ""
                       }`}
                     />
@@ -161,7 +163,7 @@ export default function Layout() {
 
                   {/* Dropdown Sub-Items */}
                   {isUserMenuOpen && (
-                    <div className="mt-1 pl-4 space-y-1 border-l border-blue-800/60 ml-6">
+                    <div className="mt-1 pl-4 space-y-1 border-l border-blue-800/60 ml-6 group-data-[collapsible=icon]:hidden dark:border-slate-600">
                      
                       {(hasUserManagementPermission || isUserModuleActive || isLoading) && (
                         <SidebarMenuButton
@@ -169,7 +171,7 @@ export default function Layout() {
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-medium transition-all duration-200 ${
                             isUsersSubItemActive
                               ?"bg-[#ab8ffe] text-[#7C3AED]"
-                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED]"
+                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
                           }`}
                         >
                           <Users className="h-4 w-4" />
@@ -184,7 +186,7 @@ export default function Layout() {
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-medium transition-all duration-200 ${
                             currentPath.startsWith("/roles")
                               ? "bg-[#ab8ffe] text-[#7C3AED]"
-                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED]"
+                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
                           }`}
                         >
                           <UserCog className="h-4 w-4" />
@@ -208,13 +210,13 @@ export default function Layout() {
 
         {/* Main Content Area */}
         <div className="flex flex-1 flex-col">
-          <div className="w-full bg-white/80 backdrop-blur-sm border-b border-blue-100 z-20">
+          <div className="w-full bg-white/80 backdrop-blur-sm border-b border-blue-100 z-20 dark:border-slate-700 dark:bg-slate-900/90">
             <Navigation />
           </div>
           <main className="flex-1 overflow-y-auto">
             {isLoading ? (
              
-              <div className="h-full flex items-center justify-center text-[#A78BFA] font-medium bg-[#F0F4F8]">
+              <div className="h-full flex items-center justify-center text-[#A78BFA] font-medium bg-[#F0F4F8] dark:bg-slate-950 dark:text-violet-300">
                 Loading Content Data...
               </div>
             ) : (

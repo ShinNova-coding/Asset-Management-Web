@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../lib/api";
-import { normalizeImageSource } from "../../lib/utils";
+import { getImageValue, normalizeImageSource } from "../../lib/utils";
 import type { Employee } from "../../types/employee";
 
 type ApiUser = {
@@ -26,14 +26,7 @@ type ApiUser = {
 
 const mapUser = (user: ApiUser): Employee => ({
   id: user.id,
-  profileImage: normalizeImageSource(
-    user.preview_url ||
-      user.image_url ||
-      user.image ||
-      user.media?.[0]?.preview_url ||
-      user.media?.[0]?.original_url ||
-      ""
-  ),
+  profileImage: normalizeImageSource(getImageValue(user)),
   employee_id: user.employee_id,
   name: user.name,
   email: user.email,
