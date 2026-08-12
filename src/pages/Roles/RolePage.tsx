@@ -1,21 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ShieldCheck, Plus, Database } from "lucide-react";
+import { CheckCircle, ChevronLeft, ChevronRight, ShieldCheck, Plus, Database, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { fetchRoles, deleteRole } from "@/lib/axios"; 
-import { apiRequest } from "@/lib/apiService";
+import { hasStoredPermission } from "@/lib/routeAccess";
 import { MdOutlineModeEditOutline } from "react-icons/md";
 export default function RolesPage() {
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [roleIndex, setRoleIndex] = useState(0);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const canCreateRoles = hasStoredPermission("create-roles");
+  const canUpdateRoles = hasStoredPermission("update-roles");
+  const canDeleteRoles = hasStoredPermission("delete-roles");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,12 +37,26 @@ export default function RolesPage() {
     loadRoles();
   }, []);
 
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    window.setTimeout(() => setToastMessage(null), 2500);
+  };
+
+  const openDeleteCard = () => {
+    setDeleteTarget(roles[roleIndex]);
+    setToastMessage(null);
+  };
+
+  const closeDeleteCard = () => {
+    if (isDeleting) return;
+    setDeleteTarget(null);
+  };
+
   const handleDelete = async () => {
-    const roleToDelete = roles[roleIndex];
+    const roleToDelete = deleteTarget;
     const id = roleToDelete.role_id || roleToDelete.id;
 
     if (!id) return;
-    if (!confirm(`Are you sure you want to delete: ${roleToDelete.name}?`)) return;
 
     try {
       setIsDeleting(true);
@@ -46,37 +64,16 @@ export default function RolesPage() {
       
       setRoles(roles.filter((r) => (r.role_id || r.id) !== id));
       setRoleIndex(0);
-      alert("Role deleted successfully!");
+      setDeleteTarget(null);
+      showToast("Role deleted successfully!");
     } catch (error: any) {
       console.error("Delete failed:", error);
-      alert(error.response?.data?.message || "Delete failed. Please check permissions.");
+      showToast(error.response?.data?.message || "Delete failed. Please check permissions.");
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const updateRolePermissions = async (roleId: number, name: string, permissionNames: string[]) => {
-  try {
-    setIsUpdating(true);
-    
-   
-    await apiRequest(`/role/${roleId}`, "PATCH", { 
-      role_id: roleId, 
-      name, 
-      permissions: permissionNames 
-    });
-    
-   
-    const data = await fetchRoles();
-    setRoles(Array.isArray(data) ? data : (data.data || []));
-    alert("Role updated successfully!");
-  } catch (error: any) {
-    console.error("Update error:", error);
-    alert(error.message || "Failed to update role.");
-  } finally {
-    setIsUpdating(false);
-  }
-};
   const groupPermissions = (permissions: any[]) => {
     if (!permissions) return {};
     const groups: Record<string, any[]> = {};
@@ -111,7 +108,14 @@ export default function RolesPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-start mb-8">
           <h1 className="text-2xl font-bold text-[#7C3AED]">Permissions List</h1>
-          <Button onClick={() => navigate("/roles/create")} className="bg-[#7C3AED] hover:bg-purple-700">
+          <Button
+            onClick={() => {
+              if (canCreateRoles) navigate("/roles/create");
+            }}
+            disabled={!canCreateRoles}
+            className="bg-[#7C3AED] hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+            title={canCreateRoles ? "Add permissions" : "You do not have permission to create roles"}
+          >
             <Plus className="w-4 h-4 mr-2" /> Add Permissions
           </Button>
         </div>
@@ -134,16 +138,23 @@ export default function RolesPage() {
     <Button 
       variant="outline" 
       
-      className="text-[#7C3AED] border-purple-700 hover:bg-purple-600"
-      onClick={() => navigate(`/roles/${currentRole.id}`)} 
+      className="text-[#7C3AED] border-purple-700 hover:bg-purple-600 disabled:cursor-not-allowed disabled:opacity-40"
+      onClick={() => {
+        if (canUpdateRoles) navigate(`/roles/${currentRole.id}`);
+      }} 
+      disabled={!canUpdateRoles}
+      title={canUpdateRoles ? "Edit role" : "You do not have permission to update roles"}
     >
      <MdOutlineModeEditOutline className="w-5 h-5"/>
     </Button>
               <Button 
                 variant="ghost" 
-                className="text-red-600 hover:text-red-700 border-red-400 hover:bg-red-50"
-                onClick={handleDelete}
-                disabled={isDeleting}
+                className="text-red-600 hover:text-red-700 border-red-400 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+                onClick={() => {
+                  if (canDeleteRoles) openDeleteCard();
+                }}
+                disabled={isDeleting || !canDeleteRoles}
+                title={canDeleteRoles ? "Delete role" : "You do not have permission to delete roles"}
               >
                 < RiDeleteBinLine className="w-5 h-5"/> {isDeleting ? "Deleting..." : ""}
               </Button>
@@ -180,6 +191,59 @@ export default function RolesPage() {
           ))}
         </div>
       </div>
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-50 text-red-600">
+                <RiDeleteBinLine size={22} />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-base font-bold text-slate-900">Delete Role</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Are you sure you want to delete {deleteTarget.name || "this role"}?
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeDeleteCard}
+                disabled={isDeleting}
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+              >
+                <RiDeleteBinLine size={16} />
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toastMessage && (
+        <div className="fixed right-6 top-6 z-50 flex max-w-sm items-center gap-3 rounded-xl border border-[#C4B5FD] bg-[#7C3AED] px-4 py-3 text-white shadow-xl shadow-purple-500/20">
+          <CheckCircle size={16} />
+          <span className="text-sm font-semibold">{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="ml-auto rounded-md p-1 text-white/80 transition hover:bg-white/15 hover:text-white"
+            aria-label="Close notification"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import axios from 'axios';
+import { apiRequest } from '@/lib/apiService';
 
 interface PermissionItem {
   id: string; 
@@ -22,6 +22,7 @@ export default function CreateRolePage() {
     { id: 'create-assignments', label: 'Assignments (Create)', checked: false },
     { id: 'create-maintenances', label: 'Maintenances (Create)', checked: false },
     { id: 'create-expenses', label: 'Expenses (Create)', checked: false },
+    { id: 'create-roles', label: 'Roles (Create)', checked: false },
     { id: 'create-asset-requests', label: 'Asset Requests (Create)', checked: false },
     { id: 'create-maintenance-requests', label: 'Maintenance Requests (Create)', checked: false },
 
@@ -31,6 +32,7 @@ export default function CreateRolePage() {
     { id: 'update-assignments', label: 'Assignments (Update)', checked: false },
     { id: 'update-maintenances', label: 'Maintenances (Update)', checked: false },
     { id: 'update-expenses', label: 'Expenses (Update)', checked: false },
+    { id: 'update-roles', label: 'Roles (Update)', checked: false },
     { id: 'update-maintenance-requests', label: 'Maintenance Requests (Update)', checked: false },
     
     { id: 'delete-categories', label: 'Categories (Delete)', checked: false },
@@ -39,6 +41,7 @@ export default function CreateRolePage() {
     { id: 'delete-assignments', label: 'Assignments (Delete)', checked: false },
     { id: 'delete-maintenances', label: 'Maintenances (Delete)', checked: false },
     { id: 'delete-expenses', label: 'Expenses (Delete)', checked: false },
+    { id: 'delete-roles', label: 'Roles (Delete)', checked: false },
 
     { id: 'approve-asset-requests', label: 'Asset Requests (Approve)', checked: false },
     { id: 'approve-maintenance-requests', label: 'Maintenance Requests (Approve)', checked: false },
@@ -55,6 +58,7 @@ export default function CreateRolePage() {
     { id: 'view-assignments', label: 'Assignments', checked: false },
     { id: 'view-maintenances', label: 'Maintenances', checked: false },
     { id: 'view-expenses', label: 'Expenses', checked: false },
+    { id: 'view-roles', label: 'Roles', checked: false },
     { id: 'get-notifications', label: 'Notifications', checked: false },
   ]);
 
@@ -106,25 +110,27 @@ const handleSubmit = async (e: React.FormEvent) => {
     ...viewPermissions.filter(p => p.checked).map(p => p.id),
   ];
 
+  if (!roleName.trim()) {
+    setError("Role name is required.");
+    setLoading(false);
+    return;
+  }
+
+  if (selectedPermissions.length === 0) {
+    setError("Please select at least one permission.");
+    setLoading(false);
+    return;
+  }
+
   try {
-    
-    const response = await axios.post('http://192.168.100.185:1011/api/role', {
-      name: roleName,
-      guard_name: "sanctum",
+    await apiRequest("/role", "POST", {
+      name: roleName.trim(),
       permissions: selectedPermissions 
-    }, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      }
     });
 
-    if (response.status === 200 || response.status === 201) {
-      navigate("/roles");
-    }
+    navigate("/roles");
   } catch (err: any) {
-    setError(err.response?.data?.message || "Something went wrong.");
+    setError(err?.message || "Something went wrong.");
   } finally {
     setLoading(false);
   }
@@ -391,7 +397,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-[#7C3AED] text-white font-semibold text-sm rounded-xl hover:bg-purple-700 focus:ring-4 focus:ring-indigo-500/20 shadow-sm shadow-indigo-500/10 transition duration-200 disabled:bg-blue-400"
+              className="px-6 py-3 bg-[#7C3AED] text-white font-semibold text-sm rounded-xl hover:bg-purple-700 focus:ring-4 focus:ring-[#7C3AED]/20 shadow-sm shadow-purple-500/10 transition duration-200 disabled:bg-[#7C3AED] disabled:opacity-70"
             >
               {loading ? 'Creating...' : 'Create Permissions'}
             </button>

@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button"
 import { InventoryFilter } from "./InventoryFilter"
 import { columns as baseColumns } from "./InventoryColumns"
 import { apiRequest } from "@/lib/apiService";
+import { hasStoredPermission } from "@/lib/routeAccess";
 interface InventoryTableProps {
   data: any[]
 }
@@ -72,6 +73,9 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
     targetId: null,
   })
   const [showToast, setShowToast] = React.useState(false)
+  const canViewAssets = hasStoredPermission("view-assets")
+  const canUpdateAssets = hasStoredPermission("update-assets")
+  const canDeleteAssets = hasStoredPermission("delete-assets")
 
   React.useEffect(() => {
     if (initialData) {
@@ -84,6 +88,7 @@ export function InventoryTable({ data: initialData }: InventoryTableProps) {
   }, [data])
 
   const handleDeleteTrigger = (id: string) => {
+    if (!canDeleteAssets) return
     setDeleteModal({ isOpen: true, targetId: id })
   }
 const handleConfirmDelete = async () => {
@@ -118,10 +123,12 @@ const handleConfirmDelete = async () => {
     
 
   const handleEdit = (item: any) => {
+    if (!canUpdateAssets) return
     navigate("/inventory/add", { state: { id: item.id, editItem: item } })
   }
 
   const handleViewDetails = (item: any) => {
+    if (!canViewAssets) return
     navigate(`/inventory/${item.id}`, { state: { id: item.id, detailsItem: item } })
   }
 
@@ -148,6 +155,8 @@ const handleConfirmDelete = async () => {
     meta: {
       deleteRow: handleDeleteTrigger,
       editRow: handleEdit,
+      canUpdateAssets,
+      canDeleteAssets,
       updateRowAction: (targetId: string, newAction: string) => {
         setData((prevData) => prevData.map((item) => (item.id === targetId ? { ...item, action: newAction } : item)))
       },
@@ -219,9 +228,9 @@ const handleConfirmDelete = async () => {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer">
+                <TableRow key={row.id} className={`transition-colors hover:bg-slate-50/80 border-b border-slate-100 ${canViewAssets ? "cursor-pointer" : "cursor-not-allowed opacity-75"}`}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3 text-slate-700 text-sm" onClick={() => cell.column.id !== "actions" && handleViewDetails(row.original)}>
+                    <TableCell key={cell.id} className="py-3 text-slate-700 text-sm" onClick={() => cell.column.id !== "actions" && canViewAssets && handleViewDetails(row.original)}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}

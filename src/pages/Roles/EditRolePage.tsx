@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Loader2, ArrowLeft, Save } from "lucide-react";
+import { Loader2, ArrowLeft, Save, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,6 +19,12 @@ export default function EditRolePage() {
   
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    window.setTimeout(() => setToastMessage(null), 2500);
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,11 +66,11 @@ export default function EditRolePage() {
         permissions: selectedPermissions 
       });
 
-      alert("Role updated successfully!");
-      navigate("/roles");
+      showToast("Role updated successfully!");
+      window.setTimeout(() => navigate("/roles"), 900);
     } catch (error: any) {
       console.error(error);
-      alert(error.message || "Update failed.");
+      showToast(error.message || "Update failed.");
     } finally {
       setIsSaving(false);
     }
@@ -84,6 +90,21 @@ export default function EditRolePage() {
 
   return (
     <div className="p-6 min-h-screen bg-[#e9e5ff]">
+      {toastMessage && (
+        <div className="fixed right-6 top-6 z-50 flex max-w-sm items-center gap-3 rounded-xl border border-[#C4B5FD] bg-[#7C3AED] px-4 py-3 text-white shadow-xl shadow-purple-500/20">
+          <CheckCircle size={16} />
+          <span className="text-sm font-semibold">{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="ml-auto rounded-md p-1 text-white/80 transition hover:bg-white/15 hover:text-white"
+            aria-label="Close notification"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto space-y-6">
         <Button variant="ghost" className="text-[#7C3AED] hover:text-purple-700" onClick={() => navigate("/roles")}>
           <ArrowLeft className="w-4 h-4 mr-2 text-[#7C3AED]" /> Back

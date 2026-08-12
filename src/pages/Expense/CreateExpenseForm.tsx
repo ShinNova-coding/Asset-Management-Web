@@ -51,6 +51,11 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
   
   const [employeeName, setEmployeeName] = React.useState<string>("Unknown Employee")
 
+  const showToast = (message: string) => {
+    setToastMessage(message)
+    window.setTimeout(() => setToastMessage(null), 2500)
+  }
+
   React.useEffect(() => {
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
@@ -147,20 +152,20 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
     }
 
     if (!userId) {
-      alert("User session not found. Please log in again.")
+      showToast("User session not found. Please log in again.")
       return
     }
 
     // Input Validation ကို ပိုစိပ်အောင် ပြင်ဆင်ထားပါတယ် (Cost က 0 ထက်ကြီးရမယ်)
     const calculatedCost = Number(cost)
     if (isNaN(calculatedCost) || calculatedCost <= 0 || !expenseDate || !title.trim() || !description.trim()) {
-      alert("Please fill all required fields correctly (Cost must be greater than 0, Date, Title, and Description are required).")
+      showToast("Please fill all required fields correctly.")
       return
     }
 
     if (expenseType === "asset_purchase") {
       if (!assetName.trim() || !assetCode.trim() || !serialNumber.trim()) {
-        alert("Asset Name, Asset Code, and Serial Number are all required for asset purchases.")
+        showToast("Asset Name, Asset Code, and Serial Number are required.")
         return
       }
     }
@@ -190,7 +195,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
     try {
       await createExpense(payload)
 
-      setToastMessage("Expense created successfully!")
+      showToast("Expense created successfully!")
       
       setTimeout(() => {
         onSuccess?.()
@@ -198,7 +203,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
       }, 1500)
     } catch (err: any) {
       console.error("Create Expense Error:", err)
-      alert(err?.message || "Failed to create expense record. Please try again.")
+      showToast(err?.message || "Failed to create expense record. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -344,7 +349,7 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                     <input
                       type="text"
                       required
-                      placeholder="e.g., LAP-002, LAP-003"
+                      placeholder="e.g., AST-2026-001"
                       value={assetCode}
                       onChange={(e) => setAssetCode(e.target.value)}
                       className={inputCls}
@@ -486,9 +491,17 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
 
       {/* 🛠️ FIX 3: absolute မှ fixed သို့ ပြောင်းလဲထားပါတယ် */}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl animate-fade-in">
-          <FiCheckCircle className="text-emerald-400" size={18} />
-          <span className="text-xs font-semibold">{toastMessage}</span>
+        <div className="fixed right-6 top-6 z-50 flex max-w-sm items-center gap-3 rounded-xl border border-[#C4B5FD] bg-[#7C3AED] px-4 py-3 text-white shadow-xl shadow-purple-500/20">
+          <FiCheckCircle className="text-white" size={18} />
+          <span className="text-sm font-semibold">{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="ml-auto rounded-md p-1 text-white/80 transition hover:bg-white/15 hover:text-white"
+            aria-label="Close notification"
+          >
+            <FiX size={16} />
+          </button>
         </div>
       )}
     </div>

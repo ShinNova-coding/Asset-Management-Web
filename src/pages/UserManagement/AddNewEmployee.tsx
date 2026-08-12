@@ -10,7 +10,7 @@ import {
   EyeOff,  
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { normalizeImageSource } from '../../lib/utils';
+import { cacheProfileImage, normalizeImageSource } from '../../lib/utils';
 import { apiFetch } from '../../lib/api';
 import {
   Select,
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 
 const DEFAULT_TOKEN = '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c';
+const FALLBACK_ROLES = ['admin', 'employee', 'hr'];
 
 interface FormState {
   name: string;
@@ -69,6 +70,18 @@ const unwrapSavedUser = (responseData: any) => {
   return Array.isArray(candidate) ? null : candidate;
 };
 
+const normalizeRolesPayload = (payload: any) => {
+  const roles = payload?.data?.data || payload?.data || payload || [];
+  if (!Array.isArray(roles)) return [];
+
+  return roles
+    .map((role: any) => role?.name || role?.role_name || role?.title || "")
+    .filter((name: string) => name && name !== "-");
+};
+
+const uniqueRoles = (roles: string[]) =>
+  Array.from(new Set(roles.filter(Boolean)));
+
 const AddEmployeeForm: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -94,6 +107,7 @@ const AddEmployeeForm: React.FC = () => {
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [roleOptions, setRoleOptions] = useState<string[]>(FALLBACK_ROLES);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -101,9 +115,7 @@ const AddEmployeeForm: React.FC = () => {
   useEffect(() => {
     if (editItem) {
       const rawRole = editItem.role || 'admin';
-      const normalizedRole = rawRole !== '-' 
-        ? rawRole.toLowerCase().replace(/-/g, ' ') 
-        : 'admin';
+      const normalizedRole = rawRole !== '-' ? rawRole : 'admin';
 
       setFormState({
         name: editItem.name || '',
@@ -127,6 +139,23 @@ const AddEmployeeForm: React.FC = () => {
         setProfileImage(null);
       }
     }
+  }, [editItem]);
+
+  useEffect(() => {
+    const fetchRoleOptions = async () => {
+      try {
+        const response = await apiFetch('/role', { method: 'GET' });
+        const fetchedRoles = normalizeRolesPayload(response);
+        const currentRole = editItem?.role && editItem.role !== '-' ? editItem.role : '';
+        setRoleOptions(uniqueRoles([...fetchedRoles, currentRole, ...FALLBACK_ROLES]));
+      } catch (err) {
+        console.error('Failed to fetch roles:', err);
+        const currentRole = editItem?.role && editItem.role !== '-' ? editItem.role : '';
+        setRoleOptions(uniqueRoles([currentRole, ...FALLBACK_ROLES]));
+      }
+    };
+
+    fetchRoleOptions();
   }, [editItem]);
 
   const handleInputChange = (
@@ -229,6 +258,14 @@ const AddEmployeeForm: React.FC = () => {
             }
           : savedUser;
 
+      cacheProfileImage({
+        ...rawBody,
+        ...(savedUserWithImage && !Array.isArray(savedUserWithImage) ? savedUserWithImage : {}),
+        email: rawBody.email,
+        employee_id: rawBody.employee_id,
+        image: rawBody.image || savedUserWithImage?.image || editItem?.image || null,
+      });
+
       const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
       const isCurrentUser =
         storedUser &&
@@ -250,8 +287,12 @@ const AddEmployeeForm: React.FC = () => {
             joined_date: savedUserWithImage?.joined_date || rawBody.joined_date || storedUser.joined_date || null,
             left_date: savedUserWithImage?.left_date || rawBody.left_date || storedUser.left_date || null,
             image: rawBody.image || savedUserWithImage?.image || storedUser.image || null,
+            image_url: savedUserWithImage?.image_url || storedUser.image_url || null,
+            preview_url: savedUserWithImage?.preview_url || storedUser.preview_url || null,
+            media: savedUserWithImage?.media || storedUser.media || [],
           })
         );
+        window.dispatchEvent(new Event('profile_updated'));
       }
 
       navigate('/employees', {
@@ -512,9 +553,11 @@ const AddEmployeeForm: React.FC = () => {
                     <SelectValue placeholder="Select Role" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border border-[#DDD6FE] bg-white shadow-lg">
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="employee">Employee</SelectItem>
-                    <SelectItem value="hr">HR</SelectItem>
+                    {roleOptions.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

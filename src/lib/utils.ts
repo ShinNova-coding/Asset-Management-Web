@@ -44,11 +44,27 @@ export function getImageValue(record: any): string | null {
   const candidates = [
     record.image,
     record.profileImage,
+    record.profile_image,
+    record.profile_photo,
+    record.avatar,
+    record.avatar_url,
+    record.photo,
+    record.photo_url,
     record.preview_url,
     record.image_url,
     record.original_url,
     record.path,
     record.url,
+    record.user?.image,
+    record.user?.profileImage,
+    record.user?.profile_image,
+    record.user?.profile_photo,
+    record.user?.avatar,
+    record.user?.avatar_url,
+    record.user?.photo,
+    record.user?.photo_url,
+    record.user?.preview_url,
+    record.user?.image_url,
     record.media?.[0]?.preview_url,
     record.media?.[0]?.original_url,
     record.media?.[0]?.url,
@@ -74,4 +90,48 @@ export function getImageValue(record: any): string | null {
   }
 
   return null
+}
+
+const PROFILE_IMAGE_CACHE_KEY = "user_profile_images"
+
+const getProfileImageCacheKeys = (record: any) => {
+  if (!record) return []
+
+  return [
+    record.email,
+    record.employee_id,
+    record.id,
+  ]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase())
+}
+
+export function cacheProfileImage(record: any) {
+  const imageValue = getImageValue(record)
+  const keys = getProfileImageCacheKeys(record)
+  if (!imageValue || keys.length === 0) return
+
+  try {
+    const cache = JSON.parse(localStorage.getItem(PROFILE_IMAGE_CACHE_KEY) || "{}")
+    keys.forEach((key) => {
+      cache[key] = imageValue
+    })
+    localStorage.setItem(PROFILE_IMAGE_CACHE_KEY, JSON.stringify(cache))
+  } catch {
+    localStorage.removeItem(PROFILE_IMAGE_CACHE_KEY)
+  }
+}
+
+export function getCachedProfileImage(record: any): string | null {
+  const keys = getProfileImageCacheKeys(record)
+  if (keys.length === 0) return null
+
+  try {
+    const cache = JSON.parse(localStorage.getItem(PROFILE_IMAGE_CACHE_KEY) || "{}")
+    const cachedValue = keys.map((key) => cache[key]).find(Boolean)
+    return cachedValue || null
+  } catch {
+    localStorage.removeItem(PROFILE_IMAGE_CACHE_KEY)
+    return null
+  }
 }

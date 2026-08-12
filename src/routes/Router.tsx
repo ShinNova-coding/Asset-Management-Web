@@ -33,14 +33,17 @@ import { getFirstAccessiblePath, getStoredPermissions, hasPermission } from "@/l
 
 function RequirePermission({
   permission,
+  permissions: allowedPermissions,
   children,
 }: {
-  permission: string
+  permission?: string
+  permissions?: string[]
   children: React.ReactNode
 }) {
   const permissions = getStoredPermissions()
+  const requiredPermissions = allowedPermissions || (permission ? [permission] : [])
 
-  if (hasPermission(permissions, permission)) {
+  if (requiredPermissions.some((item) => hasPermission(permissions, item))) {
     return <>{children}</>
   }
 
@@ -81,7 +84,7 @@ export const router = createBrowserRouter([
           },
           {
             path:"categories/add",
-          element:<RequirePermission permission="view-categories"><AddNewCategories/></RequirePermission>,
+          element:<RequirePermission permission="create-categories"><AddNewCategories/></RequirePermission>,
           },
           
           {
@@ -90,11 +93,11 @@ export const router = createBrowserRouter([
           },
           {
             path: "inventory/add",
-            element: <RequirePermission permission="view-assets"><AddNewAsset /></RequirePermission>,
+            element: <RequirePermission permission="create-assets"><AddNewAsset /></RequirePermission>,
           },
           {
             path: "inventory/:id/edit",
-            element: <RequirePermission permission="view-assets"><AddNewAsset /></RequirePermission>,
+            element: <RequirePermission permission="update-assets"><AddNewAsset /></RequirePermission>,
           },
           {
             path: "inventory/:id",
@@ -112,7 +115,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "assignment/add",
-            element: <RequirePermission permission="view-assignments"><Assign /></RequirePermission>,
+            element: <RequirePermission permission="create-assignments"><Assign /></RequirePermission>,
           },
           {
             path: "assignment/:id",
@@ -120,7 +123,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "assignment/edit/:id",
-            element: <RequirePermission permission="view-assignments"><AssignmentEditPage /></RequirePermission>, 
+            element: <RequirePermission permission="update-assignments"><AssignmentEditPage /></RequirePermission>, 
           },
           
           {
@@ -134,7 +137,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "maintenance/:id/complete",
-            element: <RequirePermission permission="view-maintenances"><MaintenanceEditPage /></RequirePermission>,
+            element: <RequirePermission permission="update-maintenances"><MaintenanceEditPage /></RequirePermission>,
           },
           {
             path: "maintenance/:id",
@@ -147,7 +150,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "add-employee",
-            element: <RequirePermission permission="view-users"><AddEmployeeForm /></RequirePermission>,
+            element: <RequirePermission permissions={["create-users", "update-users"]}><AddEmployeeForm /></RequirePermission>,
           },
           
           {
@@ -161,11 +164,11 @@ export const router = createBrowserRouter([
           },
           {
             path:"roles/:id",
-            element:<RequirePermission permission="view-roles"><EditRolePage/></RequirePermission>,
+            element:<RequirePermission permission="update-roles"><EditRolePage/></RequirePermission>,
           },
           {
             path: "roles/create",
-            element: <RequirePermission permission="view-roles"><CreateRolePage /></RequirePermission>
+            element: <RequirePermission permission="create-roles"><CreateRolePage /></RequirePermission>
           },
 
           {
@@ -180,7 +183,7 @@ export const router = createBrowserRouter([
 
           {
             path: "expense/createexpenseform",
-            element: <RequirePermission permission="view-expenses"><CreateExpenseForm /></RequirePermission>
+            element: <RequirePermission permission="create-expenses"><CreateExpenseForm /></RequirePermission>
           },
         ],
       },

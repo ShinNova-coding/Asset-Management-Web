@@ -5,21 +5,25 @@ type Permission = {
 export const routeAccessRules = [
   { path: "/dashboard", permission: "view-dashboard" },
   { path: "/categories", permission: "view-categories" },
-  { path: "/categories/add", permission: "view-categories" },
+  { path: "/categories/add", permission: "create-categories" },
   { path: "/inventory", permission: "view-assets" },
-  { path: "/inventory/add", permission: "view-assets" },
+  { path: "/inventory/add", permission: "create-assets" },
   { path: "/assignment", permission: "view-assignments" },
-  { path: "/assignment/add", permission: "view-assignments" },
+  { path: "/assignment/add", permission: "create-assignments" },
   { path: "/maintenance", permission: "view-maintenances" },
+  { path: "/maintenance/:id", permission: "view-maintenances" },
+  { path: "/maintenance/:id/complete", permission: "update-maintenances" },
   { path: "/activity", permission: "view-activitylogs" },
   { path: "/expense", permission: "view-expenses" },
   { path: "/expense/report", permission: "view-expenses" },
-  { path: "/expense/createexpenseform", permission: "view-expenses" },
+  { path: "/expense/createexpenseform", permission: "create-expenses" },
   { path: "/usermanagement", permission: "view-users" },
   { path: "/employees", permission: "view-users" },
-  { path: "/add-employee", permission: "view-users" },
+  { path: "/employee/:id", permission: "view-users" },
+  { path: "/add-employee", permission: "create-users" },
   { path: "/roles", permission: "view-roles" },
-  { path: "/roles/create", permission: "view-roles" },
+  { path: "/roles/create", permission: "create-roles" },
+  { path: "/roles/:id", permission: "update-roles" },
 ]
 
 export const getStoredPermissions = (): Permission[] => {
@@ -36,8 +40,11 @@ export const getStoredPermissions = (): Permission[] => {
 }
 
 export const hasPermission = (permissions: Permission[], permission: string) =>
+  localStorage.getItem("user_role")?.toLowerCase() === "super-admin" ||
   permissions.some((item) => item?.name === permission)
+
+export const hasStoredPermission = (permission: string) =>
+  hasPermission(getStoredPermissions(), permission)
 
 export const getFirstAccessiblePath = (permissions = getStoredPermissions()) =>
   routeAccessRules.find((rule) => hasPermission(permissions, rule.permission))?.path || ""
-

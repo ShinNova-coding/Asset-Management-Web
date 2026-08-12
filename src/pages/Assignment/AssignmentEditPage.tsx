@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import { MdOutlineModeEditOutline } from "react-icons/md";
+import { X } from "lucide-react";
 import { apiRequest } from "@/lib/apiService"; 
 const EditAssignmentPage = () => {
   const { id } = useParams();
@@ -15,6 +16,12 @@ const EditAssignmentPage = () => {
   const [assignedDate, setAssignedDate] = useState("");
   const [note, setNote] = useState("");
   const [assetCode, setAssetCode] = useState("");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    window.setTimeout(() => setToastMessage(null), 2500);
+  };
 
   useEffect(() => {
     if (assignment) {
@@ -37,19 +44,33 @@ const EditAssignmentPage = () => {
     });
 
     if (response?.success) {
-      alert("Assignment updated successfully!");
-      navigate("/assignment");
+      showToast("Assignment updated successfully!");
+      window.setTimeout(() => navigate("/assignment"), 900);
     } else {
       throw new Error(response?.message || "Failed to update.");
     }
   } catch (err: any) {
     console.error("Update error:", err);
-    alert(`Failed to update: ${err.message || "Unknown error"}`);
+    showToast(`Failed to update: ${err.message || "Unknown error"}`);
   }
 };
 
   return (
     <div className="min-h-screen bg-[#e9e5ff] p-10 font-sans text-slate-900">
+      {toastMessage && (
+        <div className="fixed right-6 top-6 z-50 flex max-w-sm items-center gap-3 rounded-xl border border-[#C4B5FD] bg-[#7C3AED] px-4 py-3 text-white shadow-xl shadow-purple-500/20">
+          <span className="text-sm font-semibold">{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="ml-auto rounded-md p-1 text-white/80 transition hover:bg-white/15 hover:text-white"
+            aria-label="Close notification"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-sm font-medium text-[#7C3AED] hover:text-purple-700 transition-colors mb-2"

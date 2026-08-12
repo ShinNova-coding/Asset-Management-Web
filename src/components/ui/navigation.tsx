@@ -17,7 +17,7 @@ import {
 import { useSidebar } from "@/components/ui/sidebar"
 import { useNavigate } from "react-router-dom"
 import { apiFetch } from "@/lib/api"
-import { getImageValue, normalizeImageSource } from "@/lib/utils"
+import { cacheProfileImage, getCachedProfileImage, getImageValue, normalizeImageSource } from "@/lib/utils"
 
 const searchItems = [
   { title: "Dashboard", path: "/dashboard", keywords: "home stats overview charts" },
@@ -50,6 +50,13 @@ type NavUser = {
   joined_date?: string | null
   left_date?: string | null
   image?: string | null
+  profileImage?: string | null
+  profile_image?: string | null
+  profile_photo?: string | null
+  avatar?: string | null
+  avatar_url?: string | null
+  photo?: string | null
+  photo_url?: string | null
   image_url?: string | null
   preview_url?: string | null
   roles?: Array<{ name?: string }>
@@ -76,10 +83,13 @@ export default function Navigation() {
 
   useEffect(() => {
     const applyUser = (nextUser: NavUser) => {
-      const rawImage = getImageValue(nextUser)
+      const rawImage = getImageValue(nextUser) || getCachedProfileImage(nextUser)
 
       setUser(nextUser)
-      setProfileImage(rawImage ? normalizeImageSource(rawImage) : "")
+      if (rawImage) {
+        setProfileImage(normalizeImageSource(rawImage))
+        cacheProfileImage({ ...nextUser, image: rawImage })
+      }
     }
 
     const isSameUser = (candidate: NavUser, current: NavUser) =>
@@ -88,37 +98,92 @@ export default function Navigation() {
       (!!candidate.email && !!current.email && candidate.email.toLowerCase() === current.email.toLowerCase())
 
     const refreshUserFromList = async (currentUser: NavUser) => {
-      const response = await apiFetch("/user")
-      const users = response?.data?.data || response?.data || response || []
-      if (!Array.isArray(users)) return
+      try {
+        const response = await apiFetch("/user")
+        const users = response?.data?.data || response?.data || response || []
+        if (Array.isArray(users)) {
+          const freshUser = users.find((candidate: NavUser) => isSameUser(candidate, currentUser))
+          if (freshUser) {
+            applyUser(freshUser)
+            localStorage.setItem("user", JSON.stringify(freshUser))
+            return
+          }
+        }
+      } catch {
+        // Some roles cannot view the full user list; try the single-user endpoint below.
+      }
 
-      const freshUser = users.find((candidate: NavUser) => isSameUser(candidate, currentUser))
-      if (freshUser) {
-        applyUser(freshUser)
-        localStorage.setItem("user", JSON.stringify(freshUser))
+      const identifier = currentUser.id || currentUser.employee_id || currentUser.email
+      const endpoints = [
+        identifier ? `/user/id?id=${encodeURIComponent(identifier)}` : "",
+        identifier ? `/user/${encodeURIComponent(identifier)}` : "",
+        "/profile",
+        "/me",
+        "/auth/me",
+        "/user/profile",
+      ].filter(Boolean)
+
+      for (const endpoint of endpoints) {
+        try {
+          const response = await apiFetch(endpoint)
+          const freshUser = response?.data?.data || response?.data?.user || response?.data || response?.user || response
+          if (freshUser && typeof freshUser === "object" && !Array.isArray(freshUser)) {
+            applyUser(freshUser)
+            localStorage.setItem("user", JSON.stringify(freshUser))
+            return
+          }
+        } catch {
+          // Try the next profile endpoint shape.
+        }
       }
     }
 
-    const userData = localStorage.getItem("user");
-    if (userData) {
+    const applyFallbackUser = () => {
+      const storedEmail = localStorage.getItem("user_email") || ""
+      const storedRole = localStorage.getItem("user_role") || ""
+      if (!storedEmail && !storedRole) return
+
+      applyUser({
+        email: storedEmail,
+        name: storedEmail ? storedEmail.split("@")[0] : storedRole || "User",
+        role: storedRole,
+      })
+    }
+
+    const loadStoredUser = () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
       try {
         const storedUser = JSON.parse(userData)
-        applyUser(storedUser)
-        refreshUserFromList(storedUser).catch(() => {})
+        if (storedUser && typeof storedUser === "object" && !Array.isArray(storedUser)) {
+          applyUser({
+            ...storedUser,
+            email: storedUser.email || localStorage.getItem("user_email") || "",
+            role: storedUser.role || localStorage.getItem("user_role") || "",
+          })
+          refreshUserFromList(storedUser).catch(() => {})
+        } else {
+          applyFallbackUser()
+        }
       } catch {
-        setUser(null);
-        setProfileImage("");
+        applyFallbackUser()
         const storedEmail = localStorage.getItem("user_email")
         if (storedEmail) {
           refreshUserFromList({ email: storedEmail }).catch(() => {})
         }
       }
-    } else {
+      } else {
+      applyFallbackUser()
       const storedEmail = localStorage.getItem("user_email")
       if (storedEmail) {
         refreshUserFromList({ email: storedEmail }).catch(() => {})
       }
+      }
     }
+
+    loadStoredUser()
+    window.addEventListener("profile_updated", loadStoredUser)
+    window.addEventListener("focus", loadStoredUser)
 
     const savedTheme = localStorage.getItem("theme")
     const shouldUseDarkMode =
@@ -127,6 +192,11 @@ export default function Navigation() {
 
     setDarkMode(shouldUseDarkMode)
     document.documentElement.classList.toggle("dark", shouldUseDarkMode)
+
+    return () => {
+      window.removeEventListener("profile_updated", loadStoredUser)
+      window.removeEventListener("focus", loadStoredUser)
+    }
   }, []);
 
   const roleName = user?.roles?.[0]?.name || user?.role || localStorage.getItem("user_role") || ""

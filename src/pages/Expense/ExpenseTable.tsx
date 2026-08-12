@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, X } from 'lucide-react';
 import { FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi"; 
 import { fetchExpenses as fetchExpensesAPI, updateExpenseStatus, deleteExpense } from "@/lib/apiService";
 import { FaSearch } from 'react-icons/fa';
@@ -10,6 +10,7 @@ import { Input } from '@base-ui/react';
 import { ExpenseDetailModal } from './ExpenseDetailModal';
 import type { ExpenseDetailData } from './ExpenseDetailModal';
 import { RiDeleteBinLine } from "react-icons/ri";
+import { hasStoredPermission } from "@/lib/routeAccess";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
@@ -44,8 +45,12 @@ export const ExpenseTable: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [approvalTarget, setApprovalTarget] = useState<ExpenseWithUser | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ExpenseWithUser | null>(null);
   const [approvalRemark, setApprovalRemark] = useState("");
-  const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const canViewExpenses = hasStoredPermission("view-expenses");
+  const canUpdateExpenses = hasStoredPermission("update-expenses");
+  const canDeleteExpenses = hasStoredPermission("delete-expenses");
 
   const fetchExpenses = async () => {
     setLoading(true);
@@ -78,21 +83,26 @@ export const ExpenseTable: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    window.setTimeout(() => setToastMessage(null), 2500);
+  };
+
   const handleUpdateStatus = async (expense: ExpenseWithUser, newStatus: 'approved' | 'canceled', remark = "") => {
     const targetId = expense.id || (expense as any).expense_id;
     if (!targetId) return;
 
     setActionLoadingId(targetId);
-    setStatusMessage(null);
+    setToastMessage(null);
     try {
       await updateExpenseStatus(targetId, newStatus, remark);
-      setStatusMessage({ type: "success", text: `Expense status updated to ${newStatus} successfully.` });
+      showToast(`Expense status updated to ${newStatus} successfully.`);
       setApprovalTarget(null);
       setApprovalRemark("");
       fetchExpenses(); 
     } catch (err: any) {
       console.error("Status Update Error:", err);
-      setStatusMessage({ type: "error", text: err?.message || `Failed to update status to ${newStatus}.` });
+      showToast(err?.message || `Failed to update status to ${newStatus}.`);
     } finally {
       setActionLoadingId(null);
     }
@@ -101,13 +111,23 @@ export const ExpenseTable: React.FC = () => {
   const openApprovalCard = (expense: ExpenseWithUser) => {
     setApprovalTarget(expense);
     setApprovalRemark("");
-    setStatusMessage(null);
+    setToastMessage(null);
   };
 
   const closeApprovalCard = () => {
     if (actionLoadingId) return;
     setApprovalTarget(null);
     setApprovalRemark("");
+  };
+
+  const openDeleteCard = (expense: ExpenseWithUser) => {
+    setDeleteTarget(expense);
+    setToastMessage(null);
+  };
+
+  const closeDeleteCard = () => {
+    if (actionLoadingId) return;
+    setDeleteTarget(null);
   };
 
   const getValue = (value: any) => {
@@ -175,20 +195,23 @@ export const ExpenseTable: React.FC = () => {
     doc.save(`Expense_${fileSafeTitle || rowNumber}.pdf`);
   };
 
-  const handleDeleteExpense = async (expense: ExpenseWithUser) => {
+  const handleDeleteExpense = async () => {
+    if (!deleteTarget) return;
+
+    const expense = deleteTarget;
     const targetId = expense.id || (expense as any).expense_id;
     if (!targetId) return;
 
-    if (!window.confirm("Are you sure you want to permanently delete this expense record?")) return;
-
     setActionLoadingId(targetId);
+    setToastMessage(null);
     try {
       await deleteExpense(targetId);
-      alert("Expense deleted successfully!");
+      showToast("Expense deleted successfully.");
+      setDeleteTarget(null);
       fetchExpenses();
     } catch (err: any) {
       console.error("Delete Expense Error:", err);
-      alert(err?.message || "Failed to delete the expense record.");
+      showToast(err?.message || "Failed to delete the expense record.");
     } finally {
       setActionLoadingId(null);
     }
@@ -283,15 +306,17 @@ export const ExpenseTable: React.FC = () => {
 
   return (
     <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
-      {statusMessage && (
-        <div
-          className={`rounded-lg border px-4 py-3 text-sm font-medium ${
-            statusMessage.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border-red-200 bg-red-50 text-red-700"
-          }`}
-        >
-          {statusMessage.text}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg animate-fade-in">
+          <CheckCircle className="text-emerald-400" size={16} />
+          <span className="text-xs font-medium">{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            aria-label="Close notification"
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
       
@@ -418,8 +443,10 @@ export const ExpenseTable: React.FC = () => {
                 return (
                   <tr 
                     key={currentId || index} 
-                    onClick={() => handleRowClick(expense)}
-                    className="hover:bg-slate-50/80 cursor-pointer transition-colors"
+                    onClick={() => {
+                      if (canViewExpenses) handleRowClick(expense);
+                    }}
+                    className={`hover:bg-slate-50/80 transition-colors ${canViewExpenses ? "cursor-pointer" : "cursor-not-allowed opacity-75"}`}
                   >
                     <td className="py-3.5 px-4 font-normal text-slate-400">
                       {indexOfFirstItem + index + 1}
@@ -460,9 +487,12 @@ export const ExpenseTable: React.FC = () => {
                                 {/* APPROVE BUTTON */}
                                 <button 
                                   type="button"
-                                  onClick={() => openApprovalCard(expense)} 
-                                  className="text-[#7C3AED] hover:text-purple-700 active:scale-95 transition-all p-1.5 hover:bg-emerald-50 rounded-md"
-                                  title="Approve Expense"
+                                  onClick={() => {
+                                    if (canUpdateExpenses) openApprovalCard(expense);
+                                  }} 
+                                  disabled={!canUpdateExpenses}
+                                  className="text-[#7C3AED] hover:text-purple-700 active:scale-95 transition-all p-1.5 hover:bg-emerald-50 rounded-md disabled:cursor-not-allowed disabled:opacity-40"
+                                  title={canUpdateExpenses ? "Approve Expense" : "You do not have permission to update expenses"}
                                 >
                                   <CheckCircle size={16} />
                                 </button>
@@ -470,9 +500,12 @@ export const ExpenseTable: React.FC = () => {
                                 {/* CANCEL BUTTON */}
                                 <button 
                                   type="button"
-                                  onClick={() => handleUpdateStatus(expense, 'canceled')} 
-                                  className="text-red-500 hover:text-red-700 active:scale-95 transition-all p-1.5 hover:bg-red-50 rounded-md"
-                                  title="Cancel Expense"
+                                  onClick={() => {
+                                    if (canUpdateExpenses) handleUpdateStatus(expense, 'canceled');
+                                  }} 
+                                  disabled={!canUpdateExpenses}
+                                  className="text-red-500 hover:text-red-700 active:scale-95 transition-all p-1.5 hover:bg-red-50 rounded-md disabled:cursor-not-allowed disabled:opacity-40"
+                                  title={canUpdateExpenses ? "Cancel Expense" : "You do not have permission to update expenses"}
                                 >
                                   <XCircle size={16} />
                                 </button>
@@ -482,18 +515,24 @@ export const ExpenseTable: React.FC = () => {
                             {/* DELETE BUTTON */}
                             <button
                               type="button"
-                              onClick={() => handleExportExpensePDF(expense, indexOfFirstItem + index + 1)}
-                              className="text-[#7C3AED] hover:text-purple-700 active:scale-95 transition-all p-1.5 hover:bg-purple-50 rounded-md"
-                              title="Export this expense"
+                              onClick={() => {
+                                if (canViewExpenses) handleExportExpensePDF(expense, indexOfFirstItem + index + 1);
+                              }}
+                              disabled={!canViewExpenses}
+                              className="text-[#7C3AED] hover:text-purple-700 active:scale-95 transition-all p-1.5 hover:bg-purple-50 rounded-md disabled:cursor-not-allowed disabled:opacity-40"
+                              title={canViewExpenses ? "Export this expense" : "You do not have permission to view expenses"}
                             >
                               <IoCloudDownloadOutline size={16} />
                             </button>
 
                             <button 
                               type="button"
-                              onClick={() => handleDeleteExpense(expense)} 
-                              className="text-red-600  active:scale-95 transition-all p-1.5 hover:bg-rose-50 rounded-md"
-                              title="Delete permanently"
+                              onClick={() => {
+                                if (canDeleteExpenses) openDeleteCard(expense);
+                              }} 
+                              disabled={!canDeleteExpenses}
+                              className="text-red-600 active:scale-95 transition-all p-1.5 hover:bg-rose-50 rounded-md disabled:cursor-not-allowed disabled:opacity-40"
+                              title={canDeleteExpenses ? "Delete permanently" : "You do not have permission to delete expenses"}
                             >
                               <RiDeleteBinLine size={16} />
                             </button>
@@ -573,6 +612,47 @@ export const ExpenseTable: React.FC = () => {
         onClose={() => setIsModalOpen(false)} 
         expense={selectedExpense} 
       />
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-50 text-red-600">
+                <RiDeleteBinLine size={22} />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-base font-bold text-slate-900">Delete Expense</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Are you sure you want to permanently delete this expense record?
+                </p>
+                <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
+                  {deleteTarget.title || "Untitled expense"}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeDeleteCard}
+                disabled={Boolean(actionLoadingId)}
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteExpense}
+                disabled={Boolean(actionLoadingId)}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+              >
+                {actionLoadingId ? <Loader2 className="animate-spin text-white" size={16} /> : <RiDeleteBinLine size={16} />}
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {approvalTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">

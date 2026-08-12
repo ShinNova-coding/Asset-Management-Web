@@ -59,6 +59,8 @@ export interface ExpenseDetailData {
   user?: UserData | null;
   maintenance?: MaintenanceData | null;
   asset?: AssetData | null;
+  asset_name?: string | null;
+  asset_code?: string | null;
 }
 
 interface ExpenseDetailModalProps {
@@ -97,6 +99,9 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
     payment: expense.maintenance?.payment || "paid",
     duration: expense.maintenance?.duration || "5"
   };
+  const assetName = expense.asset?.name || expense.asset_name || "";
+  const assetCode = expense.asset?.asset_code || expense.asset_code || "";
+  const hasAssetDetails = Boolean(assetName || assetCode);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -177,25 +182,30 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
               </CardContent>
             </Card>
 
-            {/* Hardware Allocation Card */}
-            <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-xl">
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#7C3AED]">
-                  <FiCpu className="w-4 h-4" />
-                  Hardware Allocation
-                </div>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500/90 uppercase tracking-normal">Asset Name</label>
-                    <p className="font-bold text-slate-900 text-base mt-0.5">{expense.asset?.name || "N/A"}</p>
+            {hasAssetDetails && (
+              <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-xl">
+                <CardContent className="p-5 space-y-4">
+                  <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#7C3AED]">
+                    <FiCpu className="w-4 h-4" />
+                    Hardware Allocation
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500/90 uppercase tracking-normal">Asset Code</label>
-                    <p className="font-bold text-slate-900 text-base mt-0.5">{expense.asset?.asset_code || "N/A"}</p>
+                  <div className="space-y-3">
+                    {assetName && (
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500/90 uppercase tracking-normal">Asset Name</label>
+                        <p className="font-bold text-slate-900 text-base mt-0.5">{assetName}</p>
+                      </div>
+                    )}
+                    {assetCode && (
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500/90 uppercase tracking-normal">Asset Code</label>
+                        <p className="font-bold text-slate-900 text-base mt-0.5">{assetCode}</p>
+                      </div>
+                    )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Timeline & Metadata Card */}

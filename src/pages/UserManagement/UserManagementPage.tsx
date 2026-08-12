@@ -4,7 +4,8 @@ import { IoCloudDownloadOutline } from "react-icons/io5";
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Employee } from '../../types/employee';
-import { getImageValue, normalizeImageSource } from '../../lib/utils';
+import { cacheProfileImage, getImageValue, normalizeImageSource } from '../../lib/utils';
+import { hasStoredPermission } from '../../lib/routeAccess';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
 import { apiFetch } from '../../lib/api';
 import { UserManagementSearch } from "@/components/features/UserManagement/UserManagementSearchBox";
@@ -116,9 +117,14 @@ const UserManagement: React.FC = () => {
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
     targetId: null as string | null,
+    targetName: "",
   });
 
   const [showToast, setShowToast] = useState(false);
+  const canViewUsers = hasStoredPermission("view-users");
+  const canCreateUsers = hasStoredPermission("create-users");
+  const canUpdateUsers = hasStoredPermission("update-users");
+  const canDeleteUsers = hasStoredPermission("delete-users");
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -138,6 +144,7 @@ const UserManagement: React.FC = () => {
       const users = payload?.data?.data || payload?.data || payload || [];
       
       if (Array.isArray(users)) {
+        users.forEach(cacheProfileImage);
         const savedUser = (location.state as { savedUser?: ApiUser } | null)?.savedUser;
         setData(mergeSavedEmployee(users.map(mapApiUserToEmployee), savedUser));
       } else {
@@ -164,10 +171,11 @@ const UserManagement: React.FC = () => {
     fetchUsers();
   }, [location.key]); 
 
-  const handleDeleteTrigger = (id: string) => {
+  const handleDeleteTrigger = (id: string, name: string) => {
     setDeleteModal({
       isOpen: true,
-      targetId: id
+      targetId: id,
+      targetName: name,
     });
   };
 
@@ -216,7 +224,7 @@ const UserManagement: React.FC = () => {
         setError(err?.message || 'Failed to delete user.');
       } finally {
         setLoading(false);
-        setDeleteModal({ isOpen: false, targetId: null });
+        setDeleteModal({ isOpen: false, targetId: null, targetName: "" });
       }
     };
 
@@ -348,14 +356,23 @@ const UserManagement: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={handleExportPDF}
+            onClick={canViewUsers ? handleExportPDF : undefined}
+            disabled={!canViewUsers}
             className="px-4 py-2 bg-[#7C3AED] border border-slate-300 text-white rounded-lg transition-colors text-lg font-medium shadow-sm flex items-center gap-2 hover:bg-purple-700"
+            title={canViewUsers ? "Export employees" : "You do not have permission to view users"}
           >
             <IoCloudDownloadOutline size={20} />
           </button>
 
           <Link to="/add-employee">
-            <button className="flex items-center gap-2 rounded-md bg-[#7C3AED] px-4 py-2 text-sm text-white hover:bg-purple-700 transition-colors">
+            <button
+              disabled={!canCreateUsers}
+              onClick={(event) => {
+                if (!canCreateUsers) event.preventDefault();
+              }}
+              className="flex items-center gap-2 rounded-md bg-[#7C3AED] px-4 py-2 text-sm text-white hover:bg-purple-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              title={canCreateUsers ? "Add employee" : "You do not have permission to create users"}
+            >
               <UserPlus size={18} />
               Add Employee
             </button>
@@ -455,8 +472,10 @@ const UserManagement: React.FC = () => {
               {currentPaginatedData.map((emp, index) => (
                 <TableRow
                   key={emp.id ?? emp.employee_id}
-                  className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer"
-                  onClick={() => navigate(`/employee/${emp.id ?? emp.employee_id}`)}
+                  className={`transition-colors hover:bg-slate-50/80 border-b border-slate-100 ${canViewUsers ? "cursor-pointer" : "cursor-not-allowed opacity-75"}`}
+                  onClick={() => {
+                    if (canViewUsers) navigate(`/employee/${emp.id ?? emp.employee_id}`);
+                  }}
                 >
                   <TableCell className="py-3.5 text-slate-700 text-sm font-medium">{startIndex + index + 1}</TableCell>
                   <TableCell className="py-3.5 text-slate-700 text-sm">{emp.employee_id}</TableCell>
@@ -478,13 +497,18 @@ const UserManagement: React.FC = () => {
                   </TableCell>
                   <TableCell className="py-3.5 text-slate-700 text-sm text-right" data-actions-cell="true">
                     <div className="flex justify-end gap-2 items-center" onClick={(e) => e.stopPropagation()}>
-                      <UserManagementEdit onEdit={() => handleEdit(emp)} />
+                      <span className={!canUpdateUsers ? "pointer-events-none opacity-40" : ""} title={canUpdateUsers ? "Edit employee" : "You do not have permission to update users"}>
+                        <UserManagementEdit onEdit={() => handleEdit(emp)} />
+                      </span>
                       <button
                         onClick={(event) => {
                           event.stopPropagation();
-                          handleDeleteTrigger(emp.id ?? emp.employee_id);
+                          if (!canDeleteUsers) return;
+                          handleDeleteTrigger(emp.id ?? emp.employee_id, emp.name);
                         }}
-                        className="text-red-600 hover:text-red-700 transition-colors"
+                        disabled={!canDeleteUsers}
+                        className="text-red-600 hover:text-red-700 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                        title={canDeleteUsers ? "Delete employee" : "You do not have permission to delete users"}
                       >
                         <RiDeleteBinLine className="w-5 h-5" />
                       </button>
@@ -555,7 +579,7 @@ const UserManagement: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
           <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
             <div className="flex justify-end">
-              <button onClick={() => setDeleteModal({ isOpen: false, targetId: null })}>
+              <button onClick={() => setDeleteModal({ isOpen: false, targetId: null, targetName: "" })}>
                 <FiX size={20} />
               </button>
             </div>
@@ -565,12 +589,14 @@ const UserManagement: React.FC = () => {
                 <FiTrash2 className="text-red-600" size={24} />
               </div>
               <h3 className="text-base font-bold text-slate-900">Delete Employee</h3>
-              <p className="text-xs text-slate-500 mt-2">Are you sure you want to delete this employee record?</p>
+              <p className="text-xs text-slate-500 mt-2">
+                Are you sure you want to delete {deleteModal.targetName || "this employee"}?
+              </p>
             </div>
 
             <div className="flex justify-end gap-2.5 pt-2 mt-6">
               <button 
-                onClick={() => setDeleteModal({ isOpen: false, targetId: null })} 
+                onClick={() => setDeleteModal({ isOpen: false, targetId: null, targetName: "" })} 
                 className="flex-1 py-2 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50"
               >
                 Cancel

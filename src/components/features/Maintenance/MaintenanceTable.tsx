@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button"
 import type { Maintenance } from "@/data/maintenance"
 import { columns as baseColumns } from "./MaintenanceColumns"
 import { MaintenanceRemark } from "./MaintenanceRemark"
+import { hasStoredPermission } from "@/lib/routeAccess"
 
 const inputCls =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
@@ -47,6 +48,18 @@ const getCategoryName = (item: any) => {
     item?.asset?.category?.name ||
     item?.category_name ||
     "-"
+  )
+}
+
+const getMaintenanceAssetCode = (item: any) => {
+  return (
+    item?.asset?.asset_code ||
+    (item?.asset_code && item.asset_code !== "-" ? item.asset_code : "") ||
+    item?.assetCode ||
+    item?.asset?.code ||
+    item?.asset?.asset_id ||
+    item?.assets_id ||
+    "Maintenance request"
   )
 }
 
@@ -67,6 +80,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [toastMessage, setToastMessage] = React.useState<string | null>(null)
   const [selectedItem, setSelectedItem] = React.useState<Maintenance | null>(null)
+  const [deleteTarget, setDeleteTarget] = React.useState<{ item: Maintenance; label: string } | null>(null)
   const [dialogMode, setDialogMode] = React.useState<"remark" | "edit" | "view" | null>(null)
   const [remarkText, setRemarkText] = React.useState("")
   const [editEmployeeName, setEditEmployeeName] = React.useState("")
@@ -82,6 +96,11 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
   const [editPayment, setEditPayment] = React.useState("")
   const [editDuration, setEditDuration] = React.useState("")
   const [editVoucher, setEditVoucher] = React.useState("") 
+  const canViewMaintenances = hasStoredPermission("view-maintenances")
+  const canUpdateMaintenances = hasStoredPermission("update-maintenances")
+  const canDeleteMaintenances = hasStoredPermission("delete-maintenances")
+  const canApproveMaintenanceRequests = hasStoredPermission("approve-maintenance-requests")
+  const canCancelMaintenanceRequests = hasStoredPermission("cancel-maintenance-requests")
   
   const navigate = useNavigate()
 
@@ -108,6 +127,15 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     setSelectedItem(item)
     setRemarkText(item.remark ?? "")
     setDialogMode("remark")
+  }
+
+  const openDeleteCard = (item: Maintenance, label: string) => {
+    setDeleteTarget({ item, label })
+    setToastMessage(null)
+  }
+
+  const closeDeleteCard = () => {
+    setDeleteTarget(null)
   }
 
   const openEditDialog = (item: Maintenance) => {
@@ -236,8 +264,10 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     }
   }
 
-  const deleteRow = async (item: Maintenance, label: string) => {
-    if (!confirm("Are you sure you want to delete this record?")) return
+  const deleteRow = async () => {
+    if (!deleteTarget) return
+
+    const { item, label } = deleteTarget
     const targetAssetId = item.asset?.id || (item as any).asset_id;
     if (!targetAssetId) return
 
@@ -256,8 +286,10 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
 
       setData((prev) => prev.map((r) => r.id === item.id ? { ...r, status: "canceled" } : r))
       setToastMessage(`${(item as any).user?.name ?? "Asset"} ${label}`)
+      setDeleteTarget(null)
     } catch (err) {
       console.error(err)
+      setToastMessage("Failed to cancel maintenance request.")
     }
   }
   
@@ -310,10 +342,26 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
             if (status === "request" || status === "requested") {
               return (
                 <div className="flex items-center gap-3">
-                  <button onClick={(e) => { e.stopPropagation(); openRemarkDialog(item) }} className="text-green-500 hover:text-green-700 p-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (canApproveMaintenanceRequests) openRemarkDialog(item);
+                    }}
+                    disabled={!canApproveMaintenanceRequests}
+                    className="text-green-500 hover:text-green-700 p-1 disabled:cursor-not-allowed disabled:opacity-40"
+                    title={canApproveMaintenanceRequests ? "Approve maintenance request" : "You do not have permission to approve maintenance requests"}
+                  >
                     <FiCheck size={20} />
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); deleteRow(item, "request cancelled.") }} className="text-red-500 hover:text-red-700 p-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (canCancelMaintenanceRequests) openDeleteCard(item, "request cancelled.");
+                    }}
+                    disabled={!canCancelMaintenanceRequests}
+                    className="text-red-500 hover:text-red-700 p-1 disabled:cursor-not-allowed disabled:opacity-40"
+                    title={canCancelMaintenanceRequests ? "Cancel maintenance request" : "You do not have permission to cancel maintenance requests"}
+                  >
                     <RiDeleteBinLine size={20} />
                   </button>
                 </div>
@@ -323,10 +371,26 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
             if (status === "approved" || status === "in progress") {
               return (
                 <div className="flex items-center gap-3">
-                  <button onClick={(e) => { e.stopPropagation(); navigate(`/maintenance/${item.id}/complete`, { state: { maintenance: item } }) }} className="text-[#7C3AED] hover:text-purple-700 p-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (canUpdateMaintenances) navigate(`/maintenance/${item.id}/complete`, { state: { maintenance: item } });
+                    }}
+                    disabled={!canUpdateMaintenances}
+                    className="text-[#7C3AED] hover:text-purple-700 p-1 disabled:cursor-not-allowed disabled:opacity-40"
+                    title={canUpdateMaintenances ? "Edit maintenance" : "You do not have permission to update maintenances"}
+                  >
                     <MdOutlineModeEditOutline size={21} />
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); deleteRow(item, "record deleted.") }} className="text-red-600 hover:text-red-700 p-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (canDeleteMaintenances) openDeleteCard(item, "record deleted.");
+                    }}
+                    disabled={!canDeleteMaintenances}
+                    className="text-red-600 hover:text-red-700 p-1 disabled:cursor-not-allowed disabled:opacity-40"
+                    title={canDeleteMaintenances ? "Delete maintenance" : "You do not have permission to delete maintenances"}
+                  >
                     <RiDeleteBinLine size={21} />
                   </button>
                 </div>
@@ -334,7 +398,15 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
             }
 
             return (
-              <button onClick={(e) => { e.stopPropagation(); navigate(`/maintenance/${item.id}`) }} className="text-[#7C3AED] hover:text-purple-700 p-1">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (canViewMaintenances) navigate(`/maintenance/${item.id}`);
+                }}
+                disabled={!canViewMaintenances}
+                className="text-[#7C3AED] hover:text-purple-700 p-1 disabled:cursor-not-allowed disabled:opacity-40"
+                title={canViewMaintenances ? "View maintenance" : "You do not have permission to view maintenances"}
+              >
                 <LuEye size={20} />
               </button>
             )
@@ -346,7 +418,14 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     })
 
     return [indexColumn, ...customizedColumns]
-  }, [baseColumns])
+  }, [
+    canApproveMaintenanceRequests,
+    canCancelMaintenanceRequests,
+    canDeleteMaintenances,
+    canUpdateMaintenances,
+    canViewMaintenances,
+    navigate,
+  ])
 
   const table = useReactTable({
     data,
@@ -359,7 +438,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),  
-    globalFilterFn: (row, columnId, filterValue) => {
+    globalFilterFn: (row, _columnId, filterValue) => {
       const search = filterValue.toLowerCase()
       const item = row.original as any
       
@@ -432,12 +511,12 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="transition-colors hover:bg-slate-50/80 border-b border-slate-100 cursor-pointer"
+                  className={`transition-colors hover:bg-slate-50/80 border-b border-slate-100 ${canViewMaintenances ? "cursor-pointer" : "cursor-not-allowed opacity-75"}`}
                   onClick={(e) => {
                     const item = row.original as any
                     const target = e.target as HTMLElement
                     if (target.closest('[data-actions-cell="true"]') || target.closest('button')) return
-                    navigate(`/maintenance/${item.id}`)
+                    if (canViewMaintenances) navigate(`/maintenance/${item.id}`)
                   }}
                 >
                   {row.getVisibleCells().map((cell) => {
@@ -521,10 +600,56 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
 
       {/* ── TOAST MESSAGE ── */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg animate-fade-in">
-          <FiCheckCircle className="text-emerald-400" size={16} />
-          <span className="text-xs font-medium">{toastMessage}</span>
-          <button onClick={() => setToastMessage(null)}><FiX size={14} /></button>
+        <div className="fixed right-6 top-6 z-50 flex max-w-sm items-center gap-3 rounded-xl border border-[#C4B5FD] bg-[#7C3AED] px-4 py-3 text-white shadow-xl shadow-purple-500/20">
+          <FiCheckCircle size={16} />
+          <span className="text-sm font-semibold">{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="ml-auto rounded-md p-1 text-white/80 transition hover:bg-white/15 hover:text-white"
+            aria-label="Close notification"
+          >
+            <FiX size={14} />
+          </button>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-50 text-red-600">
+                <RiDeleteBinLine size={22} />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-base font-bold text-slate-900">Cancel Maintenance Request</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Are you sure you want to cancel this maintenance request?
+                </p>
+                <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
+                  {getMaintenanceAssetCode(deleteTarget.item)}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeDeleteCard}
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={deleteRow}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+              >
+                <RiDeleteBinLine size={16} />
+                Confirm
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

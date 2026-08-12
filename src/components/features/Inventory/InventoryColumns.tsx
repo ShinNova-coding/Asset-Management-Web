@@ -78,8 +78,6 @@ export const columns: ColumnDef<Inventory>[] = [
       const item = row.original
       const meta = table.options.meta as any
      
-      const targetId = item.id 
-
       return (
         <div 
           className="flex items-center gap-2" 
@@ -88,22 +86,25 @@ export const columns: ColumnDef<Inventory>[] = [
             e.preventDefault();
           }}
         >
-          <Edit 
-            onEdit={() => {
-              if (meta?.editRow) {
-                meta.editRow(item)
-              }
-            }} 
-          />
+          <span className={!meta?.canUpdateAssets ? "pointer-events-none opacity-40" : ""} title={meta?.canUpdateAssets ? "Edit asset" : "You do not have permission to update assets"}>
+            <Edit 
+              onEdit={() => {
+                if (meta?.canUpdateAssets && meta?.editRow) {
+                  meta.editRow(item)
+                }
+              }} 
+            />
+          </span>
           
-<Delete 
-  onDelete={() => {
-    if (meta?.deleteRow) {
-     
-      meta.deleteRow(item.id) 
-    }
-  }} 
-/>
+          <span className={!meta?.canDeleteAssets ? "pointer-events-none opacity-40" : ""} title={meta?.canDeleteAssets ? "Delete asset" : "You do not have permission to delete assets"}>
+            <Delete 
+              onDelete={() => {
+                if (meta?.canDeleteAssets && meta?.deleteRow) {
+                  meta.deleteRow(item.id) 
+                }
+              }} 
+            />
+          </span>
         </div>
       )
     },
