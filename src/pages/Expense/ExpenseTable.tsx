@@ -1,15 +1,17 @@
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Loader2, ChevronDown, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi"; 
 import { fetchExpenses as fetchExpensesAPI, updateExpenseStatus, deleteExpense } from "@/lib/apiService";
 import { FaSearch } from 'react-icons/fa';
+import { IoCloudDownloadOutline } from "react-icons/io5";
 import { Input } from '@base-ui/react';
 import { ExpenseDetailModal } from './ExpenseDetailModal';
 import type { ExpenseDetailData } from './ExpenseDetailModal';
 import { RiDeleteBinLine } from "react-icons/ri";
-import type { Table } from "@tanstack/react-table"
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   Select,
   SelectContent,
@@ -18,11 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-interface ExpenseWithUser extends ExpenseDetailData {
-  user?: {
-    name?: string;
-  } | null;
-}
+type ExpenseWithUser = ExpenseDetailData;
 
 type SortableColumns = 'employee' | 'title' | 'expense_date' | 'cost';
 
@@ -110,6 +108,71 @@ export const ExpenseTable: React.FC = () => {
     if (actionLoadingId) return;
     setApprovalTarget(null);
     setApprovalRemark("");
+  };
+
+  const getValue = (value: any) => {
+    if (value === null || value === undefined || value === "") return "-";
+    return value;
+  };
+
+  const getEmployeeName = (expense: ExpenseWithUser) =>
+    expense.user?.name || currentUserName || "Unknown Employee";
+
+  const getEmployeeId = (expense: ExpenseWithUser) =>
+    expense.user?.employee_id || (expense as any).employee_id || "-";
+
+  const getAssetName = (expense: ExpenseWithUser) =>
+    expense.asset?.name || (expense as any).asset_name || "-";
+
+  const getAssetCode = (expense: ExpenseWithUser) =>
+    expense.asset?.asset_code || (expense as any).asset_code || "-";
+
+  const getSerialNumber = (expense: ExpenseWithUser) =>
+    (expense as any).serial_number || (expense.asset as any)?.serial_number || "-";
+
+  const getCategoryName = (expense: ExpenseWithUser) => {
+    const category = (expense as any).category;
+    if (typeof category === "string") return category || "-";
+    return category?.name || (expense as any).asset?.category?.name || "-";
+  };
+
+  const handleExportExpensePDF = (expense: ExpenseWithUser, rowNumber: number) => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Expense Report", 14, 20);
+
+    autoTable(doc, {
+      startY: 30,
+      head: [["Field", "Value"]],
+      body: [
+        ["No", rowNumber],
+        ["Employee ID", getEmployeeId(expense)],
+        ["Employee Name", getEmployeeName(expense)],
+        ["Title", getValue(expense.title)],
+        ["Type", getValue(expense.expense_type)],
+        ["Cost (MMK)", Number(expense.cost || 0).toLocaleString()],
+        ["Date", getValue(expense.expense_date)],
+        ["Status", getValue(expense.status)],
+        ["Description", getValue(expense.description)],
+        ["Remark", getValue(expense.remark)],
+        ["Asset Name", getAssetName(expense)],
+        ["Asset Code", getAssetCode(expense)],
+        ["Category", getCategoryName(expense)],
+        ["Serial No.", getSerialNumber(expense)],
+        ["Approved By", getValue(expense.approved_by)],
+        ["Created At", getValue(expense.created_at)],
+      ],
+      headStyles: { fillColor: [124, 58, 237] },
+      styles: { fontSize: 10, cellPadding: 3, overflow: "linebreak" },
+      columnStyles: {
+        0: { cellWidth: 45, fontStyle: "bold" },
+        1: { cellWidth: 130 },
+      },
+      theme: "striped",
+    });
+
+    const fileSafeTitle = (expense.title || "expense").replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "");
+    doc.save(`Expense_${fileSafeTitle || rowNumber}.pdf`);
   };
 
   const handleDeleteExpense = async (expense: ExpenseWithUser) => {
@@ -417,6 +480,15 @@ export const ExpenseTable: React.FC = () => {
                             )}
 
                             {/* DELETE BUTTON */}
+                            <button
+                              type="button"
+                              onClick={() => handleExportExpensePDF(expense, indexOfFirstItem + index + 1)}
+                              className="text-[#7C3AED] hover:text-purple-700 active:scale-95 transition-all p-1.5 hover:bg-purple-50 rounded-md"
+                              title="Export this expense"
+                            >
+                              <IoCloudDownloadOutline size={16} />
+                            </button>
+
                             <button 
                               type="button"
                               onClick={() => handleDeleteExpense(expense)} 
@@ -498,7 +570,6 @@ export const ExpenseTable: React.FC = () => {
       {/* VIEW DETAIL COMPONENT DRAWER OVERLAY */}
       <ExpenseDetailModal 
         isOpen={isModalOpen} 
-        close={false}
         onClose={() => setIsModalOpen(false)} 
         expense={selectedExpense} 
       />

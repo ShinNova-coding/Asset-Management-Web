@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from "react"
+import { useState, useEffect, useMemo, type FormEvent } from "react"
 import {
   BadgeCheck,
   Briefcase,
@@ -130,12 +130,36 @@ export default function Navigation() {
   }, []);
 
   const roleName = user?.roles?.[0]?.name || user?.role || localStorage.getItem("user_role") || ""
-  const filteredSearchItems = searchTerm.trim()
-    ? searchItems.filter((item) => {
-        const haystack = `${item.title} ${item.path} ${item.keywords}`.toLowerCase()
-        return haystack.includes(searchTerm.trim().toLowerCase())
-      }).slice(0, 7)
-    : []
+  const filteredSearchItems = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase()
+    if (!query) return []
+
+    const getScore = (item: (typeof searchItems)[number]) => {
+      const title = item.title.toLowerCase()
+      const path = item.path.toLowerCase()
+      const keywords = item.keywords.toLowerCase()
+      const haystack = `${title} ${path} ${keywords}`
+
+      if (title === query) return 0
+      if (title.startsWith(query)) return 1
+      if (title.split(" ").some((word) => word.startsWith(query))) return 2
+      if (title.includes(query)) return 3
+      if (path.includes(query)) return 4
+      if (query.length < 3) return Number.POSITIVE_INFINITY
+      if (keywords.split(" ").some((word) => word.startsWith(query))) return 5
+      if (keywords.includes(query)) return 6
+      if (haystack.includes(query)) return 7
+
+      return Number.POSITIVE_INFINITY
+    }
+
+    return searchItems
+      .map((item) => ({ item, score: getScore(item) }))
+      .filter(({ score }) => Number.isFinite(score))
+      .sort((a, b) => a.score - b.score || a.item.title.localeCompare(b.item.title))
+      .slice(0, 7)
+      .map(({ item }) => item)
+  }, [searchTerm])
 
   function goTo(path: string) {
     setSearchTerm("")
@@ -187,30 +211,30 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="sticky top-0 z-30 flex h-[50px] items-center gap-3 border-b border-slate-400 bg-[#e9e5ff] px-3 dark:border-slate-700 dark:bg-slate-900">
+    <nav className="z-30 flex min-h-14 items-center gap-3 rounded-2xl border border-white/70 bg-white/85 px-4 py-2 shadow-[0_12px_35px_rgba(124,58,237,0.12)] backdrop-blur-xl dark:rounded-none dark:border-x-0 dark:border-t-0 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none dark:backdrop-blur-none">
       <div className="flex shrink-0 items-center">
         <button
           onClick={toggleSidebar}
-          className="flex h-9 w-9 items-center justify-center rounded-md bg-white/60 text-[#7C3AED] shadow-sm transition hover:bg-white hover:text-violet-700 dark:bg-slate-800 dark:text-violet-300 dark:hover:bg-slate-700"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-violet-100 bg-violet-50 text-[#7C3AED] shadow-sm transition hover:bg-violet-100 hover:text-violet-700 dark:border-slate-700 dark:bg-slate-800 dark:text-violet-300 dark:shadow-none dark:hover:bg-slate-700"
           aria-label="Toggle Sidebar"
         >
           <PanelLeft className="h-5 w-5" />
         </button>
       </div>
 
-      <form onSubmit={handleSearchSubmit} className="relative hidden w-[530px] max-w-[46vw] sm:block">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7C3AED] dark:text-violet-300" />
+      <form onSubmit={handleSearchSubmit} className="relative hidden w-full max-w-2xl sm:block">
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7C3AED] dark:text-violet-300" />
           <input
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Search pages, users, assets..."
-            className="h-9 w-full rounded-md border border-violet-200 bg-white pl-9 pr-9 text-sm text-slate-700 shadow-sm outline-none transition focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            className="h-10 w-full rounded-xl border border-violet-100 bg-violet-50/60 pl-11 pr-10 text-sm text-slate-700 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-[#7C3AED] focus:bg-white focus:ring-2 focus:ring-violet-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:shadow-none dark:focus:border-violet-400 dark:focus:bg-slate-800 dark:focus:ring-0"
           />
           {searchTerm && (
             <button
               type="button"
               onClick={() => setSearchTerm("")}
-              className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-violet-50 hover:text-[#7C3AED] dark:hover:bg-slate-700 dark:hover:text-violet-300"
+              className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-violet-100 hover:text-[#7C3AED] dark:hover:bg-slate-700 dark:hover:text-violet-300"
               aria-label="Clear search"
             >
               <X className="h-4 w-4" />
@@ -218,7 +242,7 @@ export default function Navigation() {
           )}
 
           {filteredSearchItems.length > 0 && (
-            <div className="absolute left-0 right-0 top-11 z-40 overflow-hidden rounded-lg border border-violet-100 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
+            <div className="absolute left-0 right-0 top-12 z-40 overflow-hidden rounded-xl border border-violet-100 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800">
               {filteredSearchItems.map((item) => (
                 <button
                   key={item.path}
@@ -237,10 +261,10 @@ export default function Navigation() {
       <div className="ml-auto flex items-center gap-3">
         <button
           onClick={() => setSettingsOpen(true)}
-          className="flex h-9 items-center gap-2 rounded-md bg-[#7C3AED] px-2.5 text-white shadow-sm transition hover:bg-violet-700"
+          className="flex h-10 items-center gap-2 rounded-xl bg-[#7C3AED] px-3 text-white shadow-[0_10px_22px_rgba(124,58,237,0.28)] transition hover:bg-violet-700 dark:bg-slate-800 dark:text-violet-200 dark:shadow-none dark:hover:bg-slate-700"
           aria-label="Open settings"
         >
-          <div className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-white/20">
+          <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-white/20 ring-2 ring-white/25">
             {profileImage ? (
               <img src={profileImage} alt="" className="h-full w-full object-cover" />
             ) : (
@@ -248,8 +272,8 @@ export default function Navigation() {
             )}
           </div>
           <div className="hidden text-left md:block">
-            <p className="text-xs font-bold text-white">{user?.name || "Admin User"}</p>
-            <p className="text-[10px] uppercase text-blue-200">{roleName}</p>
+            <p className="max-w-36 truncate text-xs font-bold text-white">{user?.name || "Admin User"}</p>
+            <p className="max-w-36 truncate text-[10px] uppercase text-violet-100">{roleName}</p>
           </div>
           <Settings className="h-4 w-4" />
         </button>

@@ -87,14 +87,14 @@ export default function Layout() {
 
   return (
     <SidebarProvider style={{ "--sidebar-width": "240px" } as React.CSSProperties}>
-      <div className="flex min-h-screen w-full bg-[#F0F4F8] dark:bg-slate-950">
+      <div className="flex min-h-screen w-full bg-[#f4f1ff] dark:bg-slate-950">
        
-        <Sidebar collapsible="icon" className="border-r border-blue-100 bg-[#e9e5ff] dark:border-slate-700 dark:bg-slate-900">
-          <SidebarContent className="bg-[#e9e5ff] px-4 py-8 group-data-[collapsible=icon]:px-2 dark:bg-slate-900">
+        <Sidebar collapsible="icon" className="border-r-transparent bg-[#eee9ff] shadow-[10px_0_28px_rgba(124,58,237,0.06)] dark:border-slate-700 dark:bg-slate-900 dark:shadow-none">
+          <SidebarContent className="bg-[#eee9ff] px-5 py-7 group-data-[collapsible=icon]:px-2 dark:bg-slate-900 dark:shadow-none">
            
-           <div className="flex items-center gap-3 px-2 mb-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+           <div className="flex items-center gap-3 px-1 mb-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
   <div 
-    className="w-12 h-12 flex-shrink-0 bg-white border-2 border-[#A78BFA] rounded-full flex items-center justify-center shadow-sm transition-transform hover:scale-105 group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:w-9 dark:bg-slate-800 dark:border-violet-400"
+    className="w-12 h-12 flex-shrink-0 bg-white border border-violet-200 rounded-2xl flex items-center justify-center shadow-[0_10px_25px_rgba(124,58,237,0.15)] transition-transform hover:scale-105 group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:w-9 dark:rounded-full dark:bg-slate-800 dark:border-violet-400 dark:shadow-sm"
     style={{ animation: 'bounce 3s infinite ease-in-out' }}
   >
     <BsBoxFill className="w-6 h-6 text-[#7C3AED] group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
@@ -122,10 +122,10 @@ export default function Layout() {
                         <SidebarMenuButton
                           onClick={() => navigate(item.path)}
                           tooltip={item.title}
-                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 ${
+                          className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 ${
                             isActive
-                              ? "bg-[#ab8ffe] text-[#7C3AED]"
-                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
+                              ? "bg-[#A78BFA] text-white shadow-[0_10px_24px_rgba(124,58,237,0.22)] dark:bg-slate-800 dark:text-violet-200 dark:shadow-none"
+                              : "text-[#7C3AED] hover:bg-white/70 hover:text-[#6D28D9] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
                           }`}
                         >
                           <item.icon className="h-5 w-5" />
@@ -144,10 +144,10 @@ export default function Layout() {
                   <SidebarMenuButton
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     tooltip="User Management"
-                    className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 ${
+                    className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 ${
                       isUserModuleActive
-                        ? "bg-[#ab8ffe] text-[#7C3AED]"
-                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
+                        ? "bg-[#A78BFA] text-white shadow-[0_10px_24px_rgba(124,58,237,0.22)] dark:bg-slate-800 dark:text-violet-200 dark:shadow-none"
+                              : "text-[#7C3AED] hover:bg-white/70 hover:text-[#6D28D9] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -163,15 +163,15 @@ export default function Layout() {
 
                   {/* Dropdown Sub-Items */}
                   {isUserMenuOpen && (
-                    <div className="mt-1 pl-4 space-y-1 border-l border-blue-800/60 ml-6 group-data-[collapsible=icon]:hidden dark:border-slate-600">
+                    <div className="mt-2 ml-6 space-y-1 border-l border-violet-300/70 pl-4 group-data-[collapsible=icon]:hidden dark:border-slate-600">
                      
                       {(hasUserManagementPermission || isUserModuleActive || isLoading) && (
                         <SidebarMenuButton
                           onClick={() => navigate("/usermanagement")}
-                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-medium transition-all duration-200 ${
+                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-200 ${
                             isUsersSubItemActive
-                              ?"bg-[#ab8ffe] text-[#7C3AED]"
-                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
+                              ?"bg-white text-[#7C3AED] shadow-sm dark:bg-slate-800 dark:text-violet-200"
+                              : "text-[#7C3AED] hover:bg-white/70 hover:text-[#6D28D9] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
                           }`}
                         >
                           <Users className="h-4 w-4" />
@@ -183,10 +183,10 @@ export default function Layout() {
                       {(hasRolesPermission || currentPath.startsWith("/roles") || (isLoading && currentPath.startsWith("/roles"))) && (
                         <SidebarMenuButton
                           onClick={() => navigate("/roles")}
-                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-medium transition-all duration-200 ${
+                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-200 ${
                             currentPath.startsWith("/roles")
-                              ? "bg-[#ab8ffe] text-[#7C3AED]"
-                              : "text-[#7C3AED] hover:bg-[#ab8ffe] hover:text-[#7C3AED] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
+                              ? "bg-white text-[#7C3AED] shadow-sm dark:bg-slate-800 dark:text-violet-200"
+                              : "text-[#7C3AED] hover:bg-white/70 hover:text-[#6D28D9] dark:text-violet-300 dark:hover:bg-slate-800 dark:hover:text-violet-200"
                           }`}
                         >
                           <UserCog className="h-4 w-4" />
@@ -209,14 +209,14 @@ export default function Layout() {
         </Sidebar>
 
         {/* Main Content Area */}
-        <div className="flex flex-1 flex-col">
-          <div className="w-full bg-white/80 backdrop-blur-sm border-b border-blue-100 z-20 dark:border-slate-700 dark:bg-slate-900/90">
+        <div className="flex min-w-0 flex-1 flex-col bg-[#f4f1ff] dark:bg-slate-950">
+          <div className="sticky top-0 z-20 px-5 pt-4">
             <Navigation />
           </div>
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto px-5 pb-5 pt-4">
             {isLoading ? (
              
-              <div className="h-full flex items-center justify-center text-[#A78BFA] font-medium bg-[#F0F4F8] dark:bg-slate-950 dark:text-violet-300">
+              <div className="h-full flex items-center justify-center text-[#A78BFA] font-medium dark:bg-slate-950 dark:text-violet-300">
                 Loading Content Data...
               </div>
             ) : (

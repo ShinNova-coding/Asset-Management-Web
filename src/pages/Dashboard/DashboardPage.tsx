@@ -45,7 +45,7 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen px-4 pt-4 pb-6 space-y-5 bg-[#e9e5ff]">
+    <div className="space-y-5">
       <h1 className="text-2xl font-bold text-[#7C3AED]">Dashboard</h1>
       <DashboardCards data={dashboardData} />
 
