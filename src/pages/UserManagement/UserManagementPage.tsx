@@ -497,7 +497,7 @@ const UserManagement: React.FC = () => {
         </div>
 
         {/* PAGINATION */}
-        <div className="flex items-center justify-between bg-slate-50/50 rounded-xl border border-slate-100 p-3 shadow-sm">
+        <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
           <div className="text-xs text-slate-500 font-medium">
             Page {currentPage + 1} of {totalPages || 1} ({filteredData.length} total employees)
           </div>
@@ -524,7 +524,7 @@ const UserManagement: React.FC = () => {
                       key={index}
                       variant={currentPage === index ? "default" : "outline"}
                       size="sm"
-                      className={currentPage === index ? "bg-blue-800 hover:bg-blue-700 text-white border-none" : "bg-white border-slate-200"}
+                      className={currentPage === index ? "bg-[#A78BFA] text-white border-none" : "bg-slate-200"}
                       onClick={() => setCurrentPage(index)}
                     >
                       {index + 1}

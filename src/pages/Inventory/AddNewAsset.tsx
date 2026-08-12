@@ -40,6 +40,11 @@ const AddNewAsset = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const selectedCategoryName =
+    categories.find((cat) => (
+      String(cat.id) === String(formData.category) ||
+      String(cat.name) === String(formData.category)
+    ))?.name || "";
 
   const formatToInputDate = (dateString: string) => {
     if (!dateString) return "";
@@ -171,7 +176,7 @@ useEffect(() => {
       
       console.log("DEBUG - API Response:", res); 
 
-      const categoryArray = res.data || res; 
+      const categoryArray = res?.data?.data || res?.data || res; 
       
       if (Array.isArray(categoryArray)) {
         setCategories(categoryArray);
@@ -373,7 +378,9 @@ useEffect(() => {
                       onValueChange={(value) => handleSelectChange("category", value)}
                     >
                       <SelectTrigger className="h-10 w-full rounded-md border-slate-300 bg-white px-3 text-sm text-slate-800 focus-visible:border-[#A78BFA] focus-visible:ring-[#EDE9FE]">
-                        <SelectValue placeholder="Select a Category" />
+                        <span className={selectedCategoryName ? "truncate text-slate-800" : "truncate text-slate-400"}>
+                          {selectedCategoryName || "Select a Category"}
+                        </span>
                       </SelectTrigger>
                       <SelectContent className="border border-[#DDD6FE] bg-white">
                         {categories.map((cat) => (

@@ -245,6 +245,10 @@ const AddEmployeeForm: React.FC = () => {
           JSON.stringify({
             ...storedUser,
             ...(savedUserWithImage && !Array.isArray(savedUserWithImage) ? savedUserWithImage : {}),
+            position: savedUserWithImage?.position || rawBody.position || storedUser.position || null,
+            phone_number: savedUserWithImage?.phone_number || rawBody.phone_number || storedUser.phone_number || null,
+            joined_date: savedUserWithImage?.joined_date || rawBody.joined_date || storedUser.joined_date || null,
+            left_date: savedUserWithImage?.left_date || rawBody.left_date || storedUser.left_date || null,
             image: rawBody.image || savedUserWithImage?.image || storedUser.image || null,
           })
         );

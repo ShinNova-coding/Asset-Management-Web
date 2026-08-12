@@ -130,6 +130,7 @@ export default function Navigation() {
   }, []);
 
   const roleName = user?.roles?.[0]?.name || user?.role || localStorage.getItem("user_role") || ""
+  const positionName = user?.position && user.position !== "-" ? user.position : ""
   const filteredSearchItems = useMemo(() => {
     const query = searchTerm.trim().toLowerCase()
     if (!query) return []
@@ -323,7 +324,7 @@ export default function Navigation() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Briefcase className="h-4 w-4 text-[#7C3AED] dark:text-violet-300" />
-                  <span>{user?.position || "No position"}</span>
+                  <span>{positionName || "No position"}</span>
                 </div>
               </div>
 
