@@ -31,7 +31,7 @@ export function AssignmentFilter<TData>({ table }: AssignmentFilterProps<TData>)
         }}
       >
        
-<SelectTrigger className="w-full ...">
+<SelectTrigger className="w-full">
  
   <SelectValue placeholder="Select Status" />
 </SelectTrigger>

@@ -317,14 +317,14 @@ export const ExpenseTable: React.FC = () => {
     onValueChange={(value) => setStatusFilter(value || 'All')}
       
     >
-     <SelectTrigger className="w-full ...">
+     <SelectTrigger className="w-full border-slate-300 bg-slate-50 text-slate-700 focus-visible:border-[#A78BFA] focus-visible:ring-[#EDE9FE]">
  
   <SelectValue placeholder="Select Status" />
 </SelectTrigger>
         
       
      <SelectContent 
-  className="bg-white border border-slate-200 rounded-xl shadow-lg" 
+  className="bg-white border border-[#DDD6FE] rounded-xl shadow-lg" 
   sideOffset={2}//to set distance from trigger
   alignItemWithTrigger={false} 
 >

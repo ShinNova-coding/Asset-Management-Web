@@ -71,6 +71,12 @@
   /* Buttons & accents */
   --primary: #ab8ffe;               /* blue button background */
   --primary-foreground: #ffffff;    /* white text on buttons */
+  --accent: #EDE9FE;
+  --accent-foreground: #6D28D9;
+  --popover: #ffffff;
+  --popover-foreground: #334155;
+  --muted: #F5F3FF;
+  --muted-foreground: #64748b;
   
 
 
@@ -101,6 +107,12 @@
   --card-foreground: #e5e7eb;
   --primary: #8b5cf6;
   --primary-foreground: #ffffff;
+  --accent: #312e81;
+  --accent-foreground: #ddd6fe;
+  --popover: #111827;
+  --popover-foreground: #e5e7eb;
+  --muted: #1f2937;
+  --muted-foreground: #cbd5e1;
   --input: #334155;
   --ring: #8b5cf6;
   --sidebar: #111827;

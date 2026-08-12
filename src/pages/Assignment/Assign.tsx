@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useParams } from "react-router-dom"; 
 import { ArrowLeft, User, Package, Calendar, ChevronDown } from 'lucide-react';
+import { apiRequest } from '@/lib/apiService';
 
 const AddNewAsset = () => {
   const navigate = useNavigate();
@@ -33,26 +34,21 @@ const AddNewAsset = () => {
 
   useEffect(() => {
     const fetchDropdownData = async () => {
-      const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
-      const headers = {
-        "Accept": "application/json",
-        "Authorization": `Bearer ${currentToken}`
-      };
-
       try {
-        const usersResponse = await fetch("http://localhost:1011/api/user", { headers });
-        if (usersResponse.ok) {
-          const usersData = await usersResponse.json();
-          setUsersList(usersData.data?.data || usersData.data || []);
-        }
+        const [usersData, assetsData] = await Promise.all([
+          apiRequest("/user", "GET"),
+          apiRequest("/asset", "GET"),
+        ]);
 
-        const assetsResponse = await fetch("http://localhost:1011/api/asset", { headers });
-        if (assetsResponse.ok) {
-          const assetsData = await assetsResponse.json();
-          setAssetsList(assetsData.data?.data || assetsData.data || []);
-        }
+        const users = usersData?.data?.data || usersData?.data || usersData?.users || [];
+        const assets = assetsData?.data?.data || assetsData?.data || assetsData?.assets || [];
+
+        setUsersList(Array.isArray(users) ? users : []);
+        setAssetsList(Array.isArray(assets) ? assets : []);
       } catch (err) {
         console.error("Failed to load dropdown data", err);
+        setUsersList([]);
+        setAssetsList([]);
       }
     };
 
@@ -170,7 +166,7 @@ const AddNewAsset = () => {
 
       console.log(" Sending Payload to Assignment API:", assignmentPayload);
 
-      const API_URL = "http://localhost:1011/api/assignment"; 
+      const API_URL = "http://10.175.189.64:1011/api/assignment"; 
       
       const targetId = stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;

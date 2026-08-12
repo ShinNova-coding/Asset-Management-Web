@@ -4,6 +4,13 @@ import * as React from "react"
 import { FiDollarSign, FiCalendar, FiFileText, FiUpload, FiX, FiCheckCircle, FiArrowLeft, FiTag, FiHash, FiGrid, FiImage } from "react-icons/fi"
 import { useNavigate, Link } from "react-router-dom"
 import { apiRequest, createExpense } from "@/lib/apiService"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface CategoryItem {
   id: string;
@@ -279,16 +286,22 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
 
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Expense Type</label>
-            <select
+            <Select
               value={expenseType}
-              onChange={(e) => setExpenseType(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#7C3AED] focus:ring-2 focus:ring-violet-100 cursor-pointer"
+              onValueChange={(value) => {
+                if (value) setExpenseType(value)
+              }}
             >
-              <option value="maintenance">Maintenance</option>
-              <option value="asset_purchase">Asset_Purchase</option>
-              <option value="office_supply">Office_Supply</option>
-              <option value="operational">Operational</option>
-            </select>
+              <SelectTrigger className="h-11 w-full rounded-xl border-slate-200 bg-slate-50 px-4 text-sm text-slate-900 focus-visible:border-[#A78BFA] focus-visible:ring-[#EDE9FE]">
+                <SelectValue placeholder="Select Expense Type" />
+              </SelectTrigger>
+              <SelectContent className="border border-[#DDD6FE] bg-white">
+                <SelectItem value="maintenance">Maintenance</SelectItem>
+                <SelectItem value="asset_purchase">Asset_Purchase</SelectItem>
+                <SelectItem value="office_supply">Office_Supply</SelectItem>
+                <SelectItem value="operational">Operational</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -360,20 +373,23 @@ export function CreateExpenseForm({ onSuccess, onCancel }: CreateExpenseFormProp
                   <label className="text-xs font-semibold text-slate-700">Asset Category</label>
                   <div className="relative">
                     <FiGrid className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <select
+                    <Select
                       value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#7C3AED] focus:ring-2 focus:ring-violet-100 cursor-pointer"
+                      onValueChange={(value) => {
+                        if (value) setCategory(value)
+                      }}
                     >
-                      <option value="" disabled>
-                        Select a Category
-                      </option>
-                      {categoriesList.map((cat) => (
-                        <option key={cat.id} value={cat.name}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="h-11 w-full rounded-xl border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-900 focus-visible:border-[#A78BFA] focus-visible:ring-[#EDE9FE]">
+                        <SelectValue placeholder="Select a Category" />
+                      </SelectTrigger>
+                      <SelectContent className="border border-[#DDD6FE] bg-white">
+                        {categoriesList.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>

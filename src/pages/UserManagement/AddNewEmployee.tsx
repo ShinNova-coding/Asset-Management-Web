@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import {
   ArrowLeft,
   User,
-  ChevronDown,
   Camera,
   Clock,
   Eye,     
@@ -13,6 +12,13 @@ import {
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { normalizeImageSource } from '../../lib/utils';
 import { apiFetch } from '../../lib/api';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const DEFAULT_TOKEN = '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c';
 
@@ -124,9 +130,15 @@ const AddEmployeeForm: React.FC = () => {
   }, [editItem]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = e.target;
+    setFormState((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: "status" | "role", value: string | null) => {
+    if (value === null) return;
+
     setFormState((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -468,22 +480,19 @@ const AddEmployeeForm: React.FC = () => {
                 <label className="text-xs font-semibold text-slate-600">
                   Status
                 </label>
-                <div className="relative">
-                  <select
-                    name="status"
-                    value={formState.status} 
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all appearance-none pr-10 bg-white border-slate-200"
-                  >
-                    <option value="active">Active</option>
-                    <option value="suspended">Suspended</option>
-                    <option value="resigned">Resigned</option>
-                  </select>
-                  <ChevronDown
-                    size={16}
-                    className="absolute right-3 top-3.5 text-slate-400 pointer-events-none"
-                  />
-                </div>
+                <Select
+                  value={formState.status}
+                  onValueChange={(value) => handleSelectChange("status", value)}
+                >
+                  <SelectTrigger className="h-10 w-full rounded-lg border-slate-200 bg-white px-3 text-sm text-slate-800 focus-visible:border-[#A78BFA] focus-visible:ring-[#EDE9FE]">
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border border-[#DDD6FE] bg-white shadow-lg">
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                    <SelectItem value="resigned">Resigned</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* System Role */}
@@ -491,22 +500,19 @@ const AddEmployeeForm: React.FC = () => {
                 <label className="text-xs font-semibold text-slate-600">
                   Role
                 </label>
-                <div className="relative">
-                  <select
-                    name="role"
-                    value={formState.role} 
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all appearance-none pr-10 bg-white border-slate-200"
-                  >
-                    <option value="admin">Admin</option>
-                    <option value="employee">Employee</option>
-                    <option value="hr">HR</option>
-                  </select>
-                  <ChevronDown
-                    size={16}
-                    className="absolute right-3 top-3.5 text-slate-400 pointer-events-none"
-                  />
-                </div>
+                <Select
+                  value={formState.role}
+                  onValueChange={(value) => handleSelectChange("role", value)}
+                >
+                  <SelectTrigger className="h-10 w-full rounded-lg border-slate-200 bg-white px-3 text-sm text-slate-800 focus-visible:border-[#A78BFA] focus-visible:ring-[#EDE9FE]">
+                    <SelectValue placeholder="Select Role" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border border-[#DDD6FE] bg-white shadow-lg">
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="employee">Employee</SelectItem>
+                    <SelectItem value="hr">HR</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

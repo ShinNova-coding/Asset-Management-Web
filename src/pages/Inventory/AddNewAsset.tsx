@@ -5,6 +5,13 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { ArrowLeft, Package, Settings, ImageIcon, Upload, X, Cpu } from 'lucide-react';
 import { apiRequest } from '@/lib/apiService';
 import { normalizeImageSource } from '@/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 const AddNewAsset = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -188,6 +195,15 @@ useEffect(() => {
     });
   };
 
+  const handleSelectChange = (name: "category" | "condition" | "action", value: string | null) => {
+    if (value === null) return;
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const goBack = () => {
     navigate("/inventory"); 
   };
@@ -273,7 +289,6 @@ useEffect(() => {
         finalizedImageString = stripBase64Header(imagePreview);
       }
 
-      const updatedStatusText = formData.action.trim() || "available";
       const targetId = routeId || stateId || stateEditItem?.asset_id || stateEditItem?.id;
 
       if (isEditMode && (!targetId || targetId === "undefined" || targetId === "id")) {
@@ -306,13 +321,12 @@ useEffect(() => {
         assetPayload.image = finalizedImageString;
       }
 
-     let response;
   if (isEditMode) {
    
-    response = await apiRequest(`/asset/${targetId}`, "PATCH", assetPayload);
+    await apiRequest(`/asset/${targetId}`, "PATCH", assetPayload);
   } else {
    
-    response = await apiRequest("/asset", "POST", assetPayload);
+    await apiRequest("/asset", "POST", assetPayload);
   }
 
   alert(isEditMode ? "Asset entry altered successfully!" : "New asset entry saved!");
@@ -354,28 +368,53 @@ useEffect(() => {
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset Category</label>
-                    <select name="category" value={formData.category} onChange={handleInputChange} className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-[#7C3AED] outline-none text-sm bg-white" required>
-                      <option value="">Select a Category</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                      ))}
-                    </select>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) => handleSelectChange("category", value)}
+                    >
+                      <SelectTrigger className="h-10 w-full rounded-md border-slate-300 bg-white px-3 text-sm text-slate-800 focus-visible:border-[#A78BFA] focus-visible:ring-[#EDE9FE]">
+                        <SelectValue placeholder="Select a Category" />
+                      </SelectTrigger>
+                      <SelectContent className="border border-[#DDD6FE] bg-white">
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-600">Asset Condition</label>
-                    <select name="condition" value={formData.condition} onChange={handleInputChange} className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-[#7C3AED] outline-none text-sm bg-white">
-                      <option value="new">New</option>
-                      <option value="good">Good</option>
-                      <option value="fair">Fair</option>
-                      <option value="bad">Bad</option>
-                    </select>
+                    <Select
+                      value={formData.condition}
+                      onValueChange={(value) => handleSelectChange("condition", value)}
+                    >
+                      <SelectTrigger className="h-10 w-full rounded-md border-slate-300 bg-white px-3 text-sm text-slate-800 focus-visible:border-[#A78BFA] focus-visible:ring-[#EDE9FE]">
+                        <SelectValue placeholder="Select Condition" />
+                      </SelectTrigger>
+                      <SelectContent className="border border-[#DDD6FE] bg-white">
+                        <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="good">Good</SelectItem>
+                        <SelectItem value="fair">Fair</SelectItem>
+                        <SelectItem value="bad">Bad</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-1.5 md:col-span-2">
                     <label className="text-xs font-bold text-slate-600">Action Status</label>
-                    <select name="action" value={formData.action} onChange={handleInputChange} className="w-full px-3.5 py-2 rounded-lg border border-slate-200 focus:border-[#7C3AED] focus:ring-2 focus:ring-violet-100 outline-none text-sm bg-slate-50/50 focus:bg-white transition-all text-slate-800">
-                      <option value="available">Available</option>
-                      <option value="retired">Retired</option>
-                    </select>
+                    <Select
+                      value={formData.action}
+                      onValueChange={(value) => handleSelectChange("action", value)}
+                    >
+                      <SelectTrigger className="h-10 w-full rounded-lg border-slate-200 bg-slate-50/50 px-3.5 text-sm text-slate-800 focus-visible:border-[#A78BFA] focus-visible:bg-white focus-visible:ring-[#EDE9FE]">
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+                      <SelectContent className="border border-[#DDD6FE] bg-white">
+                        <SelectItem value="available">Available</SelectItem>
+                        <SelectItem value="retired">Retired</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </section>
