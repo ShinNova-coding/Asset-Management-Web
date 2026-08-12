@@ -124,11 +124,6 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     setDialogMode("edit")
   }
 
-  const openViewDialog = (item: Maintenance) => {
-    setSelectedItem(item)
-    setDialogMode("view")
-  }
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -140,6 +135,14 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
       }
       reader.readAsDataURL(file)
     }
+  }
+
+  const handleVendorNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditVendor(e.target.value.replace(/[0-9]/g, ""))
+  }
+
+  const handleVendorPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditVendorPhno(e.target.value.replace(/\D/g, "").slice(0, 13))
   }
 
   const submitRemark = async () => {
@@ -310,7 +313,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
             if (status === "approved" || status === "in progress") {
               return (
                 <div className="flex items-center gap-3">
-                  <button onClick={(e) => { e.stopPropagation(); openEditDialog(item) }} className="text-blue-800 hover:text-blue-900 p-1">
+                  <button onClick={(e) => { e.stopPropagation(); openEditDialog(item) }} className="text-[#7C3AED] hover:text-purple-700 p-1">
                     <MdOutlineModeEditOutline size={21} />
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); deleteRow(item, "record deleted.") }} className="text-red-600 hover:text-red-700 p-1">
@@ -321,7 +324,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
             }
 
             return (
-              <button onClick={(e) => { e.stopPropagation(); openViewDialog(item) }} className="text-slate-500 hover:text-slate-700 p-1">
+              <button onClick={(e) => { e.stopPropagation(); navigate(`/maintenance/${item.id}`) }} className="text-[#7C3AED] hover:text-purple-700 p-1">
                 <LuEye size={20} />
               </button>
             )
@@ -366,6 +369,9 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     },
     initialState: { pagination: { pageSize: 5 } },
   })
+
+  const pageCount = table.getPageCount()
+  const currentPage = table.getState().pagination.pageIndex
 
   return (
     <div className="max-w-6xl mx-auto space-y-4 p-3 bg-white rounded-xl border border-slate-200 shadow-sm relative">
@@ -446,103 +452,60 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
       </div>
 
       {/* ── PAGINATION ── */}
-      <div className="flex items-center justify-between px-2 py-1 bg-white border border-slate-200 rounded-xl shadow-sm">
+      <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
         {/* Left Status Text */}
-        <div className="text-sm text-slate-500 font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({table.getFilteredRowModel().rows.length} total maintenance)
+        <div className="text-xs text-slate-500 font-medium">
+          Page {currentPage + 1} of {pageCount} ({table.getFilteredRowModel().rows.length} total maintenance)
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center space-x-2">
           {/* Previous Button */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-400 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <FiChevronLeft size={16} />
-          </button>
+          </Button>
 
           {/* Page Numbers */}
-          {(() => {
-            const currentPage = table.getState().pagination.pageIndex + 1
-            const pageCount = table.getPageCount()
-            const pages: (number | string)[] = []
-
-            
-            const siblingCount = 1 
-
-            
-            pages.push(1)
-
-      
-            if (currentPage > siblingCount + 3) {
-              pages.push("...")
-            } else if (pageCount > 2) {
-              
-              for (let i = 2; i < Math.min(currentPage - siblingCount, pageCount); i++) {
-                if (!pages.includes(i)) pages.push(i)
-              }
-            }
-
-           
-            const startRange = Math.max(2, currentPage - siblingCount)
-            const endRange = Math.min(pageCount - 1, currentPage + siblingCount)
-
-            for (let i = startRange; i <= endRange; i++) {
-              if (!pages.includes(i)) pages.push(i)
-            }
-
-            
-            if (currentPage < pageCount - siblingCount - 2) {
-              pages.push("...")
-            } else if (pageCount > 1) {
-              
-              for (let i = Math.max(currentPage + siblingCount + 1, 2); i < pageCount; i++) {
-                if (!pages.includes(i)) pages.push(i)
-              }
-            }
-
-            
-            if (pageCount > 1 && !pages.includes(pageCount)) {
-              pages.push(pageCount)
-            }
-
-            return pages.map((page, index) => {
-              if (page === "...") {
+          <div className="flex gap-1 items-center">
+            {Array.from({ length: pageCount }).map((_, index) => {
+              if (
+                index === 0 ||
+                index === pageCount - 1 ||
+                (index >= currentPage - 1 && index <= currentPage + 1)
+              ) {
                 return (
-                  <span key={`ellipsis-${index}`} className="px-2 text-slate-400 text-sm tracking-widest">
-                    ...
-                  </span>
+                  <Button
+                    key={index}
+                    variant={currentPage === index ? "default" : "outline"}
+                    size="sm"
+                    className={currentPage === index ? "bg-[#A78BFA] text-white border-none" : "bg-slate-200"}
+                    onClick={() => table.setPageIndex(index)}
+                  >
+                    {index + 1}
+                  </Button>
                 )
               }
-
-              const isPageActive = currentPage === page
-
-              return (
-                <button
-                  key={`page-${page}`}
-                  onClick={() => table.setPageIndex((page as number) - 1)}
-                  className={`w-8 h-8 text-sm font-semibold rounded-lg border transition-all flex items-center justify-center ${
-                    isPageActive
-                      ? "bg-purple-700 border-[#0a46b4] text-white shadow-sm"
-                      : "bg-slate-300 border-slate-500 text-slate-700 hover:bg-slate-300"
-                  }`}
-                >
-                  {page}
-                </button>
-              )
-            })
-          })()}
+              if (index === currentPage - 2 || index === currentPage + 2) {
+                return <span key={index} className="px-2 text-gray-500">...</span>
+              }
+              return null
+            })}
+          </div>
 
           {/* Next Button */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-500 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <FiChevronRight size={16} />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -570,7 +533,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
           <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
             <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">Edit Maintenance & Mark Complete</h2>
+              <h2 className="text-lg font-semibold text-[#7C3AED]">Edit Maintenance & Mark Complete</h2>
               <button onClick={closeDialog} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
                 <FiX size={18} />
               </button>
@@ -613,11 +576,18 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-1">
                   <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Vendor Name</label>
-                  <input type="text" value={editVendor} onChange={(e) => setEditVendor(e.target.value)} className={`${inputCls} !bg-white`} />
+                  <input type="text" value={editVendor} onChange={handleVendorNameChange} className={`${inputCls} !bg-white`} />
                 </div>
                 <div className="grid gap-1">
                   <label className="text-sm text-slate-900 font-semibold uppercase tracking-wide">Vendor Phone</label>
-                  <input type="text" value={editVendorPhno} onChange={(e) => setEditVendorPhno(e.target.value)} className={`${inputCls} !bg-white`} />
+                  <input
+                    type="tel"
+                    value={editVendorPhno}
+                    onChange={handleVendorPhoneChange}
+                    inputMode="numeric"
+                    maxLength={13}
+                    className={`${inputCls} !bg-white`}
+                  />
                 </div>
               </div>
 
@@ -669,7 +639,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
 
               <div className="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:justify-end -mx-6 -mb-6 mt-4">
                 <Button variant="outline" onClick={closeDialog}>Cancel</Button>
-                <Button onClick={submitEdit} className="bg-blue-500 hover:bg-blue-600 text-white">Save & Complete</Button>
+                <Button onClick={submitEdit} className="bg-[#7C3AED] hover:bg-purple-700 text-white">Save & Complete</Button>
               </div>
             </div>
           </div>

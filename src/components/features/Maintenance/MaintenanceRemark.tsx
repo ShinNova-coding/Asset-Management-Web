@@ -21,7 +21,7 @@ export function MaintenanceRemark({ open, item, remarkText, onChange, onClose, o
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
         <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Maintenance Remark</h2>
+          <h2 className="text-lg font-semibold text-[#7C3AED]">Maintenance Remark</h2>
           <button 
             onClick={onClose} 
             className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"><FiX size={18} />
@@ -65,7 +65,7 @@ export function MaintenanceRemark({ open, item, remarkText, onChange, onClose, o
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={onSubmit} className="bg-blue-500 hover:bg-blue-600 text-white">
+            <Button onClick={onSubmit} className="bg-[#7C3AED] hover:bg-purple-700 text-white">
               Submit
             </Button>
         </div>

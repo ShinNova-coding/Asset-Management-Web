@@ -244,7 +244,7 @@ const AddNewAsset = () => {
                   <button
                     type="button"
                     onClick={() => setIsUserOpen(!isUserOpen)}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white flex justify-between items-center focus:ring-2 focus:ring-blue-500 outline-none text-sm text-left"
+                    className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white flex justify-between items-center focus:ring-2 focus:ring-[#7C3AED] outline-none text-sm text-left"
                   >
                     <span className={formData.users_name ? "text-slate-900" : "text-slate-400"}>
                       {formData.users_name || "Select an Employee"}
@@ -258,7 +258,7 @@ const AddNewAsset = () => {
                         <div
                           key={user.id}
                           onClick={() => handleUserSelect(user)}
-                          className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm flex justify-between items-center border-b border-slate-50 last:border-b-0"
+                          className="px-3 py-2 hover:bg-violet-50 cursor-pointer text-sm flex justify-between items-center border-b border-slate-50 last:border-b-0"
                         >
                           <span>{String(index + 1).padStart(2, '0')} {user.name}</span>
                           <span className="text-xs text-slate-400">{user.employee_id}</span>
@@ -283,7 +283,7 @@ const AddNewAsset = () => {
                   <button
                     type="button"
                     onClick={() => setIsAssetOpen(!isAssetOpen)}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white flex justify-between items-center focus:ring-2 focus:ring-blue-500 outline-none text-sm text-left"
+                    className="w-full px-3 py-2 rounded-md border border-slate-300 bg-white flex justify-between items-center focus:ring-2 focus:ring-[#7C3AED] outline-none text-sm text-left"
                   >
                     <span className={formData.assets_name ? "text-slate-900" : "text-slate-400"}>
                       {formData.assets_name || "Select an Asset"}
@@ -300,7 +300,7 @@ const AddNewAsset = () => {
         <div
           key={asset.id}
           onClick={() => handleAssetSelect(asset)}
-          className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-slate-50 last:border-b-0"
+          className="px-3 py-2 hover:bg-violet-50 cursor-pointer text-sm border-b border-slate-50 last:border-b-0"
         >
           <span>{String(index + 1).padStart(2, '0')} {asset.name}</span>
         </div>
@@ -330,7 +330,7 @@ const AddNewAsset = () => {
                     name="assigned_date"
                     value={formData.assigned_date}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-[#7C3AED] outline-none text-sm bg-white"
                     required
                   />
                 </div>
@@ -357,7 +357,7 @@ const AddNewAsset = () => {
                 onChange={handleInputChange}
                 placeholder="Write reason or remarks here..."
                 rows={6}
-                className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none"
+                className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-[#7C3AED] outline-none text-sm resize-none"
               />
             </div>
 

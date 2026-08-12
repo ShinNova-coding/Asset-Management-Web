@@ -4,13 +4,18 @@ import { router } from "./routes/Router";
 import { AuthContext } from "@/hooks/useAuth";
 
 const App = () => {
-  
-  const [permissions, setPermissions] = useState(() => {
+  const [permissions] = useState(() => {
     const saved = localStorage.getItem("user_permissions");
-    return saved ? JSON.parse(saved) : [];
-  });
+    if (!saved) return [];
 
-  
+    try {
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      localStorage.removeItem("user_permissions");
+      return [];
+    }
+  });
 
   return (
     <AuthContext.Provider value={{ permissions: permissions }}>

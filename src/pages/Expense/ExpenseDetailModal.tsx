@@ -74,7 +74,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
   const isRequested = expense.status?.toLowerCase() === "requested";
   const isCanceled = expense.status?.toLowerCase() === "canceled";
 
-  const getStatusBadgeClass = (status: string) => {
+  const getStatusBadgeClass = () => {
     if (isActive) return "bg-emerald-50 text-emerald-700 border border-emerald-200/60";
     if (isRequested) return "bg-blue-50 text-blue-700 border border-blue-200/60";
     if (isCanceled) return "bg-rose-50 text-rose-700 border border-rose-200/60";
@@ -113,12 +113,12 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 bg-white border-b border-slate-200/80 shrink-0">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-blue-800 truncate max-w-[340px] md:max-w-[420px]">
+            <h1 className="text-2xl font-bold tracking-tight text-[#7C3AED] truncate max-w-[340px] md:max-w-[420px]">
               Expense Detail
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide shadow-sm uppercase ${getStatusBadgeClass(expense.status)}`}>
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide shadow-sm uppercase ${getStatusBadgeClass()}`}>
               <span className={`h-1.5 w-1.5 rounded-full ${getStatusDotClass()}`}></span>
               {expense.status}
             </span>
@@ -134,7 +134,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
           {/* Expense Title Details */}
           <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-xl">
             <CardContent className="p-5 space-y-1">
-              <div className="flex items-center gap-2 text-sm font-bold uppercase text-blue-600">
+              <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#7C3AED]">
                 <FiFileText className="w-4 h-4" />
                 Expense Title
               </div>
@@ -145,7 +145,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
           {/* Total Cost Card */}
           <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-xl">
             <CardContent className="p-5 space-y-1">
-              <div className="flex items-center gap-2 text-sm font-bold uppercase text-blue-600">
+              <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#7C3AED]">
                 <FiDollarSign className="w-4 h-4" />
                 Total Cost
               </div>
@@ -160,7 +160,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
             {/* User Detail Card */}
             <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-xl">
               <CardContent className="p-5 space-y-4">
-                <div className="flex items-center gap-2 text-sm font-bold uppercase text-blue-600">
+                <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#7C3AED]">
                   <FiUser className="w-4 h-4" />
                   User Detail
                 </div>
@@ -180,7 +180,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
             {/* Hardware Allocation Card */}
             <Card className="border border-slate-200/80 shadow-sm bg-white overflow-hidden rounded-xl">
               <CardContent className="p-5 space-y-4">
-                <div className="flex items-center gap-2 text-sm font-bold uppercase text-blue-600">
+                <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#7C3AED]">
                   <FiCpu className="w-4 h-4" />
                   Hardware Allocation
                 </div>
@@ -201,7 +201,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
           {/* Timeline & Metadata Card */}
           <Card className="border border-slate-200/80 shadow-sm bg-white rounded-xl">
             <CardContent className="p-5 space-y-4">
-              <div className="flex items-center gap-2 text-sm font-bold uppercase text-blue-600">
+              <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#7C3AED]">
                 <FiCalendar className="w-4 h-4" />
                 Timeline
               </div>
@@ -214,7 +214,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
                 
                 <div className="space-y-0.5 border-l-2 border-slate-200 pl-3">
                   <label className="block text-xs font-semibold text-slate-500/90 uppercase tracking-normal">Expense Type</label>
-                  <div className="flex items-center gap-1 text-indigo-600 font-bold text-base uppercase mt-0.5">
+                  <div className="flex items-center gap-1 text-[#7C3AED] font-bold text-base uppercase mt-0.5">
                     <FiTag size={14} className="mt-0.5" />
                     {expense.expense_type}
                   </div>
@@ -236,7 +236,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
           {expense.expense_type === 'maintenance' && (
             <Card className="border border-slate-200/80 shadow-sm bg-white rounded-xl overflow-hidden">
               <CardContent className="p-5 space-y-4">
-                <div className="flex items-center gap-2 text-sm font-bold uppercase text-blue-600">
+                <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#7C3AED]">
                   <FiTool className="w-4 h-4" />
                   Maintenance Summary
                 </div>
@@ -285,7 +285,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
           {expense.remark && (
             <Card className="border border-slate-200 shadow-sm bg-white rounded-xl overflow-hidden">
               <CardContent className="p-5 space-y-2">
-                <div className="flex items-center gap-2 text-sm font-bold uppercase text-blue-600">
+                <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#7C3AED]">
                   <FiClock className="w-4 h-4" />
                   Admin Remarks
                 </div>
@@ -302,7 +302,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
           {expense.description && (
             <Card className="border border-slate-200/80 shadow-sm bg-white rounded-xl">
               <CardContent className="p-5 space-y-2">
-                <div className="flex items-center gap-2 text-sm font-bold uppercase text-blue-600">
+                <div className="flex items-center gap-2 text-sm font-bold uppercase text-[#7C3AED]">
                   <FiFileText className="w-4 h-4" />
                   Description
                 </div>
@@ -319,7 +319,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({ isOpen, 
         <div className="p-4 border-t border-slate-200/80 bg-white flex justify-end shrink-0">
           <Button 
             onClick={onClose} 
-            className="w-full sm:w-auto px-5 py-2 bg-blue-800 hover:bg-blue-900 text-white font-semibold text-sm rounded-xl shadow-sm transition-colors"
+            className="w-full sm:w-auto px-5 py-2 bg-[#7C3AED] hover:bg-purple-700 text-white font-semibold text-sm rounded-xl shadow-sm transition-colors"
           >
             Close Detail
           </Button>

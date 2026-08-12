@@ -200,7 +200,7 @@ const UserManagement: React.FC = () => {
         };
 
         
-        const response = await fetch(`http://localhost:1011/api/user/${targetId}`, requestOptions);
+        const response = await fetch(`http://10.175.189.64:1011/api/user/${targetId}`, requestOptions);
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));

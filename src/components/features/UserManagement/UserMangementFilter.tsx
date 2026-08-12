@@ -19,7 +19,7 @@ export function UserManagementFilter<TData>({ table }: UserManagementFilterProps
   if (!statusColumn) return null
 
  //if there's no filter set is to select status
-  const currentValue = (statusColumn.getFilterValue() as string) ?? "all"
+  const currentValue = statusColumn.getFilterValue() as string | undefined
 
   return (
     <div className=" w-full bg-transparent">

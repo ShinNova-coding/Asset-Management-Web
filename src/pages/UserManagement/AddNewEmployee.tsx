@@ -15,8 +15,6 @@ import { normalizeImageSource } from '../../lib/utils';
 import { apiFetch } from '../../lib/api';
 
 const DEFAULT_TOKEN = '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c';
-const EMPTY_PROFILE_IMAGE =
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=';
 
 interface FormState {
   name: string;
@@ -201,8 +199,6 @@ const AddEmployeeForm: React.FC = () => {
       if (profileFile) {
         const base64WithHeader = await convertImageToBase64(profileFile);
         rawBody.image = stripBase64Header(base64WithHeader);
-      } else if (!isEditMode) {
-        rawBody.image = EMPTY_PROFILE_IMAGE;
       }
 
       const method = isEditMode ? 'PATCH' : 'POST';
@@ -328,7 +324,7 @@ const AddEmployeeForm: React.FC = () => {
       e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-ZÀ-ÿ\s.\-]/g, "");
     }}
     placeholder="e.g. Aung Aung"
-    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all bg-white border-slate-200"
     required
   />
 </div>
@@ -361,7 +357,7 @@ const AddEmployeeForm: React.FC = () => {
                     value={formState.email}
                     onChange={handleInputChange}
                     placeholder="e.g. aung.aung@example.com"
-                    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all bg-white border-slate-200"
                     required
                   />
                 </div>
@@ -376,7 +372,7 @@ const AddEmployeeForm: React.FC = () => {
                     value={formState.position}
                     onChange={handleInputChange}
                     placeholder="e.g. Developer"
-                    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all bg-white border-slate-200"
                   />
                 </div>
 
@@ -433,7 +429,7 @@ const AddEmployeeForm: React.FC = () => {
       e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "").slice(0, 13);
     }}
     placeholder="e.g. 09123456789"
-    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+    className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all bg-white border-slate-200"
   />
 </div>
 
@@ -447,7 +443,7 @@ const AddEmployeeForm: React.FC = () => {
                     name="status"
                     value={formState.status} 
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none pr-10 bg-white border-slate-200"
+                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all appearance-none pr-10 bg-white border-slate-200"
                   >
                     <option value="active">Active</option>
                     <option value="suspended">Suspended</option>
@@ -470,7 +466,7 @@ const AddEmployeeForm: React.FC = () => {
                     name="role"
                     value={formState.role} 
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none pr-10 bg-white border-slate-200"
+                    className="w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all appearance-none pr-10 bg-white border-slate-200"
                   >
                     <option value="admin">Admin</option>
                     <option value="employee">Employee</option>
@@ -498,7 +494,7 @@ const AddEmployeeForm: React.FC = () => {
                     value={formState.password} 
                     onChange={handleInputChange}
                     placeholder="Enter password"
-                    className="w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                    className="w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all bg-white border-slate-200"
                     autoComplete="new-password"
                     required={!isEditMode}
                   />
@@ -524,7 +520,7 @@ const AddEmployeeForm: React.FC = () => {
                     value={formState.password_confirmation} 
                     onChange={handleInputChange}
                     placeholder="Confirm password"
-                    className="w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all bg-white border-slate-200"
+                    className="w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all bg-white border-slate-200"
                     autoComplete="new-password"
                     required={!isEditMode}
                   />

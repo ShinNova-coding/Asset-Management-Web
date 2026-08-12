@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 interface ExpenseWithUser extends ExpenseDetailData {
   user?: {
     name?: string;
@@ -418,88 +419,59 @@ export const ExpenseTable: React.FC = () => {
       </div>
 
       {/* ── 🔢 FIXED PAGINATION DESIGN ── */}
-      <div className="flex items-center justify-between px-2 py-1 bg-white border border-slate-200 rounded-xl shadow-sm">
-        <div className="text-sm text-slate-500 font-medium">
+      <div className="flex items-center justify-between px-2 py-1 bg-white rounded-lg border border-slate-200 p-2 shadow-sm">
+        <div className="text-xs text-slate-500 font-medium">
           Page {currentPage} of {totalPages} ({totalItems} total expenses)
         </div>
 
-        <div className="flex items-center gap-1">
-          <button
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-400 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <FiChevronLeft size={16} />
-          </button>
+          </Button>
 
-          {(() => {
-            const pageCount = totalPages;
-            const pages: (number | string)[] = [];
-            const siblingCount = 1; 
+          <div className="flex gap-1 items-center">
+            {Array.from({ length: totalPages }).map((_, index) => {
+              const page = index + 1;
 
-            pages.push(1);
-
-            if (currentPage > siblingCount + 3) {
-              pages.push("...");
-            } else if (pageCount > 2) {
-              for (let i = 2; i < Math.min(currentPage - siblingCount, pageCount); i++) {
-                if (!pages.includes(i)) pages.push(i);
-              }
-            }
-
-            const startRange = Math.max(2, currentPage - siblingCount);
-            const endRange = Math.min(pageCount - 1, currentPage + siblingCount);
-
-            for (let i = startRange; i <= endRange; i++) {
-              if (!pages.includes(i)) pages.push(i);
-            }
-
-            if (currentPage < pageCount - siblingCount - 2) {
-              pages.push("...");
-            } else if (pageCount > 1) {
-              for (let i = Math.max(currentPage + siblingCount + 1, 2); i < pageCount; i++) {
-                if (!pages.includes(i)) pages.push(i);
-              }
-            }
-
-            if (pageCount > 1 && !pages.includes(pageCount)) {
-              pages.push(pageCount);
-            }
-
-            return pages.map((page, index) => {
-              if (page === "...") {
+              if (
+                index === 0 ||
+                index === totalPages - 1 ||
+                (page >= currentPage - 1 && page <= currentPage + 1)
+              ) {
                 return (
-                  <span key={`ellipsis-${index}`} className="px-2 text-slate-400 text-sm tracking-widest">
-                    ...
-                  </span>
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    className={currentPage === page ? "bg-[#A78BFA] text-white border-none" : "bg-slate-200"}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </Button>
                 );
               }
 
-              const isPageActive = currentPage === page;
+              if (page === currentPage - 2 || page === currentPage + 2) {
+                return <span key={page} className="px-2 text-gray-500">...</span>;
+              }
 
-              return (
-                <button
-                  key={`page-${page}`}
-                  onClick={() => setCurrentPage(page as number)}
-                  className={`w-8 h-8 text-sm font-semibold rounded-lg border transition-all flex items-center justify-center ${
-                    isPageActive
-                      ? "bg-purple-700 border-[#0a46b4] text-white shadow-sm"
-                      : "bg-slate-300 border-slate-500 text-slate-700 hover:bg-slate-200"
-                  }`}
-                >
-                  {page}
-                </button>
-              );
-            });
-          })()}
+              return null;
+            })}
+          </div>
 
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
-            className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-500 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <FiChevronRight size={16} />
-          </button>
+          </Button>
         </div>
       </div>
 

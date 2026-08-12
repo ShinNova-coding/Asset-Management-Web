@@ -17,11 +17,11 @@ export function normalizeImageSource(value?: string | null): string {
   }
 
   if (/^\/(storage|uploads|images)\//i.test(trimmed)) {
-    return `http://localhost:1011${trimmed}`
+    return `http://10.175.189.64:1011${trimmed}`
   }
 
   if (/^(storage|uploads|images)\//i.test(trimmed)) {
-    return `http://localhost:1011/${trimmed}`
+    return `http://10.175.189.64:1011/${trimmed}`
   }
 
   if (/^(https?:\/\/|\/|blob:)/i.test(trimmed)) {

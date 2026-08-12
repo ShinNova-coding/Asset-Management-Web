@@ -22,8 +22,9 @@ const MaintenanceDetailsForm: React.FC = () => {
         const result = await apiFetch(`/maintenance/maintenance_id?maintenance_id=${id}`);
         console.log("[MaintenanceDetail] Raw API response:", result);
 
-        const record = result?.data ?? result ?? null;
-        setRecord(record);
+        const rawRecord = result?.data ?? result ?? null;
+        const detailRecord = Array.isArray(rawRecord) ? rawRecord[0] ?? null : rawRecord;
+        setRecord(detailRecord);
       } catch (err) {
         console.error("Fetch detail error:", err);
         setRecord(null);
@@ -78,6 +79,14 @@ const MaintenanceDetailsForm: React.FC = () => {
     }
   };
 
+  const categoryName = record.category?.name ?? record.asset?.category?.name ?? record.category_name ?? "-";
+  const evidenceImage = record.image_url ?? record.preview_url ?? record.media?.[0]?.original_url ?? record.media?.[0]?.url;
+  const voucherImage = record.voucher
+    ? record.voucher.startsWith("data:")
+      ? record.voucher
+      : `data:image/jpeg;base64,${record.voucher}`
+    : null;
+
   return (
     <div className="max-w-8xl mx-auto p-6 bg-[#e9e5ff] min-h-screen font-sans relative">
       
@@ -122,7 +131,7 @@ const MaintenanceDetailsForm: React.FC = () => {
 
           <div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Category</p>
-            <p className="text-slate-900 font-medium">{record.category?.name ?? "-"}</p>
+            <p className="text-slate-900 font-medium">{categoryName}</p>
           </div>
         </div>
 
@@ -141,6 +150,42 @@ const MaintenanceDetailsForm: React.FC = () => {
           </div>
 
         
+        </div>
+
+        {/* SECTION 3: Vendor & Completion Details */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 md:col-span-2">
+          <h2 className="text-sm font-bold text-[#7C3AED] flex items-center gap-2 border-b pb-2">
+            <Wrench size={16} className="text-[#7C3AED]" /> Vendor & Completion
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Vendor</p>
+              <p className="text-slate-900 font-medium">{record.vendor ?? "-"}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Vendor Phone</p>
+              <p className="text-slate-900 font-medium">{record.vendor_phno ?? "-"}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Payment Status</p>
+              <p className="text-slate-900 font-medium capitalize">{record.payment ?? "-"}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Cost</p>
+              <p className="text-slate-900 font-medium">
+                {record.cost ? `${Number(record.cost).toLocaleString()} MMK` : "-"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Duration</p>
+              <p className="text-slate-900 font-medium">{record.duration ? `${record.duration} Days` : "-"}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Vendor Address</p>
+              <p className="text-slate-900 font-medium">{record.vendor_address ?? "-"}</p>
+            </div>
+          </div>
         </div>
 
         {/* SECTION 3: Issue Details */}
@@ -186,7 +231,7 @@ const MaintenanceDetailsForm: React.FC = () => {
         </div>
 
         {/* SECTION 5: Evidence Attachment */}
-        {record.image_url && (
+        {evidenceImage && (
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
             <h2 className="text-sm font-bold text-[#7C3AED] flex items-center gap-2 border-b pb-2">
               <ImageIcon size={16} className="text-[#7C3AED]" /> Evidence Image
@@ -197,7 +242,7 @@ const MaintenanceDetailsForm: React.FC = () => {
               title="Click to zoom image"
             >
               <img 
-                src={record.image_url} 
+                src={evidenceImage} 
                 alt="Maintenance Evidence" 
                 className="object-contain h-full w-auto max-h-40 p-1"
                 onError={(e) => {
@@ -211,10 +256,25 @@ const MaintenanceDetailsForm: React.FC = () => {
           </div>
         )}
 
+        {voucherImage && (
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <h2 className="text-sm font-bold text-[#7C3AED] flex items-center gap-2 border-b pb-2">
+              <ImageIcon size={16} className="text-[#7C3AED]" /> Voucher Receipt
+            </h2>
+            <div className="mt-2 border border-slate-200 rounded-lg overflow-hidden max-h-48 flex justify-center bg-slate-100 shadow-2xs">
+              <img 
+                src={voucherImage} 
+                alt="Voucher Receipt" 
+                className="object-contain h-full w-auto max-h-40 p-1"
+              />
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* ── 🖼️ EVIDENCE IMAGE LIGHTBOX MODAL OVERLAY ─────────────────────────────────── */}
-      {isImageModalOpen && record.image_url && (
+      {isImageModalOpen && evidenceImage && (
         <div 
           onClick={() => setIsImageModalOpen(false)}
           className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-zoom-out animate-fade-in"
@@ -234,7 +294,7 @@ const MaintenanceDetailsForm: React.FC = () => {
             className="relative max-w-4xl max-h-[85vh] rounded-lg overflow-hidden bg-white/5 p-2 flex items-center justify-center"
           >
             <img 
-              src={record.image_url} 
+              src={evidenceImage} 
               alt="Maintenance Evidence Large View" 
               className="object-contain max-w-full max-h-[80vh] rounded-md shadow-2xl"
             />
