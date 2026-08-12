@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useParams } from "react-router-dom"; 
-import { ArrowLeft, User, Package, Calendar, ChevronDown } from 'lucide-react';
+import { ArrowLeft, User, Package, Calendar, ChevronDown, X } from 'lucide-react';
 import { apiRequest } from '@/lib/apiService';
 
 const AddNewAsset = () => {
@@ -28,6 +28,7 @@ const AddNewAsset = () => {
 
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isAssetOpen, setIsAssetOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const assetDropdownRef = useRef<HTMLDivElement>(null);
@@ -137,21 +138,26 @@ const AddNewAsset = () => {
     navigate("/assignment"); 
   };
 
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    window.setTimeout(() => setToastMessage(null), 2500);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.users_name.trim()) {
-      alert("Employee Name is required!");
+      showToast("Employee Name is required!");
       return;
     }
 
     if (!formData.assets_name.trim()) {
-      alert("Asset Name is required!");
+      showToast("Asset Name is required!");
       return;
     }
 
     if (!formData.assigned_date) {
-      alert("Assigned Date is required!");
+      showToast("Assigned Date is required!");
       return;
     }
 
@@ -166,7 +172,7 @@ const AddNewAsset = () => {
 
       console.log(" Sending Payload to Assignment API:", assignmentPayload);
 
-      const API_URL = "http://10.175.189.64:1011/api/assignment"; 
+      const API_URL = "http://192.168.18.32:1011/api/assignment"; 
       
       const targetId = stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
@@ -197,17 +203,30 @@ const AddNewAsset = () => {
         throw new Error(errorData.message || `Server responded with status ${response.status}`);
       }
 
-      alert(isEditMode ? "Assignment record updated!" : "Successfully assigned asset to employee!");
-      navigate("/assignment");
+      showToast(isEditMode ? "Assignment record updated!" : "Successfully assigned asset to employee!");
+      window.setTimeout(() => navigate("/assignment"), 900);
 
     } catch (err: any) {
       console.error("Transmission Error details:", err);
-      alert(`Could not save assignment:\n${err.message}`);
+      showToast(`Could not save assignment: ${err.message}`);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#e9e5ff] p-10 font-sans text-slate-900">
+      {toastMessage && (
+        <div className="fixed right-6 top-6 z-50 flex max-w-sm items-center gap-3 rounded-xl border border-[#C4B5FD] bg-[#7C3AED] px-4 py-3 text-white shadow-xl shadow-purple-500/20">
+          <span className="text-sm font-semibold">{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="ml-auto rounded-md p-1 text-white/80 transition hover:bg-white/15 hover:text-white"
+            aria-label="Close notification"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
       
         
         <div className="space-y-2">
@@ -320,16 +339,17 @@ const AddNewAsset = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-[#7C3AED] block mb-1">Assigned Date</label>
-                  <input
-                    type="date"
-                    name="assigned_date"
-                    value={formData.assigned_date}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-[#7C3AED] outline-none text-sm bg-white"
-                    required
-                  />
-                </div>
+  <label className="text-xs font-semibold text-[#7C3AED] block mb-1">Assigned Date</label>
+  <input
+    type="date"
+    name="assigned_date"
+    value={formData.assigned_date}
+    onChange={handleInputChange}
+    max={new Date().toISOString().split("T")[0]} 
+    className="w-full px-3 py-2 rounded-md border border-slate-300 focus:ring-2 focus:ring-[#7C3AED] outline-none text-sm bg-white"
+    required
+  />
+</div>
                 <div>
                   <label className="text-xs font-semibold text-[#7C3AED] block mb-1">Status</label>
                   <input

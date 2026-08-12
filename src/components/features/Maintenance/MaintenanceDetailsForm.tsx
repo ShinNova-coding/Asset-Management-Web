@@ -79,7 +79,13 @@ const MaintenanceDetailsForm: React.FC = () => {
     }
   };
 
-  const categoryName = record.category?.name ?? record.asset?.category?.name ?? record.category_name ?? "-";
+  const categoryName =
+    (typeof record.category === "string" && record.category !== "-" ? record.category : "") ||
+    record.category?.name ||
+    record.category_obj?.name ||
+    record.asset?.category?.name ||
+    record.category_name ||
+    "-";
   const evidenceImage = record.image_url ?? record.preview_url ?? record.media?.[0]?.original_url ?? record.media?.[0]?.url;
   const voucherImage = record.voucher
     ? record.voucher.startsWith("data:")

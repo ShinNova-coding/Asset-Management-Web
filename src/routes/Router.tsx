@@ -13,6 +13,7 @@ import ActivityPage from "@/pages/Activity/ActivityPage"
 import RolePage from "@/pages/Roles/RolePage" 
 import CreateRolePage from "@/pages/Roles/CreateRolePage"
 import MaintenancePage from "@/pages/Maintenance/MaintenancePage"
+import MaintenanceEditPage from "@/pages/Maintenance/MaintenanceEditPage"
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee"
 import AddNewAsset from "@/pages/Inventory/AddNewAsset"
 import { InventoryDetail } from "@/components/features/Inventory/InventoryDetail"
@@ -130,6 +131,10 @@ export const router = createBrowserRouter([
           {
             path: "maintenance",
             element: <RequirePermission permission="view-maintenances"><MaintenancePage /></RequirePermission>,
+          },
+          {
+            path: "maintenance/:id/complete",
+            element: <RequirePermission permission="view-maintenances"><MaintenanceEditPage /></RequirePermission>,
           },
           {
             path: "maintenance/:id",

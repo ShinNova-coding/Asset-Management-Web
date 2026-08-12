@@ -36,7 +36,7 @@ export default function MaintenancePage() {
           id: item.id,
           employee_name: item.user?.name ?? "-",
           asset_code: item.asset?.asset_code ?? "-",
-          category: item.category?.name ?? "-",
+          category: item.category?.name ?? item.asset?.category?.name ?? item.category_name ?? "-",
           approver: item.accepted_by?.name ?? "—",
           maintenance_date: item.maintenance_date ?? "",
           completed_date: item.completed_date ?? "",

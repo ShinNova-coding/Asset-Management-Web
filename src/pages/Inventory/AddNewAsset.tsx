@@ -40,6 +40,7 @@ const AddNewAsset = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const selectedCategoryName =
     categories.find((cat) => (
       String(cat.id) === String(formData.category) ||
@@ -209,6 +210,11 @@ useEffect(() => {
     }));
   };
 
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    window.setTimeout(() => setToastMessage(null), 2500);
+  };
+
   const goBack = () => {
     navigate("/inventory"); 
   };
@@ -236,11 +242,11 @@ useEffect(() => {
 
   const processImage = (file: File) => {
     if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file (PNG, JPG).");
+      showToast("Please upload an image file (PNG, JPG).");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert("File size exceeds 5MB limit.");
+      showToast("File size exceeds 5MB limit.");
       return;
     }
     setSelectedImage(file);
@@ -275,12 +281,12 @@ useEffect(() => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert("Please provide at least an Asset Name before saving.");
+      showToast("Please provide at least an Asset Name before saving.");
       return;
     }
 
     if (!formData.serial_number.trim()) {
-      alert("Serial Number is required by the server!");
+      showToast("Serial Number is required by the server!");
       return;
     }
 
@@ -297,7 +303,7 @@ useEffect(() => {
       const targetId = routeId || stateId || stateEditItem?.asset_id || stateEditItem?.id;
 
       if (isEditMode && (!targetId || targetId === "undefined" || targetId === "id")) {
-        alert("Invalid Asset ID detected.");
+        showToast("Invalid Asset ID detected.");
         return;
       }
 
@@ -334,18 +340,32 @@ useEffect(() => {
     await apiRequest("/asset", "POST", assetPayload);
   }
 
-  alert(isEditMode ? "Asset entry altered successfully!" : "New asset entry saved!");
+  showToast(isEditMode ? "Asset entry altered successfully!" : "New asset entry saved!");
   localStorage.removeItem("inventory_data");
-  navigate("/inventory");
+  window.setTimeout(() => navigate("/inventory"), 900);
 
 } catch (err: any) {
   console.error("Transmission Error details:", err);
-  alert(`Could not save item to backend server:\n${err.message}`);
+  showToast(`Could not save item to backend server: ${err.message}`);
 }
   };
 
   return (
     <div className="min-h-screen bg-[#e9e5ff] p-10 font-sans text-slate-900">
+      {toastMessage && (
+        <div className="fixed right-6 top-6 z-50 flex max-w-sm items-center gap-3 rounded-xl border border-[#C4B5FD] bg-[#7C3AED] px-4 py-3 text-white shadow-xl shadow-purple-500/20">
+          <span className="text-sm font-semibold">{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="ml-auto rounded-md p-1 text-white/80 transition hover:bg-white/15 hover:text-white"
+            aria-label="Close notification"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="space-y-2">
           <button type="button" onClick={goBack} className="flex items-center text-sm font-medium text-[#7C3AED] hover:text-purple-700 transition-colors">

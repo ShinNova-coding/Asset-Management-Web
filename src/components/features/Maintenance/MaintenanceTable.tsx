@@ -37,6 +37,19 @@ import { MaintenanceRemark } from "./MaintenanceRemark"
 const inputCls =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
 
+const getCategoryName = (item: any) => {
+  const category = item?.category
+  if (typeof category === "string" && category !== "-") return category
+
+  return (
+    category?.name ||
+    item?.category_obj?.name ||
+    item?.asset?.category?.name ||
+    item?.category_name ||
+    "-"
+  )
+}
+
 interface MaintenanceTableProps {
   data: Maintenance[]
   onRefresh?: () => void
@@ -102,12 +115,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     setEditEmployeeName(item.user?.name ?? "")      
     setEditAssetCode(item.asset?.asset_code ?? "")     
     
-    const catName = 
-      (item as any).category?.name || 
-      (item as any).asset?.category?.name || 
-      (item as any).category_name || 
-      "";
-    setEditCategory(catName);
+    setEditCategory(getCategoryName(item));
     
     setEditApprover(typeof item.accepted_by === 'object' && item.accepted_by !== null ? (item.accepted_by as any).name : (item.accepted_by ?? "—"))
     setEditMaintenanceDate(item.maintenance_date ?? "") 
@@ -123,6 +131,8 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
 
     setDialogMode("edit")
   }
+
+  void openEditDialog
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -313,7 +323,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
             if (status === "approved" || status === "in progress") {
               return (
                 <div className="flex items-center gap-3">
-                  <button onClick={(e) => { e.stopPropagation(); openEditDialog(item) }} className="text-[#7C3AED] hover:text-purple-700 p-1">
+                  <button onClick={(e) => { e.stopPropagation(); navigate(`/maintenance/${item.id}/complete`, { state: { maintenance: item } }) }} className="text-[#7C3AED] hover:text-purple-700 p-1">
                     <MdOutlineModeEditOutline size={21} />
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); deleteRow(item, "record deleted.") }} className="text-red-600 hover:text-red-700 p-1">
@@ -357,7 +367,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
       const assetCode = item.asset?.asset_code?.toLowerCase() || ""
       const status = item.status?.toLowerCase() || ""
       const vendor = item.vendor?.toLowerCase() || ""
-      const category = item.category?.name?.toLowerCase() || item.asset?.category?.name?.toLowerCase() || ""
+      const category = getCategoryName(item).toLowerCase()
       
       return (
         employeeName.includes(search) ||
@@ -662,7 +672,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
                 {[
                   { label: "Employee Name", value: selectedItem?.user?.name || "—" },
                   { label: "Asset Code", value: selectedItem?.asset?.asset_code || "—" },
-                  { label: "Category", value: (selectedItem as any).category?.name || "—" },
+                  { label: "Category", value: getCategoryName(selectedItem) },
                   { 
                     label: "Approver", 
                     value: typeof selectedItem?.accepted_by === 'object' && selectedItem?.accepted_by !== null 

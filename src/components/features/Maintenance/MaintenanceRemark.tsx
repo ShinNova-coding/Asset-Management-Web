@@ -17,6 +17,15 @@ type Props = {
 export function MaintenanceRemark({ open, item, remarkText, onChange, onClose, onSubmit }: Props) {
   if (!open || !item) return null
 
+  const category = (item as any).category
+  const categoryName =
+    (typeof category === "string" && category !== "-" ? category : "") ||
+    category?.name ||
+    (item as any).category_obj?.name ||
+    (item as any).asset?.category?.name ||
+    (item as any).category_name ||
+    "-"
+
   return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
         <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
@@ -42,7 +51,7 @@ export function MaintenanceRemark({ open, item, remarkText, onChange, onClose, o
 
         <div>
             <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">Category</p>
-            <p className="text-sm font-medium text-slate-800 mt-0.5">{item.category?.name ?? "-"}</p>
+            <p className="text-sm font-medium text-slate-800 mt-0.5">{categoryName}</p>
         </div>
 
         <div>

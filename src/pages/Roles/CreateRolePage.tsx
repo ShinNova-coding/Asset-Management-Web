@@ -21,6 +21,7 @@ export default function CreateRolePage() {
     { id: 'create-users', label: 'Users (Create)', checked: false },
     { id: 'create-assignments', label: 'Assignments (Create)', checked: false },
     { id: 'create-maintenances', label: 'Maintenances (Create)', checked: false },
+    { id: 'create-expenses', label: 'Expenses (Create)', checked: false },
     { id: 'create-asset-requests', label: 'Asset Requests (Create)', checked: false },
     { id: 'create-maintenance-requests', label: 'Maintenance Requests (Create)', checked: false },
 
@@ -29,6 +30,7 @@ export default function CreateRolePage() {
     { id: 'update-users', label: 'Users (Update)', checked: false },
     { id: 'update-assignments', label: 'Assignments (Update)', checked: false },
     { id: 'update-maintenances', label: 'Maintenances (Update)', checked: false },
+    { id: 'update-expenses', label: 'Expenses (Update)', checked: false },
     { id: 'update-maintenance-requests', label: 'Maintenance Requests (Update)', checked: false },
     
     { id: 'delete-categories', label: 'Categories (Delete)', checked: false },
@@ -36,6 +38,7 @@ export default function CreateRolePage() {
     { id: 'delete-users', label: 'Users (Delete)', checked: false },
     { id: 'delete-assignments', label: 'Assignments (Delete)', checked: false },
     { id: 'delete-maintenances', label: 'Maintenances (Delete)', checked: false },
+    { id: 'delete-expenses', label: 'Expenses (Delete)', checked: false },
 
     { id: 'approve-asset-requests', label: 'Asset Requests (Approve)', checked: false },
     { id: 'approve-maintenance-requests', label: 'Maintenance Requests (Approve)', checked: false },
@@ -51,6 +54,7 @@ export default function CreateRolePage() {
     { id: 'view-dashboard', label: 'Dashboard', checked: false },
     { id: 'view-assignments', label: 'Assignments', checked: false },
     { id: 'view-maintenances', label: 'Maintenances', checked: false },
+    { id: 'view-expenses', label: 'Expenses', checked: false },
     { id: 'get-notifications', label: 'Notifications', checked: false },
   ]);
 

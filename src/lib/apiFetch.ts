@@ -21,7 +21,7 @@ export async function apiFetch(url: string, options: any = {}) {
         : JSON.stringify(options.body);
   }
 
-  const res = await fetch(`http://10.175.189.64:1011/api${url}`, config);
+  const res = await fetch(`http://192.168.18.32:1011/api${url}`, config);
 
   const data = await res.json();
 

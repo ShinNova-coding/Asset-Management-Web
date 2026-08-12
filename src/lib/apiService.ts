@@ -1,6 +1,6 @@
 
 
-const BASE_URL = "http://10.175.189.64:1011/api";
+const BASE_URL = "http://192.168.18.32:1011/api";
 
 export const apiRequest = async (
   endpoint: string,
@@ -133,7 +133,7 @@ export async function getCategories() {
     redirect: 'follow'
   };
 
-  const response = await fetch("http://10.175.189.64:1011/api/category", requestOptions);
+  const response = await fetch("http://192.168.18.32:1011/api/category", requestOptions);
   if (!response.ok) {
     throw new Error("Failed to fetch categories");
   }
