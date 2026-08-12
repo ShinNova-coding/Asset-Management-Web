@@ -16,7 +16,8 @@ import {
 } from "lucide-react"
 import { useSidebar } from "@/components/ui/sidebar"
 import { useNavigate } from "react-router-dom"
-import { normalizeImageSource } from "@/lib/utils"
+import { apiFetch } from "@/lib/api"
+import { getImageValue, normalizeImageSource } from "@/lib/utils"
 
 const searchItems = [
   { title: "Dashboard", path: "/dashboard", keywords: "home stats overview charts" },
@@ -53,6 +54,12 @@ type NavUser = {
   preview_url?: string | null
   roles?: Array<{ name?: string }>
   role?: string
+  media?: Array<{
+    original_url?: string | null
+    preview_url?: string | null
+    url?: string | null
+    path?: string | null
+  }>
 }
 
 export default function Navigation() {
@@ -60,6 +67,7 @@ export default function Navigation() {
   const [searchTerm, setSearchTerm] = useState("")
   const [darkMode, setDarkMode] = useState(false)
   const [user, setUser] = useState<NavUser | null>(null)
+  const [profileImage, setProfileImage] = useState("")
   const navigate = useNavigate()
   
   // Safely fallback if provider context is missing
@@ -67,12 +75,48 @@ export default function Navigation() {
   const toggleSidebar = sidebar?.toggleSidebar ?? (() => {})
 
   useEffect(() => {
+    const applyUser = (nextUser: NavUser) => {
+      const rawImage = getImageValue(nextUser)
+
+      setUser(nextUser)
+      setProfileImage(rawImage ? normalizeImageSource(rawImage) : "")
+    }
+
+    const isSameUser = (candidate: NavUser, current: NavUser) =>
+      (!!candidate.id && !!current.id && String(candidate.id) === String(current.id)) ||
+      (!!candidate.employee_id && !!current.employee_id && String(candidate.employee_id) === String(current.employee_id)) ||
+      (!!candidate.email && !!current.email && candidate.email.toLowerCase() === current.email.toLowerCase())
+
+    const refreshUserFromList = async (currentUser: NavUser) => {
+      const response = await apiFetch("/user")
+      const users = response?.data?.data || response?.data || response || []
+      if (!Array.isArray(users)) return
+
+      const freshUser = users.find((candidate: NavUser) => isSameUser(candidate, currentUser))
+      if (freshUser) {
+        applyUser(freshUser)
+        localStorage.setItem("user", JSON.stringify(freshUser))
+      }
+    }
+
     const userData = localStorage.getItem("user");
     if (userData) {
       try {
-        setUser(JSON.parse(userData));
+        const storedUser = JSON.parse(userData)
+        applyUser(storedUser)
+        refreshUserFromList(storedUser).catch(() => {})
       } catch {
         setUser(null);
+        setProfileImage("");
+        const storedEmail = localStorage.getItem("user_email")
+        if (storedEmail) {
+          refreshUserFromList({ email: storedEmail }).catch(() => {})
+        }
+      }
+    } else {
+      const storedEmail = localStorage.getItem("user_email")
+      if (storedEmail) {
+        refreshUserFromList({ email: storedEmail }).catch(() => {})
       }
     }
 
@@ -86,7 +130,6 @@ export default function Navigation() {
   }, []);
 
   const roleName = user?.roles?.[0]?.name || user?.role || localStorage.getItem("user_role") || ""
-  const profileImage = normalizeImageSource(user?.image || user?.preview_url || user?.image_url || null)
   const filteredSearchItems = searchTerm.trim()
     ? searchItems.filter((item) => {
         const haystack = `${item.title} ${item.path} ${item.keywords}`.toLowerCase()

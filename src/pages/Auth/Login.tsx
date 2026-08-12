@@ -6,6 +6,14 @@ import { LuEyeClosed, LuEye } from "react-icons/lu";
 import { useState } from "react"
 import { BsBoxFill } from "react-icons/bs"
 import { loginUser } from "@/lib/apiService";
+
+const getLoginUser = (data: any) =>
+  data?.user ||
+  data?.data?.user ||
+  data?.data?.data?.user ||
+  data?.data ||
+  null;
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -23,15 +31,22 @@ const Login = () => {
     try {
       const data = await loginUser({ email, password });
       if (data.success) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      const loggedInUser = getLoginUser(data);
+
+      localStorage.setItem("token", data.token || data.data?.token || "");
+      localStorage.setItem("user_email", email);
+      if (loggedInUser && typeof loggedInUser === "object" && !Array.isArray(loggedInUser)) {
+        localStorage.setItem("user", JSON.stringify(loggedInUser));
+      } else {
+        localStorage.removeItem("user");
+      }
 
         let exactRoleName = "Employee"; 
         let exactPermissions = []; 
 
-        if (data.user?.roles?.length > 0) {
-          exactRoleName = data.user.roles[0].name; 
-          exactPermissions = data.user.roles[0].permissions || [];
+        if (loggedInUser?.roles?.length > 0) {
+          exactRoleName = loggedInUser.roles[0].name; 
+          exactPermissions = loggedInUser.roles[0].permissions || [];
           
           if (exactPermissions.length === 0) {
             if (exactRoleName === "super-admin") {

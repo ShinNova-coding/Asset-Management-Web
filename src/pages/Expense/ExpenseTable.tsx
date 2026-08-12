@@ -45,6 +45,9 @@ export const ExpenseTable: React.FC = () => {
   const [selectedExpense, setSelectedExpense] = useState<ExpenseDetailData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [approvalTarget, setApprovalTarget] = useState<ExpenseWithUser | null>(null);
+  const [approvalRemark, setApprovalRemark] = useState("");
+  const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const fetchExpenses = async () => {
     setLoading(true);
@@ -77,30 +80,36 @@ export const ExpenseTable: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleUpdateStatus = async (expense: ExpenseWithUser, newStatus: 'approved' | 'canceled') => {
+  const handleUpdateStatus = async (expense: ExpenseWithUser, newStatus: 'approved' | 'canceled', remark = "") => {
     const targetId = expense.id || (expense as any).expense_id;
     if (!targetId) return;
 
-    if (!window.confirm(`Are you sure you want to change this expense status to ${newStatus}?`)) return;
-
-    let remark = "";
-    if (newStatus === 'approved') {
-      const userRemark = window.prompt("Enter a remark for approval (Optional):", "");
-      if (userRemark === null) return; 
-      remark = userRemark;
-    }
-
     setActionLoadingId(targetId);
+    setStatusMessage(null);
     try {
       await updateExpenseStatus(targetId, newStatus, remark);
-      alert(`Expense status updated to ${newStatus} successfully!`);
+      setStatusMessage({ type: "success", text: `Expense status updated to ${newStatus} successfully.` });
+      setApprovalTarget(null);
+      setApprovalRemark("");
       fetchExpenses(); 
     } catch (err: any) {
       console.error("Status Update Error:", err);
-      alert(err?.message || `Failed to update status to ${newStatus}.`);
+      setStatusMessage({ type: "error", text: err?.message || `Failed to update status to ${newStatus}.` });
     } finally {
       setActionLoadingId(null);
     }
+  };
+
+  const openApprovalCard = (expense: ExpenseWithUser) => {
+    setApprovalTarget(expense);
+    setApprovalRemark("");
+    setStatusMessage(null);
+  };
+
+  const closeApprovalCard = () => {
+    if (actionLoadingId) return;
+    setApprovalTarget(null);
+    setApprovalRemark("");
   };
 
   const handleDeleteExpense = async (expense: ExpenseWithUser) => {
@@ -211,6 +220,17 @@ export const ExpenseTable: React.FC = () => {
 
   return (
     <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
+      {statusMessage && (
+        <div
+          className={`rounded-lg border px-4 py-3 text-sm font-medium ${
+            statusMessage.type === "success"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-red-200 bg-red-50 text-red-700"
+          }`}
+        >
+          {statusMessage.text}
+        </div>
+      )}
       
       <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2 relative">
         <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
@@ -377,8 +397,8 @@ export const ExpenseTable: React.FC = () => {
                                 {/* APPROVE BUTTON */}
                                 <button 
                                   type="button"
-                                  onClick={() => handleUpdateStatus(expense, 'approved')} 
-                                  className="text-emerald-500 hover:text-emerald-700 active:scale-95 transition-all p-1.5 hover:bg-emerald-50 rounded-md"
+                                  onClick={() => openApprovalCard(expense)} 
+                                  className="text-[#7C3AED] hover:text-purple-700 active:scale-95 transition-all p-1.5 hover:bg-emerald-50 rounded-md"
                                   title="Approve Expense"
                                 >
                                   <CheckCircle size={16} />
@@ -482,6 +502,56 @@ export const ExpenseTable: React.FC = () => {
         onClose={() => setIsModalOpen(false)} 
         expense={selectedExpense} 
       />
+
+      {approvalTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#e9e5ff] text-[#7C3AED]">
+                <CheckCircle size={22} />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-base font-bold text-slate-900">Approve Expense</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Confirm approval for {approvalTarget.title || "this expense"}.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Remark
+              </label>
+              <textarea
+                value={approvalRemark}
+                onChange={(event) => setApprovalRemark(event.target.value)}
+                placeholder="Optional approval remark"
+                className="min-h-24 w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]"
+              />
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeApprovalCard}
+                disabled={Boolean(actionLoadingId)}
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUpdateStatus(approvalTarget, "approved", approvalRemark)}
+                disabled={Boolean(actionLoadingId)}
+                className="inline-flex items-center gap-2 rounded-lg bg-[#7C3AED] px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-60"
+              >
+                {actionLoadingId ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
+                Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

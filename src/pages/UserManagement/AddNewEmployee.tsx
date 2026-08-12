@@ -208,10 +208,40 @@ const AddEmployeeForm: React.FC = () => {
         body: JSON.stringify(rawBody),
       });
 
+      const savedUser = unwrapSavedUser(responseData);
+      const savedUserWithImage =
+        savedUser && !Array.isArray(savedUser)
+          ? {
+              ...savedUser,
+              image: savedUser.image || rawBody.image || editItem?.image || null,
+            }
+          : savedUser;
+
+      const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+      const isCurrentUser =
+        storedUser &&
+        isEditMode &&
+        (
+          String(storedUser.id || '') === String(targetId || '') ||
+          String(storedUser.employee_id || '') === String(formState.employee_id || '') ||
+          String(storedUser.email || '').toLowerCase() === String(formState.email || '').toLowerCase()
+        );
+
+      if (isCurrentUser) {
+        localStorage.setItem(
+          'user',
+          JSON.stringify({
+            ...storedUser,
+            ...(savedUserWithImage && !Array.isArray(savedUserWithImage) ? savedUserWithImage : {}),
+            image: rawBody.image || savedUserWithImage?.image || storedUser.image || null,
+          })
+        );
+      }
+
       navigate('/employees', {
         state: {
           refresh: true,
-          savedUser: unwrapSavedUser(responseData),
+          savedUser: savedUserWithImage,
         },
         replace: true,
       });
