@@ -1,4 +1,5 @@
-import { createBrowserRouter } from "react-router-dom"
+import { createBrowserRouter, Navigate } from "react-router-dom"
+import type React from "react"
 
 import Login from "@/pages/Auth/Login"
 import Layout from "@/layouts/Layout"
@@ -27,6 +28,36 @@ import ExpenseTable from "@/pages/Expense/ExpenseTable"
 import { CreateExpenseForm } from "@/pages/Expense/CreateExpenseForm"
 import ExpenseDashboard from "@/components/features/Dashboard/ExpenseDashboard"; // Adjust path as needed
 import AddNewCategories from "@/pages/Categories/AddNewCategories"
+import { getFirstAccessiblePath, getStoredPermissions, hasPermission } from "@/lib/routeAccess"
+
+function RequirePermission({
+  permission,
+  children,
+}: {
+  permission: string
+  children: React.ReactNode
+}) {
+  const permissions = getStoredPermissions()
+
+  if (hasPermission(permissions, permission)) {
+    return <>{children}</>
+  }
+
+  const fallbackPath = getFirstAccessiblePath(permissions)
+
+  if (fallbackPath) {
+    return <Navigate to={fallbackPath} replace />
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#e9e5ff] p-6 text-center">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h1 className="text-lg font-bold text-[#7C3AED]">No Access</h1>
+        <p className="mt-2 text-sm text-slate-500">Your account does not have permission to view this page.</p>
+      </div>
+    </div>
+  )
+}
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -41,110 +72,110 @@ export const router = createBrowserRouter([
         children: [
           {
             path: "dashboard",
-            element: <DashboardPage />,
+            element: <RequirePermission permission="view-dashboard"><DashboardPage /></RequirePermission>,
           },
           {
             path:"categories",
-            element:<CategoriesPage/>
+            element:<RequirePermission permission="view-categories"><CategoriesPage/></RequirePermission>
           },
           {
             path:"categories/add",
-          element:<AddNewCategories/>,
+          element:<RequirePermission permission="view-categories"><AddNewCategories/></RequirePermission>,
           },
           
           {
             path: "inventory",
-            element: <InventoryPage />,
+            element: <RequirePermission permission="view-assets"><InventoryPage /></RequirePermission>,
           },
           {
             path: "inventory/add",
-            element: <AddNewAsset />,
+            element: <RequirePermission permission="view-assets"><AddNewAsset /></RequirePermission>,
           },
           {
             path: "inventory/:id/edit",
-            element: <AddNewAsset />,
+            element: <RequirePermission permission="view-assets"><AddNewAsset /></RequirePermission>,
           },
           {
             path: "inventory/:id",
-            element: <InventoryDetail />,
+            element: <RequirePermission permission="view-assets"><InventoryDetail /></RequirePermission>,
           },
           
           {
             path: "usermanagement",
-            element: <UserManagementPage />,
+            element: <RequirePermission permission="view-users"><UserManagementPage /></RequirePermission>,
           },
           
           {
             path: "assignment",
-            element: <AssignmentPage />,
+            element: <RequirePermission permission="view-assignments"><AssignmentPage /></RequirePermission>,
           },
           {
             path: "assignment/add",
-            element: <Assign />,
+            element: <RequirePermission permission="view-assignments"><Assign /></RequirePermission>,
           },
           {
             path: "assignment/:id",
-            element: <AssignmentDetailPage />,
+            element: <RequirePermission permission="view-assignments"><AssignmentDetailPage /></RequirePermission>,
           },
           {
             path: "assignment/edit/:id",
-            element: <AssignmentEditPage />, 
+            element: <RequirePermission permission="view-assignments"><AssignmentEditPage /></RequirePermission>, 
           },
           
           {
             path: "activity",
-            element: <ActivityPage />,
+            element: <RequirePermission permission="view-activitylogs"><ActivityPage /></RequirePermission>,
           },
           
           {
             path: "maintenance",
-            element: <MaintenancePage />,
+            element: <RequirePermission permission="view-maintenances"><MaintenancePage /></RequirePermission>,
           },
           {
             path: "maintenance/:id",
-            element: <MaintenanceDetailsForm />,
+            element: <RequirePermission permission="view-maintenances"><MaintenanceDetailsForm /></RequirePermission>,
           },
 
           {
             path: "employees",
-            element: <UserManagementPage />,
+            element: <RequirePermission permission="view-users"><UserManagementPage /></RequirePermission>,
           },
           {
             path: "add-employee",
-            element: <AddEmployeeForm />,
+            element: <RequirePermission permission="view-users"><AddEmployeeForm /></RequirePermission>,
           },
           
           {
             path: "employee/:id",
-            element: <EmployeeDetailsPage />,
+            element: <RequirePermission permission="view-users"><EmployeeDetailsPage /></RequirePermission>,
           },
 
           {
             path: "roles",
-            element: <RolePage />
+            element: <RequirePermission permission="view-roles"><RolePage /></RequirePermission>
           },
           {
             path:"roles/:id",
-            element:<EditRolePage/>,
+            element:<RequirePermission permission="view-roles"><EditRolePage/></RequirePermission>,
           },
           {
             path: "roles/create",
-            element: <CreateRolePage />
+            element: <RequirePermission permission="view-roles"><CreateRolePage /></RequirePermission>
           },
 
           {
             path: "expense",
-            element: <ExpensePage />
+            element: <RequirePermission permission="view-expenses"><ExpensePage /></RequirePermission>
           },
           // Inside your createBrowserRouter children array
 {
   path: "expense/report", // The URL path for this new view
-  element: <ExpenseDashboard />,
+  element: <RequirePermission permission="view-expenses"><ExpenseDashboard /></RequirePermission>,
 },
 
           {
             path: "expense/createexpenseform",
-            element: <CreateExpenseForm />
+            element: <RequirePermission permission="view-expenses"><CreateExpenseForm /></RequirePermission>
           },
         ],
       },

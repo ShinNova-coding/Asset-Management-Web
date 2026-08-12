@@ -213,7 +213,7 @@ export const ExpenseTable: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7C3AED]"></div>
       </div>
     );
   }
@@ -387,7 +387,7 @@ export const ExpenseTable: React.FC = () => {
                       <div className="flex items-center justify-center gap-1" onClick={(e) => e.stopPropagation()}>
                         
                         {isActionLoading ? (
-                          <Loader2 className="animate-spin text-slate-400 mx-2" size={16} />
+                          <Loader2 className="animate-spin text-[#7C3AED] mx-2" size={16} />
                         ) : (
                           <>
                             {expense.status?.toLowerCase() !== 'approved' && 
@@ -545,7 +545,7 @@ export const ExpenseTable: React.FC = () => {
                 disabled={Boolean(actionLoadingId)}
                 className="inline-flex items-center gap-2 rounded-lg bg-[#7C3AED] px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:opacity-60"
               >
-                {actionLoadingId ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
+                {actionLoadingId ? <Loader2 className="animate-spin text-white" size={16} /> : <CheckCircle size={16} />}
                 Approve
               </button>
             </div>

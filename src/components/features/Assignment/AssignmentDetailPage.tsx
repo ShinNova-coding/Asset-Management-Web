@@ -47,7 +47,7 @@ const AssignmentDetailPage = () => {
 
   if (loading) return (
     <div className="flex flex-col justify-center items-center h-screen bg-slate-50">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#7C3AED]"></div>
     </div>
   );
 

@@ -79,7 +79,7 @@ export default function EditRolePage() {
     );
   };
 
-  if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin w-8 h-8 text-blue-500" /></div>;
+  if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin w-8 h-8 text-[#7C3AED]" /></div>;
   if (!role) return <div className="p-10 text-center">Role not found.</div>;
 
   return (
@@ -93,7 +93,7 @@ export default function EditRolePage() {
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle className="text-[#7C3AED]">Editing: {role.name}</CardTitle>
             <Button onClick={handleUpdate} disabled={isSaving}>
-              {isSaving ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />} 
+              {isSaving ? <Loader2 className="animate-spin w-4 h-4 mr-2 text-[#7C3AED]" /> : <Save className="w-4 h-4 mr-2" />} 
               Save Changes
             </Button>
           </CardHeader>

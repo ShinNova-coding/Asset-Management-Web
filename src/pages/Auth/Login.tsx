@@ -6,6 +6,7 @@ import { LuEyeClosed, LuEye } from "react-icons/lu";
 import { useState } from "react"
 import { BsBoxFill } from "react-icons/bs"
 import { loginUser } from "@/lib/apiService";
+import { getFirstAccessiblePath } from "@/lib/routeAccess";
 
 const getLoginUser = (data: any) =>
   data?.user ||
@@ -63,7 +64,7 @@ const Login = () => {
 
         localStorage.setItem("user_role", exactRoleName);
         localStorage.setItem("user_permissions", JSON.stringify(exactPermissions)); 
-        window.location.href = "/dashboard";
+        window.location.href = getFirstAccessiblePath(exactPermissions) || "/";
       } else {
         setError(data.message || "Login failed.");
       }

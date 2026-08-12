@@ -36,7 +36,13 @@ const DashboardPage: React.FC = () => {
     loadData();
   }, []);
 
-  if (loading) return <div className="p-10 text-center">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7C3AED]"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen px-4 pt-4 pb-6 space-y-5 bg-[#e9e5ff]">
