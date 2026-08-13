@@ -28,7 +28,6 @@ import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import Navigation from "@/components/ui/navigation";
 import { BsBoxFill } from "react-icons/bs";
 import { useAuth } from "@/hooks/useAuth";
-import { hasPermission } from "@/lib/routeAccess";
 
 const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard", permission: "view-dashboard" },
@@ -72,15 +71,26 @@ export default function Layout() {
   
   const isLoading = !permissions || !Array.isArray(permissions);
 
+  const permissionNames = isLoading
+    ? []
+    : permissions
+        .map((permission: any) => (
+          typeof permission === "string" ? permission : permission?.name
+        ))
+        .filter(Boolean);
+
+  const hasSidebarViewPermission = (permission: string) =>
+    permissionNames.includes(permission);
+
   const filteredMenuItems = menuItems.filter((item) =>
-    !isLoading && hasPermission(permissions, item.permission)
+    !isLoading && hasSidebarViewPermission(item.permission)
   );
 
-  const hasUserManagementPermission = !isLoading && hasPermission(permissions, "view-users");
-  const hasRolesPermission = !isLoading && hasPermission(permissions, "view-roles");
+  const hasUserManagementPermission = !isLoading && hasSidebarViewPermission("view-users");
+  const hasRolesPermission = !isLoading && hasSidebarViewPermission("view-roles");
 
   
-  const showUserManagementMenu = isLoading ? isUserModuleActive : (hasUserManagementPermission || hasRolesPermission || isUserModuleActive);
+  const showUserManagementMenu = !isLoading && (hasUserManagementPermission || hasRolesPermission);
 
   return (
     <SidebarProvider style={{ "--sidebar-width": "240px" } as React.CSSProperties}>
@@ -162,7 +172,7 @@ export default function Layout() {
                   {isUserMenuOpen && (
                     <div className="mt-2 ml-6 space-y-1 border-l border-violet-300/70 pl-4 group-data-[collapsible=icon]:hidden dark:border-slate-600">
                      
-                      {(hasUserManagementPermission || isUserModuleActive || isLoading) && (
+                      {hasUserManagementPermission && (
                         <SidebarMenuButton
                           onClick={() => navigate("/usermanagement")}
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-200 ${
@@ -177,7 +187,7 @@ export default function Layout() {
                       )}
 
                       {/* Sub item: Roles */}
-                      {(hasRolesPermission || currentPath.startsWith("/roles") || (isLoading && currentPath.startsWith("/roles"))) && (
+                      {hasRolesPermission && (
                         <SidebarMenuButton
                           onClick={() => navigate("/roles")}
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-200 ${
