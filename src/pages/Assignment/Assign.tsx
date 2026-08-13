@@ -16,7 +16,9 @@ const AddNewAsset = () => {
   const isEditMode = !!stateEditItem || !!stateId || !!routeId;
 
   const [formData, setFormData] = useState({
+    users_id: '',
     users_name: '',
+    assets_id: '',
     assets_name: '',        
     assigned_date: '',
     note: '',
@@ -82,7 +84,9 @@ const AddNewAsset = () => {
   useEffect(() => {
     if (!isEditMode) {
       setFormData({
+        users_id: '',
         users_name: '',
+        assets_id: '',
         assets_name: '',
         assigned_date: '',
         note: '',
@@ -106,7 +110,9 @@ const AddNewAsset = () => {
 
     if (activeItem) {
       setFormData({
+        users_id: activeItem.users_id || activeItem.user_id || activeItem.user?.id || '',
         users_name: activeItem.users_name || activeItem.employee_name || '',
+        assets_id: activeItem.assets_id || activeItem.asset_id || activeItem.asset?.id || '',
         assets_name: activeItem.assets_name || activeItem.asset_name || '',
         assigned_date: formatToInputDate(activeItem.assigned_date),
         note: activeItem.note || '',
@@ -125,12 +131,20 @@ const AddNewAsset = () => {
   };
 
   const handleUserSelect = (user: any) => {
-    setFormData({ ...formData, users_name: user.name });
+    setFormData({
+      ...formData,
+      users_id: String(user.id || user.users_id || user.employee_id || ''),
+      users_name: user.name,
+    });
     setIsUserOpen(false);
   };
 
   const handleAssetSelect = (asset: any) => {
-    setFormData({ ...formData, assets_name: asset.name });
+    setFormData({
+      ...formData,
+      assets_id: String(asset.id || asset.assets_id || asset.asset_id || ''),
+      assets_name: asset.name,
+    });
     setIsAssetOpen(false);
   };
 
@@ -163,7 +177,9 @@ const AddNewAsset = () => {
 
     try {
       const assignmentPayload = {
+        users_id: formData.users_id,
         users_name: formData.users_name.trim(),
+        assets_id: formData.assets_id,
         assets_name: formData.assets_name.trim(),
         assigned_date: formData.assigned_date,
         note: formData.note.trim() || null,

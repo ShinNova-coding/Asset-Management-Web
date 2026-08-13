@@ -35,16 +35,46 @@ const normalizePermissions = (permissions: any[] = []) =>
     })
     .filter(Boolean);
 
+const mergePermissions = (...permissionGroups: any[][]) => {
+  const permissionMap = new Map<string, any>();
+
+  permissionGroups
+    .flat()
+    .forEach((permission) => {
+      const normalized = normalizePermissions([permission])[0];
+      if (normalized?.name) {
+        permissionMap.set(normalized.name, normalized);
+      }
+    });
+
+  return Array.from(permissionMap.values());
+};
+
+const getLoginToken = (data: any) =>
+  data?.token || data?.data?.token || data?.data?.data?.token || "";
+
+const getRolesFromResponse = (response: any) => {
+  const roles = response?.data?.data || response?.data || response || [];
+  return Array.isArray(roles) ? roles : [];
+};
+
+const normalizeRoleName = (roleName: string) =>
+  String(roleName || "").trim().toLowerCase();
+
+const getPrimaryRoleName = (user: any) => {
+  const role = Array.isArray(user?.roles) ? user.roles[0] : null;
+  return role?.name || user?.role?.name || user?.role || user?.role_name || "Employee";
+};
+
 const getRolePermissionsFromApi = async (roleName: string) => {
   if (!roleName) return [];
 
   try {
     const response = await apiRequest("/role", "GET");
-    const roles = response?.data?.data || response?.data || response || [];
-    if (!Array.isArray(roles)) return [];
+    const roles = getRolesFromResponse(response);
 
     const matchingRole = roles.find((role: any) =>
-      String(role?.name || "").toLowerCase() === roleName.toLowerCase()
+      normalizeRoleName(role?.name) === normalizeRoleName(roleName)
     );
 
     return normalizePermissions(matchingRole?.permissions || []);
@@ -92,38 +122,42 @@ const Login = () => {
 
     try {
       const data = await loginUser({ email, password });
-      if (data.success) {
-      const loggedInUser = getLoginUser(data);
-      const fullLoggedInUser =
-        loggedInUser && typeof loggedInUser === "object" && !Array.isArray(loggedInUser)
-          ? (await getUserByIdentifier(loggedInUser.id || loggedInUser.employee_id || loggedInUser.email || email)) || loggedInUser
-          : await getUserByIdentifier(email);
+      if (data.success || data.status === "success") {
+        const token = getLoginToken(data);
+        localStorage.setItem("token", token);
+        localStorage.setItem("user_email", email);
 
-      localStorage.setItem("token", data.token || data.data?.token || "");
-      localStorage.setItem("user_email", email);
-      if (fullLoggedInUser && typeof fullLoggedInUser === "object" && !Array.isArray(fullLoggedInUser)) {
-        const storedLoginUser = {
-          ...fullLoggedInUser,
-          email: fullLoggedInUser.email || email,
-        };
-        localStorage.setItem("user", JSON.stringify(storedLoginUser));
-        cacheProfileImage(storedLoginUser);
-      } else {
-        localStorage.setItem("user", JSON.stringify({ email }));
-      }
+        const loggedInUser = getLoginUser(data);
+        const fullLoggedInUser =
+          loggedInUser && typeof loggedInUser === "object" && !Array.isArray(loggedInUser)
+            ? (await getUserByIdentifier(loggedInUser.id || loggedInUser.employee_id || loggedInUser.email || email)) || loggedInUser
+            : await getUserByIdentifier(email);
+
+        if (fullLoggedInUser && typeof fullLoggedInUser === "object" && !Array.isArray(fullLoggedInUser)) {
+          const storedLoginUser = {
+            ...fullLoggedInUser,
+            email: fullLoggedInUser.email || email,
+          };
+          localStorage.setItem("user", JSON.stringify(storedLoginUser));
+          cacheProfileImage(storedLoginUser);
+        } else {
+          localStorage.setItem("user", JSON.stringify({ email }));
+        }
 
         let exactRoleName = "Employee"; 
         let exactPermissions: any[] = []; 
 
-        if (fullLoggedInUser?.roles?.length > 0) {
-          exactRoleName = fullLoggedInUser.roles[0].name; 
-          exactPermissions = normalizePermissions(fullLoggedInUser.roles[0].permissions || fullLoggedInUser.permissions || []);
-          if (exactPermissions.length === 0) {
-            exactPermissions = await getRolePermissionsFromApi(exactRoleName);
-          }
+        if (fullLoggedInUser) {
+          const primaryRole = Array.isArray(fullLoggedInUser?.roles) ? fullLoggedInUser.roles[0] : null;
+          exactRoleName = getPrimaryRoleName(fullLoggedInUser); 
+          exactPermissions = normalizePermissions(primaryRole?.permissions || fullLoggedInUser.permissions || []);
+          exactPermissions = mergePermissions(
+            exactPermissions,
+            await getRolePermissionsFromApi(exactRoleName)
+          );
           
           if (exactPermissions.length === 0) {
-            const normalizedRoleName = exactRoleName.toLowerCase();
+            const normalizedRoleName = normalizeRoleName(exactRoleName);
             if (normalizedRoleName === "super-admin") {
                exactPermissions = [
                 { id: 7, name: "view-assets" },
@@ -160,7 +194,38 @@ const Login = () => {
                 { id: 103, name: "delete-roles" },
                ];
             } else if (normalizedRoleName === "admin") {
-               exactPermissions = [{ id: 7, name: "view-assets" }, { id: 12, name: "view-users" }, { id: 26, name: "view-dashboard" }, { id: 28, name: "view-assignments" }, { id: 2, name: "view-categories" }, { id: 33, name: "view-maintenances" }];
+               exactPermissions = [
+                { id: 2, name: "view-categories" },
+                { id: 3, name: "create-categories" },
+                { id: 4, name: "update-categories" },
+                { id: 5, name: "delete-categories" },
+                { id: 7, name: "view-assets" },
+                { id: 8, name: "create-assets" },
+                { id: 9, name: "update-assets" },
+                { id: 10, name: "delete-assets" },
+                { id: 12, name: "view-users" },
+                { id: 13, name: "create-users" },
+                { id: 14, name: "update-users" },
+                { id: 15, name: "delete-users" },
+                { id: 26, name: "view-dashboard" },
+                { id: 28, name: "view-assignments" },
+                { id: 29, name: "create-assignments" },
+                { id: 30, name: "update-assignments" },
+                { id: 31, name: "delete-assignments" },
+                { id: 33, name: "view-maintenances" },
+                { id: 34, name: "create-maintenances" },
+                { id: 35, name: "update-maintenances" },
+                { id: 36, name: "delete-maintenances" },
+                { id: 37, name: "get-notifications" },
+                { id: 38, name: "create-asset-requests" },
+                { id: 39, name: "approve-asset-requests" },
+                { id: 40, name: "cancel-asset-requests" },
+                { id: 43, name: "create-maintenance-requests" },
+                { id: 44, name: "approve-maintenance-requests" },
+                { id: 45, name: "cancel-maintenance-requests" },
+                { id: 46, name: "update-maintenance-requests" },
+                { id: 48, name: "view-expenses" },
+               ];
             } else if (normalizedRoleName === "hr") {
                exactPermissions = [{ id: 2, name: "view-categories" }, { id: 7, name: "view-assets" }, { id: 26, name: "view-dashboard" }, { id: 28, name: "view-assignments" }, { id: 33, name: "view-maintenances" }, { id: 37, name: "get-notifications" }];
             } else if (normalizedRoleName === "employee") {

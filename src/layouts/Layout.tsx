@@ -28,6 +28,7 @@ import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import Navigation from "@/components/ui/navigation";
 import { BsBoxFill } from "react-icons/bs";
 import { useAuth } from "@/hooks/useAuth";
+import { hasPermission } from "@/lib/routeAccess";
 
 const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard", permission: "view-dashboard" },
@@ -71,16 +72,12 @@ export default function Layout() {
   
   const isLoading = !permissions || !Array.isArray(permissions);
 
-  const permissionNames = isLoading
-    ? []
-    : permissions.map((p: any) => (typeof p === "string" ? p : p.name));
-
   const filteredMenuItems = menuItems.filter((item) =>
-    permissionNames.includes(item.permission)
+    !isLoading && hasPermission(permissions, item.permission)
   );
 
-  const hasUserManagementPermission = permissionNames.includes("view-users");
-  const hasRolesPermission = permissionNames.includes("view-roles");
+  const hasUserManagementPermission = !isLoading && hasPermission(permissions, "view-users");
+  const hasRolesPermission = !isLoading && hasPermission(permissions, "view-roles");
 
   
   const showUserManagementMenu = isLoading ? isUserModuleActive : (hasUserManagementPermission || hasRolesPermission || isUserModuleActive);

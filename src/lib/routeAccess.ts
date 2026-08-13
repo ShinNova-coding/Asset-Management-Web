@@ -39,8 +39,19 @@ export const getStoredPermissions = (): Permission[] => {
   }
 }
 
+const normalizeRole = (role: string | null) =>
+  String(role || "").trim().toLowerCase()
+
+const isRolePermission = (permission: string) =>
+  permission.endsWith("-roles")
+
+export const isAdminRole = () => {
+  const role = normalizeRole(localStorage.getItem("user_role"))
+  return role === "admin" || role === "super-admin" || role === "superadmin"
+}
+
 export const hasPermission = (permissions: Permission[], permission: string) =>
-  localStorage.getItem("user_role")?.toLowerCase() === "super-admin" ||
+  (isAdminRole() && !isRolePermission(permission)) ||
   permissions.some((item) => item?.name === permission)
 
 export const hasStoredPermission = (permission: string) =>
