@@ -172,7 +172,7 @@ const AddNewAsset = () => {
 
       console.log(" Sending Payload to Assignment API:", assignmentPayload);
 
-      const API_URL = "http://192.168.18.32:1011/api/assignment"; 
+      const API_URL = "http://192.168.100.163:1011/api/assignment"; 
       
       const targetId = stateEditItem?.id || stateId || routeId;
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
