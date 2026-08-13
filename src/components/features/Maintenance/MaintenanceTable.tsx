@@ -63,6 +63,14 @@ const getMaintenanceAssetCode = (item: any) => {
   )
 }
 
+const getMaintenanceAssetId = (item: any) => {
+  return item?.asset?.id || item?.asset_id || item?.assets_id || null
+}
+
+const getEmployeeName = (item: any) => {
+  return item?.user?.name || item?.employee_name || ""
+}
+
 interface MaintenanceTableProps {
   data: Maintenance[]
   onRefresh?: () => void
@@ -140,8 +148,8 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
 
   const openEditDialog = (item: Maintenance) => {
     setSelectedItem(item)
-    setEditEmployeeName(item.user?.name ?? "")      
-    setEditAssetCode(item.asset?.asset_code ?? "")     
+    setEditEmployeeName(getEmployeeName(item))      
+    setEditAssetCode(getMaintenanceAssetCode(item) === "Maintenance request" ? "" : getMaintenanceAssetCode(item))     
     
     setEditCategory(getCategoryName(item));
     
@@ -185,8 +193,11 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
 
   const submitRemark = async () => {
     if (!selectedItem) return
-    const targetAssetId = selectedItem.asset?.id || (selectedItem as any).asset_id;
+    const item = selectedItem
+    const targetAssetId = getMaintenanceAssetId(item);
     if (!targetAssetId) return
+
+    closeDialog()
 
     try {
       await apiFetch(`/admin/maintenance/status`, {
@@ -201,17 +212,17 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
 
       setData((prev) =>
         prev.map((row) =>
-          row.id === selectedItem.id
+          row.id === item.id
             ? { ...row, status: "Approved", remark: remarkText }
             : row
         )
       )
 
       setToastMessage("Approved successfully")
-      closeDialog()
       onRefresh?.()  
     } catch (error) {
       console.error(error)
+      setToastMessage("Approval was sent, but the page did not receive a success response.")
     }
   }
 
@@ -268,7 +279,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
     if (!deleteTarget) return
 
     const { item, label } = deleteTarget
-    const targetAssetId = item.asset?.id || (item as any).asset_id;
+    const targetAssetId = getMaintenanceAssetId(item);
     if (!targetAssetId) return
 
     try {
@@ -442,8 +453,8 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
       const search = filterValue.toLowerCase()
       const item = row.original as any
       
-      const employeeName = item.user?.name?.toLowerCase() || ""
-      const assetCode = item.asset?.asset_code?.toLowerCase() || ""
+      const employeeName = getEmployeeName(item).toLowerCase()
+      const assetCode = getMaintenanceAssetCode(item).toLowerCase()
       const status = item.status?.toLowerCase() || ""
       const vendor = item.vendor?.toLowerCase() || ""
       const category = getCategoryName(item).toLowerCase()

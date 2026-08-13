@@ -221,6 +221,7 @@ const Login = () => {
                 { id: 5, name: "delete-categories" },
                 { id: 7, name: "view-assets" },
                 { id: 8, name: "create-assets" },
+                { id: 58, name: "view-activitylogs" },
                 { id: 9, name: "update-assets" },
                 { id: 10, name: "delete-assets" },
                 { id: 12, name: "view-users" },

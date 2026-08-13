@@ -33,6 +33,7 @@ export default function MaintenancePage() {
         }
 
         return {
+          ...item,
           id: item.id,
           employee_name: item.user?.name ?? "-",
           asset_code: item.asset?.asset_code ?? "-",
@@ -45,6 +46,7 @@ export default function MaintenancePage() {
           user: item.user,
           asset: item.asset,
           category_obj: item.category,
+          asset_id: item.asset?.id ?? item.asset_id ?? item.assets_id ?? null,
         };
       });
 

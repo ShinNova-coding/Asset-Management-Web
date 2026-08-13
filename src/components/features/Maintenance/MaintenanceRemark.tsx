@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { FiX } from "react-icons/fi"
 import type { Maintenance } from "@/data/maintenance"
@@ -12,6 +11,14 @@ type Props = {
   onChange: (v: string) => void
   onClose: () => void
   onSubmit: () => void
+}
+
+const getEmployeeName = (item: any) => item?.user?.name || item?.employee_name || "-"
+const getAssetCode = (item: any) => item?.asset?.asset_code || item?.asset_code || "-"
+const getApproverName = (item: any) => {
+  return typeof item?.accepted_by === "object" && item.accepted_by
+    ? item.accepted_by.name
+    : item?.approver || item?.accepted_by || "-"
 }
 
 export function MaintenanceRemark({ open, item, remarkText, onChange, onClose, onSubmit }: Props) {
@@ -41,12 +48,12 @@ export function MaintenanceRemark({ open, item, remarkText, onChange, onClose, o
         <div className="grid gap-4 sm:grid-cols-2 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
         <div>
             <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">Employee Name</p>
-            <p className="text-sm font-medium text-slate-800 mt-0.5">{item.user?.name ?? "-"}</p>
+            <p className="text-sm font-medium text-slate-800 mt-0.5">{getEmployeeName(item)}</p>
         </div>
 
         <div>
             <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">Asset Code</p>
-            <p className="text-sm font-medium text-slate-800 mt-0.5">{item.asset?.asset_code ?? "-"}</p>
+            <p className="text-sm font-medium text-slate-800 mt-0.5">{getAssetCode(item)}</p>
         </div>
 
         <div>
@@ -56,7 +63,7 @@ export function MaintenanceRemark({ open, item, remarkText, onChange, onClose, o
 
         <div>
             <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">Approver</p>
-            <p className="text-sm font-medium text-slate-800 mt-0.5">{item.accepted_by?.name ?? "-"}</p>
+            <p className="text-sm font-medium text-slate-800 mt-0.5">{getApproverName(item)}</p>
         </div>
         </div>
             <label className="grid gap-2">
