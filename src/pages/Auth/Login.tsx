@@ -107,6 +107,30 @@ const getUserByIdentifier = async (identifier: string) => {
   return null;
 };
 
+const mergeUserDetails = (loginUser: any, fetchedUser: any, fallbackEmail: string) => {
+  const baseUser =
+    loginUser && typeof loginUser === "object" && !Array.isArray(loginUser)
+      ? loginUser
+      : {};
+  const profileUser =
+    fetchedUser && typeof fetchedUser === "object" && !Array.isArray(fetchedUser)
+      ? fetchedUser
+      : {};
+
+  return {
+    ...baseUser,
+    ...profileUser,
+    roles: Array.isArray(profileUser.roles) && profileUser.roles.length > 0 ? profileUser.roles : baseUser.roles,
+    permissions:
+      Array.isArray(profileUser.permissions) && profileUser.permissions.length > 0
+        ? profileUser.permissions
+        : baseUser.permissions,
+    role: profileUser.role || baseUser.role,
+    role_name: profileUser.role_name || baseUser.role_name,
+    email: profileUser.email || baseUser.email || fallbackEmail,
+  };
+};
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -128,18 +152,14 @@ const Login = () => {
         localStorage.setItem("user_email", email);
 
         const loggedInUser = getLoginUser(data);
-        const fullLoggedInUser =
-          loggedInUser && typeof loggedInUser === "object" && !Array.isArray(loggedInUser)
-            ? (await getUserByIdentifier(loggedInUser.id || loggedInUser.employee_id || loggedInUser.email || email)) || loggedInUser
-            : await getUserByIdentifier(email);
+        const fetchedUser = await getUserByIdentifier(
+          loggedInUser?.id || loggedInUser?.employee_id || loggedInUser?.email || email
+        );
+        const fullLoggedInUser = mergeUserDetails(loggedInUser, fetchedUser, email);
 
         if (fullLoggedInUser && typeof fullLoggedInUser === "object" && !Array.isArray(fullLoggedInUser)) {
-          const storedLoginUser = {
-            ...fullLoggedInUser,
-            email: fullLoggedInUser.email || email,
-          };
-          localStorage.setItem("user", JSON.stringify(storedLoginUser));
-          cacheProfileImage(storedLoginUser);
+          localStorage.setItem("user", JSON.stringify(fullLoggedInUser));
+          cacheProfileImage(fullLoggedInUser);
         } else {
           localStorage.setItem("user", JSON.stringify({ email }));
         }
@@ -246,7 +266,7 @@ const Login = () => {
         setError(data.message || "Login failed.");
       }
     } catch (err) {
-      setError("Something went wrong. Cannot connect to server.");
+      setError(err instanceof Error ? err.message : "Something went wrong. Cannot connect to server.");
     } finally {
       setLoading(false);
     }

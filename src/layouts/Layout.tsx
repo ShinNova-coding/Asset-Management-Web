@@ -83,14 +83,16 @@ export default function Layout() {
     permissionNames.includes(permission);
 
   const filteredMenuItems = menuItems.filter((item) =>
-    !isLoading && hasSidebarViewPermission(item.permission)
+    hasSidebarViewPermission(item.permission)
   );
 
   const hasUserManagementPermission = !isLoading && hasSidebarViewPermission("view-users");
   const hasRolesPermission = !isLoading && hasSidebarViewPermission("view-roles");
 
   
-  const showUserManagementMenu = !isLoading && (hasUserManagementPermission || hasRolesPermission);
+  const showUserManagementMenu = isLoading
+    ? isUserModuleActive
+    : hasUserManagementPermission || hasRolesPermission || isUserModuleActive;
 
   return (
     <SidebarProvider style={{ "--sidebar-width": "240px" } as React.CSSProperties}>
@@ -172,7 +174,7 @@ export default function Layout() {
                   {isUserMenuOpen && (
                     <div className="mt-2 ml-6 space-y-1 border-l border-violet-300/70 pl-4 group-data-[collapsible=icon]:hidden dark:border-slate-600">
                      
-                      {hasUserManagementPermission && (
+                      {(hasUserManagementPermission || isUserModuleActive || isLoading) && (
                         <SidebarMenuButton
                           onClick={() => navigate("/usermanagement")}
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-200 ${
@@ -187,7 +189,7 @@ export default function Layout() {
                       )}
 
                       {/* Sub item: Roles */}
-                      {hasRolesPermission && (
+                      {(hasRolesPermission || currentPath.startsWith("/roles") || (isLoading && currentPath.startsWith("/roles"))) && (
                         <SidebarMenuButton
                           onClick={() => navigate("/roles")}
                           className={`flex w-full items-center gap-3 rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-200 ${
