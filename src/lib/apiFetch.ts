@@ -21,9 +21,9 @@ export async function apiFetch(url: string, options: any = {}) {
         : JSON.stringify(options.body);
   }
 
-  const res = await fetch(`http://192.168.18.32:1011/api${url}`, config);
+  const res = await fetch(`http://192.168.100.163:1011/api${url}`, config);
 
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
     throw new Error(data?.message || `API Error ${res.status}`);

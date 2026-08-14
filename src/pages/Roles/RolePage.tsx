@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { fetchRoles, deleteRole } from "@/lib/axios"; 
-import { hasStoredPermission } from "@/lib/routeAccess";
+import { hasStoredPermission } from "@/lib/utils";
 import { MdOutlineModeEditOutline } from "react-icons/md";
 export default function RolesPage() {
   const [roles, setRoles] = useState<any[]>([]);

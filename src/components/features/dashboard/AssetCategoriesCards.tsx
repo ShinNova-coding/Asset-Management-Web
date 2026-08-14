@@ -27,7 +27,7 @@ const AssetCategoriesCards = ({ data }: { data?: any }) => {
               paddingAngle={8}
               dataKey="value"
             >
-              {chartData.map((entry, index) => (
+              {chartData.map((_, index) => (
                 <Cell key={index} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>

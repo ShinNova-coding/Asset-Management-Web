@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { 
   Dialog, 
   DialogContent, 
@@ -19,9 +19,10 @@ interface DeleteProps {
   categoryId: string;
   categoryName: string;
   onDeleted: () => void;
+  triggerIcon?: ReactNode;
 }
 
-export default function CategoriesDelete({ categoryId, categoryName, onDeleted }: DeleteProps) {
+export default function CategoriesDelete({ categoryId, categoryName, onDeleted, triggerIcon }: DeleteProps) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -44,8 +45,8 @@ export default function CategoriesDelete({ categoryId, categoryName, onDeleted }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <RiDeleteBinLine className="h-5 w-5 text-red-600 cursor-pointer" />
+      <DialogTrigger render={<button type="button" className="inline-flex" />}>
+        {triggerIcon || <RiDeleteBinLine className="h-5 w-5 text-red-600 cursor-pointer" />}
       </DialogTrigger>
       
       

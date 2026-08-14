@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button"
 import { InventoryFilter } from "./InventoryFilter"
 import { columns as baseColumns } from "./InventoryColumns"
 import { apiRequest } from "@/lib/apiService";
-import { hasStoredPermission } from "@/lib/routeAccess";
+import { hasStoredPermission } from "@/lib/utils";
 interface InventoryTableProps {
   data: any[]
 }

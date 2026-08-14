@@ -28,6 +28,7 @@ import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import Navigation from "@/components/ui/navigation";
 import { BsBoxFill } from "react-icons/bs";
 import { useAuth } from "@/hooks/useAuth";
+import { getStoredPermissions, hasPermission, isSuperAdmin } from "@/lib/utils";
 
 const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, path: "/dashboard", permission: "view-dashboard" },
@@ -71,16 +72,8 @@ export default function Layout() {
   
   const isLoading = !permissions || !Array.isArray(permissions);
 
-  const permissionNames = isLoading
-    ? []
-    : permissions
-        .map((permission: any) => (
-          typeof permission === "string" ? permission : permission?.name
-        ))
-        .filter(Boolean);
-
   const hasSidebarViewPermission = (permission: string) =>
-    permissionNames.includes(permission);
+    isSuperAdmin() || hasPermission(getStoredPermissions(), permission);
 
   const filteredMenuItems = menuItems.filter((item) =>
     hasSidebarViewPermission(item.permission)

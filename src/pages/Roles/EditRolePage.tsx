@@ -114,7 +114,7 @@ export default function EditRolePage() {
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle className="text-[#7C3AED]">Editing: {role.name}</CardTitle>
             <Button onClick={handleUpdate} disabled={isSaving}>
-              {isSaving ? <Loader2 className="animate-spin w-4 h-4 mr-2 text-[#7C3AED]" /> : <Save className="w-4 h-4 mr-2" />} 
+              {isSaving ? <Loader2 className="animate-spin w-4 h-4 mr-2 text-[#7C3AED]  bg-[#7C3AED]" /> : <Save className="w-4 h-4 mr-2 text-[#7C3AED]" />} 
               Save Changes
             </Button>
           </CardHeader>

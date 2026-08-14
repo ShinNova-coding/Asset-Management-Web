@@ -5,6 +5,122 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export type Permission = {
+  id?: number | string
+  name?: string
+}
+
+export const routeAccessRules = [
+  { path: "/dashboard", permission: "view-dashboard" },
+  { path: "/categories", permission: "view-categories" },
+  { path: "/categories/add", permission: "create-categories" },
+  { path: "/inventory", permission: "view-assets" },
+  { path: "/inventory/add", permission: "create-assets" },
+  { path: "/assignment", permission: "view-assignments" },
+  { path: "/assignment/add", permission: "create-assignments" },
+  { path: "/maintenance", permission: "view-maintenances" },
+  { path: "/maintenance/:id", permission: "view-maintenances" },
+  { path: "/maintenance/:id/complete", permission: "update-maintenances" },
+  { path: "/activity", permission: "view-activitylogs" },
+  { path: "/expense", permission: "view-expenses" },
+  { path: "/expense/report", permission: "view-expenses" },
+  { path: "/expense/createexpenseform", permission: "create-expenses" },
+  { path: "/usermanagement", permission: "view-users" },
+  { path: "/employees", permission: "view-users" },
+  { path: "/employee/:id", permission: "view-users" },
+  { path: "/add-employee", permission: "create-users" },
+  { path: "/roles", permission: "view-roles" },
+  { path: "/roles/create", permission: "create-roles" },
+  { path: "/roles/:id", permission: "update-roles" },
+]
+
+const normalizeRole = (role: string | null) =>
+  String(role || "").trim().toLowerCase()
+
+const getCachedRolePermissions = (role: string | null): Permission[] => {
+  const normalizedRole = normalizeRole(role)
+  if (!normalizedRole) return []
+
+  try {
+    const cache = JSON.parse(localStorage.getItem("role_permission_cache") || "{}")
+    const permissions = cache[normalizedRole]
+    return Array.isArray(permissions) ? permissions : []
+  } catch {
+    return []
+  }
+}
+
+const getFallbackPermissionsForRole = (role: string | null): Permission[] => {
+  const normalizedRole = normalizeRole(role)
+
+  if (normalizedRole === "manager") {
+    return [{ name: "view-dashboard" }]
+  }
+
+  return []
+}
+
+export const getStoredPermissions = (): (string | Permission)[] => {
+  const saved = localStorage.getItem("user_permissions")
+  const role = localStorage.getItem("user_role")
+
+  try {
+    const parsed = saved ? JSON.parse(saved) : []
+    const storedPermissions = Array.isArray(parsed) ? parsed : []
+    if (storedPermissions.length > 0) return storedPermissions
+  } catch {
+    localStorage.removeItem("user_permissions")
+  }
+
+  const cachedPermissions = getCachedRolePermissions(role)
+  if (cachedPermissions.length > 0) return cachedPermissions
+
+  return getFallbackPermissionsForRole(role)
+}
+
+const isRolePermission = (permission: string) =>
+  permission.endsWith("-roles")
+
+export const isAdminRole = () => {
+  const role = normalizeRole(localStorage.getItem("user_role"))
+  return (
+    role === "admin" ||
+    role === "super-admin" ||
+    role === "superadmin" ||
+    role === "system-admin" ||
+    role === "system admin"
+  )
+}
+
+export const isSuperAdmin = () => {
+  const role = normalizeRole(localStorage.getItem("user_role"))
+  return (
+    role === "super-admin" ||
+    role === "superadmin" ||
+    role === "system-admin" ||
+    role === "system admin"
+  )
+}
+
+export const hasPermission = (permissions: (string | Permission)[], permission: string) =>
+  isSuperAdmin() ||
+  (isAdminRole() && !isRolePermission(permission)) ||
+  permissions.some((item) =>
+    typeof item === "string"
+      ? item.toLowerCase() === permission.toLowerCase()
+      : item?.name?.toLowerCase() === permission.toLowerCase()
+  )
+
+export const hasStoredPermission = (permission: string) =>
+  hasPermission(getStoredPermissions(), permission)
+
+export const getFirstAccessiblePath = (permissions = getStoredPermissions()) =>
+  routeAccessRules.find((rule) => {
+    if (rule.path.includes(":")) return false
+    if (["create-", "update-", "delete-"].some((prefix) => rule.permission.startsWith(prefix))) return false
+    return hasPermission(permissions, rule.permission)
+  })?.path || ""
+
 export function normalizeImageSource(value?: string | null): string {
   const fallback = "https://via.placeholder.com/120"
   if (!value) return fallback
@@ -17,11 +133,11 @@ export function normalizeImageSource(value?: string | null): string {
   }
 
   if (/^\/(storage|uploads|images)\//i.test(trimmed)) {
-    return `http://192.168.18.32:1011${trimmed}`
+    return `http://192.168.100.163:1011${trimmed}`
   }
 
   if (/^(storage|uploads|images)\//i.test(trimmed)) {
-    return `http://192.168.18.32:1011/${trimmed}`
+    return `http://192.168.100.163:1011/${trimmed}`
   }
 
   if (/^(https?:\/\/|\/|blob:)/i.test(trimmed)) {

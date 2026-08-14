@@ -8,6 +8,7 @@ import {
   getFilteredRowModel, 
   getPaginationRowModel, 
   flexRender,
+  type ColumnDef,
   type SortingState 
 } from "@tanstack/react-table";
 
@@ -45,8 +46,15 @@ function DeleteButton() {
   ); 
 }
 
+type Category = {
+  id: string
+  name: string
+  created_at?: string
+  updated_at?: string
+}
+
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,7 +78,7 @@ export default function CategoriesPage() {
     }
   };
 
-  const columns = useMemo(() => [
+  const columns = useMemo<ColumnDef<Category>[]>(() => [
     { 
       accessorKey: "no", 
       header: "No.",
@@ -87,7 +95,7 @@ export default function CategoriesPage() {
       accessorKey: "created_at", 
       header: "Created At", 
       size: 160,
-      cell: (info) => (info.getValue() as string)?.split('T')[0] 
+      cell: (info) => (info.getValue() as string | undefined)?.split('T')[0] 
     },
     { 
       accessorKey: "updated_at", 
@@ -106,7 +114,7 @@ export default function CategoriesPage() {
         </div>
       )
     },
-  ], [currentPage]);
+  ], [fetchCategories]);
 
   
 const table = useReactTable({

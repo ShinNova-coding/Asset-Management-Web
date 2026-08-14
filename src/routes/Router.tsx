@@ -17,7 +17,6 @@ import MaintenanceEditPage from "@/pages/Maintenance/MaintenanceEditPage"
 import AddEmployeeForm from "@/pages/UserManagement/AddNewEmployee"
 import AddNewAsset from "@/pages/Inventory/AddNewAsset"
 import { InventoryDetail } from "@/components/features/Inventory/InventoryDetail"
-import EmployeeListPage from "@/pages/UserManagement/EmployeeListPage"
 import EmployeeDetailsPage from "@/pages/UserManagement/EmployeeDetailsPage"
 import MaintenanceDetailsForm from "@/components/features/Maintenance/MaintenanceDetailsForm"
 import AssignmentDetailPage from "@/components/features/Assignment/AssignmentDetailPage"
@@ -25,11 +24,10 @@ import AssignmentEditPage from "@/pages/Assignment/AssignmentEditPage"
 import EditRolePage from "@/pages/Roles/EditRolePage"
 import CategoriesPage from "@/pages/Categories/CategoriesPage"
 import ExpensePage from "@/pages/Expense/ExpensePage" 
-import ExpenseTable from "@/pages/Expense/ExpenseTable" 
 import { CreateExpenseForm } from "@/pages/Expense/CreateExpenseForm"
-import ExpenseDashboard from "@/components/features/Dashboard/ExpenseDashboard"; // Adjust path as needed
+import ExpenseDashboard from "@/components/features/dashboard/ExpenseDashboard";
 import AddNewCategories from "@/pages/Categories/AddNewCategories"
-import { getFirstAccessiblePath, getStoredPermissions, hasPermission } from "@/lib/routeAccess"
+import { getFirstAccessiblePath, getStoredPermissions, hasPermission } from "@/lib/utils"
 
 function RequirePermission({
   permission,

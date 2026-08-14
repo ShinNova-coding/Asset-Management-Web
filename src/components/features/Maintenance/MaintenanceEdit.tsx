@@ -1,7 +1,5 @@
 "use client"
 
-import React from "react"
-
 import { MdOutlineModeEditOutline } from "react-icons/md";
 interface EditProps {
   onEdit?: () => void

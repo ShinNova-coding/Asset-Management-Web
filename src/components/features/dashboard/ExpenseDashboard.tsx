@@ -15,10 +15,10 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface ExpenseDashboardProps {
-  data: any[]; 
+  data?: any[]; 
 }
 
-const ExpenseDashboard: React.FC<ExpenseDashboardProps> = ({ data }) => {
+const ExpenseDashboard: React.FC<ExpenseDashboardProps> = ({ data = [] }) => {
   const safeData = Array.isArray(data) ? data : [];
 
   //  (Monthly Aggregation)

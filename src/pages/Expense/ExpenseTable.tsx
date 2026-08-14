@@ -10,7 +10,7 @@ import { Input } from '@base-ui/react';
 import { ExpenseDetailModal } from './ExpenseDetailModal';
 import type { ExpenseDetailData } from './ExpenseDetailModal';
 import { RiDeleteBinLine } from "react-icons/ri";
-import { hasStoredPermission } from "@/lib/routeAccess";
+import { hasStoredPermission } from "@/lib/utils";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import {

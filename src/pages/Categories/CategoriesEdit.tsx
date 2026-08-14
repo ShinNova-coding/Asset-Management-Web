@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, type ReactNode } from "react";
 import { 
   Dialog, 
   DialogContent, 
@@ -16,9 +16,10 @@ import { apiRequest } from "@/lib/apiService";
 interface EditProps {
   category: { id: string; name: string };
   onUpdated: () => void;
+  triggerIcon?: ReactNode;
 }
 
-export default function CategoriesEdit({ category, onUpdated }: EditProps) {
+export default function CategoriesEdit({ category, onUpdated, triggerIcon }: EditProps) {
   const [name, setName] = useState(category.name);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -50,10 +51,8 @@ export default function CategoriesEdit({ category, onUpdated }: EditProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-       
-        <MdOutlineModeEditOutline className="h-5 w-5 text-[#7C3AED]" />
-        
+      <DialogTrigger render={<button type="button" className="inline-flex" />}>
+        {triggerIcon || <MdOutlineModeEditOutline className="h-5 w-5 text-[#7C3AED]" />}
       </DialogTrigger>
       <DialogContent className="bg-white">
         <DialogHeader>

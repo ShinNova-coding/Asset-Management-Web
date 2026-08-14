@@ -1,6 +1,6 @@
 
 
-const BASE_URL = "http://192.168.18.32:1011/api";
+const BASE_URL = "http://192.168.100.163:1011/api";
 
 export const apiRequest = async (
   endpoint: string,
@@ -20,7 +20,7 @@ export const apiRequest = async (
   };
 
   const response = await fetch(`${BASE_URL}${endpoint}`, config);
-  const result = await response.json();
+  const result = await response.json().catch(() => ({}));
 
   if (!response.ok) {
     throw new Error(result.message || "Operation failed");
@@ -116,7 +116,7 @@ export const loginUser = async (credentials: { email: string; password: string }
     body: JSON.stringify(credentials),
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(data.message || "Login failed");
   }
@@ -133,7 +133,7 @@ export async function getCategories() {
     redirect: 'follow'
   };
 
-  const response = await fetch("http://192.168.18.32:1011/api/category", requestOptions);
+  const response = await fetch("http://192.168.100.163:1011/api/category", requestOptions);
   if (!response.ok) {
     throw new Error("Failed to fetch categories");
   }

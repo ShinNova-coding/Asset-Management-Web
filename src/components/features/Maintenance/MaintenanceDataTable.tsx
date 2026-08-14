@@ -1,7 +1,6 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import { BiSolidSkipPreviousCircle } from "react-icons/bi";
 import {
   flexRender,
   getCoreRowModel,

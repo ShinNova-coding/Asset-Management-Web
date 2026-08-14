@@ -11,10 +11,14 @@ import {
 } from "recharts";
 import { apiRequest } from "@/lib/apiService";
 
-const UserCards: React.FC = () => {
-  const [data, setData] = useState<any>(null);
-  const [year, setYear] = useState("2026");
-  const [month, setMonth] = useState("June");
+type UserCardsProps = {
+  apiData?: any
+}
+
+const UserCards: React.FC<UserCardsProps> = ({ apiData }) => {
+  const [data, setData] = useState<any>(apiData?.user ?? null);
+  const [year] = useState("2026");
+  const [month] = useState("June");
 
   useEffect(() => {
     const fetchData = async () => {

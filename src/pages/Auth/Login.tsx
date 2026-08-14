@@ -5,8 +5,7 @@ import { LuEyeClosed, LuEye } from "react-icons/lu";
 import { useState } from "react"
 import { BsBoxFill } from "react-icons/bs"
 import { apiRequest, loginUser } from "@/lib/apiService";
-import { getFirstAccessiblePath } from "@/lib/routeAccess";
-import { cacheProfileImage } from "@/lib/utils";
+import { cacheProfileImage, getFirstAccessiblePath } from "@/lib/utils";
 
 const getLoginUser = (data: any) => {
   const candidates = [

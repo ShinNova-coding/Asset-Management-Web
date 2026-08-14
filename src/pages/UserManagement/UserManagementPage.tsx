@@ -5,7 +5,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Employee } from '../../types/employee';
 import { cacheProfileImage, getImageValue, normalizeImageSource } from '../../lib/utils';
-import { hasStoredPermission } from '../../lib/routeAccess';
+import { hasStoredPermission } from '../../lib/utils';
 import UserManagementEdit from '../../components/features/UserManagement/UserManagementEdit';
 import { apiFetch } from '../../lib/api';
 import { UserManagementSearch } from "@/components/features/UserManagement/UserManagementSearchBox";
@@ -208,7 +208,7 @@ const UserManagement: React.FC = () => {
         };
 
         
-        const response = await fetch(`http://192.168.18.32:1011/api/user/${targetId}`, requestOptions);
+        const response = await fetch(`http://192.168.100.163:1011/api/user/${targetId}`, requestOptions);
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));

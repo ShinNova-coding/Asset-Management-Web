@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { AssignmentTable } from "@/components/features/Assignment/AssignmentTable";
 import { assignmentData as fallbackData } from "@/data/assignmentdata";
 import type { Assignment } from "@/data/assignmentdata";
@@ -15,14 +14,11 @@ import { apiRequest } from "@/lib/apiService";
 const AssignmentPage = () => {
   const [data, setData] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
     targetId: null as string | number | null,
   });
-
-  const navigate = useNavigate();
- 
 
   const fetchAssignments = async () => {
     try {
@@ -67,14 +63,6 @@ const AssignmentPage = () => {
     doc.save(`assignments_report_${new Date().toISOString().slice(0, 10)}.pdf`);
   };
 
-  const handleEdit = (row: Assignment) => {
-    navigate(`/assignment/edit/${row.id}`, { state: { assignment: row } });
-  };
-
-  const handleDelete = (id: string | number) => {
-    setDeleteModal({ isOpen: true, targetId: id });
-  };
-
   const handleConfirmDelete = async () => {
     if (!deleteModal.targetId) return;
     try {
@@ -109,7 +97,10 @@ const AssignmentPage = () => {
           </div>
 
           <div className="rounded-xl bg-white shadow-sm overflow-hidden">
-            <AssignmentTable data={data} meta={{ editRow: handleEdit, deleteRow: handleDelete }} />
+            <AssignmentTable
+              data={data}
+              onDeleteSuccess={(id) => setData((prev) => prev.filter((item) => item.id !== Number(id)))}
+            />
           </div>
         </>
       )}

@@ -7,12 +7,12 @@ export const employees: Employee[] = Array.from(
     employee_id: `EMP${i + 1}`,
     name: `Employee ${i + 1}`,
     email: `emp${i + 1}@example.com`,
-    
+    address: "Yangon",
     position: "Software Engineer",
     status: i % 3 === 0 ? "Active" : i % 3 === 1 ? "Suspend" : "Resign",
     role: "User",
-    joined_date: "2023-01-01",
-    left_date: "-",
+    joinedDate: "2023-01-01",
+    leftDate: "-",
     phone: "+959123456789",
   })
 );

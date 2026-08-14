@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import DashboardCards from "../../components/features/Dashboard/DashboardCards";
-import AssetCategoriesCards from "../../components/features/Dashboard/AssetCategoriesCards";
-import UserCards from "../../components/features/Dashboard/UserCards";
-import ExpenseDashboard from "../../components/features/Dashboard/ExpenseDashboard";
+import DashboardCards from "../../components/features/dashboard/DashboardCards";
+import AssetCategoriesCards from "../../components/features/dashboard/AssetCategoriesCards";
+import UserCards from "../../components/features/dashboard/UserCards";
+import ExpenseDashboard from "../../components/features/dashboard/ExpenseDashboard";
 import { apiRequest, getExpenseReport } from "@/lib/apiService"; 
 
 const DashboardPage: React.FC = () => {

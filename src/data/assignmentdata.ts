@@ -26,6 +26,9 @@ export interface Assignment {
   created_at: string;
   updated_at: string;
   asset: Asset; // Nested asset relationship from backend
+  user?: {
+    name?: string;
+  };
 }
 
 export const assignmentData: Assignment[] = [
