@@ -7,7 +7,6 @@ import {
   Mail,
   Moon,
   PanelLeft,
-  Pencil,
   Search,
   Settings,
   Sun,
@@ -245,26 +244,6 @@ export default function Navigation() {
     }
   }
 
-  function handleEditProfile() {
-    const editItem = {
-      id: user?.id || localStorage.getItem("user_id") || "",
-      employee_id: user?.employee_id || localStorage.getItem("employee_id") || "",
-      name: user?.name || "",
-      role: roleName || "employee",
-      email: user?.email || localStorage.getItem("user_email") || "",
-      position: user?.position || "",
-      phone_number: user?.phone_number || "",
-      joined_date: user?.joined_date || "",
-      left_date: user?.left_date || "",
-      status: user?.status?.toLowerCase() || "active",
-      image: profileImage || "",
-      password: "",
-    }
-
-    setSettingsOpen(false)
-    navigate("/profile/edit", { state: { editItem } })
-  }
-
   function handleThemeToggle() {
     const nextDarkMode = !darkMode
     setDarkMode(nextDarkMode)
@@ -401,13 +380,6 @@ export default function Navigation() {
               </div>
 
               <div className="space-y-2 pt-5">
-                <button
-                  onClick={handleEditProfile}
-                  className="flex w-full items-center gap-3 rounded-md border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-[#7C3AED] dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-violet-300"
-                >
-                  <Pencil className="h-4 w-4" />
-                  Edit Profile
-                </button>
                 <div className="flex items-center justify-between rounded-md border border-slate-200 px-4 py-3 dark:border-slate-700">
                   <div className="flex items-center gap-3 text-sm font-medium text-slate-700 dark:text-slate-200">
                     {darkMode ? (

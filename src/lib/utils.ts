@@ -89,13 +89,7 @@ export const cacheRolePermissions = (role: string | null, permissions: (string |
   }
 }
 
-const getFallbackPermissionsForRole = (role: string | null): Permission[] => {
-  const normalizedRole = normalizeRole(role)
-
-  if (normalizedRole === "manager") {
-    return [{ name: "view-dashboard" }]
-  }
-
+const getFallbackPermissionsForRole = (): Permission[] => {
   return []
 }
 
@@ -114,7 +108,7 @@ export const getStoredPermissions = (): (string | Permission)[] => {
   const cachedPermissions = getCachedRolePermissions(role)
   if (cachedPermissions.length > 0) return cachedPermissions
 
-  return getFallbackPermissionsForRole(role)
+  return getFallbackPermissionsForRole()
 }
 
 const isRolePermission = (permission: string) =>

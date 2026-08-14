@@ -5,7 +5,13 @@ import { LuEyeClosed, LuEye } from "react-icons/lu";
 import { useState } from "react"
 import { BsBoxFill } from "react-icons/bs"
 import { apiRequest, loginUser } from "@/lib/apiService";
-import { cacheProfileImage, getCachedRolePermissions, getFirstAccessiblePath, getPermissionName } from "@/lib/utils";
+import {
+  cacheProfileImage,
+  cacheRolePermissions,
+  getCachedRolePermissions,
+  getFirstAccessiblePath,
+  getPermissionName,
+} from "@/lib/utils";
 
 const getLoginUser = (data: any) => {
   const candidates = [
@@ -148,6 +154,10 @@ const Login = () => {
       const data = await loginUser({ email, password });
       if (data.success || data.status === "success") {
         const token = getLoginToken(data);
+        localStorage.removeItem("user_permissions");
+        localStorage.removeItem("user_role");
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("employee_id");
         localStorage.setItem("token", token);
         localStorage.setItem("user_email", email);
 
@@ -175,9 +185,14 @@ const Login = () => {
           exactPermissions = normalizePermissions(primaryRole?.permissions || fullLoggedInUser.permissions || []);
           exactPermissions = mergePermissions(
             exactPermissions,
-            await getRolePermissionsFromApi(exactRoleName),
-            getCachedRolePermissions(exactRoleName)
+            await getRolePermissionsFromApi(exactRoleName)
           );
+
+          if (exactPermissions.length === 0) {
+            exactPermissions = mergePermissions(getCachedRolePermissions(exactRoleName));
+          } else {
+            cacheRolePermissions(exactRoleName, exactPermissions);
+          }
           
           if (exactPermissions.length === 0) {
             const normalizedRoleName = normalizeRoleName(exactRoleName);

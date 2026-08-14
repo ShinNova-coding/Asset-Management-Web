@@ -20,7 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const FALLBACK_ROLES = ['admin', 'employee', 'hr'];
+const FALLBACK_ROLES = ['Admin', 'Employee', 'HR'];
+const ROLE_OPTIONS_CACHE_KEY = 'role_options_cache';
 
 interface FormState {
   name: string;
@@ -173,17 +174,82 @@ const updateProfileUser = async (targetId: string | number | null, body: Record<
   throw lastError instanceof Error ? lastError : new Error('Unable to update profile.');
 };
 
-const normalizeRolesPayload = (payload: any) => {
-  const roles = payload?.data?.data || payload?.data || payload || [];
-  if (!Array.isArray(roles)) return [];
-
-  return roles
-    .map((role: any) => role?.name || role?.role_name || role?.title || "")
-    .filter((name: string) => name && name !== "-");
+const getRoleName = (role: any) => {
+  if (typeof role === 'string') return role;
+  return role?.name || role?.role_name || role?.title || role?.role || '';
 };
 
-const uniqueRoles = (roles: string[]) =>
-  Array.from(new Set(roles.filter(Boolean)));
+const normalizeRolesPayload = (payload: any) => {
+  const candidates = [
+    payload?.data?.data,
+    payload?.data?.roles,
+    payload?.data,
+    payload?.roles,
+    payload,
+  ];
+
+  const roles = candidates.find(Array.isArray) || [];
+
+  return roles
+    .map(getRoleName)
+    .filter((name: string) => name && name !== '-');
+};
+
+const getRolesFromUsersPayload = (payload: any) => {
+  const candidates = [
+    payload?.data?.data,
+    payload?.data?.users,
+    payload?.data,
+    payload?.users,
+    payload,
+  ];
+
+  const users = candidates.find(Array.isArray) || [];
+
+  return users
+    .map((user: any) => user?.roles?.[0]?.name || user?.role?.name || user?.role || user?.role_name || '')
+    .filter((name: string) => name && name !== '-');
+};
+
+const getCachedRoleOptions = () => {
+  try {
+    const cachedRoles = JSON.parse(localStorage.getItem(ROLE_OPTIONS_CACHE_KEY) || '[]');
+    return Array.isArray(cachedRoles) ? cachedRoles : [];
+  } catch {
+    localStorage.removeItem(ROLE_OPTIONS_CACHE_KEY);
+    return [];
+  }
+};
+
+const cacheRoleOptions = (roles: string[]) => {
+  const normalizedRoles = uniqueRoles(roles);
+  if (normalizedRoles.length === 0) return;
+  localStorage.setItem(ROLE_OPTIONS_CACHE_KEY, JSON.stringify(normalizedRoles));
+};
+
+const formatRoleLabel = (role: string) => {
+  const normalized = String(role || "").trim().replace(/\s+/g, " ");
+  if (!normalized) return "";
+  if (normalized.toLowerCase() === "hr") return "HR";
+  return normalized
+    .split(/[\s-]+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join("-");
+};
+
+const uniqueRoles = (roles: string[]) => {
+  const roleMap = new Map<string, string>();
+
+  roles.forEach((role) => {
+    const label = formatRoleLabel(role);
+    const key = label.toLowerCase();
+    if (label && !roleMap.has(key)) {
+      roleMap.set(key, label);
+    }
+  });
+
+  return Array.from(roleMap.values());
+};
 
 const AddEmployeeForm: React.FC = () => {
   const location = useLocation();
@@ -211,7 +277,7 @@ const AddEmployeeForm: React.FC = () => {
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [roleOptions, setRoleOptions] = useState<string[]>(FALLBACK_ROLES);
+  const [roleOptions, setRoleOptions] = useState<string[]>(() => uniqueRoles([...getCachedRoleOptions(), ...FALLBACK_ROLES]));
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -219,7 +285,7 @@ const AddEmployeeForm: React.FC = () => {
   useEffect(() => {
     if (editItem) {
       const rawRole = editItem.role || 'admin';
-      const normalizedRole = rawRole !== '-' ? rawRole : 'admin';
+      const normalizedRole = rawRole !== '-' ? formatRoleLabel(rawRole) : 'Admin';
 
       setFormState({
         name: editItem.name || '',
@@ -232,7 +298,7 @@ const AddEmployeeForm: React.FC = () => {
           ? '' 
           : (editItem.phone_number || editItem.phone || ''),
         status: editItem.status === '-' ? 'active' : (editItem.status?.toLowerCase() || 'active'),
-        role: normalizedRole,
+        role: normalizedRole || 'Admin',
         password: '',
         password_confirmation: '',
       });
@@ -247,16 +313,31 @@ const AddEmployeeForm: React.FC = () => {
 
   useEffect(() => {
     const fetchRoleOptions = async () => {
+      const currentRole =
+        editItem?.roles?.[0]?.name ||
+        (editItem?.role && editItem.role !== '-' ? editItem.role : '');
+      const collectedRoles: string[] = [...getCachedRoleOptions(), currentRole];
+
       try {
         const response = await apiFetch('/role', { method: 'GET' });
-        const fetchedRoles = normalizeRolesPayload(response);
-        const currentRole = editItem?.role && editItem.role !== '-' ? editItem.role : '';
-        setRoleOptions(uniqueRoles([...fetchedRoles, currentRole, ...FALLBACK_ROLES]));
+        collectedRoles.push(...normalizeRolesPayload(response));
       } catch (err) {
         console.error('Failed to fetch roles:', err);
-        const currentRole = editItem?.role && editItem.role !== '-' ? editItem.role : '';
-        setRoleOptions(uniqueRoles([currentRole, ...FALLBACK_ROLES]));
       }
+
+      try {
+        const usersResponse = await apiFetch('/user', { method: 'GET' });
+        collectedRoles.push(...getRolesFromUsersPayload(usersResponse));
+      } catch (err) {
+        console.error('Failed to fetch user roles:', err);
+      }
+
+      const nextRoleOptions = uniqueRoles(
+        collectedRoles.some(Boolean) ? collectedRoles : FALLBACK_ROLES
+      );
+
+      setRoleOptions(nextRoleOptions);
+      cacheRoleOptions(nextRoleOptions);
     };
 
     fetchRoleOptions();
