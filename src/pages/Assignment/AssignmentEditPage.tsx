@@ -1,0 +1,151 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { FiArrowLeft } from "react-icons/fi";
+import { MdOutlineModeEditOutline } from "react-icons/md";
+import { X } from "lucide-react";
+import { apiRequest } from "@/lib/apiService"; 
+const EditAssignmentPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const assignment = location.state?.assignment || {};
+
+  const [assignedDate, setAssignedDate] = useState("");
+  const [note, setNote] = useState("");
+  const [assetCode, setAssetCode] = useState("");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    window.setTimeout(() => setToastMessage(null), 2500);
+  };
+
+  useEffect(() => {
+    if (assignment) {
+      setAssignedDate(assignment.assigned_date || "");
+      setNote(assignment.note || "");
+      setAssetCode(assignment.asset?.asset_code || assignment.assets_code || "");
+    }
+  }, [assignment]);
+
+  const handleUpdate = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    
+    const response = await apiRequest(`/assignment/${id}`, "PATCH", {
+      assignment_id: id,
+      assets_code: assetCode,
+      note: note,
+      assigned_date: assignedDate
+    });
+
+    if (response?.success) {
+      showToast("Assignment updated successfully!");
+      window.setTimeout(() => navigate("/assignment"), 900);
+    } else {
+      throw new Error(response?.message || "Failed to update.");
+    }
+  } catch (err: any) {
+    console.error("Update error:", err);
+    showToast(`Failed to update: ${err.message || "Unknown error"}`);
+  }
+};
+
+  return (
+    <div className="min-h-screen bg-[#e9e5ff] p-10 font-sans text-slate-900">
+      {toastMessage && (
+        <div className="fixed right-6 top-6 z-50 flex max-w-sm items-center gap-3 rounded-xl border border-[#C4B5FD] bg-[#7C3AED] px-4 py-3 text-white shadow-xl shadow-purple-500/20">
+          <span className="text-sm font-semibold">{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="ml-auto rounded-md p-1 text-white/80 transition hover:bg-white/15 hover:text-white"
+            aria-label="Close notification"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-sm font-medium text-[#7C3AED] hover:text-purple-700 transition-colors mb-2"
+      >
+        <FiArrowLeft size={16} /> Back
+      </button>
+
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="p-8 border-b border-slate-100 bg-white">
+          <h2 className="text-xl font-bold text-[#7C3AED] flex items-center gap-3">
+            <MdOutlineModeEditOutline className="text-[#7C3AED] w-5 h-5"/> Edit Assignment 
+          </h2>
+        </div>
+
+        <form onSubmit={handleUpdate} className="p-8 space-y-6 bg-white">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-xs font-semibold text-[#7C3AED] mb-1 uppercase tracking-wider">
+                Asset Code
+              </label>
+              <input
+                type="text"
+                value={assetCode}
+                onChange={(e) => setAssetCode(e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#7C3AED] mb-1 uppercase tracking-wider">
+                Assigned Date
+              </label>
+              <input
+                type="date"
+                value={assignedDate}
+                onChange={(e) => setAssignedDate(e.target.value)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[#7C3AED] mb-1 uppercase tracking-wider">
+              Note
+            </label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={6}
+              placeholder="Write remarks or notes here..."
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-5 py-2 rounded-md border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 text-xs"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-md bg-[#7C3AED] text-white font-medium hover:bg-purple-700 shadow-sm text-xs transition-colors"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default EditAssignmentPage;
