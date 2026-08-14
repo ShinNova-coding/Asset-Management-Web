@@ -147,7 +147,7 @@ export default function Layout() {
                   
                   <SidebarMenuButton
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    tooltip="User Management"
+                   tooltip="Administration"
                     className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 ${
                       isUserModuleActive
                         ? "bg-[#A78BFA] text-white shadow-[0_10px_24px_rgba(124,58,237,0.22)] dark:bg-slate-800 dark:text-violet-200 dark:shadow-none"
@@ -156,7 +156,7 @@ export default function Layout() {
                   >
                     <div className="flex items-center gap-3">
                       <Users className="h-5 w-5" />
-                      <span className="group-data-[collapsible=icon]:hidden">User Management</span>
+                     <span className="group-data-[collapsible=icon]:hidden">Administration</span>
                     </div>
                     <ChevronDown
                       className={`h-4 w-4 transition-transform duration-200 group-data-[collapsible=icon]:hidden ${
