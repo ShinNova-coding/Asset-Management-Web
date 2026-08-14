@@ -149,6 +149,30 @@ const resolveProfileUser = async (profile: any) => {
   return profile;
 };
 
+const updateProfileUser = async (targetId: string | number | null, body: Record<string, any>) => {
+  const endpoints = [
+    '/profile',
+    '/me',
+    '/user/profile',
+    targetId ? `/user/${targetId}` : '',
+  ].filter(Boolean);
+
+  let lastError: unknown = null;
+
+  for (const endpoint of endpoints) {
+    try {
+      return await apiFetch(endpoint, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      });
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('Unable to update profile.');
+};
+
 const normalizeRolesPayload = (payload: any) => {
   const roles = payload?.data?.data || payload?.data || payload || [];
   if (!Array.isArray(roles)) return [];
@@ -275,10 +299,10 @@ const AddEmployeeForm: React.FC = () => {
     setError('');
 
     try {
-      if (!formState.employee_id.trim()) throw new Error('Employee ID is required.');
+      if (!isProfileEditMode && !formState.employee_id.trim()) throw new Error('Employee ID is required.');
       if (!formState.name.trim()) throw new Error('Name is required.');
       if (!formState.email.trim()) throw new Error('Email is required.');
-      if (!formState.role.trim()) throw new Error('Role is required.');
+      if (!isProfileEditMode && !formState.role.trim()) throw new Error('Role is required.');
 
       if (!isEditMode) {
         if (!formState.password) throw new Error('Password is required.');
@@ -293,7 +317,7 @@ const AddEmployeeForm: React.FC = () => {
 
       const resolvedEditItem = isProfileEditMode ? await resolveProfileUser(editItem) : editItem;
       const targetId = resolvedEditItem?.id; 
-      if (isEditMode && !targetId) {
+      if (isEditMode && !isProfileEditMode && !targetId) {
         throw new Error('Missing account identifier (id) for profile update. Please logout and login again.');
       }
 
@@ -303,14 +327,14 @@ const AddEmployeeForm: React.FC = () => {
 
       const rawBody: Record<string, any> = {
         name: formState.name.trim(),
-        employee_id: formState.employee_id.trim(),
+        employee_id: formState.employee_id.trim() || resolvedEditItem?.employee_id || '',
         email: formState.email.trim(),
         position: formState.position.trim() || '-',
         joined_date: formState.joined_date || null, 
         left_date: formState.left_date || null,    
         phone_number: formState.phone_number.trim() || '-',
-        status: formState.status,
-            role: isProfileEditMode ? resolvedEditItem?.roles?.[0]?.name || resolvedEditItem?.role || formState.role.trim() : formState.role.trim(),
+        status: isProfileEditMode ? resolvedEditItem?.status || formState.status : formState.status,
+        role: isProfileEditMode ? resolvedEditItem?.roles?.[0]?.name || resolvedEditItem?.role || formState.role.trim() || localStorage.getItem('user_role') || 'employee' : formState.role.trim(),
       };
 
       if (isEditMode) {
@@ -327,12 +351,27 @@ const AddEmployeeForm: React.FC = () => {
         rawBody.image = stripBase64Header(base64WithHeader);
       }
 
-      const method = isEditMode ? 'PATCH' : 'POST';
+      const profileBody = {
+        name: rawBody.name,
+        employee_id: rawBody.employee_id,
+        email: rawBody.email,
+        position: rawBody.position,
+        joined_date: rawBody.joined_date,
+        left_date: rawBody.left_date,
+        phone_number: rawBody.phone_number,
+        ...(rawBody.password ? {
+          password: rawBody.password,
+          password_confirmation: rawBody.password_confirmation,
+        } : {}),
+        ...(rawBody.image ? { image: rawBody.image } : {}),
+      };
 
-      const responseData = await apiFetch(isEditMode ? `/user/${targetId}` : '/user', {
-        method,
-        body: JSON.stringify(rawBody),
-      });
+      const responseData = isProfileEditMode
+        ? await updateProfileUser(targetId || null, profileBody)
+        : await apiFetch(isEditMode ? `/user/${targetId}` : '/user', {
+            method: isEditMode ? 'PATCH' : 'POST',
+            body: JSON.stringify(rawBody),
+          });
 
       const savedUser = unwrapSavedUser(responseData);
       const savedUserWithImage =

@@ -247,11 +247,11 @@ export default function Navigation() {
 
   function handleEditProfile() {
     const editItem = {
-      id: user?.id,
-      employee_id: user?.employee_id || "",
+      id: user?.id || localStorage.getItem("user_id") || "",
+      employee_id: user?.employee_id || localStorage.getItem("employee_id") || "",
       name: user?.name || "",
       role: roleName || "employee",
-      email: user?.email || "",
+      email: user?.email || localStorage.getItem("user_email") || "",
       position: user?.position || "",
       phone_number: user?.phone_number || "",
       joined_date: user?.joined_date || "",
@@ -275,6 +275,8 @@ export default function Navigation() {
   function handleLogout() {
     localStorage.removeItem("token") 
     localStorage.removeItem("user") 
+    localStorage.removeItem("user_id")
+    localStorage.removeItem("employee_id")
     localStorage.removeItem("user_role")
     localStorage.removeItem("user_permissions")
     setSettingsOpen(false)

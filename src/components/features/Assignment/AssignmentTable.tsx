@@ -191,8 +191,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
                     if (target.closest('[data-actions-cell="true"]') || target.closest('button')) {
                       return
                     }
-                    
-                    navigate(`/assignment/${item.id}`)
+                    navigate(`/assignment/${item.id}`, { state: { editItem: item } })
                   }}
                 >
                   {row.getVisibleCells().map((cell) => {

@@ -159,6 +159,8 @@ const Login = () => {
 
         if (fullLoggedInUser && typeof fullLoggedInUser === "object" && !Array.isArray(fullLoggedInUser)) {
           localStorage.setItem("user", JSON.stringify(fullLoggedInUser));
+          if (fullLoggedInUser.id) localStorage.setItem("user_id", String(fullLoggedInUser.id));
+          if (fullLoggedInUser.employee_id) localStorage.setItem("employee_id", String(fullLoggedInUser.employee_id));
           cacheProfileImage(fullLoggedInUser);
         } else {
           localStorage.setItem("user", JSON.stringify({ email }));

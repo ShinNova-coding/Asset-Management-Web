@@ -12,6 +12,12 @@ import {
 import type { Assignment } from "@/data/assignmentdata";
 import { apiRequest } from "@/lib/apiService";
 
+const getResponseData = (response: any) =>
+  response?.data?.data || response?.data || response?.assignment || response;
+
+const getAssignmentId = (assignment: any) =>
+  assignment?.id || assignment?.assignment_id || assignment?.assignments_id;
+
 const AssignmentDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -30,12 +36,30 @@ const AssignmentDetailPage = () => {
       }
       try {
         setLoading(true);
-        const response = await apiRequest(`/assignment/${id}`, "GET");
-        if (response?.success) {
-          setFormData(Array.isArray(response.data) ? response.data[0] : response.data);
-        } else {
-          throw new Error(response?.message || "Failed to locate target record.");
+        const endpoints = [
+          `/assignment/${id}`,
+          `/assignment/assignment_id?assignment_id=${encodeURIComponent(id || "")}`,
+          "/assignment",
+        ];
+
+        for (const endpoint of endpoints) {
+          try {
+            const response = await apiRequest(endpoint, "GET");
+            const responseData = getResponseData(response);
+            const record = Array.isArray(responseData)
+              ? responseData.find((item: any) => String(getAssignmentId(item)) === String(id))
+              : responseData;
+
+            if (record && typeof record === "object") {
+              setFormData(record);
+              return;
+            }
+          } catch {
+            // Try the next endpoint shape.
+          }
         }
+
+        throw new Error("Failed to locate target record.");
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -66,9 +90,9 @@ const AssignmentDetailPage = () => {
 
   const isActive = formData.status?.toLowerCase() === "active";
   const displayUserId = formData.user?.employee_id || formData.employee_id || formData.users_id || "N/A";
-  const displayUserName = formData.user?.name || formData.user_name || "Unknown User";
+  const displayUserName = formData.user?.name || formData.users_name || formData.employee_name || formData.user_name || "Unknown User";
   const displayAssetCode = formData.asset?.asset_code || formData.asset_code || formData.assets_id || "N/A";
-  const displayAssetName = formData.asset?.name || formData.asset_name || "Unknown Asset Unit";
+  const displayAssetName = formData.asset?.name || formData.assets_name || formData.asset_name || "Unknown Asset Unit";
 
   return (
     <div className="min-h-screen bg-[#e9e5ff] p-4 md:p-10 font-sans">
