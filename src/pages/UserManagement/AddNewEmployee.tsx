@@ -390,10 +390,6 @@ const AddEmployeeForm: React.FC = () => {
         if (formState.password !== formState.password_confirmation) {
           throw new Error('Password and confirmation must match.');
         }
-      } else if (formState.password) {
-        if (formState.password !== formState.password_confirmation) {
-          throw new Error('Password and confirmation must match.');
-        }
       }
 
       const resolvedEditItem = isProfileEditMode ? await resolveProfileUser(editItem) : editItem;
@@ -422,7 +418,7 @@ const AddEmployeeForm: React.FC = () => {
         rawBody.id = targetId;
       }
 
-      if (formState.password) {
+      if (!isEditMode && formState.password) {
         rawBody.password = formState.password;
         rawBody.password_confirmation = formState.password_confirmation;
       }
@@ -776,60 +772,61 @@ const AddEmployeeForm: React.FC = () => {
               </div>
             </div>
 
-            {/* Password Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              {/* Password */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-600">
-                  Password {isEditMode && <span className="text-slate-400 font-normal">(Leave blank to keep unchanged)</span>}
-                </label>
-                <div className="relative">
-                  <input
-                    name="password"
-                    type={showPassword ? 'text' : 'password'} 
-                    value={formState.password} 
-                    onChange={handleInputChange}
-                    placeholder="Enter password"
-                    className="w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all bg-white border-slate-200"
-                    autoComplete="new-password"
-                    required={!isEditMode}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
-                  </button>
+            {!isEditMode && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                {/* Password */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-600">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      name="password"
+                      type={showPassword ? 'text' : 'password'} 
+                      value={formState.password} 
+                      onChange={handleInputChange}
+                      placeholder="Enter password"
+                      className="w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none transition-all bg-white border-slate-200 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                      autoComplete="new-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                    >
+                      {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Confirm Password */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-600">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <input
-                    name="password_confirmation"
-                    type={showConfirmPassword ? 'text' : 'password'} 
-                    value={formState.password_confirmation} 
-                    onChange={handleInputChange}
-                    placeholder="Confirm password"
-                    className="w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all bg-white border-slate-200"
-                    autoComplete="new-password"
-                    required={!isEditMode}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
-                  >
-                    {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
-                  </button>
+                {/* Confirm Password */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-600">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      name="password_confirmation"
+                      type={showConfirmPassword ? 'text' : 'password'} 
+                      value={formState.password_confirmation} 
+                      onChange={handleInputChange}
+                      placeholder="Confirm password"
+                      className="w-full px-3 pr-10 py-2.5 rounded-lg border text-sm focus:outline-none transition-all bg-white border-slate-200 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                      autoComplete="new-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                    >
+                      {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">

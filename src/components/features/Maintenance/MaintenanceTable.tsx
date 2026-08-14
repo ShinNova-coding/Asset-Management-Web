@@ -412,7 +412,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (canViewMaintenances) navigate(`/maintenance/${item.id}`);
+                  if (canViewMaintenances) navigate(`/maintenance/${item.id}`, { state: { maintenance: item } });
                 }}
                 disabled={!canViewMaintenances}
                 className="text-[#7C3AED] hover:text-purple-700 p-1 disabled:cursor-not-allowed disabled:opacity-40"
@@ -527,7 +527,7 @@ export function MaintenanceTable({ data: initialData, onRefresh }: MaintenanceTa
                     const item = row.original as any
                     const target = e.target as HTMLElement
                     if (target.closest('[data-actions-cell="true"]') || target.closest('button')) return
-                    if (canViewMaintenances) navigate(`/maintenance/${item.id}`)
+                    if (canViewMaintenances) navigate(`/maintenance/${item.id}`, { state: { maintenance: item } })
                   }}
                 >
                   {row.getVisibleCells().map((cell) => {

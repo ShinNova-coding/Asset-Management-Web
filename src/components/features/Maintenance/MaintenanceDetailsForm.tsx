@@ -3,11 +3,48 @@
 import React, { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { ArrowLeft, Calendar, Wrench, ShieldCheck, FileText, Image as ImageIcon, X } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+
+const unwrapMaintenanceRecord = (response: any) => {
+  const candidates = [
+    response?.data?.data,
+    response?.data?.maintenance,
+    response?.data?.record,
+    response?.data,
+    response?.maintenance,
+    response?.record,
+    response,
+  ];
+
+  const record = candidates.find((candidate) => {
+    if (!candidate) return false;
+    if (Array.isArray(candidate)) return candidate.length > 0;
+    return typeof candidate === "object";
+  });
+
+  return Array.isArray(record) ? record[0] ?? null : record ?? null;
+};
+
+const getMaintenanceList = (response: any) => {
+  const candidates = [
+    response?.data?.data,
+    response?.data?.maintenances,
+    response?.data,
+    response?.maintenances,
+    response,
+  ];
+
+  return candidates.find(Array.isArray) || [];
+};
+
+const getMaintenanceId = (record: any) =>
+  record?.id ?? record?.maintenance_id ?? record?.maintenances_id;
 
 const MaintenanceDetailsForm: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const stateRecord = (location.state as { maintenance?: any } | null)?.maintenance;
 
   const [record, setRecord] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -17,14 +54,35 @@ const MaintenanceDetailsForm: React.FC = () => {
 
   useEffect(() => {
     const fetchDetail = async () => {
-      try {
-        console.log("[MaintenanceDetail] Fetching ID:", id);
-        const result = await apiFetch(`/maintenance/${id}`);
-        console.log("[MaintenanceDetail] Raw API response:", result);
+      if (stateRecord && String(getMaintenanceId(stateRecord)) === String(id)) {
+        setRecord(stateRecord);
+        setLoading(false);
+        return;
+      }
 
-        const rawRecord = result?.data ?? result ?? null;
-        const detailRecord = Array.isArray(rawRecord) ? rawRecord[0] ?? null : rawRecord;
-        setRecord(detailRecord);
+      try {
+        const detailEndpoints = [
+          `/maintenance/${id}`,
+          `/maintenance/id?id=${encodeURIComponent(String(id))}`,
+        ];
+
+        for (const endpoint of detailEndpoints) {
+          try {
+            const result = await apiFetch(endpoint);
+            const detailRecord = unwrapMaintenanceRecord(result);
+            if (detailRecord) {
+              setRecord(detailRecord);
+              return;
+            }
+          } catch {
+            // Try the next detail endpoint shape.
+          }
+        }
+
+        const listResult = await apiFetch("/maintenance");
+        const list = getMaintenanceList(listResult);
+        const matchingRecord = list.find((item: any) => String(getMaintenanceId(item)) === String(id));
+        setRecord(matchingRecord || null);
       } catch (err) {
         console.error("Fetch detail error:", err);
         setRecord(null);
@@ -38,7 +96,7 @@ const MaintenanceDetailsForm: React.FC = () => {
     } else {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, stateRecord]);
 
   if (loading) {
     return (
