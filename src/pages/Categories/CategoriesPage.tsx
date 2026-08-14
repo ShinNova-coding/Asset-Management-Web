@@ -22,7 +22,8 @@ import { IoCloudDownloadOutline } from "react-icons/io5";
 import AddNewCategories from "@/pages/Categories/AddNewCategories";
 import CategoriesDelete from "@/pages/Categories/CategoriesDelete";
 import CategoriesEdit from "@/pages/Categories/CategoriesEdit";
-import { FaEdit } from "react-icons/fa";
+import { MdOutlineModeEditOutline } from "react-icons/md";
+import { RiDeleteBinLine } from "react-icons/ri";
 
 
 import jsPDF from "jspdf";
@@ -30,19 +31,17 @@ import autoTable from "jspdf-autotable";
 
 function EditButton() { 
   return (
-    <div className="text-blue-400 hover:text-blue-600 transition p-1 cursor-pointer">
-      <FaEdit size={20} />
-    </div>
+    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#7C3AED] transition hover:bg-purple-50 hover:text-purple-700">
+      <MdOutlineModeEditOutline className="h-5 w-5" />
+    </span>
   ); 
 }
 
 function DeleteButton() { 
   return (
-    <div className="text-red-400 hover:text-red-700 transition cursor-pointer">
-      <svg stroke="currentColor" fill="currentColor" viewBox="0 0 24 24" height="16" width="16">
-        <path d="M5 20a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8H5v12zm5-10h2v8h-2v-8zm4 0h2v8h-2v-8zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path>
-      </svg>
-    </div>
+    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-red-600 transition hover:bg-red-50 hover:text-red-700">
+      <RiDeleteBinLine className="h-5 w-5" />
+    </span>
   ); 
 }
 
@@ -108,7 +107,7 @@ export default function CategoriesPage() {
       size: 120, 
       enableSorting: false, 
       cell: ({ row }) => (
-        <div className="flex justify-center items-center gap-2"> 
+        <div className="flex justify-center items-center gap-3"> 
           <CategoriesEdit category={{ id: row.original.id, name: row.original.name }} onUpdated={fetchCategories} triggerIcon={<EditButton />} />
           <CategoriesDelete categoryId={row.original.id} categoryName={row.original.name} onDeleted={fetchCategories} triggerIcon={<DeleteButton />} />
         </div>
