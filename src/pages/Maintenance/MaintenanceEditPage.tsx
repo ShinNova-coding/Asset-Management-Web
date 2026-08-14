@@ -69,7 +69,7 @@ export default function MaintenanceEditPage() {
 
       try {
         setLoading(true)
-        const result = await apiFetch(`/maintenance/maintenance_id?maintenance_id=${id}`)
+        const result = await apiFetch(`/maintenance/${id}`)
         const rawRecord = result?.data ?? result ?? null
         setRecord(Array.isArray(rawRecord) ? rawRecord[0] ?? null : rawRecord)
       } catch (err) {

@@ -29,7 +29,7 @@ export default function CategoriesDelete({ categoryId, categoryName, onDeleted, 
   const handleDelete = async () => {
     setLoading(true);
     try {
-      await apiRequest("/category/category_id", "DELETE", {
+      await apiRequest(`/category/${categoryId}`, "DELETE", {
         category_id: categoryId
       });
       

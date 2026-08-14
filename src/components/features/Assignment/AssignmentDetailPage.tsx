@@ -30,7 +30,7 @@ const AssignmentDetailPage = () => {
       }
       try {
         setLoading(true);
-        const response = await apiRequest(`/assignment/assignment_id?assignment_id=${id}`, "GET");
+        const response = await apiRequest(`/assignment/${id}`, "GET");
         if (response?.success) {
           setFormData(Array.isArray(response.data) ? response.data[0] : response.data);
         } else {

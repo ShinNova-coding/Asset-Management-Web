@@ -66,7 +66,7 @@ export const updateExpense = async (id: string, payload: Partial<ExpensePayload>
 };
 
 export const deleteExpense = async (id: string) => {
-  return apiRequest("/expense/expense_id", "DELETE", { expense_id: id });
+  return apiRequest(`/expense/${id}`, "DELETE", { expense_id: id });
 };
 // Expense Report အတွက် function အသစ်
 export const getExpenseReport = async () => {
@@ -124,8 +124,10 @@ export const loginUser = async (credentials: { email: string; password: string }
 };
 export async function getCategories() {
   const myHeaders = new Headers();
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
+
   myHeaders.append("Accept", "application/json");
-  myHeaders.append("Authorization", "Bearer 261|UKYS7uARyAxUtGBmPZJVTmphmMp8EQOGCcHo9Qsi8993df01");
+  myHeaders.append("Authorization", `Bearer ${token}`);
 
   const requestOptions: RequestInit = {
     method: 'GET',
@@ -176,5 +178,5 @@ export const updateUserProfile = async (payload: UserUpdatePayload) => {
     updatePayload.left_date = payload.left_date;
   }
 
-  return apiRequest("/user/id", "PATCH", updatePayload);
+  return apiRequest(`/user/${payload.id}`, "PATCH", updatePayload);
 };

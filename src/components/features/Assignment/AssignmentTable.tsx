@@ -64,7 +64,7 @@ export function AssignmentTable({ data: initialData, onDeleteSuccess }: Assignme
   
   try {
    
-    await apiRequest(`/assignment/assignment_id`, "DELETE", {
+    await apiRequest(`/assignment/${targetId}`, "DELETE", {
       assignment_id: targetId,
     });
 

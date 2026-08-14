@@ -131,11 +131,6 @@ const UserManagement: React.FC = () => {
     setError("");
 
     try {
-      const token = localStorage.getItem('token') || '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c';
-      if (!localStorage.getItem('token')) {
-        localStorage.setItem('token', token);
-      }
-
       const response = await apiFetch(USER_ENDPOINT, {
         method: 'GET',
       });
@@ -192,7 +187,10 @@ const UserManagement: React.FC = () => {
         myHeaders.append("Accept", "application/json");
         myHeaders.append("Content-Type", "application/json");
         
-        const currentToken = localStorage.getItem('token') || '261|UKYS7uARyAxUtGBmPZJVTmphmMp8EQOGCcHo9Qsi8993df01';
+        const currentToken = localStorage.getItem('token');
+        if (!currentToken) {
+          throw new Error('Missing authentication token. Please login again.');
+        }
         myHeaders.append("Authorization", `Bearer ${currentToken}`);
 
         

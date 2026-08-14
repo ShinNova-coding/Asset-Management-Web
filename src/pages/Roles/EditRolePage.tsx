@@ -6,8 +6,28 @@ import { Loader2, ArrowLeft, Save, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { fetchRoles } from "@/lib/axios";
+import { fetchRoles, updateRole } from "@/lib/axios";
 import { apiRequest } from "@/lib/apiService"; 
+import { cacheRolePermissions } from "@/lib/utils";
+
+const getResponseArray = (response: any) => {
+  const data = response?.data?.data || response?.data || response || [];
+  return Array.isArray(data) ? data : [];
+};
+
+const getRoleId = (role: any) => role?.role_id || role?.id;
+
+const getPermissionName = (permission: any) =>
+  typeof permission === "string" ? permission : permission?.name;
+
+const uniquePermissionNames = (permissions: any[] = []) =>
+  Array.from(
+    new Set(
+      permissions
+        .map(getPermissionName)
+        .filter(Boolean)
+    )
+  );
 
 export default function EditRolePage() {
   const { id } = useParams<{ id: string }>();
@@ -30,23 +50,23 @@ export default function EditRolePage() {
     const loadData = async () => {
       setLoading(true);
       try {
-       
-        const [rolesData, permsResponse] = await Promise.all([
-          fetchRoles(),
-          apiRequest("/permission", "GET")
-        ]);
-
-        const allRoles = Array.isArray(rolesData) ? rolesData : (rolesData.data || []);
-        const permsData = permsResponse.data || permsResponse;
-
-        const foundRole = allRoles.find((r: any) => (r.role_id || r.id).toString() === id);
+        const rolesData = await fetchRoles();
+        const allRoles = getResponseArray(rolesData);
+        const foundRole = allRoles.find((r: any) => String(getRoleId(r)) === id);
         
         if (foundRole) {
           setRole(foundRole);
-          setSelectedPermissions(foundRole.permissions.map((p: any) => p.name));
+          setSelectedPermissions(uniquePermissionNames(foundRole.permissions || []));
         }
-        
-        setAllPermissions(permsData);
+
+        try {
+          const permsResponse = await apiRequest("/permission", "GET");
+          const permsData = getResponseArray(permsResponse);
+          setAllPermissions(permsData.length > 0 ? permsData : (foundRole?.permissions || []));
+        } catch (permissionError) {
+          console.error("Error loading permissions:", permissionError);
+          setAllPermissions(foundRole?.permissions || []);
+        }
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {
@@ -59,13 +79,15 @@ export default function EditRolePage() {
   const handleUpdate = async () => {
     setIsSaving(true);
     try {
-      
-      await apiRequest(`/role/${id}`, "PATCH", {
-        role_id: id,
+      const roleId = getRoleId(role) || id;
+
+      await updateRole(roleId, {
+        role_id: roleId,
         name: role.name,
-        permissions: selectedPermissions 
+        permissions: selectedPermissions,
       });
 
+      cacheRolePermissions(role.name, selectedPermissions);
       showToast("Role updated successfully!");
       window.setTimeout(() => navigate("/roles"), 900);
     } catch (error: any) {
@@ -120,17 +142,22 @@ export default function EditRolePage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {allPermissions.map((perm) => (
-                <div key={perm.id} className="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50 transition-colors">
+              {allPermissions.map((perm) => {
+                const permissionName = getPermissionName(perm);
+                if (!permissionName) return null;
+
+                return (
+                <div key={perm.id || permissionName} className="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50 transition-colors">
                   <Checkbox 
-                    checked={selectedPermissions.includes(perm.name)} 
-                    onCheckedChange={() => togglePermission(perm.name)} 
+                    checked={selectedPermissions.includes(permissionName)} 
+                    onCheckedChange={() => togglePermission(permissionName)} 
                   />
                   <label className="text-sm cursor-pointer capitalize">
-                    {perm.name.replace(/-/g, ' ')}
+                    {permissionName.replace(/-/g, ' ')}
                   </label>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>

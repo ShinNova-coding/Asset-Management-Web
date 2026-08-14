@@ -19,7 +19,7 @@ const MaintenanceDetailsForm: React.FC = () => {
     const fetchDetail = async () => {
       try {
         console.log("[MaintenanceDetail] Fetching ID:", id);
-        const result = await apiFetch(`/maintenance/maintenance_id?maintenance_id=${id}`);
+        const result = await apiFetch(`/maintenance/${id}`);
         console.log("[MaintenanceDetail] Raw API response:", result);
 
         const rawRecord = result?.data ?? result ?? null;

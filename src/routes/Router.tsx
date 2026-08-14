@@ -150,6 +150,10 @@ export const router = createBrowserRouter([
             path: "add-employee",
             element: <RequirePermission permissions={["create-users", "update-users"]}><AddEmployeeForm /></RequirePermission>,
           },
+          {
+            path: "profile/edit",
+            element: <AddEmployeeForm />,
+          },
           
           {
             path: "employee/:id",

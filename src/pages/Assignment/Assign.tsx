@@ -194,7 +194,10 @@ const AddNewAsset = () => {
       const url = isEditMode ? `${API_URL}/${targetId}` : API_URL;
       const method = isEditMode ? "PUT" : "POST";
       
-      const currentToken = localStorage.getItem("token") || "38|5WXyvmXnbjTmcDeqSQDda6J8UsUSpKeMvdSGwaM546e4040d";
+      const currentToken = localStorage.getItem("token");
+      if (!currentToken) {
+        throw new Error("Missing authentication token. Please login again.");
+      }
 
       const response = await fetch(url, {
         method: method,

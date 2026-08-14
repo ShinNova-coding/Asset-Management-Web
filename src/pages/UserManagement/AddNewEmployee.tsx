@@ -10,7 +10,7 @@ import {
   EyeOff,  
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { cacheProfileImage, normalizeImageSource } from '../../lib/utils';
+import { cacheProfileImage, getFirstAccessiblePath, getStoredPermissions, normalizeImageSource } from '../../lib/utils';
 import { apiFetch } from '../../lib/api';
 import {
   Select,
@@ -20,7 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const DEFAULT_TOKEN = '7|N5Vq58chJXHoyy7GqjuTEPH4CHJGLF6IplgxGtIQ2187ee5c';
 const FALLBACK_ROLES = ['admin', 'employee', 'hr'];
 
 interface FormState {
@@ -70,6 +69,86 @@ const unwrapSavedUser = (responseData: any) => {
   return Array.isArray(candidate) ? null : candidate;
 };
 
+const getStoredProfileUser = () => {
+  try {
+    const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+    if (storedUser && typeof storedUser === 'object' && !Array.isArray(storedUser)) {
+      return {
+        ...storedUser,
+        role: storedUser.roles?.[0]?.name || storedUser.role || localStorage.getItem('user_role') || 'employee',
+        email: storedUser.email || localStorage.getItem('user_email') || '',
+      };
+    }
+  } catch {
+    // Fall back to the minimal login fields below.
+  }
+
+  const email = localStorage.getItem('user_email') || '';
+  const role = localStorage.getItem('user_role') || 'employee';
+
+  return email
+    ? {
+        email,
+        name: email.split('@')[0],
+        role,
+        status: 'active',
+      }
+    : null;
+};
+
+const getUserCandidate = (response: any) => {
+  const candidate = response?.data?.data || response?.data?.user || response?.data || response?.user || response;
+  return candidate && typeof candidate === 'object' && !Array.isArray(candidate) ? candidate : null;
+};
+
+const isSameProfileUser = (candidate: any, profile: any) => {
+  const candidateEmail = String(candidate?.email || '').toLowerCase();
+  const profileEmail = String(profile?.email || '').toLowerCase();
+
+  return (
+    (!!candidate?.id && !!profile?.id && String(candidate.id) === String(profile.id)) ||
+    (!!candidate?.employee_id && !!profile?.employee_id && String(candidate.employee_id) === String(profile.employee_id)) ||
+    (!!candidateEmail && !!profileEmail && candidateEmail === profileEmail)
+  );
+};
+
+const resolveProfileUser = async (profile: any) => {
+  if (profile?.id) return profile;
+
+  const identifier = profile?.employee_id || profile?.email || localStorage.getItem('user_email') || '';
+  const endpoints = [
+    '/profile',
+    '/me',
+    '/auth/me',
+    '/user/profile',
+    identifier ? `/user/${encodeURIComponent(identifier)}` : '',
+    identifier ? `/user/id?id=${encodeURIComponent(identifier)}` : '',
+  ].filter(Boolean);
+
+  for (const endpoint of endpoints) {
+    try {
+      const response = await apiFetch(endpoint);
+      const user = getUserCandidate(response);
+      if (user) return { ...profile, ...user };
+    } catch {
+      // Try the next profile endpoint shape.
+    }
+  }
+
+  try {
+    const response = await apiFetch('/user');
+    const users = response?.data?.data || response?.data || response || [];
+    if (Array.isArray(users)) {
+      const foundUser = users.find((candidate: any) => isSameProfileUser(candidate, profile));
+      if (foundUser) return { ...profile, ...foundUser };
+    }
+  } catch {
+    // Some roles cannot view the full user list.
+  }
+
+  return profile;
+};
+
 const normalizeRolesPayload = (payload: any) => {
   const roles = payload?.data?.data || payload?.data || payload || [];
   if (!Array.isArray(roles)) return [];
@@ -86,7 +165,8 @@ const AddEmployeeForm: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const editItem = (location.state as { editItem?: any } | null)?.editItem;
+  const isProfileEditMode = location.pathname.toLowerCase() === '/profile/edit';
+  const editItem = (location.state as { editItem?: any } | null)?.editItem || (isProfileEditMode ? getStoredProfileUser() : null);
   const isEditMode = Boolean(editItem);
 
   const [formState, setFormState] = useState<FormState>({
@@ -181,6 +261,11 @@ const AddEmployeeForm: React.FC = () => {
   };
 
   const handleCancel = () => {
+    if (isProfileEditMode) {
+      navigate(getFirstAccessiblePath(getStoredPermissions()) || '/dashboard');
+      return;
+    }
+
     navigate('/employees');
   };
 
@@ -206,14 +291,14 @@ const AddEmployeeForm: React.FC = () => {
         }
       }
 
-      const targetId = editItem?.id; 
+      const resolvedEditItem = isProfileEditMode ? await resolveProfileUser(editItem) : editItem;
+      const targetId = resolvedEditItem?.id; 
       if (isEditMode && !targetId) {
-        throw new Error('Missing account identifier (id) for update.');
+        throw new Error('Missing account identifier (id) for profile update. Please logout and login again.');
       }
 
-      const savedToken = localStorage.getItem('token') || DEFAULT_TOKEN;
       if (!localStorage.getItem('token')) {
-        localStorage.setItem('token', savedToken);
+        throw new Error('Missing authentication token. Please login again.');
       }
 
       const rawBody: Record<string, any> = {
@@ -225,7 +310,7 @@ const AddEmployeeForm: React.FC = () => {
         left_date: formState.left_date || null,    
         phone_number: formState.phone_number.trim() || '-',
         status: formState.status,
-        role: formState.role.trim(),
+            role: isProfileEditMode ? resolvedEditItem?.roles?.[0]?.name || resolvedEditItem?.role || formState.role.trim() : formState.role.trim(),
       };
 
       if (isEditMode) {
@@ -286,6 +371,8 @@ const AddEmployeeForm: React.FC = () => {
             phone_number: savedUserWithImage?.phone_number || rawBody.phone_number || storedUser.phone_number || null,
             joined_date: savedUserWithImage?.joined_date || rawBody.joined_date || storedUser.joined_date || null,
             left_date: savedUserWithImage?.left_date || rawBody.left_date || storedUser.left_date || null,
+            role: savedUserWithImage?.role || rawBody.role || storedUser.role || null,
+            roles: savedUserWithImage?.roles || resolvedEditItem?.roles || storedUser.roles || [],
             image: rawBody.image || savedUserWithImage?.image || storedUser.image || null,
             image_url: savedUserWithImage?.image_url || storedUser.image_url || null,
             preview_url: savedUserWithImage?.preview_url || storedUser.preview_url || null,
@@ -295,13 +382,17 @@ const AddEmployeeForm: React.FC = () => {
         window.dispatchEvent(new Event('profile_updated'));
       }
 
-      navigate('/employees', {
-        state: {
-          refresh: true,
-          savedUser: savedUserWithImage,
-        },
-        replace: true,
-      });
+      if (isProfileEditMode) {
+        navigate(getFirstAccessiblePath(getStoredPermissions()) || '/dashboard', { replace: true });
+      } else {
+        navigate('/employees', {
+          state: {
+            refresh: true,
+            savedUser: savedUserWithImage,
+          },
+          replace: true,
+        });
+      }
 
     } catch (err) {
       console.error('Submit error:', err);
@@ -322,14 +413,14 @@ const AddEmployeeForm: React.FC = () => {
         {/* Back Button & Title Area */}
         <div className="flex flex-col gap-1">
           <Link
-            to="/employees"
+            to={isProfileEditMode ? (getFirstAccessiblePath(getStoredPermissions()) || "/dashboard") : "/employees"}
             className="inline-flex items-center text-xs font-semibold uppercase tracking-wider text-[#7C3AED] hover:text-purple-700 transition-colors"
           >
             <ArrowLeft size={14} className="mr-1.5" />
             Back 
           </Link>
           <h1 className="text-xl font-bold text-[#7C3AED]">
-            {isEditMode ? 'Edit Employee Profile' : 'Add New Employee'}
+            {isProfileEditMode ? 'Edit My Profile' : isEditMode ? 'Edit Employee Profile' : 'Add New Employee'}
           </h1>
         </div>
 
@@ -528,6 +619,7 @@ const AddEmployeeForm: React.FC = () => {
                 <Select
                   value={formState.status}
                   onValueChange={(value) => handleSelectChange("status", value)}
+                  disabled={isProfileEditMode}
                 >
                   <SelectTrigger className="h-10 w-full rounded-lg border-slate-200 bg-white px-3 text-sm text-slate-800 focus-visible:border-[#A78BFA] focus-visible:ring-[#EDE9FE]">
                     <SelectValue placeholder="Select Status" />
@@ -548,6 +640,7 @@ const AddEmployeeForm: React.FC = () => {
                 <Select
                   value={formState.role}
                   onValueChange={(value) => handleSelectChange("role", value)}
+                  disabled={isProfileEditMode}
                 >
                   <SelectTrigger className="h-10 w-full rounded-lg border-slate-200 bg-white px-3 text-sm text-slate-800 focus-visible:border-[#A78BFA] focus-visible:ring-[#EDE9FE]">
                     <SelectValue placeholder="Select Role" />

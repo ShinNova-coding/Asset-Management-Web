@@ -37,7 +37,7 @@ export const routeAccessRules = [
 const normalizeRole = (role: string | null) =>
   String(role || "").trim().toLowerCase()
 
-const getCachedRolePermissions = (role: string | null): Permission[] => {
+export const getCachedRolePermissions = (role: string | null): Permission[] => {
   const normalizedRole = normalizeRole(role)
   if (!normalizedRole) return []
 
@@ -47,6 +47,28 @@ const getCachedRolePermissions = (role: string | null): Permission[] => {
     return Array.isArray(permissions) ? permissions : []
   } catch {
     return []
+  }
+}
+
+export const cacheRolePermissions = (role: string | null, permissions: (string | Permission)[]) => {
+  const normalizedRole = normalizeRole(role)
+  if (!normalizedRole) return
+
+  const normalizedPermissions = permissions
+    .map((permission) =>
+      typeof permission === "string" ? { name: permission } : permission?.name ? permission : null
+    )
+    .filter(Boolean)
+
+  try {
+    const cache = JSON.parse(localStorage.getItem("role_permission_cache") || "{}")
+    cache[normalizedRole] = normalizedPermissions
+    localStorage.setItem("role_permission_cache", JSON.stringify(cache))
+  } catch {
+    localStorage.setItem(
+      "role_permission_cache",
+      JSON.stringify({ [normalizedRole]: normalizedPermissions })
+    )
   }
 }
 

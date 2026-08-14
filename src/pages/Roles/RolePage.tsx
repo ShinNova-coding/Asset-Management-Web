@@ -140,7 +140,7 @@ export default function RolesPage() {
       
       className="text-[#7C3AED] border-purple-700 hover:bg-purple-600 disabled:cursor-not-allowed disabled:opacity-40"
       onClick={() => {
-        if (canUpdateRoles) navigate(`/roles/${currentRole.id}`);
+        if (canUpdateRoles) navigate(`/roles/${currentRole.role_id || currentRole.id}`);
       }} 
       disabled={!canUpdateRoles}
       title={canUpdateRoles ? "Edit role" : "You do not have permission to update roles"}

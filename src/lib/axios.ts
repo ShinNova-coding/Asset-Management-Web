@@ -15,11 +15,11 @@ export const fetchRoles = async () => {
   return response.data;
 };
 
-export const deleteRole = async (id: number) => {
+export const deleteRole = async (id: number | string) => {
  
   const response = await axios({
     method: 'delete',
-    url: `${API_BASE_URL}/role/role_id`, 
+    url: `${API_BASE_URL}/role/${id}`, 
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
       "Accept": "application/json",
@@ -30,8 +30,15 @@ export const deleteRole = async (id: number) => {
   return response.data;
 };
 // Add this to lib/axios.ts
-export const updateRole = async (id: number, data: { name: string, permissions: string[] }) => {
-  const response = await axios.patch(`${API_BASE_URL}/role/${id}`, data, {
+export const updateRole = async (
+  id: number | string,
+  data: { role_id?: number | string; name: string; permissions: string[] }
+) => {
+  const response = await axios.patch(`${API_BASE_URL}/role/${id}`, {
+    role_id: data.role_id || id,
+    name: data.name,
+    permissions: data.permissions,
+  }, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
       "Accept": "application/json",

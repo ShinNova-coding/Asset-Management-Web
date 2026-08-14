@@ -247,9 +247,9 @@ const Login = () => {
                 { id: 48, name: "view-expenses" },
                ];
             } else if (normalizedRoleName === "hr") {
-               exactPermissions = [{ id: 2, name: "view-categories" }, { id: 7, name: "view-assets" }, { id: 26, name: "view-dashboard" }, { id: 28, name: "view-assignments" }, { id: 33, name: "view-maintenances" }, { id: 37, name: "get-notifications" }];
+               exactPermissions = [{ id: 2, name: "view-categories" }, { id: 7, name: "view-assets" },  { id: 14, name: "update-users" }, { id: 12, name: "view-users" }, { id: 26, name: "view-dashboard" }, { id: 28, name: "view-assignments" }, { id: 33, name: "view-maintenances" }, { id: 37, name: "get-notifications" }];
             } else if (normalizedRoleName === "employee") {
-               exactPermissions = [{ id: 2, name: "view-categories" }, { id: 2, name: "view-categories" },{ id: 33, name: "view-maintenances" }, { id: 7, name: "view-assets" }, { id: 29, name: "view-assignments" }];
+               exactPermissions = [{ id: 2, name: "view-categories" }, { id: 2, name: "view-categories" }, { id: 33, name: "view-maintenances" }, { id: 7, name: "view-assets" }, { id: 29, name: "view-assignments" }];
             }
           }
         }

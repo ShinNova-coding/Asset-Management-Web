@@ -262,7 +262,7 @@ export default function Navigation() {
     }
 
     setSettingsOpen(false)
-    navigate("/add-employee", { state: { editItem } })
+    navigate("/profile/edit", { state: { editItem } })
   }
 
   function handleThemeToggle() {

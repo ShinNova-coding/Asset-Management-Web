@@ -34,7 +34,7 @@ export default function CategoriesEdit({ category, onUpdated, triggerIcon }: Edi
     setLoading(true);
     try {
      
-      await apiRequest("/category/category_id", "PATCH", {
+      await apiRequest(`/category/${category.id}`, "PATCH", {
         category_id: category.id,
         name: name
       });
