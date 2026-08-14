@@ -5,7 +5,7 @@ import { LuEyeClosed, LuEye } from "react-icons/lu";
 import { useState } from "react"
 import { BsBoxFill } from "react-icons/bs"
 import { apiRequest, loginUser } from "@/lib/apiService";
-import { cacheProfileImage, getFirstAccessiblePath } from "@/lib/utils";
+import { cacheProfileImage, getCachedRolePermissions, getFirstAccessiblePath, getPermissionName } from "@/lib/utils";
 
 const getLoginUser = (data: any) => {
   const candidates = [
@@ -29,8 +29,9 @@ const getLoginUser = (data: any) => {
 const normalizePermissions = (permissions: any[] = []) =>
   permissions
     .map((permission) => {
-      if (typeof permission === "string") return { name: permission };
-      return permission?.name ? permission : null;
+      const name = getPermissionName(permission);
+      if (!name) return null;
+      return typeof permission === "string" ? { name } : { ...permission, name };
     })
     .filter(Boolean);
 
@@ -42,7 +43,7 @@ const mergePermissions = (...permissionGroups: any[][]) => {
     .forEach((permission) => {
       const normalized = normalizePermissions([permission])[0];
       if (normalized?.name) {
-        permissionMap.set(normalized.name, normalized);
+        permissionMap.set(getPermissionName(normalized), normalized);
       }
     });
 
@@ -172,7 +173,8 @@ const Login = () => {
           exactPermissions = normalizePermissions(primaryRole?.permissions || fullLoggedInUser.permissions || []);
           exactPermissions = mergePermissions(
             exactPermissions,
-            await getRolePermissionsFromApi(exactRoleName)
+            await getRolePermissionsFromApi(exactRoleName),
+            getCachedRolePermissions(exactRoleName)
           );
           
           if (exactPermissions.length === 0) {
@@ -254,14 +256,16 @@ const Login = () => {
           }
         }
 
-        if (exactPermissions.length === 0) {
-          setError("This role has no view permission. Please edit the role and add at least one view permission.");
+        localStorage.setItem("user_role", exactRoleName);
+        const firstAccessiblePath = getFirstAccessiblePath(exactPermissions);
+
+        if (exactPermissions.length === 0 || !firstAccessiblePath) {
+          setError("This role has no page access. Please edit the role and add at least one view permission, for example view-assets, view-assignments, or view-dashboard.");
           return;
         }
 
-        localStorage.setItem("user_role", exactRoleName);
         localStorage.setItem("user_permissions", JSON.stringify(exactPermissions)); 
-        window.location.href = getFirstAccessiblePath(exactPermissions) || "/";
+        window.location.href = firstAccessiblePath;
       } else {
         setError(data.message || "Login failed.");
       }

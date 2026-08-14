@@ -8,6 +8,23 @@ export function cn(...inputs: ClassValue[]) {
 export type Permission = {
   id?: number | string
   name?: string
+  permission?: string
+  permission_name?: string
+  slug?: string
+}
+
+export const getPermissionName = (permission: string | Permission | null | undefined) => {
+  if (typeof permission === "string") return permission.trim().toLowerCase()
+
+  return String(
+    permission?.name ||
+    permission?.permission ||
+    permission?.permission_name ||
+    permission?.slug ||
+    ""
+  )
+    .trim()
+    .toLowerCase()
 }
 
 export const routeAccessRules = [
@@ -56,7 +73,7 @@ export const cacheRolePermissions = (role: string | null, permissions: (string |
 
   const normalizedPermissions = permissions
     .map((permission) =>
-      typeof permission === "string" ? { name: permission } : permission?.name ? permission : null
+      getPermissionName(permission) ? { ...(typeof permission === "string" ? {} : permission), name: getPermissionName(permission) } : null
     )
     .filter(Boolean)
 
@@ -128,9 +145,7 @@ export const hasPermission = (permissions: (string | Permission)[], permission: 
   isSuperAdmin() ||
   (isAdminRole() && !isRolePermission(permission)) ||
   permissions.some((item) =>
-    typeof item === "string"
-      ? item.toLowerCase() === permission.toLowerCase()
-      : item?.name?.toLowerCase() === permission.toLowerCase()
+    getPermissionName(item) === getPermissionName(permission)
   )
 
 export const hasStoredPermission = (permission: string) =>

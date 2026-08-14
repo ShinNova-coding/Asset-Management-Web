@@ -29,6 +29,18 @@ const uniquePermissionNames = (permissions: any[] = []) =>
     )
   );
 
+const getRequiredViewPermission = (permissionName: string) => {
+  const parts = permissionName.split("-");
+  const action = parts[0];
+  const moduleName = parts.slice(1).join("-");
+
+  if (action === "view" || !moduleName) return null;
+  if (moduleName === "asset-requests") return "view-assets";
+  if (moduleName === "maintenance-requests") return "view-maintenances";
+
+  return `view-${moduleName}`;
+};
+
 export default function EditRolePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -103,7 +115,7 @@ export default function EditRolePage() {
     setSelectedPermissions(prev => 
       prev.includes(permName) 
         ? prev.filter(p => p !== permName) 
-        : [...prev, permName]
+        : Array.from(new Set([...prev, permName, getRequiredViewPermission(permName)].filter(Boolean) as string[]))
     );
   };
 

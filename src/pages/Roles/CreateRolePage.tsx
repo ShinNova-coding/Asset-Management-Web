@@ -2,12 +2,25 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { apiRequest } from '@/lib/apiService';
+import { cacheRolePermissions } from '@/lib/utils';
 
 interface PermissionItem {
   id: string; 
   label: string;
   checked: boolean;
 }
+
+const getRequiredViewPermission = (permissionId: string) => {
+  const parts = permissionId.split('-');
+  const action = parts[0];
+  const moduleName = parts.slice(1).join('-');
+
+  if (action === 'view' || !moduleName) return null;
+  if (moduleName === 'asset-requests') return 'view-assets';
+  if (moduleName === 'maintenance-requests') return 'view-maintenances';
+
+  return `view-${moduleName}`;
+};
 
 export default function CreateRolePage() {
   const navigate = useNavigate();
@@ -64,9 +77,17 @@ export default function CreateRolePage() {
 
   const handleCheckboxChange = (id: string, type: 'manage' | 'view') => {
     if (type === 'manage') {
+      const wasChecked = managePermissions.find(p => p.id === id)?.checked;
       setManagePermissions(prev =>
         prev.map(p => p.id === id ? { ...p, checked: !p.checked } : p)
       );
+
+      const requiredViewPermission = getRequiredViewPermission(id);
+      if (!wasChecked && requiredViewPermission) {
+        setViewPermissions(prev =>
+          prev.map(p => p.id === requiredViewPermission ? { ...p, checked: true } : p)
+        );
+      }
     } else {
       setViewPermissions(prev =>
         prev.map(p => p.id === id ? { ...p, checked: !p.checked } : p)
@@ -109,6 +130,9 @@ const handleSubmit = async (e: React.FormEvent) => {
     ...managePermissions.filter(p => p.checked).map(p => p.id),
     ...viewPermissions.filter(p => p.checked).map(p => p.id),
   ];
+  const hasPageViewPermission = selectedPermissions.some(permission =>
+    permission.startsWith("view-")
+  );
 
   if (!roleName.trim()) {
     setError("Role name is required.");
@@ -122,12 +146,19 @@ const handleSubmit = async (e: React.FormEvent) => {
     return;
   }
 
+  if (!hasPageViewPermission) {
+    setError("Please select at least one view permission so this role has a page to open after login.");
+    setLoading(false);
+    return;
+  }
+
   try {
     await apiRequest("/role", "POST", {
       name: roleName.trim(),
       permissions: selectedPermissions 
     });
 
+    cacheRolePermissions(roleName.trim(), selectedPermissions);
     navigate("/roles");
   } catch (err: any) {
     setError(err?.message || "Something went wrong.");

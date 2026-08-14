@@ -94,15 +94,17 @@ export default function Layout() {
         <Sidebar collapsible="icon" className="border-r-transparent bg-[#eee9ff] shadow-[10px_0_28px_rgba(124,58,237,0.06)] dark:border-slate-700 dark:bg-slate-900 dark:shadow-none">
           <SidebarContent className="bg-[#eee9ff] px-5 py-7 group-data-[collapsible=icon]:px-2 dark:bg-slate-900 dark:shadow-none">
            
-           <div className="flex items-center gap-3 px-1 mb-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-  <div 
-    className="w-12 h-12 flex-shrink-0 bg-white border border-violet-200 rounded-2xl flex items-center justify-center shadow-[0_10px_25px_rgba(124,58,237,0.15)] transition-transform hover:scale-105 group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:w-9 dark:rounded-full dark:bg-slate-800 dark:border-violet-400 dark:shadow-sm"
-    style={{ animation: 'bounce 3s infinite ease-in-out' }}
-  >
-    <BsBoxFill className="w-6 h-6 text-[#7C3AED] group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-  </div>
-  <h1 className="text-xl font-bold tracking-tight text-[#7C3AED] group-data-[collapsible=icon]:hidden dark:text-violet-300">ITAMS</h1>
-</div>
+            <div className="mb-8 flex items-center gap-3 px-1 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+              <div
+                className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border-2 border-[#A78BFA] bg-white transition-transform hover:scale-105 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 dark:border-violet-400 dark:bg-slate-800"
+              >
+                <BsBoxFill className="h-7 w-7 text-[#7C3AED] group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5 dark:text-violet-300" />
+              </div>
+              <div className="group-data-[collapsible=icon]:hidden">
+                <h1 className="text-2xl font-bold tracking-tight text-[#7C3AED] dark:text-violet-300">ITAMS</h1>
+                <p className="text-[11px] font-medium text-[#1E1B4B]/60 dark:text-slate-400">Asset Management</p>
+              </div>
+            </div>
 
            
             <SidebarMenu className="space-y-1">
